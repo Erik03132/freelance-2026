@@ -1,0 +1,23 @@
+# === Agent Lab: Core Dependencies ===
+
+# LLM Orchestration
+langgraph>=0.4.0
+langchain>=0.3.0
+langchain-openai>=0.3.0
+langchain-community>=0.3.0
+
+# MCP (Model Context Protocol)
+fastmcp>=2.0.0
+langchain-mcp-adapters>=0.1.0
+
+# RAG (Vector Search)
+chromadb>=0.6.0
+langchain-text-splitters>=0.3.0
+
+# LLM Providers
+openai>=1.60.0
+httpx>=0.28.0
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.0.0

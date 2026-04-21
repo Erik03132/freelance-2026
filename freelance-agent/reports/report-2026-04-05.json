@@ -1,0 +1,41 @@
+{
+  "date": "2026-04-05",
+  "totalJobs": 3,
+  "byPlatform": {
+    "kwork": 3
+  },
+  "byStatus": {
+    "new": 3
+  },
+  "averageScores": {
+    "skillMatch": 0.88,
+    "clarity": 0.28,
+    "overall": 0.7
+  },
+  "topJobs": [
+    {
+      "title": "Мобильная игра про инопланетянина (векторная графика)",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3142601",
+      "skillMatchScore": 0.9,
+      "clarityScore": 0.3,
+      "overallScore": 0.72
+    },
+    {
+      "title": "Разработка интерактивной системы",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3142613",
+      "skillMatchScore": 0.88,
+      "clarityScore": 0.3,
+      "overallScore": 0.71
+    },
+    {
+      "title": "Анимировать эмодзи",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3142608",
+      "skillMatchScore": 0.85,
+      "clarityScore": 0.25,
+      "overallScore": 0.67
+    }
+  ]
+}

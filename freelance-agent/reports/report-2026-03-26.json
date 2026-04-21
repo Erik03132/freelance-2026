@@ -1,0 +1,43 @@
+{
+  "date": "2026-03-26",
+  "totalJobs": 2,
+  "byPlatform": {
+    "kwork": 2
+  },
+  "byStatus": {
+    "new": 2
+  },
+  "averageScores": {
+    "skillMatch": 0.73,
+    "clarity": 0.48,
+    "overall": 0.66
+  },
+  "topJobs": [
+    {
+      "title": "Тестовое приложение Google Apps Script",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3133057",
+      "budget": {
+        "type": "fixed",
+        "amount": 500,
+        "currency": "RUB"
+      },
+      "skillMatchScore": 0.85,
+      "clarityScore": 0.4,
+      "overallScore": 0.72
+    },
+    {
+      "title": "Разработка MAX-бота и backend для скачивания видео",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3133077",
+      "budget": {
+        "type": "fixed",
+        "amount": 500,
+        "currency": "RUB"
+      },
+      "skillMatchScore": 0.6,
+      "clarityScore": 0.55,
+      "overallScore": 0.59
+    }
+  ]
+}

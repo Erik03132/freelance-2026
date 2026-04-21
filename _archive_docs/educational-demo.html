@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Демо: Панель доступности и ЭЦП для Школы</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a5c96;
+            --bg-body: #f4f7f9;
+            --text-main: #333;
+            --font-size-base: 16px;
+            --filter-img: none;
+        }
+
+        /* ЧЕРНО-БЕЛАЯ СХЕМА */
+        body.mode-bw {
+            --primary-color: #000;
+            --bg-body: #fff;
+            --text-main: #000;
+            --filter-img: grayscale(100%);
+        }
+        body.mode-bw * { background-color: #fff !important; color: #000 !important; border-color: #000 !important; }
+
+        /* ИНВЕРСИЯ */
+        body.mode-invert {
+            --primary-color: #fff;
+            --bg-body: #000;
+            --text-main: #fff;
+        }
+        body.mode-invert * { background-color: #000 !important; color: #fff !important; border-color: #fff !important; }
+
+        /* СИНЯЯ СХЕМА */
+        body.mode-blue {
+            --primary-color: #fff;
+            --bg-body: #9dd1ff;
+            --text-main: #063462;
+        }
+        body.mode-blue * { background-color: #9dd1ff !important; color: #063462 !important; border-color: #063462 !important; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+            font-size: var(--font-size-base);
+        }
+
+        /* ПАНЕЛЬ ДОСТУПНОСТИ */
+        .accessibility-panel {
+            background: #fff;
+            border-bottom: 2px solid var(--primary-color);
+            padding: 15px 5%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .panel-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .btn-tool {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-tool:hover { background: #eee; }
+        .btn-active { border-color: var(--primary-color); background: var(--primary-color); color: #fff; }
+
+        .scheme-btn { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; }
+        .scheme-default { background: #fff; }
+        .scheme-bw { background: linear-gradient(45deg, #000 50%, #fff 50%); }
+        .scheme-invert { background: #000; }
+        .scheme-blue { background: #9dd1ff; }
+
+        /* КОНТЕНТ */
+        .header {
+            background: var(--primary-color);
+            color: #fff;
+            padding: 40px 5%;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            filter: var(--filter-img);
+        }
+
+        /* ЭЦП СТИЛИ */
+        .doc-link {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f0f7ff;
+            border: 1px solid #d0e3f7;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-top: 20px;
+            position: relative;
+            transition: 0.2s;
+        }
+
+        .doc-link:hover { background: #e6f1ff; border-color: var(--primary-color); }
+
+        .eds-mark {
+            width: 32px;
+            height: 32px;
+            cursor: help;
+            position: relative;
+        }
+
+        .eds-tooltip {
+            visibility: hidden;
+            width: 320px;
+            background-color: #ffffff;
+            color: #333;
+            text-align: left;
+            border: 2px solid #1a5c96;
+            border-radius: 8px;
+            padding: 15px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -160px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-size: 13px;
+            line-height: 1.4;
+            pointer-events: none;
+        }
+
+        .eds-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -10px;
+            border-width: 10px;
+            border-style: solid;
+            border-color: #1a5c96 transparent transparent transparent;
+        }
+
+        .eds-mark:hover .eds-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip-title {
+            font-weight: bold;
+            color: #1a5c96;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            display: block;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .tooltip-row { margin-bottom: 5px; }
+        .tooltip-label { color: #888; font-weight: 400; }
+
+        /* Кнопки масштаба */
+        .zoom-controls button {
+            width: 40px; height: 40px; font-size: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="accessibility-panel">
+    <div class="panel-group">
+        <span class="panel-label">Цветовая схема:</span>
+        <div class="scheme-btn scheme-default" onclick="setScheme('default')" title="Обычная"></div>
+        <div class="scheme-btn scheme-bw" onclick="setScheme('bw')" title="Черно-белая"></div>
+        <div class="scheme-btn scheme-invert" onclick="setScheme('invert')" title="Инверсия"></div>
+        <div class="scheme-btn scheme-blue" onclick="setScheme('blue')" title="Синяя"></div>
+    </div>
+
+    <div class="panel-group">
+        <span class="panel-label">Размер шрифта:</span>
+        <button class="btn-tool" onclick="changeFont(-2)">А-</button>
+        <button class="btn-tool" onclick="changeFont(2)">А+</button>
+    </div>
+
+    <div class="panel-group">
+        <span class="panel-label">Изображения:</span>
+        <button class="btn-tool" id="imgToggle" onclick="toggleImages()">ВКЛ</button>
+    </div>
+</div>
+
+<div class="header" id="mainHeader">
+    <h1>Средняя общеобразовательная школа №4</h1>
+    <p>Официальный сайт образовательной организации</p>
+</div>
+
+<div class="container">
+    <h2 itemprop="name">Добро пожаловать в нашу школу!</h2>
+    <p>Этот проект является технологической демонстрацией возможностей системы для образовательных учреждений. Мы уделяем особое внимание доступности и соблюдению государственных стандартов.</p>
+    
+    <div style="margin: 20px 0;">
+        <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800" alt="Здание школы">
+    </div>
+
+    <h3>Документы организации</h3>
+    <p>Раздел подготовлен в соответствии с требованиями Рособрнадзора по визуализации электронной подписи.</p>
+
+    <div class="doc-link">
+        <svg style="width: 24px; height: 24px; fill: #e74c3c;" viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg>
+        <span style="flex-grow: 1;">Устав образовательной организации (PDF, 2.4 Мб)</span>
+        
+        <div class="eds-mark">
+            <!-- Иконка печати -->
+            <svg viewBox="0 0 24 24" fill="#1a5c96">
+                <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,17V15H13V17H11M11,13V7H13V13H11Z" />
+            </svg>
+            
+            <div class="eds-tooltip">
+                <span class="tooltip-title">Документ подписан электронной подписью</span>
+                <div class="tooltip-row"><span class="tooltip-label">ФИО:</span> Иванов Иван Иванович</div>
+                <div class="tooltip-row"><span class="tooltip-label">Должность:</span> Директор МБОУ СОШ №4</div>
+                <div class="tooltip-row"><span class="tooltip-label">Дата:</span> 09.04.2026 14:20:15</div>
+                <div class="tooltip-row"><span class="tooltip-label">Ключ:</span> 0089a8c772183e9b11e2f47732a3ea3</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentFontSize = 16;
+    let imagesVisible = true;
+
+    function setScheme(mode) {
+        document.body.className = '';
+        if (mode !== 'default') {
+            document.body.classList.add('mode-' + mode);
+        }
+        localStorage.setItem('school_theme', mode);
+    }
+
+    function changeFont(delta) {
+        currentFontSize += delta;
+        document.documentElement.style.setProperty('--font-size-base', currentFontSize + 'px');
+        localStorage.setItem('school_font', currentFontSize);
+    }
+
+    function toggleImages() {
+        imagesVisible = !imagesVisible;
+        const imgs = document.querySelectorAll('img');
+        imgs.forEach(img => img.style.display = imagesVisible ? 'block' : 'none');
+        document.getElementById('imgToggle').innerText = imagesVisible ? 'ВКЛ' : 'ВЫКЛ';
+    }
+
+    // Инициализация при загрузке
+    window.onload = () => {
+        const savedTheme = localStorage.getItem('school_theme');
+        if (savedTheme) setScheme(savedTheme);
+        
+        const savedFont = localStorage.getItem('school_font');
+        if (savedFont) {
+            currentFontSize = parseInt(savedFont);
+            document.documentElement.style.setProperty('--font-size-base', currentFontSize + 'px');
+        }
+    };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+{
+  "date": "2026-04-02",
+  "totalJobs": 4,
+  "byPlatform": {
+    "kwork": 4
+  },
+  "byStatus": {
+    "new": 4
+  },
+  "averageScores": {
+    "skillMatch": 0.79,
+    "clarity": 0.25,
+    "overall": 0.63
+  },
+  "topJobs": [
+    {
+      "title": "WordPress разработчик + SEO понимание в одном флаконе",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3139419",
+      "skillMatchScore": 0.9,
+      "clarityScore": 0.3,
+      "overallScore": 0.72
+    },
+    {
+      "title": "Дизайн одностраничегого сайта под остекление под ключ",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3139424",
+      "skillMatchScore": 0.9,
+      "clarityScore": 0.25,
+      "overallScore": 0.71
+    },
+    {
+      "title": "Нужен дизайн креативов в кол-ве 14 шт",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3139444",
+      "skillMatchScore": 0.85,
+      "clarityScore": 0.25,
+      "overallScore": 0.67
+    },
+    {
+      "title": "Маркетолог",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3139452",
+      "skillMatchScore": 0.5,
+      "clarityScore": 0.2,
+      "overallScore": 0.41
+    }
+  ]
+}

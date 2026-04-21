@@ -1,0 +1,43 @@
+{
+  "date": "2026-03-30",
+  "totalJobs": 2,
+  "byPlatform": {
+    "kwork": 2
+  },
+  "byStatus": {
+    "new": 2
+  },
+  "averageScores": {
+    "skillMatch": 0.75,
+    "clarity": 0.4,
+    "overall": 0.65
+  },
+  "topJobs": [
+    {
+      "title": "Кейс, который продает услугу",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3136619",
+      "budget": {
+        "type": "fixed",
+        "amount": 6500,
+        "currency": "RUB"
+      },
+      "skillMatchScore": 0.8,
+      "clarityScore": 0.4,
+      "overallScore": 0.68
+    },
+    {
+      "title": "Разместить баннер и создать новую страницу",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3136604",
+      "budget": {
+        "type": "fixed",
+        "amount": 500,
+        "currency": "RUB"
+      },
+      "skillMatchScore": 0.7,
+      "clarityScore": 0.4,
+      "overallScore": 0.61
+    }
+  ]
+}

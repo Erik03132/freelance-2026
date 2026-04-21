@@ -1,0 +1,58 @@
+[
+  {
+    "timestamp": 1776181595.550864,
+    "query": "Какие условия для получения гранта Старт-1 от ФСИ? Подробно.",
+    "answer_length": 1054,
+    "used_perplexity": false,
+    "web_context_length": 66
+  },
+  {
+    "timestamp": 1776181610.388086,
+    "query": "Мой ООО хочет обанкротиться. Какие риски для директора по субсидиарной ответственности?",
+    "answer_length": 1003,
+    "used_perplexity": false,
+    "web_context_length": 66
+  },
+  {
+    "timestamp": 1776182219.391541,
+    "query": "Хочу получить налоговые льготы для своей ИТ-компании. Какие именно статьи НК РФ регулируют ставку 5%? И какие документы нужны для аккредитации Минцифры?",
+    "answer_length": 673,
+    "used_perplexity": false,
+    "web_context_length": 66
+  },
+  {
+    "timestamp": 1776182330.961656,
+    "query": "Расскажите подробно про стоп-факторы при подаче на грант ФСИ Старт-1. Какие ошибки чаще всего допускают заявители? И какие обязательства возникают после получения гранта?",
+    "answer_length": 1735,
+    "used_perplexity": false,
+    "web_context_length": 66
+  },
+  {
+    "timestamp": 1776182402.19411,
+    "query": "Какие условия для резидентства в Сколково? И какие налоговые льготы это даёт? Ссылки на законы пожалуйста.",
+    "answer_length": 1172,
+    "used_perplexity": false,
+    "web_context_length": 66
+  },
+  {
+    "timestamp": 1776182441.368313,
+    "query": "Наше ООО не может платить по долгам. Директор боится субсидиарной ответственности. Что говорит закон? Какие статьи ФЗ-127?",
+    "answer_length": 941,
+    "used_perplexity": false,
+    "web_context_length": 66
+  },
+  {
+    "timestamp": 1776182680.931455,
+    "query": "Привет! Кто ты?",
+    "answer_length": 177,
+    "used_perplexity": false,
+    "web_context_length": 66
+  },
+  {
+    "timestamp": 1776182959.50073,
+    "query": "Здравствуйте! Как вас зовут и чем вы занимаетесь?",
+    "answer_length": 445,
+    "used_perplexity": false,
+    "web_context_length": 66
+  }
+]

@@ -1,0 +1,57 @@
+{
+  "date": "2026-04-04",
+  "totalJobs": 5,
+  "byPlatform": {
+    "kwork": 5
+  },
+  "byStatus": {
+    "new": 5
+  },
+  "averageScores": {
+    "skillMatch": 0.82,
+    "clarity": 0.21,
+    "overall": 0.64
+  },
+  "topJobs": [
+    {
+      "title": "Дизайн оформление раскрасок для детей",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3141910",
+      "skillMatchScore": 0.9,
+      "clarityScore": 0.2,
+      "overallScore": 0.69
+    },
+    {
+      "title": "Создание промороликов",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3138408",
+      "skillMatchScore": 0.85,
+      "clarityScore": 0.2,
+      "overallScore": 0.66
+    },
+    {
+      "title": "Продвижение в соц сетях",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3141913",
+      "skillMatchScore": 0.85,
+      "clarityScore": 0.2,
+      "overallScore": 0.66
+    },
+    {
+      "title": "Настройка Яндекс директ",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3141885",
+      "skillMatchScore": 0.8,
+      "clarityScore": 0.25,
+      "overallScore": 0.63
+    },
+    {
+      "title": "Описание 12 услуг для каталога B2B‑платформы",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3141897",
+      "skillMatchScore": 0.7,
+      "clarityScore": 0.2,
+      "overallScore": 0.55
+    }
+  ]
+}

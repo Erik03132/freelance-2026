@@ -1,0 +1,336 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+  --bg: #000000;
+  --fg: #ffffff;
+  --accent: #d4af37;
+  --cyan: #00f0ff;
+  --glass: rgba(255, 255, 255, 0.02);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
+  color: var(--fg);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.bg-gradient {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at 10% 10%, #0a0a0a 0%, #000 100%);
+  z-index: -1;
+}
+
+.grain {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: url('https://grainy-gradients.vercel.app/noise.svg');
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Header & Logo */
+.header {
+  padding: 2rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 100;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+}
+
+.logo-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.neural-logo {
+  filter: drop-shadow(0 0 5px var(--cyan));
+}
+
+.dot {
+  animation: dot-pulse 3s infinite alternate ease-in-out;
+}
+
+.d1 { animation-delay: 0.2s; }
+.d2 { animation-delay: 0.8s; }
+.d3 { animation-delay: 1.5s; }
+.d4 { animation-delay: 2.1s; }
+.d5 { animation-delay: 0s; fill: #fff; r: 5; }
+
+@keyframes dot-pulse {
+  0% { opacity: 0.3; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1.2); filter: brightness(1.5); }
+}
+
+.logo-text {
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.nav a {
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-left: 2.5rem;
+  transition: 0.3s;
+}
+
+.nav a:hover {
+  color: var(--cyan);
+}
+
+.btn-contact {
+  border: 1px solid var(--cyan);
+  padding: 0.5rem 1.2rem;
+  border-radius: 4px;
+  color: var(--cyan) !important;
+}
+
+/* Hero Section */
+.hero {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 5%;
+}
+
+.hero-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.hero-pre {
+  font-size: 0.7rem;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 2rem;
+  display: block;
+  opacity: 0.7;
+}
+
+.hero h1 {
+  font-size: 5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 2.5rem;
+}
+
+.hero p {
+  color: #888;
+  font-size: 1.2rem;
+  max-width: 550px;
+  margin: 0 auto 4rem;
+  font-weight: 300;
+}
+
+.cta-group {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: var(--fg);
+  color: var(--bg);
+  padding: 1.3rem 3.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background: var(--cyan);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--fg);
+  padding: 1.3rem 3.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Section Common */
+section {
+  padding: 8rem 10%;
+}
+
+.section-tag {
+  color: var(--cyan);
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 5px;
+  margin-bottom: 2rem;
+  display: block;
+  opacity: 0.6;
+}
+
+h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 5rem;
+  letter-spacing: -0.02em;
+}
+
+.architect-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5rem;
+}
+
+.architect-card {
+  border-left: 1px solid rgba(0, 240, 255, 0.1);
+  padding-left: 3rem;
+  padding-bottom: 4rem;
+}
+
+.architect-card h3 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.architect-card p {
+  color: #666;
+  font-weight: 300;
+  font-size: 1rem;
+}
+
+/* Chat BureauBot UI */
+.chat-wrapper {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 2000;
+}
+
+.chat-trigger {
+  width: 60px;
+  height: 60px;
+  background: var(--cyan);
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+  transition: 0.3s;
+}
+
+.chat-trigger:hover {
+  transform: scale(1.1);
+}
+
+.chat-window {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  width: 350px;
+  height: 500px;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.chat-header {
+  padding: 15px;
+  background: rgba(255,255,255,0.03);
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.msg {
+  max-width: 80%;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.msg.bot {
+  align-self: flex-start;
+  background: rgba(255,255,255,0.05);
+  color: #ccc;
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: var(--cyan);
+  color: #000;
+}
+
+.chat-inputbar {
+  padding: 15px;
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.chat-inputbar input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.chat-inputbar button {
+  background: none;
+  border: none;
+  color: var(--cyan);
+  font-size: 1.2rem;
+  cursor: pointer;
+}

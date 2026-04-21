@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Grant & Consult — Экспертный консалтинг Ульяны Беляковой</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8faff;
+            --primary: #1a2b3c; /* Глубокий синий (доверие) */
+            --accent: #c5a059;  /* Спокойное золото */
+            --text-main: #2d3748;
+            --text-light: #718096;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* НАВИГАЦИЯ */
+        header {
+            background: var(--white);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-main);
+            margin-left: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover { color: var(--accent); }
+
+        /* ГЕЙТВЕЙ (HERO) */
+        .hero {
+            padding: 100px 20px;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(36px, 5vw, 60px);
+            color: var(--primary);
+            line-height: 1.1;
+            margin-bottom: 25px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-light);
+            margin-bottom: 40px;
+        }
+
+        /* СЕТКА УСЛУГ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .section-header {
+            border-bottom: 2px solid var(--accent);
+            display: inline-block;
+            margin-bottom: 40px;
+            padding-bottom: 5px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 4px; /* Более строгие углы для серьезности */
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border-color: var(--accent);
+        }
+
+        .card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .card ul {
+            padding: 0;
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .card li {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .card li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 15px 35px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .btn:hover { background: var(--accent); }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            margin-top: 20px;
+        }
+
+        .btn-outline:hover { background: var(--primary); color: white; }
+
+        footer {
+            background: var(--primary);
+            color: white;
+            padding: 80px 40px;
+            margin-top: 100px;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">AI GRANT & CONSULT</div>
+        <nav>
+            <a href="#">Главная</a>
+            <a href="#about">О нас</a>
+            <a href="#services">Услуги</a>
+            <a href="#contacts">Контакты</a>
+        </nav>
+        <a href="https://t.me/marina_grant" class="btn" style="padding: 10px 20px; font-size: 13px; margin-left: 20px;">Задать вопрос</a>
+    </header>
+
+    <section class="hero">
+        <div style="color: var(--accent); font-weight: 700; margin-bottom: 20px; letter-spacing: 2px; font-size: 11px; text-transform: uppercase;">Marina Belyakova consulting group</div>
+        <h1>Экспертное сопровождение вашего бизнеса в мире грантов</h1>
+        <p>Профессиональный консалтинг по вопросам государственного финансирования, налоговой оптимизации и юридической безопасности в России.</p>
+        <div style="display: flex; gap: 15px; justify-content: center;">
+            <a href="#services" class="btn">Изучить услуги</a>
+            <a href="#about" class="btn btn-outline" style="margin-top: 0;">О компании</a>
+        </div>
+    </section>
+
+    <!-- СЕКЦИЯ: О НАС -->
+    <div class="container" id="about">
+        <div class="section-header">О проекте</div>
+        <div style="display: flex; gap: 50px; align-items: start; text-align: left; background: white; padding: 40px; border: 1px solid var(--border);">
+            <div style="flex: 1;">
+                <h2 style="font-family: 'Playfair Display', serif; color: var(--primary); font-size: 32px; margin-top: 0;">Комплексная экспертиза</h2>
+                <p>AI Grant & Consult — это объединение многолетнего опыта эксперта по грантам <strong>Ульяны Беляковой</strong> и передовых технологий <strong>AI Bureau</strong>. Мы помогаем компаниям расти быстрее, используя все инструменты государственной поддержки.</p>
+                <p>Наш подход сочетает в себе классический консалтинг и современные алгоритмы скоринга, что позволяет нам гарантировать высокую вероятность успеха каждой заявки.</p>
+                <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <strong style="color: var(--primary);">250+</strong>
+                        <div style="font-size: 12px; color: var(--text-light);">Успешных заявок</div>
+                    </div>
+                    <div>
+                        <strong style="color: var(--primary);">1.5 млрд ₽</strong>
+                        <div style="font-size: 12px; color: var(--text-light);">Привлеченных грантов</div>
+                    </div>
+                </div>
+            </div>
+            <div style="flex: 0 0 350px; height: 400px; background: #eee; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400'); background-size: cover; background-position: center;">
+            </div>
+        </div>
+    </div>
+
+    <!-- СЕКЦИЯ: УСЛУГИ -->
+    <div class="container" id="services">
+        <div class="section-header">Направления работы</div>
+        <div class="services-grid">
+            <div class="card" style="grid-column: span 2;">
+                <div style="display: flex; gap: 40px; align-items: center;">
+                    <div style="flex: 1;">
+                        <h3>Грантовая поддержка бизнеса</h3>
+                        <p>Полное сопровождение в фондах: ФСИ, Сколково, РФРИТ. От идеи и написания ТЭО до защиты проекта и регулярной отчетности.</p>
+                        <ul style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <li>Программы Старт-1, Старт-ИИ</li>
+                            <li>РФРИТ (Импортозамещение)</li>
+                            <li>Гранты для АПК и туризма</li>
+                            <li>Молодежное предпринимательство</li>
+                        </ul>
+                    </div>
+                    <div style="flex: 0 0 200px;">
+                        <a href="#" class="btn" style="width: 100%; text-align: center;">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Налоги и IT-льготы</h3>
+                <p>Аккредитация в Минцифры и вступление в Реестр ПО для получения налоговых преференций 0%.</p>
+                <a href="#" class="btn btn-outline" style="width: 100%; text-align: center;">Аудит налогов</a>
+            </div>
+
+            <div class="card">
+                <h3>Бухгалтерский аутсорсинг</h3>
+                <p>Ведение учета любой сложности: от спецрежимов до работы с НДС и маркетплейсами.</p>
+                <a href="#" class="btn btn-outline" style="width: 100%; text-align: center;">Тарифы</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- КОНТАКТЫ -->
+    <div class="container" id="contacts">
+        <div class="section-header">Контакты</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; text-align: left;">
+            <div class="card">
+                <h3 style="margin-top: 0;">Свяжитесь с нами</h3>
+                <p><strong>Адрес:</strong> г. Москва, ул. Академика Королева, 12</p>
+                <p><strong>Email:</strong> info@grant-consult.ru</p>
+                <p><strong>Telegram:</strong> @marina_belyakova_consult</p>
+            </div>
+            <div class="card" style="background: var(--bg);">
+                <h3 style="margin-top: 0;">ИИ-Помощник</h3>
+                <p>Наш бот ответит на ваши вопросы по грантам за 60 секунд. Попробуйте прямо сейчас.</p>
+                <a href="https://t.me/marina_grant_bot" class="btn" style="background: #2481cc; width: 100%; text-align: center;">Запустить бота</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-logo">AI Grant & Consult</div>
+        <p style="opacity: 0.6; max-width: 500px; margin: 0 auto 30px;">Профессиональная консалтинговая группа Ульяны Беляковой. Переводим господдержку на язык вашего бизнеса.</p>
+        <div style="font-size: 12px; opacity: 0.4;">© 2026 AI Grant & Consult · Технологии AI Bureau</div>
+    </footer>
+
+</body>
+</html>

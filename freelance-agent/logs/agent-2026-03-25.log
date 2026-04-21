@@ -1,0 +1,925 @@
+{"timestamp":"2026-03-25T10:13:27.285Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T10:13:27.286Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T10:13:27.286Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T10:13:27.287Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T10:13:27.287Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T10:13:32.204Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T10:13:32.206Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T10:13:32.561Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T10:13:32.561Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T10:13:32.562Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T10:13:52.720Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T10:13:52.726Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T10:14:01.784Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T10:14:01.918Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Настройка ComfyUI с API-доступом","budget":10000}}
+{"timestamp":"2026-03-25T10:14:01.963Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Надо продвигать группу ВК","budget":1000}}
+{"timestamp":"2026-03-25T10:14:02.010Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"SEO-консультация","budget":2000}}
+{"timestamp":"2026-03-25T10:14:02.048Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Смонтировать видео из исходника (очень много клиентов)","budget":5000}}
+{"timestamp":"2026-03-25T10:14:02.083Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение через комментарии (crowd marketing, ENG)","budget":20000}}
+{"timestamp":"2026-03-25T10:14:02.120Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужно перенести на Тильду","budget":5000}}
+{"timestamp":"2026-03-25T10:14:02.174Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Редизайн интернет магазина (частичный) wp + woodmart","budget":10000}}
+{"timestamp":"2026-03-25T10:14:02.247Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Видео клип на песню монтаж","budget":1000}}
+{"timestamp":"2026-03-25T10:14:02.287Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Отрисовать картинки и макеты наклеек согласно ТЗ","budget":500}}
+{"timestamp":"2026-03-25T10:14:02.323Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Оформить группу в ВК","budget":10000}}
+{"timestamp":"2026-03-25T10:14:02.362Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Telegram-бот для автоматического просчета металла","budget":35000}}
+{"timestamp":"2026-03-25T10:14:02.407Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Оформить сообщество Вконтакте","budget":500}}
+{"timestamp":"2026-03-25T10:14:02.407Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T10:14:02.407Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T10:14:02.409Z","action":"MATCHER","result":"Задача: Настройка ComfyUI с API-доступом","details":{"skillMatch":0,"clarity":0.25,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.415Z","action":"MATCHER","result":"Задача: Надо продвигать группу ВК","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.416Z","action":"MATCHER","result":"Задача: SEO-консультация","details":{"skillMatch":0,"clarity":0.1,"budget":2000,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.416Z","action":"MATCHER","result":"Задача: Смонтировать видео из исходника (очень м","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.417Z","action":"MATCHER","result":"Задача: Продвижение через комментарии (crowd mar","details":{"skillMatch":0,"clarity":0.1,"budget":20000,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.417Z","action":"MATCHER","result":"Задача: Нужно перенести на Тильду","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.417Z","action":"MATCHER","result":"Задача: Редизайн интернет магазина (частичный) w","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.418Z","action":"MATCHER","result":"Задача: Видео клип на песню монтаж","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.418Z","action":"MATCHER","result":"Задача: Отрисовать картинки и макеты наклеек сог","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.418Z","action":"MATCHER","result":"Задача: Оформить группу в ВК","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.419Z","action":"MATCHER","result":"Задача: Telegram-бот для автоматического просчет","details":{"skillMatch":0,"clarity":0.1,"budget":35000,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.420Z","action":"MATCHER","result":"Задача: Оформить сообщество Вконтакте","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:14:02.420Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T10:14:02.423Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T10:14:02.423Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T10:15:15.560Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T10:15:15.561Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T10:15:15.561Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T10:15:15.561Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T10:15:15.562Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"all"}}
+{"timestamp":"2026-03-25T10:15:19.201Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T10:15:19.205Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T10:15:19.793Z","action":"PLATFORM_UNAVAILABLE","result":"⚠️ Сайт вернул статус 403","details":{"platform":"flru"}}
+{"timestamp":"2026-03-25T10:15:19.793Z","action":"AGENT_RUN","result":"Платформы: Kwork, Freelance.ru"}
+{"timestamp":"2026-03-25T10:15:19.794Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T10:15:19.795Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T10:15:40.271Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T10:15:40.277Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T10:15:49.334Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T10:15:49.414Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Настройка ComfyUI с API-доступом","budget":10000}}
+{"timestamp":"2026-03-25T10:15:49.451Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Надо продвигать группу ВК","budget":1000}}
+{"timestamp":"2026-03-25T10:15:49.493Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"SEO-консультация","budget":2000}}
+{"timestamp":"2026-03-25T10:15:49.530Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Смонтировать видео из исходника (очень много клиентов)","budget":5000}}
+{"timestamp":"2026-03-25T10:15:49.610Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение через комментарии (crowd marketing, ENG)","budget":20000}}
+{"timestamp":"2026-03-25T10:15:49.645Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужно перенести на Тильду","budget":5000}}
+{"timestamp":"2026-03-25T10:15:49.695Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Редизайн интернет магазина (частичный) wp + woodmart","budget":10000}}
+{"timestamp":"2026-03-25T10:15:49.757Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Видео клип на песню монтаж","budget":1000}}
+{"timestamp":"2026-03-25T10:15:49.791Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Отрисовать картинки и макеты наклеек согласно ТЗ","budget":500}}
+{"timestamp":"2026-03-25T10:15:49.828Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Оформить группу в ВК","budget":10000}}
+{"timestamp":"2026-03-25T10:15:49.862Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Telegram-бот для автоматического просчета металла","budget":35000}}
+{"timestamp":"2026-03-25T10:15:49.900Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Оформить сообщество Вконтакте","budget":500}}
+{"timestamp":"2026-03-25T10:15:49.900Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T10:15:49.901Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T10:15:49.902Z","action":"MATCHER","result":"Задача: Настройка ComfyUI с API-доступом","details":{"skillMatch":0,"clarity":0.25,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.908Z","action":"MATCHER","result":"Задача: Надо продвигать группу ВК","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.908Z","action":"MATCHER","result":"Задача: SEO-консультация","details":{"skillMatch":0,"clarity":0.1,"budget":2000,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.909Z","action":"MATCHER","result":"Задача: Смонтировать видео из исходника (очень м","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.909Z","action":"MATCHER","result":"Задача: Продвижение через комментарии (crowd mar","details":{"skillMatch":0,"clarity":0.1,"budget":20000,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.909Z","action":"MATCHER","result":"Задача: Нужно перенести на Тильду","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.909Z","action":"MATCHER","result":"Задача: Редизайн интернет магазина (частичный) w","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.910Z","action":"MATCHER","result":"Задача: Видео клип на песню монтаж","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.910Z","action":"MATCHER","result":"Задача: Отрисовать картинки и макеты наклеек сог","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.910Z","action":"MATCHER","result":"Задача: Оформить группу в ВК","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.910Z","action":"MATCHER","result":"Задача: Telegram-бот для автоматического просчет","details":{"skillMatch":0,"clarity":0.1,"budget":35000,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.910Z","action":"MATCHER","result":"Задача: Оформить сообщество Вконтакте","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:15:49.911Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T10:15:49.911Z","action":"PLATFORM","result":"Обработка платформы: freelance"}
+{"timestamp":"2026-03-25T10:15:49.911Z","action":"FREELANCE_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T10:16:05.453Z","action":"FREELANCE_NAVIGATE","result":"URL: https://freelance.ru/projects/"}
+{"timestamp":"2026-03-25T10:16:05.460Z","action":"FREELANCE_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T10:16:17.703Z","action":"FREELANCE_EXTRACT","result":"Найдено карточек: 25"}
+{"timestamp":"2026-03-25T10:16:17.792Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Есть телеграм-бот его нужно перенести на Max полностью без изменений."}}
+{"timestamp":"2026-03-25T10:16:17.863Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Заполнение товарных карт для валберис"}}
+{"timestamp":"2026-03-25T10:16:17.915Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Модератор/администратор ВК-группы"}}
+{"timestamp":"2026-03-25T10:16:17.964Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Менеджер по заказам (удалённо, без опыта, без обзвонов)"}}
+{"timestamp":"2026-03-25T10:16:18.021Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Модератор контента: отзывы (удалённо, обучение)"}}
+{"timestamp":"2026-03-25T10:16:18.078Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Менеджер по ответам в чате (удалённо)"}}
+{"timestamp":"2026-03-25T10:16:18.173Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Требуется упаковка социальных сетей"}}
+{"timestamp":"2026-03-25T10:16:18.287Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Пригласить 5 рефералов на платные IT-курсы"}}
+{"timestamp":"2026-03-25T10:16:18.351Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Смм ведение аккаунта бренда одежды"}}
+{"timestamp":"2026-03-25T10:16:18.410Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Wildberries: размещать товары – просто и без опыта"}}
+{"timestamp":"2026-03-25T10:16:18.461Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка расширения для Google Chrome"}}
+{"timestamp":"2026-03-25T10:16:18.506Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Canva: создавать посты — просто"}}
+{"timestamp":"2026-03-25T10:16:18.552Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Составлять списки товаров через Excel - легко"}}
+{"timestamp":"2026-03-25T10:16:18.599Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Требуется исполнитель для работы с каталогом товаров в компании по продаже спорттоваров."}}
+{"timestamp":"2026-03-25T10:16:18.646Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Telegram:отправлять  уведомления-легко"}}
+{"timestamp":"2026-03-25T10:16:18.686Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Фотостудия: обрабатывать снимки - легко"}}
+{"timestamp":"2026-03-25T10:16:18.733Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"VK Shorts: записывать клипы - легко"}}
+{"timestamp":"2026-03-25T10:16:18.792Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Оzon: вести переписку — просто и без опыта"}}
+{"timestamp":"2026-03-25T10:16:18.842Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Писать отзывы для нас"}}
+{"timestamp":"2026-03-25T10:16:18.899Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"ВК: публиковать посты - просто и без опыта"}}
+{"timestamp":"2026-03-25T10:16:18.946Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"ВК: модерировать группы — просто и без опыта"}}
+{"timestamp":"2026-03-25T10:16:18.993Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Инфографика для ВБ/Ozon"}}
+{"timestamp":"2026-03-25T10:16:19.049Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Telegram: модерировать чат - просто"}}
+{"timestamp":"2026-03-25T10:16:19.098Z","action":"FREELANCE_EXTRACT","result":"Извлечена задача","details":{"title":"Отвечать на вопросы в Telegram -просто"}}
+{"timestamp":"2026-03-25T10:16:19.099Z","action":"FREELANCE_EXTRACT","result":"Извлечено 24 задач"}
+{"timestamp":"2026-03-25T10:16:19.099Z","action":"PLATFORM","result":"Извлечено 24 задач с freelance"}
+{"timestamp":"2026-03-25T10:16:19.099Z","action":"MATCHER","result":"Задача: Есть телеграм-бот его нужно перенести на","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.100Z","action":"MATCHER","result":"Задача: Заполнение товарных карт для валберис","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.100Z","action":"MATCHER","result":"Задача: Модератор/администратор ВК-группы","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.100Z","action":"MATCHER","result":"Задача: Менеджер по заказам (удалённо, без опыта","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.100Z","action":"MATCHER","result":"Задача: Модератор контента: отзывы (удалённо, об","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.100Z","action":"MATCHER","result":"Задача: Менеджер по ответам в чате (удалённо)","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.101Z","action":"MATCHER","result":"Задача: Требуется упаковка социальных сетей","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.103Z","action":"MATCHER","result":"Задача: Пригласить 5 рефералов на платные IT-кур","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.104Z","action":"MATCHER","result":"Задача: Смм ведение аккаунта бренда одежды","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.105Z","action":"MATCHER","result":"Задача: Wildberries: размещать товары – просто и","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.107Z","action":"MATCHER","result":"Задача: Разработка расширения для Google Chrome","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.109Z","action":"MATCHER","result":"Задача: Canva: создавать посты — просто","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.110Z","action":"MATCHER","result":"Задача: Составлять списки товаров через Excel - ","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.111Z","action":"MATCHER","result":"Задача: Требуется исполнитель для работы с катал","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.112Z","action":"MATCHER","result":"Задача: Telegram:отправлять  уведомления-легко","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.113Z","action":"MATCHER","result":"Задача: Фотостудия: обрабатывать снимки - легко","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.114Z","action":"MATCHER","result":"Задача: VK Shorts: записывать клипы - легко","details":{"skillMatch":0.85,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.115Z","action":"MATCHER","result":"Задача: Оzon: вести переписку — просто и без опы","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.117Z","action":"MATCHER","result":"Задача: Писать отзывы для нас","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.118Z","action":"MATCHER","result":"Задача: ВК: публиковать посты - просто и без опы","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.118Z","action":"MATCHER","result":"Задача: ВК: модерировать группы — просто и без о","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.119Z","action":"MATCHER","result":"Задача: Инфографика для ВБ/Ozon","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.119Z","action":"MATCHER","result":"Задача: Telegram: модерировать чат - просто","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.120Z","action":"MATCHER","result":"Задача: Отвечать на вопросы в Telegram -просто","details":{"skillMatch":0,"clarity":0,"passes":false}}
+{"timestamp":"2026-03-25T10:16:19.121Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T10:16:19.124Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T10:16:19.124Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T10:41:12.715Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T10:41:12.717Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T10:41:12.717Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T10:41:12.717Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T10:41:12.718Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T10:41:17.833Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T10:41:17.835Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T10:41:18.295Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T10:41:18.296Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T10:41:18.297Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T10:41:23.967Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T10:41:23.973Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T10:41:33.440Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T10:41:33.520Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"3д моделирование (модель для работы в 3д Макс)","budget":10000}}
+{"timestamp":"2026-03-25T10:41:33.608Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сбор базы сайтов для поиска наставников (менторов)","budget":1000}}
+{"timestamp":"2026-03-25T10:41:33.648Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Отредактировать исходное изображение","budget":1000}}
+{"timestamp":"2026-03-25T10:41:33.695Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Доработка сайта WP + Elementor","budget":1000}}
+{"timestamp":"2026-03-25T10:41:33.731Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Отрисовать лого по готовой картинке","budget":2000}}
+{"timestamp":"2026-03-25T10:41:33.766Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Тайный покупатель","budget":1000}}
+{"timestamp":"2026-03-25T10:41:33.818Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Node.js разработчик доработка API для автоактивации","budget":10000}}
+{"timestamp":"2026-03-25T10:41:33.865Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Помощь в продажах","budget":20000}}
+{"timestamp":"2026-03-25T10:41:33.898Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Аранжировка для песни","budget":5000}}
+{"timestamp":"2026-03-25T10:41:33.958Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Настроить таргет в ВК","budget":5000}}
+{"timestamp":"2026-03-25T10:41:33.991Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение телеграм канала или группы","budget":80000}}
+{"timestamp":"2026-03-25T10:41:34.022Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение сайта","budget":125000}}
+{"timestamp":"2026-03-25T10:41:34.023Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T10:41:34.023Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T10:41:34.024Z","action":"MATCHER","result":"Задача: 3д моделирование (модель для работы в 3д","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:41:34.029Z","action":"MATCHER","result":"Задача: Сбор базы сайтов для поиска наставников ","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:41:34.029Z","action":"MATCHER","result":"Задача: Отредактировать исходное изображение","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:41:34.030Z","action":"MATCHER","result":"Задача: Доработка сайта WP + Elementor","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:41:34.030Z","action":"MATCHER","result":"Задача: Отрисовать лого по готовой картинке","details":{"skillMatch":0,"clarity":0.1,"budget":2000,"passes":false}}
+{"timestamp":"2026-03-25T10:41:34.030Z","action":"MATCHER","result":"Задача: Тайный покупатель","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:41:34.030Z","action":"MATCHER","result":"Задача: Node.js разработчик доработка API для ав","details":{"skillMatch":0.8,"clarity":0.25,"budget":10000,"passes":true}}
+{"timestamp":"2026-03-25T10:41:34.031Z","action":"MATCHER","result":"Задача: Помощь в продажах","details":{"skillMatch":0,"clarity":0.1,"budget":20000,"passes":false}}
+{"timestamp":"2026-03-25T10:41:34.031Z","action":"MATCHER","result":"Задача: Аранжировка для песни","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:41:34.031Z","action":"MATCHER","result":"Задача: Настроить таргет в ВК","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:41:34.031Z","action":"MATCHER","result":"Задача: Продвижение телеграм канала или группы","details":{"skillMatch":0,"clarity":0.1,"budget":80000,"passes":false}}
+{"timestamp":"2026-03-25T10:41:34.032Z","action":"MATCHER","result":"Задача: Продвижение сайта","details":{"skillMatch":0,"clarity":0.1,"budget":125000,"passes":false}}
+{"timestamp":"2026-03-25T10:41:34.032Z","action":"PLATFORM","result":"Подходящих задач: 1"}
+{"timestamp":"2026-03-25T10:41:34.036Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":1,"byPlatform":{"kwork":1},"byStatus":{"new":1},"averageScores":{"skillMatch":0.8,"clarity":0.25,"overall":0.63},"topJobs":[{"title":"Node.js разработчик доработка API для автоактивации","platform":"kwork","url":"https://kwork.ru/projects/3126360","budget":{"type":"fixed","amount":10000,"currency":"RUB"},"skillMatchScore":0.8,"clarityScore":0.25,"overallScore":0.63}]}}
+{"timestamp":"2026-03-25T10:41:34.037Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T10:42:36.841Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T10:42:36.842Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T10:42:36.843Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T10:42:36.843Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T10:42:36.843Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T10:42:40.836Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T10:42:40.837Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T10:42:41.192Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T10:42:41.193Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T10:42:41.193Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T10:42:47.469Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T10:42:47.471Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T10:42:56.424Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T10:42:56.488Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сделать небольшие правки на сайте","budget":500}}
+{"timestamp":"2026-03-25T10:42:56.525Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Настройка доставки на OZON","budget":5000}}
+{"timestamp":"2026-03-25T10:42:56.559Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"3д моделирование (модель для работы в 3д Макс)","budget":10000}}
+{"timestamp":"2026-03-25T10:42:56.598Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сбор базы сайтов для поиска наставников (менторов)","budget":1000}}
+{"timestamp":"2026-03-25T10:42:56.633Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Отредактировать исходное изображение","budget":1000}}
+{"timestamp":"2026-03-25T10:42:56.669Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Доработка сайта WP + Elementor","budget":1000}}
+{"timestamp":"2026-03-25T10:42:56.717Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Отрисовать лого по готовой картинке","budget":2000}}
+{"timestamp":"2026-03-25T10:42:56.763Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Тайный покупатель","budget":1000}}
+{"timestamp":"2026-03-25T10:42:56.794Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Node.js разработчик доработка API для автоактивации","budget":10000}}
+{"timestamp":"2026-03-25T10:42:56.829Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Помощь в продажах","budget":20000}}
+{"timestamp":"2026-03-25T10:42:56.880Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Аранжировка для песни","budget":5000}}
+{"timestamp":"2026-03-25T10:42:56.915Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Настроить таргет в ВК","budget":5000}}
+{"timestamp":"2026-03-25T10:42:56.916Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T10:42:56.916Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T10:42:56.917Z","action":"MATCHER","result":"Задача: Сделать небольшие правки на сайте","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:42:56.925Z","action":"MATCHER","result":"Задача: Настройка доставки на OZON","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:42:56.926Z","action":"MATCHER","result":"Задача: 3д моделирование (модель для работы в 3д","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:42:56.926Z","action":"MATCHER","result":"Задача: Сбор базы сайтов для поиска наставников ","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:42:56.926Z","action":"MATCHER","result":"Задача: Отредактировать исходное изображение","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:42:56.926Z","action":"MATCHER","result":"Задача: Доработка сайта WP + Elementor","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:42:56.926Z","action":"MATCHER","result":"Задача: Отрисовать лого по готовой картинке","details":{"skillMatch":0,"clarity":0.1,"budget":2000,"passes":false}}
+{"timestamp":"2026-03-25T10:42:56.926Z","action":"MATCHER","result":"Задача: Тайный покупатель","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:42:56.927Z","action":"MATCHER","result":"Задача: Node.js разработчик доработка API для ав","details":{"skillMatch":0.8,"clarity":0.25,"budget":10000,"passes":true}}
+{"timestamp":"2026-03-25T10:42:56.929Z","action":"MATCHER","result":"Задача: Помощь в продажах","details":{"skillMatch":0,"clarity":0.1,"budget":20000,"passes":false}}
+{"timestamp":"2026-03-25T10:42:56.929Z","action":"MATCHER","result":"Задача: Аранжировка для песни","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:42:56.929Z","action":"MATCHER","result":"Задача: Настроить таргет в ВК","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:42:56.930Z","action":"PLATFORM","result":"Подходящих задач: 1"}
+{"timestamp":"2026-03-25T10:42:56.933Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":1,"byPlatform":{"kwork":1},"byStatus":{"new":1},"averageScores":{"skillMatch":0.8,"clarity":0.25,"overall":0.63},"topJobs":[{"title":"Node.js разработчик доработка API для автоактивации","platform":"kwork","url":"https://kwork.ru/projects/3126360","budget":{"type":"fixed","amount":10000,"currency":"RUB"},"skillMatchScore":0.8,"clarityScore":0.25,"overallScore":0.63}]}}
+{"timestamp":"2026-03-25T10:42:56.933Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T10:44:14.386Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T10:44:58.489Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T10:44:58.491Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T10:44:58.491Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T10:44:58.491Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T10:44:58.492Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T10:45:01.197Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T10:45:01.198Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T10:45:01.483Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T10:45:01.483Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T10:45:01.483Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T10:45:06.735Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T10:45:06.735Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T10:45:15.685Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T10:45:15.751Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сделать небольшие правки на сайте","budget":500}}
+{"timestamp":"2026-03-25T10:45:15.789Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Настройка доставки на OZON","budget":5000}}
+{"timestamp":"2026-03-25T10:45:15.821Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"3д моделирование (модель для работы в 3д Макс)","budget":10000}}
+{"timestamp":"2026-03-25T10:45:15.860Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сбор базы сайтов для поиска наставников (менторов)","budget":1000}}
+{"timestamp":"2026-03-25T10:45:15.895Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Отредактировать исходное изображение","budget":1000}}
+{"timestamp":"2026-03-25T10:45:15.934Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Доработка сайта WP + Elementor","budget":1000}}
+{"timestamp":"2026-03-25T10:45:15.984Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Отрисовать лого по готовой картинке","budget":2000}}
+{"timestamp":"2026-03-25T10:45:16.032Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Тайный покупатель","budget":1000}}
+{"timestamp":"2026-03-25T10:45:16.064Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Node.js разработчик доработка API для автоактивации","budget":10000}}
+{"timestamp":"2026-03-25T10:45:16.098Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Помощь в продажах","budget":20000}}
+{"timestamp":"2026-03-25T10:45:16.132Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Аранжировка для песни","budget":5000}}
+{"timestamp":"2026-03-25T10:45:16.165Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Настроить таргет в ВК","budget":5000}}
+{"timestamp":"2026-03-25T10:45:16.165Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T10:45:16.165Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T10:45:16.167Z","action":"MATCHER","result":"Задача: Сделать небольшие правки на сайте","details":{"skillMatch":0,"clarity":0.35,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:45:16.175Z","action":"MATCHER","result":"Задача: Настройка доставки на OZON","details":{"skillMatch":0,"clarity":0.35,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:45:16.175Z","action":"MATCHER","result":"Задача: 3д моделирование (модель для работы в 3д","details":{"skillMatch":0,"clarity":0.35,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:45:16.176Z","action":"MATCHER","result":"Задача: Сбор базы сайтов для поиска наставников ","details":{"skillMatch":0,"clarity":0.35,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:45:16.176Z","action":"MATCHER","result":"Задача: Отредактировать исходное изображение","details":{"skillMatch":0,"clarity":0.35,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:45:16.176Z","action":"MATCHER","result":"Задача: Доработка сайта WP + Elementor","details":{"skillMatch":0,"clarity":0.35,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:45:16.176Z","action":"MATCHER","result":"Задача: Отрисовать лого по готовой картинке","details":{"skillMatch":0,"clarity":0.35,"budget":2000,"passes":false}}
+{"timestamp":"2026-03-25T10:45:16.176Z","action":"MATCHER","result":"Задача: Тайный покупатель","details":{"skillMatch":0,"clarity":0.35,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:45:16.177Z","action":"MATCHER","result":"Задача: Node.js разработчик доработка API для ав","details":{"skillMatch":0.8,"clarity":0.5,"budget":10000,"passes":true}}
+{"timestamp":"2026-03-25T10:45:16.179Z","action":"MATCHER","result":"Задача: Помощь в продажах","details":{"skillMatch":0,"clarity":0.35,"budget":20000,"passes":false}}
+{"timestamp":"2026-03-25T10:45:16.179Z","action":"MATCHER","result":"Задача: Аранжировка для песни","details":{"skillMatch":0,"clarity":0.35,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:45:16.179Z","action":"MATCHER","result":"Задача: Настроить таргет в ВК","details":{"skillMatch":0,"clarity":0.35,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:45:16.179Z","action":"PLATFORM","result":"Подходящих задач: 1"}
+{"timestamp":"2026-03-25T10:45:16.182Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":1,"byPlatform":{"kwork":1},"byStatus":{"new":1},"averageScores":{"skillMatch":0.8,"clarity":0.5,"overall":0.71},"topJobs":[{"title":"Node.js разработчик доработка API для автоактивации","platform":"kwork","url":"https://kwork.ru/projects/3126360","budget":{"type":"fixed","amount":10000,"currency":"RUB"},"skillMatchScore":0.8,"clarityScore":0.5,"overallScore":0.71}]}}
+{"timestamp":"2026-03-25T10:45:16.182Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T10:52:59.603Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T10:53:53.149Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T10:53:53.150Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T10:53:53.151Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T10:53:53.151Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T10:53:53.151Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T10:53:57.194Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T10:53:57.198Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T10:53:57.538Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T10:53:57.539Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T10:53:57.539Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T10:54:03.203Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T10:54:03.208Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T10:54:12.269Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T10:54:12.350Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Yandex KIT для бренда игрушек","budget":5000}}
+{"timestamp":"2026-03-25T10:54:12.391Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Ведение таргет-кампаний в Telegram Ads для онлайн-школы","budget":30000}}
+{"timestamp":"2026-03-25T10:54:12.427Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"В поиске ваших кaнaлoв-yt","budget":500}}
+{"timestamp":"2026-03-25T10:54:12.466Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Создание видео","budget":500}}
+{"timestamp":"2026-03-25T10:54:12.505Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка Backend части игры Ролл Таверс","budget":30000}}
+{"timestamp":"2026-03-25T10:54:12.592Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Редизайн презентации","budget":2000}}
+{"timestamp":"2026-03-25T10:54:12.643Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"AI-ролик для найма курьеров","budget":1000}}
+{"timestamp":"2026-03-25T10:54:12.691Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сделать небольшие правки на сайте","budget":500}}
+{"timestamp":"2026-03-25T10:54:12.724Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Настройка доставки на OZON","budget":5000}}
+{"timestamp":"2026-03-25T10:54:12.760Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"3д моделирование (модель для работы в 3д Макс)","budget":10000}}
+{"timestamp":"2026-03-25T10:54:12.795Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сбор базы сайтов для поиска наставников (менторов)","budget":1000}}
+{"timestamp":"2026-03-25T10:54:12.835Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Отредактировать исходное изображение","budget":1000}}
+{"timestamp":"2026-03-25T10:54:12.835Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T10:54:12.835Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T10:54:12.838Z","action":"MATCHER","result":"Задача: Yandex KIT для бренда игрушек","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.845Z","action":"MATCHER","result":"Задача: Ведение таргет-кампаний в Telegram Ads д","details":{"skillMatch":0,"clarity":0.1,"budget":30000,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.846Z","action":"MATCHER","result":"Задача: В поиске ваших кaнaлoв-yt","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.846Z","action":"MATCHER","result":"Задача: Создание видео","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.846Z","action":"MATCHER","result":"Задача: Разработка Backend части игры Ролл Тавер","details":{"skillMatch":0,"clarity":0.1,"budget":30000,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.846Z","action":"MATCHER","result":"Задача: Редизайн презентации","details":{"skillMatch":0,"clarity":0.1,"budget":2000,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.846Z","action":"MATCHER","result":"Задача: AI-ролик для найма курьеров","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.847Z","action":"MATCHER","result":"Задача: Сделать небольшие правки на сайте","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.847Z","action":"MATCHER","result":"Задача: Настройка доставки на OZON","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.847Z","action":"MATCHER","result":"Задача: 3д моделирование (модель для работы в 3д","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.847Z","action":"MATCHER","result":"Задача: Сбор базы сайтов для поиска наставников ","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.847Z","action":"MATCHER","result":"Задача: Отредактировать исходное изображение","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:54:12.848Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T10:54:12.849Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T10:54:12.849Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T10:55:03.414Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T10:55:03.415Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T10:55:03.415Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T10:55:03.415Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T10:55:03.415Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T10:55:07.017Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T10:55:07.022Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T10:55:07.356Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T10:55:07.356Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T10:55:07.356Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T10:55:12.961Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T10:55:12.962Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T10:55:22.022Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T10:55:22.572Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Yandex KIT для бренда игрушек","budget":5000}}
+{"timestamp":"2026-03-25T10:55:23.588Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Ведение таргет-кампаний в Telegram Ads для онлайн-школы","budget":30000}}
+{"timestamp":"2026-03-25T10:55:24.089Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"В поиске ваших кaнaлoв-yt","budget":500}}
+{"timestamp":"2026-03-25T10:55:24.525Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Создание видео","budget":500}}
+{"timestamp":"2026-03-25T10:55:25.033Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка Backend части игры Ролл Таверс","budget":30000}}
+{"timestamp":"2026-03-25T10:55:25.498Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Редизайн презентации","budget":2000}}
+{"timestamp":"2026-03-25T10:55:25.962Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"AI-ролик для найма курьеров","budget":1000}}
+{"timestamp":"2026-03-25T10:55:26.432Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сделать небольшие правки на сайте","budget":500}}
+{"timestamp":"2026-03-25T10:55:26.896Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Настройка доставки на OZON","budget":5000}}
+{"timestamp":"2026-03-25T10:55:27.407Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"3д моделирование (модель для работы в 3д Макс)","budget":10000}}
+{"timestamp":"2026-03-25T10:55:27.838Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сбор базы сайтов для поиска наставников (менторов)","budget":1000}}
+{"timestamp":"2026-03-25T10:55:28.316Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Отредактировать исходное изображение","budget":1000}}
+{"timestamp":"2026-03-25T10:55:28.316Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T10:55:28.316Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T10:55:28.318Z","action":"MATCHER","result":"Задача: Yandex KIT для бренда игрушек","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.327Z","action":"MATCHER","result":"Задача: Ведение таргет-кампаний в Telegram Ads д","details":{"skillMatch":0,"clarity":0.1,"budget":30000,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.327Z","action":"MATCHER","result":"Задача: В поиске ваших кaнaлoв-yt","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.327Z","action":"MATCHER","result":"Задача: Создание видео","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.327Z","action":"MATCHER","result":"Задача: Разработка Backend части игры Ролл Тавер","details":{"skillMatch":0,"clarity":0.1,"budget":30000,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.327Z","action":"MATCHER","result":"Задача: Редизайн презентации","details":{"skillMatch":0,"clarity":0.1,"budget":2000,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.327Z","action":"MATCHER","result":"Задача: AI-ролик для найма курьеров","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.328Z","action":"MATCHER","result":"Задача: Сделать небольшие правки на сайте","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.328Z","action":"MATCHER","result":"Задача: Настройка доставки на OZON","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.328Z","action":"MATCHER","result":"Задача: 3д моделирование (модель для работы в 3д","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.328Z","action":"MATCHER","result":"Задача: Сбор базы сайтов для поиска наставников ","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.328Z","action":"MATCHER","result":"Задача: Отредактировать исходное изображение","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:55:28.328Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T10:55:28.330Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T10:55:28.330Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T10:56:18.112Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T10:56:18.113Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T10:56:18.113Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T10:56:18.113Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T10:56:18.113Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T10:56:21.625Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T10:56:21.626Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T10:56:21.957Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T10:56:21.957Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T10:56:21.957Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T10:56:27.541Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T10:56:27.544Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T10:56:36.591Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T10:56:37.066Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Создание иллюстраций","budget":500}}
+{"timestamp":"2026-03-25T10:56:37.467Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Yandex KIT для бренда игрушек","budget":5000}}
+{"timestamp":"2026-03-25T10:56:37.944Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Ведение таргет-кампаний в Telegram Ads для онлайн-школы","budget":30000}}
+{"timestamp":"2026-03-25T10:56:38.409Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"В поиске ваших кaнaлoв-yt","budget":500}}
+{"timestamp":"2026-03-25T10:56:38.781Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Создание видео","budget":500}}
+{"timestamp":"2026-03-25T10:56:39.270Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка Backend части игры Ролл Таверс","budget":30000}}
+{"timestamp":"2026-03-25T10:56:39.768Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Редизайн презентации","budget":2000}}
+{"timestamp":"2026-03-25T10:56:40.277Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"AI-ролик для найма курьеров","budget":1000}}
+{"timestamp":"2026-03-25T10:56:40.765Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сделать небольшие правки на сайте","budget":500}}
+{"timestamp":"2026-03-25T10:56:41.233Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Настройка доставки на OZON","budget":5000}}
+{"timestamp":"2026-03-25T10:56:41.730Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"3д моделирование (модель для работы в 3д Макс)","budget":10000}}
+{"timestamp":"2026-03-25T10:56:42.197Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сбор базы сайтов для поиска наставников (менторов)","budget":1000}}
+{"timestamp":"2026-03-25T10:56:42.198Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T10:56:42.198Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T10:56:42.199Z","action":"MATCHER","result":"Задача: Создание иллюстраций","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.208Z","action":"MATCHER","result":"Задача: Yandex KIT для бренда игрушек","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.208Z","action":"MATCHER","result":"Задача: Ведение таргет-кампаний в Telegram Ads д","details":{"skillMatch":0,"clarity":0.1,"budget":30000,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.208Z","action":"MATCHER","result":"Задача: В поиске ваших кaнaлoв-yt","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.208Z","action":"MATCHER","result":"Задача: Создание видео","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.208Z","action":"MATCHER","result":"Задача: Разработка Backend части игры Ролл Тавер","details":{"skillMatch":0,"clarity":0.1,"budget":30000,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.209Z","action":"MATCHER","result":"Задача: Редизайн презентации","details":{"skillMatch":0,"clarity":0.1,"budget":2000,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.209Z","action":"MATCHER","result":"Задача: AI-ролик для найма курьеров","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.209Z","action":"MATCHER","result":"Задача: Сделать небольшие правки на сайте","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.209Z","action":"MATCHER","result":"Задача: Настройка доставки на OZON","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.209Z","action":"MATCHER","result":"Задача: 3д моделирование (модель для работы в 3д","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.209Z","action":"MATCHER","result":"Задача: Сбор базы сайтов для поиска наставников ","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T10:56:42.209Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T10:56:42.211Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T10:56:42.211Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T10:59:49.821Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T10:59:49.823Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T10:59:49.823Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T10:59:49.823Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T10:59:49.824Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T10:59:54.972Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T10:59:54.975Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T10:59:55.435Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T10:59:55.436Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T10:59:55.436Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T11:00:00.715Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T11:00:00.716Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T11:00:09.674Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T11:00:10.185Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработчик API-интеграции c торговыми площадками","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:10.593Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Публикация статьи в Dzen-блог","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:11.049Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужен блог про строительство","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:11.511Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Публикация статьи свой Dzen/VC/DTF блог","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:12.008Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Статья в личный блог Dzen","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:12.379Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Изменить логотип на фотографиях товара через ИИ","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:12.844Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сделать карточку фена для вб за хороший отзыв","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:13.210Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Создание иллюстраций","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:13.682Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Yandex KIT для бренда игрушек","budget":5000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:14.164Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Ведение таргет-кампаний в Telegram Ads для онлайн-школы","budget":30000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:14.625Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"В поиске ваших кaнaлoв-yt","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:14.990Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Создание видео","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:00:14.991Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T11:00:14.991Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T11:00:14.992Z","action":"MATCHER","result":"Задача: Разработчик API-интеграции c торговыми п","details":{"skillMatch":0,"clarity":0.25,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:00:14.999Z","action":"MATCHER","result":"Задача: Публикация статьи в Dzen-блог","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:00:15.000Z","action":"MATCHER","result":"Задача: Нужен блог про строительство","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:00:15.000Z","action":"MATCHER","result":"Задача: Публикация статьи свой Dzen/VC/DTF блог","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:00:15.000Z","action":"MATCHER","result":"Задача: Статья в личный блог Dzen","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:00:15.000Z","action":"MATCHER","result":"Задача: Изменить логотип на фотографиях товара ч","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:00:15.000Z","action":"MATCHER","result":"Задача: Сделать карточку фена для вб за хороший ","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:00:15.000Z","action":"MATCHER","result":"Задача: Создание иллюстраций","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:00:15.001Z","action":"MATCHER","result":"Задача: Yandex KIT для бренда игрушек","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:00:15.001Z","action":"MATCHER","result":"Задача: Ведение таргет-кампаний в Telegram Ads д","details":{"skillMatch":0,"clarity":0.1,"budget":30000,"passes":false}}
+{"timestamp":"2026-03-25T11:00:15.001Z","action":"MATCHER","result":"Задача: В поиске ваших кaнaлoв-yt","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:00:15.001Z","action":"MATCHER","result":"Задача: Создание видео","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:00:15.001Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T11:00:15.004Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T11:00:15.004Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T11:00:53.589Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T11:00:53.590Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T11:00:53.590Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T11:00:53.591Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T11:00:53.591Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T11:00:57.472Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T11:00:57.476Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T11:00:57.781Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T11:00:57.781Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T11:00:57.781Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T11:01:03.968Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T11:01:03.971Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T11:01:12.925Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T11:01:13.381Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"База селлеров для маркетплейса","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:13.812Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработчик API-интеграции c торговыми площадками","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:14.277Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Публикация статьи в Dzen-блог","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:14.666Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужен блог про строительство","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:15.165Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Публикация статьи свой Dzen/VC/DTF блог","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:15.657Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Статья в личный блог Dzen","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:16.016Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Изменить логотип на фотографиях товара через ИИ","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:16.473Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сделать карточку фена для вб за хороший отзыв","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:16.844Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Создание иллюстраций","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:17.314Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Yandex KIT для бренда игрушек","budget":5000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:17.781Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Ведение таргет-кампаний в Telegram Ads для онлайн-школы","budget":30000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:18.247Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"В поиске ваших кaнaлoв-yt","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:01:18.247Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T11:01:18.247Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T11:01:18.248Z","action":"MATCHER","result":"Задача: База селлеров для маркетплейса","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.256Z","action":"MATCHER","result":"Задача: Разработчик API-интеграции c торговыми п","details":{"skillMatch":0,"clarity":0.25,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.256Z","action":"MATCHER","result":"Задача: Публикация статьи в Dzen-блог","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.256Z","action":"MATCHER","result":"Задача: Нужен блог про строительство","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.257Z","action":"MATCHER","result":"Задача: Публикация статьи свой Dzen/VC/DTF блог","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.257Z","action":"MATCHER","result":"Задача: Статья в личный блог Dzen","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.257Z","action":"MATCHER","result":"Задача: Изменить логотип на фотографиях товара ч","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.257Z","action":"MATCHER","result":"Задача: Сделать карточку фена для вб за хороший ","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.257Z","action":"MATCHER","result":"Задача: Создание иллюстраций","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.257Z","action":"MATCHER","result":"Задача: Yandex KIT для бренда игрушек","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.257Z","action":"MATCHER","result":"Задача: Ведение таргет-кампаний в Telegram Ads д","details":{"skillMatch":0,"clarity":0.1,"budget":30000,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.257Z","action":"MATCHER","result":"Задача: В поиске ваших кaнaлoв-yt","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:01:18.258Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T11:01:18.260Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T11:01:18.260Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T11:03:20.709Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T11:04:58.326Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T11:04:58.327Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T11:04:58.327Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T11:04:58.327Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T11:04:58.328Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T11:05:03.421Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T11:05:03.425Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T11:05:03.754Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T11:05:03.754Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T11:05:03.754Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T11:05:09.798Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T11:05:09.800Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T11:05:18.758Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T11:05:19.631Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разместить 10 объявлений на бдо","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:20.314Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужен нейро сотрудник","budget":20000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:20.933Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Оптимизация СЕО","budget":10000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:21.550Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Улучшить дизайн сайта","budget":25000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:22.174Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение телеграм канала или группы","budget":80000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:22.780Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка кнопки оформления","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:23.459Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение сайта","budget":125000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:24.060Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Подобрать хостинг (сервер)","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:24.660Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"База селлеров для маркетплейса","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:25.303Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Публикация статьи в Dzen-блог","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:25.950Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужен блог про строительство","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:26.667Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Публикация статьи свой Dzen/VC/DTF блог","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:05:26.668Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T11:05:26.668Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T11:05:26.673Z","action":"MATCHER","result":"Задача: Разместить 10 объявлений на бдо","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.687Z","action":"MATCHER","result":"Задача: Нужен нейро сотрудник","details":{"skillMatch":0,"clarity":0.1,"budget":20000,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.688Z","action":"MATCHER","result":"Задача: Оптимизация СЕО","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.688Z","action":"MATCHER","result":"Задача: Улучшить дизайн сайта","details":{"skillMatch":0,"clarity":0.1,"budget":25000,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.689Z","action":"MATCHER","result":"Задача: Продвижение телеграм канала или группы","details":{"skillMatch":0,"clarity":0.1,"budget":80000,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.690Z","action":"MATCHER","result":"Задача: Разработка кнопки оформления","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.691Z","action":"MATCHER","result":"Задача: Продвижение сайта","details":{"skillMatch":0,"clarity":0.1,"budget":125000,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.691Z","action":"MATCHER","result":"Задача: Подобрать хостинг (сервер)","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.691Z","action":"MATCHER","result":"Задача: База селлеров для маркетплейса","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.692Z","action":"MATCHER","result":"Задача: Публикация статьи в Dzen-блог","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.693Z","action":"MATCHER","result":"Задача: Нужен блог про строительство","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.694Z","action":"MATCHER","result":"Задача: Публикация статьи свой Dzen/VC/DTF блог","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:05:26.694Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T11:05:26.700Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T11:05:26.700Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T11:08:21.799Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T11:08:21.801Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T11:08:21.802Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T11:08:21.802Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T11:08:21.802Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T11:08:25.970Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T11:08:25.971Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T11:08:26.274Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T11:08:26.275Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T11:08:26.275Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T11:08:32.888Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T11:08:32.898Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T11:08:41.865Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T11:08:42.529Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Насиройки и оптимизация youtube канала","budget":5000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:43.109Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Помощь с переадресацией доменов","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:43.760Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разместить 10 объявлений на бдо","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:44.342Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужен нейро сотрудник","budget":20000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:44.918Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Оптимизация СЕО","budget":10000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:45.491Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Улучшить дизайн сайта","budget":25000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:46.113Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение телеграм канала или группы","budget":80000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:46.743Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка кнопки оформления","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:47.341Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение сайта","budget":125000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:47.976Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Подобрать хостинг (сервер)","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:48.666Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"База селлеров для маркетплейса","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:49.358Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Публикация статьи в Dzen-блог","budget":3000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:08:49.359Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T11:08:49.359Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T11:08:49.361Z","action":"MATCHER","result":"Задача: Насиройки и оптимизация youtube канала","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.374Z","action":"MATCHER","result":"Задача: Помощь с переадресацией доменов","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.375Z","action":"MATCHER","result":"Задача: Разместить 10 объявлений на бдо","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.376Z","action":"MATCHER","result":"Задача: Нужен нейро сотрудник","details":{"skillMatch":0,"clarity":0.1,"budget":20000,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.377Z","action":"MATCHER","result":"Задача: Оптимизация СЕО","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.377Z","action":"MATCHER","result":"Задача: Улучшить дизайн сайта","details":{"skillMatch":0,"clarity":0.1,"budget":25000,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.378Z","action":"MATCHER","result":"Задача: Продвижение телеграм канала или группы","details":{"skillMatch":0,"clarity":0.1,"budget":80000,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.378Z","action":"MATCHER","result":"Задача: Разработка кнопки оформления","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.379Z","action":"MATCHER","result":"Задача: Продвижение сайта","details":{"skillMatch":0,"clarity":0.1,"budget":125000,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.379Z","action":"MATCHER","result":"Задача: Подобрать хостинг (сервер)","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.380Z","action":"MATCHER","result":"Задача: База селлеров для маркетплейса","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.381Z","action":"MATCHER","result":"Задача: Публикация статьи в Dzen-блог","details":{"skillMatch":0,"clarity":0.1,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T11:08:49.382Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T11:08:49.384Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T11:08:55.239Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T11:08:55.241Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T11:09:04.292Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T11:09:04.997Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Составление SEO ТЗ","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:05.617Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Насиройки и оптимизация youtube канала","budget":5000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:06.460Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Помощь с переадресацией доменов","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:07.098Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разместить 10 объявлений на бдо","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:07.809Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужен нейро сотрудник","budget":20000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:08.430Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Оптимизация СЕО","budget":10000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:08.992Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Улучшить дизайн сайта","budget":25000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:09.616Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение телеграм канала или группы","budget":80000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:10.214Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка кнопки оформления","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:10.924Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение сайта","budget":125000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:11.537Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Подобрать хостинг (сервер)","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:12.162Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"База селлеров для маркетплейса","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:09:12.162Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T11:09:12.181Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T11:09:12.181Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T11:10:52.823Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T11:10:52.826Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T11:10:52.826Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T11:10:52.826Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T11:10:52.827Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T11:10:57.396Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T11:10:57.403Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T11:10:57.721Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T11:10:57.721Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T11:10:57.722Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T11:11:03.637Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T11:11:03.641Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T11:11:12.706Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T11:11:13.373Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Наполнить информацию по организации в яндекс картах","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:13.985Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Составление SEO ТЗ","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:14.711Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Насиройки и оптимизация youtube канала","budget":5000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:15.341Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Помощь с переадресацией доменов","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:15.974Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разместить 10 объявлений на бдо","budget":500,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:16.578Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужен нейро сотрудник","budget":20000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:17.156Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Оптимизация СЕО","budget":10000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:17.740Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Улучшить дизайн сайта","budget":25000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:18.337Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение телеграм канала или группы","budget":80000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:19.030Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка кнопки оформления","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:19.712Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение сайта","budget":125000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:20.340Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Подобрать хостинг (сервер)","budget":1000,"descriptionLength":19}}
+{"timestamp":"2026-03-25T11:11:20.341Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T11:11:20.341Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T11:11:20.352Z","action":"MATCHER","result":"Задача: Наполнить информацию по организации в ян","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.356Z","action":"MATCHER","result":"Задача: Составление SEO ТЗ","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.357Z","action":"MATCHER","result":"Задача: Насиройки и оптимизация youtube канала","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.358Z","action":"MATCHER","result":"Задача: Помощь с переадресацией доменов","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.359Z","action":"MATCHER","result":"Задача: Разместить 10 объявлений на бдо","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.360Z","action":"MATCHER","result":"Задача: Нужен нейро сотрудник","details":{"skillMatch":0,"clarity":0.1,"budget":20000,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.360Z","action":"MATCHER","result":"Задача: Оптимизация СЕО","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.361Z","action":"MATCHER","result":"Задача: Улучшить дизайн сайта","details":{"skillMatch":0,"clarity":0.1,"budget":25000,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.362Z","action":"MATCHER","result":"Задача: Продвижение телеграм канала или группы","details":{"skillMatch":0,"clarity":0.1,"budget":80000,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.363Z","action":"MATCHER","result":"Задача: Разработка кнопки оформления","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.363Z","action":"MATCHER","result":"Задача: Продвижение сайта","details":{"skillMatch":0,"clarity":0.1,"budget":125000,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.364Z","action":"MATCHER","result":"Задача: Подобрать хостинг (сервер)","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:11:20.366Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T11:11:20.369Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T11:11:20.369Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T11:12:02.874Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T11:12:52.255Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T11:12:52.256Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T11:12:52.256Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T11:12:52.257Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T11:12:52.257Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T11:12:57.127Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T11:12:57.138Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T11:12:57.560Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T11:12:57.560Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T11:12:57.560Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T11:13:03.245Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T11:13:03.251Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T11:13:12.315Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T11:13:13.108Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Составление SEO ТЗ","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:13.697Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Насиройки и оптимизация youtube канала","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:14.401Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Помощь с переадресацией доменов","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:15.026Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разместить 10 объявлений на бдо","budget":500,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:15.676Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужен нейро сотрудник","budget":20000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:16.271Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Оптимизация СЕО","budget":10000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:16.868Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Улучшить дизайн сайта","budget":25000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:17.467Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение телеграм канала или группы","budget":80000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:18.045Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка кнопки оформления","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:18.731Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение сайта","budget":125000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:19.327Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Подобрать хостинг (сервер)","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:19.900Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"База селлеров для маркетплейса","budget":500,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:19.900Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T11:13:19.900Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T11:13:19.910Z","action":"MATCHER","result":"Задача: Составление SEO ТЗ","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.913Z","action":"MATCHER","result":"Задача: Насиройки и оптимизация youtube канала","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.914Z","action":"MATCHER","result":"Задача: Помощь с переадресацией доменов","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.917Z","action":"MATCHER","result":"Задача: Разместить 10 объявлений на бдо","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.918Z","action":"MATCHER","result":"Задача: Нужен нейро сотрудник","details":{"skillMatch":0,"clarity":0.1,"budget":20000,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.919Z","action":"MATCHER","result":"Задача: Оптимизация СЕО","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.920Z","action":"MATCHER","result":"Задача: Улучшить дизайн сайта","details":{"skillMatch":0,"clarity":0.1,"budget":25000,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.921Z","action":"MATCHER","result":"Задача: Продвижение телеграм канала или группы","details":{"skillMatch":0,"clarity":0.1,"budget":80000,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.921Z","action":"MATCHER","result":"Задача: Разработка кнопки оформления","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.922Z","action":"MATCHER","result":"Задача: Продвижение сайта","details":{"skillMatch":0,"clarity":0.1,"budget":125000,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.923Z","action":"MATCHER","result":"Задача: Подобрать хостинг (сервер)","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.924Z","action":"MATCHER","result":"Задача: База селлеров для маркетплейса","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:13:19.925Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T11:13:19.926Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T11:13:19.926Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T11:13:34.607Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T11:13:34.608Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T11:13:34.609Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T11:13:34.609Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T11:13:34.609Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T11:13:39.944Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T11:13:39.947Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T11:13:40.436Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T11:13:40.436Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T11:13:40.436Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T11:13:46.543Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T11:13:46.549Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T11:13:55.621Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T11:13:56.360Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Написать грамотное описание к карточкам","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:56.960Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Составление SEO ТЗ","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:57.670Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Насиройки и оптимизация youtube канала","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:58.259Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Помощь с переадресацией доменов","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:58.873Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разместить 10 объявлений на бдо","budget":500,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:13:59.459Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужен нейро сотрудник","budget":20000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:14:00.044Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Оптимизация СЕО","budget":10000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:14:00.621Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Улучшить дизайн сайта","budget":25000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:14:01.208Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение телеграм канала или группы","budget":80000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:14:01.802Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка кнопки оформления","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:14:02.388Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение сайта","budget":125000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:14:02.972Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Подобрать хостинг (сервер)","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:14:02.972Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T11:14:02.973Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T11:14:02.984Z","action":"MATCHER","result":"Задача: Написать грамотное описание к карточкам","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.987Z","action":"MATCHER","result":"Задача: Составление SEO ТЗ","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.988Z","action":"MATCHER","result":"Задача: Насиройки и оптимизация youtube канала","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.989Z","action":"MATCHER","result":"Задача: Помощь с переадресацией доменов","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.989Z","action":"MATCHER","result":"Задача: Разместить 10 объявлений на бдо","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.990Z","action":"MATCHER","result":"Задача: Нужен нейро сотрудник","details":{"skillMatch":0,"clarity":0.1,"budget":20000,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.991Z","action":"MATCHER","result":"Задача: Оптимизация СЕО","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.991Z","action":"MATCHER","result":"Задача: Улучшить дизайн сайта","details":{"skillMatch":0,"clarity":0.1,"budget":25000,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.992Z","action":"MATCHER","result":"Задача: Продвижение телеграм канала или группы","details":{"skillMatch":0,"clarity":0.1,"budget":80000,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.992Z","action":"MATCHER","result":"Задача: Разработка кнопки оформления","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.993Z","action":"MATCHER","result":"Задача: Продвижение сайта","details":{"skillMatch":0,"clarity":0.1,"budget":125000,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.993Z","action":"MATCHER","result":"Задача: Подобрать хостинг (сервер)","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:14:02.994Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T11:14:02.995Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T11:14:02.996Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T11:15:03.864Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T11:15:03.866Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T11:15:03.866Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T11:15:03.866Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T11:15:03.867Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T11:15:08.392Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T11:15:08.396Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T11:15:08.720Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T11:15:08.721Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T11:15:08.721Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T11:15:14.902Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T11:15:14.904Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T11:15:23.861Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T11:15:24.573Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Консультация по Авито","budget":500,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:25.192Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Доработка NocoBase","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:25.781Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Написать грамотное описание к карточкам","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:26.377Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Составление SEO ТЗ","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:27.052Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Насиройки и оптимизация youtube канала","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:27.691Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Помощь с переадресацией доменов","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:28.300Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разместить 10 объявлений на бдо","budget":500,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:28.893Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужен нейро сотрудник","budget":20000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:29.505Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Оптимизация СЕО","budget":10000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:30.116Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Улучшить дизайн сайта","budget":25000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:30.693Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение телеграм канала или группы","budget":80000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:31.291Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка кнопки оформления","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:15:31.292Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T11:15:31.292Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T11:15:31.306Z","action":"MATCHER","result":"Задача: Консультация по Авито","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.309Z","action":"MATCHER","result":"Задача: Доработка NocoBase","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.310Z","action":"MATCHER","result":"Задача: Написать грамотное описание к карточкам","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.310Z","action":"MATCHER","result":"Задача: Составление SEO ТЗ","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.311Z","action":"MATCHER","result":"Задача: Насиройки и оптимизация youtube канала","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.312Z","action":"MATCHER","result":"Задача: Помощь с переадресацией доменов","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.315Z","action":"MATCHER","result":"Задача: Разместить 10 объявлений на бдо","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.316Z","action":"MATCHER","result":"Задача: Нужен нейро сотрудник","details":{"skillMatch":0,"clarity":0.1,"budget":20000,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.318Z","action":"MATCHER","result":"Задача: Оптимизация СЕО","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.319Z","action":"MATCHER","result":"Задача: Улучшить дизайн сайта","details":{"skillMatch":0,"clarity":0.1,"budget":25000,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.320Z","action":"MATCHER","result":"Задача: Продвижение телеграм канала или группы","details":{"skillMatch":0,"clarity":0.1,"budget":80000,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.321Z","action":"MATCHER","result":"Задача: Разработка кнопки оформления","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:15:31.322Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T11:15:31.324Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T11:15:31.325Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T11:16:06.193Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T11:16:06.198Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T11:16:06.198Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T11:16:06.198Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T11:16:06.199Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T11:16:12.156Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T11:16:12.161Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T11:16:12.550Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T11:16:12.551Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T11:16:12.551Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T11:16:20.174Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T11:16:20.188Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T11:16:29.592Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T11:17:00.493Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Обработать скриншоты","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:05.104Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сделать баннер на LinkedIn","budget":500,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:06.967Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Написать грамотное описание к карточкам","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:08.324Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разместить 10 объявлений на бдо","budget":500,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:09.811Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сделать небольшие правки на сайте","budget":500,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:10.782Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Настройка доставки на OZON","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:11.534Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Доработка сайта WP + Elementor","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:12.291Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нужно перенести на Тильду","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:13.357Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Telegram-бот для автоматического просчета металла","budget":35000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:14.840Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Добавить CMS на сайт","budget":4000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:16.361Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Доработка сайта на Битрикс","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:17.984Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Тестирование гипотезы","budget":2000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:17:17.984Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T11:17:17.986Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T11:17:18.055Z","action":"MATCHER","result":"Задача: Обработать скриншоты","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.065Z","action":"MATCHER","result":"Задача: Сделать баннер на LinkedIn","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.069Z","action":"MATCHER","result":"Задача: Написать грамотное описание к карточкам","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.072Z","action":"MATCHER","result":"Задача: Разместить 10 объявлений на бдо","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.084Z","action":"MATCHER","result":"Задача: Сделать небольшие правки на сайте","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.088Z","action":"MATCHER","result":"Задача: Настройка доставки на OZON","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.091Z","action":"MATCHER","result":"Задача: Доработка сайта WP + Elementor","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.101Z","action":"MATCHER","result":"Задача: Нужно перенести на Тильду","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.110Z","action":"MATCHER","result":"Задача: Telegram-бот для автоматического просчет","details":{"skillMatch":0,"clarity":0.1,"budget":35000,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.126Z","action":"MATCHER","result":"Задача: Добавить CMS на сайт","details":{"skillMatch":0,"clarity":0.1,"budget":4000,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.134Z","action":"MATCHER","result":"Задача: Доработка сайта на Битрикс","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.139Z","action":"MATCHER","result":"Задача: Тестирование гипотезы","details":{"skillMatch":0,"clarity":0.1,"budget":2000,"passes":false}}
+{"timestamp":"2026-03-25T11:17:18.142Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T11:17:18.149Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T11:17:18.150Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T11:18:16.480Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T11:18:16.484Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T11:18:16.484Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T11:18:16.484Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T11:18:16.485Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T11:18:24.091Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T11:18:24.115Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T11:18:24.715Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T11:18:24.717Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T11:18:24.718Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T11:18:31.183Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T11:18:31.212Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T11:18:40.283Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T11:18:40.757Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Парсер множества сайтов","budget":10000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:41.206Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"PBN сетки под Турцию и Азербайджан - нужно создать","budget":10000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:41.574Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Наполнить информацию по организации в яндекс картах","budget":500,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:41.931Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Перевести стихи с русского на английский","budget":6000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:42.289Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Обработать скриншоты","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:42.744Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Сделать баннер на LinkedIn","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:43.219Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Консультация по Авито","budget":500,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:43.683Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Доработка NocoBase","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:44.042Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Написать грамотное описание к карточкам","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:44.395Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Составление SEO ТЗ","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:44.748Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Насиройки и оптимизация youtube канала","budget":5000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:45.091Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Помощь с переадресацией доменов","budget":1000,"descriptionLength":19,"descriptionPreview":"Фриланс маркетплейс"}}
+{"timestamp":"2026-03-25T11:18:45.092Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T11:18:45.092Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T11:18:45.103Z","action":"MATCHER","result":"Задача: Парсер множества сайтов","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.106Z","action":"MATCHER","result":"Задача: PBN сетки под Турцию и Азербайджан - нуж","details":{"skillMatch":0,"clarity":0.1,"budget":10000,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.106Z","action":"MATCHER","result":"Задача: Наполнить информацию по организации в ян","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.107Z","action":"MATCHER","result":"Задача: Перевести стихи с русского на английский","details":{"skillMatch":0,"clarity":0.1,"budget":6000,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.108Z","action":"MATCHER","result":"Задача: Обработать скриншоты","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.108Z","action":"MATCHER","result":"Задача: Сделать баннер на LinkedIn","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.109Z","action":"MATCHER","result":"Задача: Консультация по Авито","details":{"skillMatch":0,"clarity":0.1,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.109Z","action":"MATCHER","result":"Задача: Доработка NocoBase","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.110Z","action":"MATCHER","result":"Задача: Написать грамотное описание к карточкам","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.111Z","action":"MATCHER","result":"Задача: Составление SEO ТЗ","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.113Z","action":"MATCHER","result":"Задача: Насиройки и оптимизация youtube канала","details":{"skillMatch":0,"clarity":0.1,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.114Z","action":"MATCHER","result":"Задача: Помощь с переадресацией доменов","details":{"skillMatch":0,"clarity":0.1,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T11:18:45.115Z","action":"PLATFORM","result":"Подходящих задач: 0"}
+{"timestamp":"2026-03-25T11:18:45.116Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":0,"byPlatform":{},"byStatus":{},"averageScores":{"skillMatch":0,"clarity":0,"overall":0},"topJobs":[]}}
+{"timestamp":"2026-03-25T11:18:45.117Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T11:19:55.817Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T19:54:46.154Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T19:54:46.155Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T19:54:46.156Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T19:54:46.156Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T19:54:46.156Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"kwork"}}
+{"timestamp":"2026-03-25T19:54:52.208Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T19:54:52.209Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T19:54:52.563Z","action":"AGENT_RUN","result":"Платформы: Kwork"}
+{"timestamp":"2026-03-25T19:54:52.564Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T19:54:52.565Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T19:54:58.810Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T19:54:58.818Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T19:55:07.800Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T19:55:07.806Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Карточка для маркетплейсов","budget":3000,"descriptionLength":236,"descriptionPreview":"Карточка для маркетплейсов корм для аквариумных рыбок хлопья, нужно создать 2-3 "}}
+{"timestamp":"2026-03-25T19:55:07.806Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Легкий видео монтаж","budget":2500,"descriptionLength":239,"descriptionPreview":"Нужно будет разбавать динамикой (сменой кадров) + в моментах субтитры наложить П"}}
+{"timestamp":"2026-03-25T19:55:07.807Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Инфографика","budget":2500,"descriptionLength":263,"descriptionPreview":"Добрый день! нужен дизайн первого слайда товара, товар «триммер для бороды» фото"}}
+{"timestamp":"2026-03-25T19:55:07.807Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Нарисовать логотип","budget":3000,"descriptionLength":359,"descriptionPreview":"Необходимо отрисовать логотип организации: АэроИнжиниринг Это будет предприятие "}}
+{"timestamp":"2026-03-25T19:55:07.807Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Программа для оптической сортировки картофеля на YOLOv8","budget":100000,"descriptionLength":997,"descriptionPreview":"Здравствуйте. Во вложении видео работы машины по сортировке апельсинов, мы хотим"}}
+{"timestamp":"2026-03-25T19:55:07.807Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Эффективное продвижение сайта","budget":125000,"descriptionLength":440,"descriptionPreview":"Добрый день! Нужно продвижение сайта \"Платформа ВНешка\" (можно в Яндекс... Добры"}}
+{"timestamp":"2026-03-25T19:55:07.808Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Собрать базу страниц для рекламы","budget":2000,"descriptionLength":316,"descriptionPreview":"Нужно в социальных сетях собрать паблики по теме: куда пойти в москве/москва... "}}
+{"timestamp":"2026-03-25T19:55:07.808Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Улучшить дизайн сайта","budget":25000,"descriptionLength":349,"descriptionPreview":"Добрый день! Нужно улучшить дизайн нашего сайта, можете сразу посмотреть наш диз"}}
+{"timestamp":"2026-03-25T19:55:07.808Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение телеграм канала или группы","budget":80000,"descriptionLength":487,"descriptionPreview":"Добрый день! Нужно продвигать телеграмм канал или группу компании на постоянной "}}
+{"timestamp":"2026-03-25T19:55:07.809Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Продвижение в MAX","budget":15000,"descriptionLength":382,"descriptionPreview":"Приветствую! Ищу специалиста по продвижению в Макс. Нужно развивать группу и кан"}}
+{"timestamp":"2026-03-25T19:55:07.809Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Поиск заказчиков за процент","budget":1000,"descriptionLength":281,"descriptionPreview":"Приветствую. Необходимо привлечь заказчиков на услуги по заведению карточки в Ян"}}
+{"timestamp":"2026-03-25T19:55:07.809Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Первый этап проекта: концепция и прототипирование","budget":500,"descriptionLength":1595,"descriptionPreview":"На данном этапе проводится быстрое изучение сообщества с целью определить логику"}}
+{"timestamp":"2026-03-25T19:55:07.809Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T19:55:07.810Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T19:55:07.821Z","action":"MATCHER","result":"Задача: Карточка для маркетплейсов","details":{"skillMatch":0,"clarity":0.35,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T19:55:07.825Z","action":"MATCHER","result":"Задача: Легкий видео монтаж","details":{"skillMatch":0,"clarity":0.35,"budget":2500,"passes":false}}
+{"timestamp":"2026-03-25T19:55:07.826Z","action":"MATCHER","result":"Задача: Инфографика","details":{"skillMatch":0,"clarity":0.35,"budget":2500,"passes":false}}
+{"timestamp":"2026-03-25T19:55:07.826Z","action":"MATCHER","result":"Задача: Нарисовать логотип","details":{"skillMatch":0,"clarity":0.35,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T19:55:07.828Z","action":"MATCHER","result":"Задача: Программа для оптической сортировки карт","details":{"skillMatch":0,"clarity":0.4,"budget":100000,"passes":false}}
+{"timestamp":"2026-03-25T19:55:07.831Z","action":"MATCHER","result":"Задача: Эффективное продвижение сайта","details":{"skillMatch":0,"clarity":0.35,"budget":125000,"passes":false}}
+{"timestamp":"2026-03-25T19:55:07.837Z","action":"MATCHER","result":"Задача: Собрать базу страниц для рекламы","details":{"skillMatch":0,"clarity":0.35,"budget":2000,"passes":false}}
+{"timestamp":"2026-03-25T19:55:07.840Z","action":"MATCHER","result":"Задача: Улучшить дизайн сайта","details":{"skillMatch":0,"clarity":0.35,"budget":25000,"passes":false}}
+{"timestamp":"2026-03-25T19:55:07.841Z","action":"MATCHER","result":"Задача: Продвижение телеграм канала или группы","details":{"skillMatch":0,"clarity":0.35,"budget":80000,"passes":false}}
+{"timestamp":"2026-03-25T19:55:07.842Z","action":"MATCHER","result":"Задача: Продвижение в MAX","details":{"skillMatch":0,"clarity":0.35,"budget":15000,"passes":false}}
+{"timestamp":"2026-03-25T19:55:07.844Z","action":"MATCHER","result":"Задача: Поиск заказчиков за процент","details":{"skillMatch":0,"clarity":0.35,"budget":1000,"passes":false}}
+{"timestamp":"2026-03-25T19:55:07.846Z","action":"MATCHER","result":"Задача: Первый этап проекта: концепция и прототи","details":{"skillMatch":0.85,"clarity":0.4,"budget":500,"passes":true}}
+{"timestamp":"2026-03-25T19:55:07.847Z","action":"PLATFORM","result":"Подходящих задач: 1"}
+{"timestamp":"2026-03-25T19:55:07.851Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":1,"byPlatform":{"kwork":1},"byStatus":{"new":1},"averageScores":{"skillMatch":0.85,"clarity":0.4,"overall":0.72},"topJobs":[{"title":"Первый этап проекта: концепция и прототипирование","platform":"kwork","url":"https://kwork.ru/projects/3047634","budget":{"type":"fixed","amount":500,"currency":"RUB"},"skillMatchScore":0.85,"clarityScore":0.4,"overallScore":0.72}]}}
+{"timestamp":"2026-03-25T19:55:07.852Z","action":"AGENT_RUN","result":"Завершение работы"}
+{"timestamp":"2026-03-25T20:04:03.225Z","action":"AGENT_INIT","result":"Инициализация агента завершена"}
+{"timestamp":"2026-03-25T20:04:03.227Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: kwork"}
+{"timestamp":"2026-03-25T20:04:03.227Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: freelance"}
+{"timestamp":"2026-03-25T20:04:03.227Z","action":"AGENT_REGISTER","result":"Зарегистрирован адаптер: flru"}
+{"timestamp":"2026-03-25T20:04:03.228Z","action":"AGENT_RUN","result":"Запуск агента","details":{"platform":"all"}}
+{"timestamp":"2026-03-25T20:04:07.947Z","action":"BROWSER_LAUNCH","result":"Браузер успешно запущен"}
+{"timestamp":"2026-03-25T20:04:07.949Z","action":"BROWSER","result":"Браузер запущен (без авторизации)"}
+{"timestamp":"2026-03-25T20:04:08.710Z","action":"PLATFORM_UNAVAILABLE","result":"⚠️ Сайт вернул статус 403","details":{"platform":"flru"}}
+{"timestamp":"2026-03-25T20:04:08.711Z","action":"AGENT_RUN","result":"Платформы: Kwork, Freelance.ru"}
+{"timestamp":"2026-03-25T20:04:08.712Z","action":"PLATFORM","result":"Обработка платформы: kwork"}
+{"timestamp":"2026-03-25T20:04:08.712Z","action":"KWORK_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T20:04:15.357Z","action":"KWORK_NAVIGATE","result":"URL: https://kwork.ru/projects"}
+{"timestamp":"2026-03-25T20:04:15.365Z","action":"KWORK_EXTRACT","result":"Начало извлечения задач"}
+{"timestamp":"2026-03-25T20:04:24.380Z","action":"KWORK_EXTRACT","result":"Найдено карточек: 12"}
+{"timestamp":"2026-03-25T20:04:24.384Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Telegram-бот, Python (помощь), парсер Wildberries","budget":1500,"descriptionLength":496,"descriptionPreview":"Есть код телеграмм бота, задача: помочь правильно настроить парсер Wildberries, "}}
+{"timestamp":"2026-03-25T20:04:24.385Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"API входящий и исходящий для Support Center","budget":145000,"descriptionLength":986,"descriptionPreview":"Реализовать API системы тикетов на Symfony. API должно покрывать полный цикл раб"}}
+{"timestamp":"2026-03-25T20:04:24.385Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Написать красивое поздравительное письмо","budget":5000,"descriptionLength":204,"descriptionPreview":"Написать красивое поздравительное письмо на праздник юбилей бабшуки 50 лет выпол"}}
+{"timestamp":"2026-03-25T20:04:24.385Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Дизайн карточек товара маркетплейса","budget":6000,"descriptionLength":196,"descriptionPreview":"Дизайн карточек товара маркетплейса сделать качественно и красиво в фирменном ст"}}
+{"timestamp":"2026-03-25T20:04:24.385Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Написать описание красивое к карточкам товара","budget":6000,"descriptionLength":216,"descriptionPreview":"Написать описание красивое к карточкам товара выполнить эту задачу в указанный с"}}
+{"timestamp":"2026-03-25T20:04:24.385Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Карточки товара для Wildberries детские игрушки","budget":500,"descriptionLength":202,"descriptionPreview":"Нужно создать красивую карточку товара на тему детские игрушки (Мозаика) для раз"}}
+{"timestamp":"2026-03-25T20:04:24.386Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Баннеры для рекламы: 4 уникальных дизайна + ресайзы","budget":8000,"descriptionLength":1466,"descriptionPreview":"Объём: 4 уникальных дизайна → каждый адаптировать под 6 текстовых вариантов (мен"}}
+{"timestamp":"2026-03-25T20:04:24.386Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Разработка чертежей мебели","budget":4000,"descriptionLength":376,"descriptionPreview":"Нужно разработать чертежи рабочего стола из фанеры для резки на ЧПУ. Есть рефере"}}
+{"timestamp":"2026-03-25T20:04:24.386Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Перепечатать текст с картинок","budget":7000,"descriptionLength":100,"descriptionPreview":"Перепечатать текст с картинок нужен человек который выполнить эту задачу точно в"}}
+{"timestamp":"2026-03-25T20:04:24.386Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Карточка для маркетплейсов","budget":3000,"descriptionLength":236,"descriptionPreview":"Карточка для маркетплейсов корм для аквариумных рыбок хлопья, нужно создать 2-3 "}}
+{"timestamp":"2026-03-25T20:04:24.387Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Легкий видео монтаж","budget":2500,"descriptionLength":239,"descriptionPreview":"Нужно будет разбавать динамикой (сменой кадров) + в моментах субтитры наложить П"}}
+{"timestamp":"2026-03-25T20:04:24.387Z","action":"KWORK_EXTRACT","result":"Извлечена задача","details":{"title":"Инфографика","budget":2500,"descriptionLength":263,"descriptionPreview":"Добрый день! нужен дизайн первого слайда товара, товар «триммер для бороды» фото"}}
+{"timestamp":"2026-03-25T20:04:24.387Z","action":"KWORK_EXTRACT","result":"Извлечено 12 задач"}
+{"timestamp":"2026-03-25T20:04:24.388Z","action":"PLATFORM","result":"Извлечено 12 задач с kwork"}
+{"timestamp":"2026-03-25T20:04:24.401Z","action":"MATCHER","result":"Задача: Telegram-бот, Python (помощь), парсер Wi","details":{"skillMatch":0.6,"clarity":0.5,"budget":1500,"passes":true}}
+{"timestamp":"2026-03-25T20:04:24.404Z","action":"MATCHER","result":"Задача: API входящий и исходящий для Support Cen","details":{"skillMatch":0.8,"clarity":0.55,"budget":145000,"passes":true}}
+{"timestamp":"2026-03-25T20:04:24.405Z","action":"MATCHER","result":"Задача: Написать красивое поздравительное письмо","details":{"skillMatch":0,"clarity":0.35,"budget":5000,"passes":false}}
+{"timestamp":"2026-03-25T20:04:24.406Z","action":"MATCHER","result":"Задача: Дизайн карточек товара маркетплейса","details":{"skillMatch":0,"clarity":0.3,"budget":6000,"passes":false}}
+{"timestamp":"2026-03-25T20:04:24.408Z","action":"MATCHER","result":"Задача: Написать описание красивое к карточкам т","details":{"skillMatch":0,"clarity":0.35,"budget":6000,"passes":false}}
+{"timestamp":"2026-03-25T20:04:24.408Z","action":"MATCHER","result":"Задача: Карточки товара для Wildberries детские ","details":{"skillMatch":0,"clarity":0.35,"budget":500,"passes":false}}
+{"timestamp":"2026-03-25T20:04:24.410Z","action":"MATCHER","result":"Задача: Баннеры для рекламы: 4 уникальных дизайн","details":{"skillMatch":0,"clarity":0.55,"budget":8000,"passes":false}}
+{"timestamp":"2026-03-25T20:04:24.411Z","action":"MATCHER","result":"Задача: Разработка чертежей мебели","details":{"skillMatch":0,"clarity":0.35,"budget":4000,"passes":false}}
+{"timestamp":"2026-03-25T20:04:24.412Z","action":"MATCHER","result":"Задача: Перепечатать текст с картинок","details":{"skillMatch":0,"clarity":0.3,"budget":7000,"passes":false}}
+{"timestamp":"2026-03-25T20:04:24.413Z","action":"MATCHER","result":"Задача: Карточка для маркетплейсов","details":{"skillMatch":0,"clarity":0.35,"budget":3000,"passes":false}}
+{"timestamp":"2026-03-25T20:04:24.413Z","action":"MATCHER","result":"Задача: Легкий видео монтаж","details":{"skillMatch":0,"clarity":0.35,"budget":2500,"passes":false}}
+{"timestamp":"2026-03-25T20:04:24.414Z","action":"MATCHER","result":"Задача: Инфографика","details":{"skillMatch":0,"clarity":0.35,"budget":2500,"passes":false}}
+{"timestamp":"2026-03-25T20:04:24.415Z","action":"PLATFORM","result":"Подходящих задач: 2"}
+{"timestamp":"2026-03-25T20:04:24.415Z","action":"PLATFORM","result":"Обработка платформы: freelance"}
+{"timestamp":"2026-03-25T20:04:24.416Z","action":"FREELANCE_NAVIGATE","result":"Переход к поиску задач"}
+{"timestamp":"2026-03-25T20:04:54.455Z","action":"BROWSER_NAVIGATION","result":"ERROR: page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://freelance.ru/projects/\", waiting until \"networkidle\"\u001b[22m\n","details":{"stack":"page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://freelance.ru/projects/\", waiting until \"networkidle\"\u001b[22m\n\n    at BrowserService.goto (/Users/igorvasin/freelance-2026/freelance-agent/src/services/browser.ts:91:23)\n    at FreelanceAdapter.navigateToJobs (/Users/igorvasin/freelance-2026/freelance-agent/src/adapters/freelance.ts:43:39)\n    at FreelanceAgent.processPlatform (/Users/igorvasin/freelance-2026/freelance-agent/src/index.ts:192:40)\n    at FreelanceAgent.run (/Users/igorvasin/freelance-2026/freelance-agent/src/index.ts:156:39)\n    at async main (/Users/igorvasin/freelance-2026/freelance-agent/src/index.ts:436:5)","url":"https://freelance.ru/projects/","errorCode":"UNKNOWN"}}
+{"timestamp":"2026-03-25T20:04:54.460Z","action":"FREELANCE_NAVIGATE","result":"ERROR: page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://freelance.ru/projects/\", waiting until \"networkidle\"\u001b[22m\n","details":{"stack":"Error: page.goto: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://freelance.ru/projects/\", waiting until \"networkidle\"\u001b[22m\n\n    at FreelanceAdapter.navigateToJobs (/Users/igorvasin/freelance-2026/freelance-agent/src/adapters/freelance.ts:46:47)\n    at async FreelanceAgent.processPlatform (/Users/igorvasin/freelance-2026/freelance-agent/src/index.ts:192:26)\n    at async FreelanceAgent.run (/Users/igorvasin/freelance-2026/freelance-agent/src/index.ts:156:28)\n    at async main (/Users/igorvasin/freelance-2026/freelance-agent/src/index.ts:436:5)"}}
+{"timestamp":"2026-03-25T20:04:54.460Z","action":"PLATFORM","result":"Не удалось перейти к задачам: freelance"}
+{"timestamp":"2026-03-25T20:04:54.463Z","action":"REPORT","result":"Отчёт сгенерирован","details":{"date":"2026-03-25","totalJobs":2,"byPlatform":{"kwork":2},"byStatus":{"new":2},"averageScores":{"skillMatch":0.7,"clarity":0.53,"overall":0.65},"topJobs":[{"title":"API входящий и исходящий для Support Center","platform":"kwork","url":"https://kwork.ru/projects/3132590","budget":{"type":"fixed","amount":145000,"currency":"RUB"},"skillMatchScore":0.8,"clarityScore":0.55,"overallScore":0.73},{"title":"Telegram-бот, Python (помощь), парсер Wildberries","platform":"kwork","url":"https://kwork.ru/projects/3132592","budget":{"type":"fixed","amount":1500,"currency":"RUB"},"skillMatchScore":0.6,"clarityScore":0.5,"overallScore":0.57}]}}
+{"timestamp":"2026-03-25T20:04:54.463Z","action":"AGENT_RUN","result":"Завершение работы"}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<<htmlhtml lang="ru">
+  <<headhead>
+    <<metameta charset="UTF-8" />
+    <<metameta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <<titletitle>AI BUREAU | Архитектура Интеллекта</title>
+    <<metameta name="description" content="AI BUREAU — Первое агентство по внедрению ИИ-агентов и автоматизации бизнеса мирового уровня." />
+    
+    <!-- Schema.org JSON-LD for Organization -->
+    <<scriptscript type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "AI Bureau",
+      "url": "https://ai-bureau.pro",
+      "logo": "https://ai-bureau.pro/logo.png",
+      "description": "Специализированное инженерное бюро по проектированию автономных интеллектуальных систем и RAG-инфраструктур.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "RU"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": "architect@ai-bureau.pro"
+      }
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD for Service (General Example) -->
+    <<scriptscript type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "serviceType": "AI Automation and Agent Development",
+      "provider": {
+        "@type": "Organization",
+        "name": "AI Bureau"
+      },
+      "areaServed": "Worldwide",
+      "description": "Разработка автономных AI-агентов, RAG-систем и внедрение локальных LLM."
+    }
+    </script>
+
+    <<linklink rel="preconnect" href="https://fonts.googleapis.com">
+    <<linklink rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <<linklink href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <<divdiv id="root"></div>
+    <<scriptscript type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

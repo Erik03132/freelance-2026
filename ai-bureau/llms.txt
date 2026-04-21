@@ -1,0 +1,19 @@
+# AI Bureau
+
+AI Bureau is a specialized engineering agency focused on designing and deploying autonomous intelligent systems, RAG-based knowledge infrastructures, and custom AI agent ecosystems for business automation.
+
+## Core Expertise
+- **Autonomous AI Agents**: Development of reasoning-capable agents for CRM/ERP integration.
+- **Neural Knowledge Bases**: Enterprise-grade RAG (Retrieval-Augmented Generation) systems.
+- **Private Model Ops**: Local deployment of LLMs (Gemma, Llama) within secure perimeters.
+- **AIO (AI Optimization)**: Enhancing web presence for Generative Engine Optimization (GEO).
+
+## Services
+- AI Audit & Strategy
+- Custom LLM Integration
+- Automated Lead Generation Systems
+- Private AI Infrastructure Deployment
+
+## Contact
+Email: architect@ai-bureau.pro
+Website: https://ai-bureau.pro

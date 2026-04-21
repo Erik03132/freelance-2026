@@ -1,0 +1,49 @@
+{
+  "name": "freelance-agent",
+  "version": "1.0.0",
+  "description": "Автономный агент для поиска задач на фриланс-биржах и подготовки опережающих решений",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node --transpile-only src/index.ts",
+    "dev:kwork": "ts-node --transpile-only src/index.ts --platform=kwork",
+    "dev:freelance": "ts-node --transpile-only src/index.ts --platform=freelance",
+    "auth:kwork": "ts-node --transpile-only src/manual-auth.ts",
+    "sherlock-start": "ts-node src/scripts/boot-agent.ts sherlock",
+    "rembrandt-start": "ts-node src/scripts/boot-agent.ts rembrandt",
+    "artemy-start": "ts-node src/scripts/boot-agent.ts artemy",
+    "agents-start": "npx ts-node src/bootloader.ts",
+    "test:ollama": "ts-node src/test-ollama.ts",
+    "wiki:compile": "ts-node src/scripts/compile-wiki.ts",
+    "offline": "bash scripts/offline.sh",
+    "online": "bash scripts/online.sh"
+  },
+  "keywords": [
+    "freelance",
+    "scraper",
+    "agent",
+    "automation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/genai": "^1.50.1",
+    "@google/generative-ai": "^0.24.1",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "axios": "^1.15.1",
+    "better-sqlite3": "^12.8.0",
+    "cheerio": "^1.0.0",
+    "dotenv": "^17.4.2",
+    "mem0ai": "^3.0.1",
+    "playwright": "^1.58.2",
+    "telegram": "^2.26.22"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/node": "^25.5.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}

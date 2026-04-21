@@ -1,0 +1,43 @@
+{
+  "date": "2026-03-25",
+  "totalJobs": 2,
+  "byPlatform": {
+    "kwork": 2
+  },
+  "byStatus": {
+    "new": 2
+  },
+  "averageScores": {
+    "skillMatch": 0.7,
+    "clarity": 0.53,
+    "overall": 0.65
+  },
+  "topJobs": [
+    {
+      "title": "API входящий и исходящий для Support Center",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3132590",
+      "budget": {
+        "type": "fixed",
+        "amount": 145000,
+        "currency": "RUB"
+      },
+      "skillMatchScore": 0.8,
+      "clarityScore": 0.55,
+      "overallScore": 0.73
+    },
+    {
+      "title": "Telegram-бот, Python (помощь), парсер Wildberries",
+      "platform": "kwork",
+      "url": "https://kwork.ru/projects/3132592",
+      "budget": {
+        "type": "fixed",
+        "amount": 1500,
+        "currency": "RUB"
+      },
+      "skillMatchScore": 0.6,
+      "clarityScore": 0.5,
+      "overallScore": 0.57
+    }
+  ]
+}
