@@ -1,0 +1,221 @@
+{
+  "version": "2.0.0",
+  "updated": "2026-04-30",
+  "description": "Реестр всех установленных скиллов Antigravity. Обновлять после каждой интеграции по протоколу SKILL_EVOLUTION_PROTOCOL.md",
+
+  "global_skills": {
+    "description": "Фундаментальные скиллы — универсальные для всех агентов",
+    "location": "~/.gemini/antigravity/skills/",
+    "skills": [
+      {
+        "name": "igorek-core",
+        "description": "Оркестратор — координация агентов, ADR, архитектура",
+        "file": "igorek-core/SKILL.md",
+        "last_updated": "2026-04-30",
+        "ecc_sections": [
+          "common-agents (параллельное выполнение)",
+          "common-performance (model routing)",
+          "common-development-workflow (Plan→TDD→Review→Commit)",
+          "common-hooks (PreToolUse/PostToolUse/Stop)"
+        ]
+      },
+      {
+        "name": "kulibin-engineer",
+        "description": "Инженер-оптимизатор — Tech Radar, RAG, деплой, безопасность",
+        "file": "kulibin-engineer/SKILL.md",
+        "last_updated": "2026-04-30",
+        "ecc_sections": [
+          "common-coding-style (иммутабельность, quality checklist)",
+          "common-patterns (Repository, DTO, Hooks)",
+          "common-git-workflow (Conventional Commits, PR process)",
+          "deployment-patterns",
+          "security-review",
+          "cost-aware-llm-pipeline",
+          "search-first"
+        ]
+      },
+      {
+        "name": "marketer-strategist",
+        "description": "CMO — SEO/GEO/AEO стратегия, дашборд, постановка ТЗ",
+        "file": "marketer-strategist/SKILL.md",
+        "last_updated": "2026-04-30",
+        "ecc_sections": [
+          "cmo-framework (из prompts/library/marketer.md)",
+          "technical-seo",
+          "dashboard-builder"
+        ]
+      },
+      {
+        "name": "rembrandt-designer",
+        "description": "Дизайнер — UI/UX, дизайн-системы, 3D WebGL",
+        "file": "rembrandt-designer/SKILL.md",
+        "last_updated": "2026-04-30",
+        "ecc_sections": [
+          "design-system-workflow (Google Labs format)",
+          "svg-to-3d-webgl (из REMBRANDT_3D_SKILL.md)"
+        ]
+      },
+      {
+        "name": "shakespeare-editor",
+        "description": "Редактор — E-E-A-T контент, GEO-ready тексты, антидетект",
+        "file": "shakespeare-editor/SKILL.md",
+        "last_updated": "2026-04-22",
+        "ecc_sections": [
+          "content-engine",
+          "brand-voice",
+          "article-writing",
+          "human-first-writing"
+        ]
+      },
+      {
+        "name": "artemiy-frontend",
+        "description": "Фронтенд — Astro, React, Vanilla CSS, CWV",
+        "file": "artemiy-frontend/SKILL.md",
+        "last_updated": "2026-04-22",
+        "ecc_sections": [
+          "frontend-patterns (component, hooks, perf, a11y)"
+        ]
+      },
+      {
+        "name": "sherl-research",
+        "description": "Разведчик — GEO/Market Intelligence, Perplexity, мониторинг",
+        "file": "sherl-research/SKILL.md",
+        "last_updated": "2026-04-22",
+        "ecc_sections": []
+      },
+      {
+        "name": "botman-creator",
+        "description": "Ботмэн — Telegram боты, чат-агенты, интеграции CRM",
+        "file": "botman-creator/SKILL.md",
+        "last_updated": "2026-04-22",
+        "ecc_sections": []
+      }
+    ]
+  },
+
+  "project_skills": {
+    "description": "Проектные скиллы — специализированные знания для конкретных проектов",
+    "location": "freelance-agent/.agent/skills/",
+    "skills": [
+      {
+        "name": "bitrix-integration",
+        "description": "Интеграция AI-агентов с Bitrix24 CRM",
+        "file": "bitrix-integration/SKILL.md",
+        "created": "2026-04-30",
+        "source": "templates/ai-agent-implementation/BITRIX_AGENT_CHECKLIST.md",
+        "projects": ["ai-eggs"],
+        "status": "active"
+      },
+      {
+        "name": "svo-veteran-support",
+        "description": "Поддержка ветеранов СВО — гранты, психология, SEO-контент",
+        "file": "svo-veteran-support/SKILL.md",
+        "created": "2026-04-30",
+        "source": "svo-start/skills/ (veteran-grant-writer + adaptation-psychologist + seo-veteran-content)",
+        "projects": ["svo-start"],
+        "status": "active"
+      },
+      {
+        "name": "react-patterns",
+        "description": "React компоненты и паттерны",
+        "file": "react-patterns/SKILL.md",
+        "created": "2026-04-22",
+        "projects": ["all-frontend"],
+        "status": "active"
+      },
+      {
+        "name": "telegram-bot-patterns",
+        "description": "Паттерны разработки Telegram ботов",
+        "file": "telegram-bot-patterns/SKILL.md",
+        "created": "2026-04-22",
+        "projects": ["ai-eggs", "ai-grant-consalt"],
+        "status": "active"
+      },
+      {
+        "name": "deployment-procedures",
+        "description": "Процедуры деплоя на Timeweb VDS",
+        "file": "deployment-procedures/SKILL.md",
+        "created": "2026-04-22",
+        "projects": ["all"],
+        "status": "active"
+      },
+      {
+        "name": "geo-fundamentals",
+        "description": "GEO/AEO основы для продвижения",
+        "file": "geo-fundamentals/SKILL.md",
+        "created": "2026-04-22",
+        "projects": ["ai-eggs", "ai-grant-consalt"],
+        "status": "active"
+      },
+      {
+        "name": "brand-voice",
+        "description": "Голос бренда для контента",
+        "file": "brand-voice/SKILL.md",
+        "created": "2026-04-22",
+        "projects": ["all"],
+        "status": "active"
+      },
+      {
+        "name": "meta-skill-factory",
+        "description": "Фабрика создания новых скиллов",
+        "file": "meta-skill-factory/SKILL.md",
+        "created": "2026-04-22",
+        "projects": ["all"],
+        "status": "active"
+      },
+      {
+        "name": "task-analysis",
+        "description": "Анализ задач и декомпозиция",
+        "file": "task-analysis/SKILL.md",
+        "created": "2026-04-22",
+        "projects": ["all"],
+        "status": "active"
+      },
+      {
+        "name": "rembrandt-stitch-design",
+        "description": "Stitch/Google Labs дизайн",
+        "file": "rembrandt-stitch-design/SKILL.md",
+        "created": "2026-04-22",
+        "projects": ["all"],
+        "status": "active"
+      }
+    ]
+  },
+
+  "global_standards": {
+    "description": "Глобальные стандарты применяемые ко всем агентам",
+    "files": [
+      {
+        "name": "SECURITY_STANDARDS",
+        "file": "~/.gemini/antigravity/SECURITY_STANDARDS.md",
+        "created": "2026-04-30",
+        "source": ".ecc-library/.cursor/rules/common-security.md",
+        "applies_to": ["all agents", "all projects"]
+      }
+    ]
+  },
+
+  "pending_integration": {
+    "description": "Скиллы запланированные к интеграции",
+    "items": [
+      {
+        "name": "botman-creator ECC enrichment",
+        "priority": "P3",
+        "source": ".ecc-library/common-* (webhook patterns, bot security)",
+        "target": "botman-creator/SKILL.md"
+      },
+      {
+        "name": "sherl-research perplexity patterns",
+        "priority": "P3",
+        "source": ".ecc-library/ + perplexity API best practices",
+        "target": "sherl-research/SKILL.md"
+      },
+      {
+        "name": "common-testing integration",
+        "priority": "P2",
+        "source": ".ecc-library/common-testing.md (TDD, 80% coverage)",
+        "target": "kulibin-engineer/SKILL.md"
+      }
+    ]
+  }
+}
