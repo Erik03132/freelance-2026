@@ -1,0 +1,37 @@
+#!/usr/bin/expect -f
+set timeout 15
+set passwords [list "fN-mUzVuWt_7F3" "zE4qDJb-+Y+rv+"]
+set user "root"
+set ip "185.39.206.145"
+
+foreach password $passwords {
+    puts "Trying password: $password"
+    spawn ssh -o StrictHostKeyChecking=no $user@$ip "pm2 status"
+    expect {
+        "*password:*" { 
+            send "$password\r"
+            expect {
+                "┌────" { 
+                    puts "Login successful!"
+                    interact
+                    exit 0
+                }
+                "Permission denied" {
+                    puts "Password failed."
+                }
+                timeout {
+                    puts "Timeout after password."
+                }
+            }
+        }
+        "┌────" {
+            puts "Login successful (key used)!"
+            interact
+            exit 0
+        }
+        timeout {
+            puts "Initial timeout."
+        }
+    }
+}
+exit 1

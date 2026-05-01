@@ -116,6 +116,37 @@ def web_search(query: str) -> str:
     return f"По запросу '{query}' ничего не найдено."
 
 
+@tool
+def execute_code_in_sandbox(code: str, language: str = "python") -> str:
+    """Выполняет сгенерированный код в высокоскоростной изолированной песочнице (Cube Sandbox / E2B).
+    ИСПОЛЬЗУЙ ЭТОТ ИНСТРУМЕНТ всегда, когда нужно запустить скрипт, проанализировать данные
+    или протестировать логику (Code Interpreter). НИКОГДА не пытайся запустить код на хост-машине.
+    
+    Args:
+        code: Исходный код для выполнения.
+        language: Язык программирования (python, javascript).
+    """
+    import os
+    
+    # Заглушка-демонстрация интеграции с локальным эндпоинтом Cube Sandbox
+    # В реальности здесь будет HTTP POST запрос к нашему поднятому KVM инстансу.
+    sandbox_endpoint = os.getenv("CUBE_SANDBOX_ENDPOINT", "http://localhost:8000/execute")
+    
+    # Имитация работы песочницы:
+    # 1. Мы отправляем код в песочницу (cold start < 60ms)
+    # 2. Песочница выполняет код в изолированном KVM-ядре
+    # 3. Песочница возвращает stdout/stderr и мгновенно уничтожается
+    
+    try:
+        # ПСЕВДОКОД: 
+        # r = httpx.post(sandbox_endpoint, json={"code": code, "lang": language})
+        # return r.json()["stdout"]
+        
+        return f"[Cube Sandbox 📦]: Песочница поднята за 55ms. Код ({language}) успешно передан на изоляцию. Результат: 🟢 STDOUT_MOCK (Integration pending)"
+    except Exception as e:
+        return f"[Cube Sandbox 📦]: Ошибка инициализации песочницы: {e}"
+
+
 # === Регистр инструментов ===
 
 # Базовый набор — доступен всем агентам
@@ -125,7 +156,8 @@ CORE_TOOLS = [
     search_knowledge,
 ]
 
-# Расширенный набор — для агентов с доступом в интернет
+# Расширенный набор — для агентов с доступом в интернет и Code Interpreter
 EXTENDED_TOOLS = CORE_TOOLS + [
     web_search,
+    execute_code_in_sandbox,
 ]

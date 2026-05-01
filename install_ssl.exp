@@ -1,0 +1,6 @@
+#!/usr/bin/expect -f
+set timeout -1
+spawn ssh -o StrictHostKeyChecking=no root@185.39.206.145 "certbot --nginx -d vezemcip.ru -d www.vezemcip.ru --non-interactive --agree-tos -m erik03132@gmail.com --redirect"
+expect "assword:"
+send "fN-mUzVuWt_7F3\r"
+expect eof

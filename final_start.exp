@@ -1,0 +1,18 @@
+#!/usr/bin/expect -f
+set timeout 60
+set password "zE4qDJb-+Y+rv+"
+set ip "72.56.38.19"
+
+# 1. Update config on server
+spawn scp -o StrictHostKeyChecking=no /Users/igorvasin/freelance-2026/ecosystem.config.cjs root@$ip:/root/antigravity/ecosystem.config.cjs
+expect {
+    "*password:*" { send "$password\r" }
+}
+expect eof
+
+# 2. Restart and save
+spawn ssh -o StrictHostKeyChecking=no root@$ip "pm2 stop all; pm2 delete all; pm2 start /root/antigravity/ecosystem.config.cjs; pm2 save"
+expect {
+    "*password:*" { send "$password\r" }
+}
+expect eof

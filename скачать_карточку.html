@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Скачать карточку ГИДРОГЕОИНЖИНИРИНГ</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Inter', Arial, sans-serif;
+      gap: 32px;
+      padding: 40px;
+    }
+    h1 { color: #fff; font-size: 1.2rem; opacity: 0.6; text-align: center; }
+    canvas { display: none; }
+    img {
+      max-width: 800px;
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .btn {
+      background: linear-gradient(135deg, #c0392b, #8e1b10);
+      color: white;
+      border: none;
+      padding: 18px 56px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      transition: all 0.3s;
+      box-shadow: 0 8px 24px rgba(192,57,43,0.4);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(192,57,43,0.55); }
+    .info { color: rgba(255,255,255,0.35); font-size: 0.82rem; }
+  </style>
+</head>
+<body>
+  <h1>ООО «ГИДРОГЕОИНЖИНИРИНГ» — корпоративная карточка</h1>
+  <canvas id="c"></canvas>
+  <img id="preview" alt="Карточка"/>
+  <button class="btn" onclick="download()">⬇️ Скачать PNG (1184×864)</button>
+  <p class="info">Файл сохранится в папку Загрузки</p>
+
+  <script>
+    const c = document.getElementById('c');
+    const ctx = c.getContext('2d');
+    const W = 1184, H = 864;
+    c.width = W; c.height = H;
+
+    // Фон: глубокий вишнёвый градиент
+    const bg = ctx.createRadialGradient(W*0.3, H*0.25, 0, W*0.5, H*0.5, W*0.85);
+    bg.addColorStop(0, '#8B1A1A');
+    bg.addColorStop(0.45, '#6B0F0F');
+    bg.addColorStop(1, '#3A0000');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Светлое пятно в центре (как в оригинале)
+    const center = ctx.createRadialGradient(W*0.5, H*0.4, 0, W*0.5, H*0.4, W*0.45);
+    center.addColorStop(0, 'rgba(180,60,60,0.35)');
+    center.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = center;
+    ctx.fillRect(0, 0, W, H);
+
+    // Волны/вихри
+    function drawWaves(x0, y0, dx, dy, count, alpha) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,' + alpha + ')';
+      ctx.lineWidth = 0.9;
+      for (let i = 0; i < count; i++) {
+        const o = i * 8;
+        ctx.beginPath();
+        ctx.moveTo(x0 + o*dx, y0 + o*dy);
+        ctx.bezierCurveTo(
+          x0 + o*dx + W*0.25, y0 + o*dy + H*0.15,
+          x0 + o*dx + W*0.05, y0 + o*dy + H*0.45,
+          x0 + o*dx + W*0.35, y0 + o*dy + H*0.7
+        );
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+    drawWaves(-80, -40, 0.6, 0.3, 16, 0.18);
+    drawWaves(W*0.55, H*0.5, 0.5, 0.2, 10, 0.12);
+
+    // Тёмная треугольная полоска внизу справа (как в оригинале)
+    ctx.save();
+    ctx.fillStyle = 'rgba(80,0,0,0.5)';
+    ctx.beginPath();
+    ctx.moveTo(W*0.6, H); ctx.lineTo(W, H*0.6); ctx.lineTo(W, H);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    // Текст
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#F5EEE8';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 10;
+
+    ctx.font = '500 68px "Segoe UI", "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText('ООО', W / 2, H / 2 - 30);
+
+    ctx.font = 'bold 82px "Segoe UI", "Helvetica Neue", Arial, sans-serif';
+    ctx.fillText('«ГИДРОГЕОИНЖИНИРИНГ»', W / 2, H / 2 + 80);
+
+    document.getElementById('preview').src = c.toDataURL('image/png');
+
+    function download() {
+      const a = document.createElement('a');
+      a.download = 'ГИДРОГЕОИНЖИНИРИНГ_1184x864.png';
+      a.href = c.toDataURL('image/png');
+      a.click();
+    }
+  </script>
+</body>
+</html>

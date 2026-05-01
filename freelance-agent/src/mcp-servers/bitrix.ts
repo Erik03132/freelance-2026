@@ -59,14 +59,16 @@ class BitrixMcpServer {
         },
         {
           name: "create_lead",
-          description: "Создать новый лид(Lead) в Битрикс24",
+          description: "Создать новый лид(Lead) или сделку в Битрикс24",
           inputSchema: {
             type: "object",
             properties: {
               title: { type: "string", description: "Название лида" },
               name: { type: "string", description: "Имя клиента" },
               phone: { type: "string", description: "Номер телефона" },
-              comments: { type: "string", description: "Комментарии/Детали заявки" }
+              comments: { type: "string", description: "Комментарии/Детали заявки" },
+              opportunity: { type: "number", description: "Сумма (стоимость) в рублях" },
+              assigned_by_id: { type: "number", description: "ID ответственного сотрудника. Используй 15 для Анжелы в песочнице, 1 для себя или Игоря." }
             },
             required: ["title"]
           }
@@ -108,10 +110,15 @@ class BitrixMcpServer {
           TITLE: args?.title,
           NAME: args?.name || "",
           SOURCE_ID: "AI_AGENT",
-          COMMENTS: args?.comments || ""
+          COMMENTS: args?.comments || "",
+          ASSIGNED_BY_ID: args?.assigned_by_id || undefined
         };
         if (args?.phone) {
           fields["PHONE"] = [{ VALUE: args.phone, VALUE_TYPE: "WORK" }];
+        }
+        if (args?.opportunity) {
+          fields["OPPORTUNITY"] = args.opportunity;
+          fields["CURRENCY_ID"] = "RUB";
         }
         
         const data = await this.callBitrix("crm.lead.add", { FIELDS: fields });

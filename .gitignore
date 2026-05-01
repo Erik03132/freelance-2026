@@ -73,3 +73,6 @@ collected_envs/
 antigravity_backup_*.tar.gz
 backup_extracted/
 tmp_restore/
+.ssh_agent_key
+.ssh_agent_key.pub
+.credentials_vezemcip.md

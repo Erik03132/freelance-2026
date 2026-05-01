@@ -1,0 +1,12 @@
+#!/usr/bin/expect -f
+set timeout 30
+set password "zE4qDJb-+Y+rv+"
+set ip "72.56.38.19"
+
+spawn ssh -o StrictHostKeyChecking=no root@$ip "pm2 status && pm2 logs --lines 100 --nostream"
+expect {
+    "*password:*" {
+        send "$password\r"
+    }
+}
+expect eof

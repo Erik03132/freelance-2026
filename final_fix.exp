@@ -1,0 +1,24 @@
+#!/usr/bin/expect -f
+set timeout 300
+set password "zE4qDJb-+Y+rv+"
+set ip "72.56.38.19"
+
+spawn ssh -o StrictHostKeyChecking=no root@$ip "
+    echo '--- STOPPING AND CLEANING ---'
+    pm2 stop all; 
+    pm2 delete all; 
+    pkill -9 -f python; 
+    rm -f /root/antigravity/ai-eggs/agent/logs/bot.lock;
+    rm -f /root/antigravity/ai-senat/agent/logs/bot.lock;
+
+    echo '--- FIXING VENV (AI-SENAT) ---'
+    cd /root/antigravity/ai-senat && rm -rf venv && python3 -m venv venv && ./venv/bin/pip install -q requirements.txt;
+
+    echo '--- RESTARTING BOTS ---'
+    pm2 start /root/antigravity/ecosystem.config.cjs;
+    pm2 save;
+"
+expect {
+    "*password:*" { send "$password\r" }
+}
+expect eof
