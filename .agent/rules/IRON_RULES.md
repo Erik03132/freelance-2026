@@ -77,7 +77,39 @@
 
 ---
 
-## 6. 🧠 BOOT SEQUENCE
+## 6. 🔍 SEARCH-FIRST PROTOCOL (обязательный каскад решений)
+
+**ПЕРЕД тем как писать код или решать техническую проблему — ОБЯЗАТЕЛЬНЫЙ каскад:**
+
+```
+┌──────────────────────────────────────────────┐
+│  1️⃣  СВОИ СКИЛЛЫ                             │
+│     grep/find по skills/ и knowledge/        │
+│     Если решение найдено → ИСПОЛЬЗОВАТЬ      │
+│                                              │
+│  2️⃣  GITHUB                                  │
+│     Поиск рабочих библиотек и примеров       │
+│     Если нашёл → адаптировать                │
+│                                              │
+│  3️⃣  СВОЯ ГОЛОВА                             │
+│     Только если 1️⃣ и 2️⃣ не дали результата   │
+│     Писать собственное решение               │
+└──────────────────────────────────────────────┘
+```
+
+### Где искать скиллы:
+| Тип | Путь |
+|-----|------|
+| Глобальные | `/Users/igorvasin/.gemini/antigravity/skills/*/SKILL.md` |
+| Проектные | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/*/SKILL.md` |
+| Knowledge Items | `/Users/igorvasin/.gemini/antigravity/knowledge/*/` |
+| Brain (артефакты прошлых сессий) | `/Users/igorvasin/.gemini/antigravity/brain/*/artifacts/` |
+
+> **НАРУШЕНИЕ:** агент тратит 20+ минут на изобретение решения, которое УЖЕ есть в скиллах — это **ГРУБАЯ ОШИБКА**.
+
+---
+
+## 7. 🧠 BOOT SEQUENCE
 
 При старте сессии по команде `boot` / `старт` / `инициализация`:
 1. Прочитать **этот файл** (IRON_RULES.md)
@@ -89,7 +121,7 @@
 
 ---
 
-## 7. 🛡️ AGENT READINESS — ПОЛНАЯ КАРТА АГЕНТОВ
+## 8. 🛡️ AGENT READINESS — ПОЛНАЯ КАРТА АГЕНТОВ
 
 **ОБЯЗАТЕЛЬНО при каждом буте.** Проверить `view_file` на каждый путь из колонки «Global SKILL.md».
 Если файл не найден → агент `❌ MISSING` → сессия **НЕ Safe**.
@@ -119,6 +151,8 @@
 | 5 | react-patterns | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/react-patterns/SKILL.md` | React-паттерны |
 | 6 | telegram-bot-patterns | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/telegram-bot-patterns/SKILL.md` | Telegram-боты |
 | 7 | svo-veteran-support | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/svo-veteran-support/SKILL.md` | Гранты для ветеранов |
+| 8 | **vk-integration** | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/vk-integration/SKILL.md` | VK API, постинг, фото, токены |
+| 9 | **ok-social** | `/Users/igorvasin/.gemini/antigravity/skills/ok-social/SKILL.md` | OK.ru API, автопостинг |
 
 ### 7.3. Реестр скиллов
 

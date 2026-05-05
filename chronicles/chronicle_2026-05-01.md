@@ -32,3 +32,6 @@
 - **19:36** — 16:59 — Stitch create_project запущен и завис до 19:34 (отменён юзером)
 - **19:39** — 🔥 КРИТИЧНЫЙ ФИХ: project_report.py переписан — ХАРДКОД-ЗАГЛУШКА заменена на живые данные (4 источника: Песочница, хроника, VK-контент, ACTIVE_TASKS). Создано правило .agent/rules/two-angelas-map.md — ЕДИНАЯ КАРТА двух Анжел (Заботкина=CRM 20:00 / Птенчикова=Проект 20:05)
 - **19:57** — 🛰️ FINISH-DAY: chp.md перезаписан, checkpoint_20260501_1955 создан, report-day сохранён, бэкап 87KB создан, 44 __pycache__ почищены. VPS: daily_report.py + project_report.py задеплоены, PM2 перезапущен. Сессия завершена.
+- **20:39** — 🔬 Исследован Graphify (graphify.dev) — инструмент для создания knowledge graph из кодовой базы, интеграция с Antigravity. Экономия токенов 10x. Добавлен в задачи на завтра.
+- **20:58** — 🧠 GRAPHIFY УСТАНОВЛЕН! 932 ноды, 1356 связей, 88 сообществ, 0 токенов. God-ноды: MemoryGraph(29), VectorMemory, Avitolog. Команды: graphify query/path/explain. HTML-граф: ai-eggs/graphify-out/graph.html. Правило: .agents/rules/graphify.md
+- **20:59** — 📋 ИТОГ ДНЯ 01.05.2026: VK контент (20 постов), project_report.py переписан (живые данные), daily_report.py пометка про звонки, Document Governance, Хроника дня, Карта двух Анжел, чистка 134 файлов, Graphify установлен (932 ноды). P0 завтра: починить отчёты раз и навсегда. 🛰️ Конец сессии.
