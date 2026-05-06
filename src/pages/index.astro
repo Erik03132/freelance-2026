@@ -1,0 +1,382 @@
+---
+const title = "Antigravity — Контент-план продвижения";
+---
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <link rel="stylesheet" href="/src/styles/dashboard.css" />
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">⚡</div>
+    <span>Antigravity</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Контент</div>
+    <a class="nav-item active" data-page="plan" onclick="showPage('plan')">
+      <span class="nav-icon">📋</span> Контент-план
+      <span class="nav-badge" id="nav-badge-queued">0</span>
+    </a>
+    <a class="nav-item" data-page="groups" onclick="showPage('groups')">
+      <span class="nav-icon">📢</span> Группы и каналы
+    </a>
+
+    <div class="nav-section-title">Платформы</div>
+    <a class="nav-item" onclick="filterPlatform('all')"><span class="nav-icon">🌐</span> Все</a>
+    <a class="nav-item" onclick="filterPlatform('vk')"><span class="nav-icon">💙</span> ВКонтакте</a>
+    <a class="nav-item" onclick="filterPlatform('ok')"><span class="nav-icon">🟠</span> Одноклассники</a>
+    <a class="nav-item" onclick="filterPlatform('tg')"><span class="nav-icon">✈️</span> Telegram</a>
+    <a class="nav-item" onclick="filterPlatform('dzen')"><span class="nav-icon">📰</span> Дзен</a>
+    <a class="nav-item" onclick="filterPlatform('maks')"><span class="nav-icon">🔴</span> МАКС</a>
+  </nav>
+  <div class="sidebar-footer">Antigravity 2026</div>
+</aside>
+
+<div class="layout">
+  <header class="header">
+    <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <div class="header-title" id="page-title">Контент-план продвижения</div>
+    <div class="header-actions">
+      <span class="header-time" id="clock"></span>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ====== PAGE: PLAN ====== -->
+    <div class="page active" id="page-plan">
+
+      <!-- KPI -->
+      <div class="kpi-grid" style="grid-template-columns: repeat(4,1fr)">
+        <div class="kpi-card accent-glow">
+          <div class="kpi-label">Всего постов</div>
+          <div class="kpi-value accent" id="kpi-total">0</div>
+        </div>
+        <div class="kpi-card yellow-glow">
+          <div class="kpi-label">Запланировано</div>
+          <div class="kpi-value yellow" id="kpi-planned">0</div>
+        </div>
+        <div class="kpi-card green-glow">
+          <div class="kpi-label">Опубликовано</div>
+          <div class="kpi-value green" id="kpi-posted">0</div>
+        </div>
+        <div class="kpi-card red-glow">
+          <div class="kpi-label">Просрочено</div>
+          <div class="kpi-value red" id="kpi-overdue">0</div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <h2 id="filter-label">Все посты</h2>
+        <div style="display:flex;gap:8px">
+          <select id="status-filter" class="filter-select" onchange="renderPlan()">
+            <option value="all">Все статусы</option>
+            <option value="Planned">Запланировано</option>
+            <option value="Ready">Готово</option>
+            <option value="Posted">Опубликовано</option>
+          </select>
+          <button class="btn btn-primary" id="btn-add">+ Новый пост</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table class="content-table" id="content-table">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Группа</th>
+              <th>Заголовок</th>
+              <th>Платформы</th>
+              <th>Статус</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ====== PAGE: GROUPS ====== -->
+    <div class="page" id="page-groups">
+      <h2 style="margin-bottom:20px">Группы и каналы</h2>
+      <div class="stats-grid" style="grid-template-columns: repeat(2,1fr)">
+        <div class="chart-card">
+          <h3>🐔 ВезёмЦып (vezemcyp)</h3>
+          <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:12px">Продающая группа инкубатора. Прайс, отзывы, график выводов.</p>
+          <div class="feed-item"><div class="feed-dot green"></div><div><div class="feed-text">10 стартовых постов готовы</div><div class="feed-time">starter_posts.md</div></div></div>
+          <div class="feed-item"><div class="feed-dot yellow"></div><div><div class="feed-text">ЦА: фермеры ЮФО, ЛПХ</div><div class="feed-time">Крым, Краснодар, Ростов, Москва</div></div></div>
+          <div class="feed-item"><div class="feed-dot blue"></div><div><div class="feed-text">Автопостинг: vk_podvorye_poster.py</div></div></div>
+        </div>
+        <div class="chart-card">
+          <h3>🏡 Своё Подворье (podvorye)</h3>
+          <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:12px">Экспертный канал. Контент-маркетинг, нативка на ВезёмЦып.</p>
+          <div class="feed-item"><div class="feed-dot green"></div><div><div class="feed-text">28 постов на май в плане</div><div class="feed-time">month1_content_plan.md</div></div></div>
+          <div class="feed-item"><div class="feed-dot yellow"></div><div><div class="feed-text">7 рубрик по дням недели</div><div class="feed-time">Пн-Вс ежедневно</div></div></div>
+          <div class="feed-item"><div class="feed-dot blue"></div><div><div class="feed-text">Нативка: 2-3 упоминания/мес</div></div></div>
+        </div>
+      </div>
+
+      <h3 style="margin:24px 0 12px">Целевые платформы</h3>
+      <div class="stats-grid" style="grid-template-columns: repeat(5,1fr)">
+        <div class="stat-card"><div class="stat-label">💙 ВКонтакте</div><div class="stat-value blue" style="font-size:1.2rem">Основная</div></div>
+        <div class="stat-card"><div class="stat-label">🟠 Одноклассники</div><div class="stat-value yellow" style="font-size:1.2rem">Дубль ВК</div></div>
+        <div class="stat-card"><div class="stat-label">✈️ Telegram</div><div class="stat-value accent" style="font-size:1.2rem">Канал</div></div>
+        <div class="stat-card"><div class="stat-label">📰 Дзен</div><div class="stat-value green" style="font-size:1.2rem">Лонгриды</div></div>
+        <div class="stat-card"><div class="stat-label">🔴 МАКС</div><div class="stat-value red" style="font-size:1.2rem">Дубль</div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" style="display:none">
+  <div class="modal">
+    <h2 id="modal-title">Новый пост</h2>
+    <form id="article-form">
+      <input type="hidden" id="form-id" />
+      <div class="form-group">
+        <label>Заголовок</label>
+        <input type="text" id="form-title" required placeholder="Название поста" />
+      </div>
+      <div class="form-group">
+        <label>Группа</label>
+        <select id="form-group">
+          <option value="vezemcyp">ВезёмЦып</option>
+          <option value="podvorye">Своё Подворье</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Описание</label>
+        <textarea id="form-content" placeholder="Краткое описание…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Дата</label>
+        <input type="date" id="form-date" required />
+      </div>
+      <div class="form-group">
+        <label>Статус</label>
+        <select id="form-status">
+          <option value="Planned">Запланировано</option>
+          <option value="Ready">Готово</option>
+          <option value="Posted">Опубликовано</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Платформы</label>
+        <div class="checkbox-group">
+          <label class="checkbox-label"><input type="checkbox" name="platform" value="vk" checked /> ВК</label>
+          <label class="checkbox-label"><input type="checkbox" name="platform" value="ok" /> ОК</label>
+          <label class="checkbox-label"><input type="checkbox" name="platform" value="tg" /> ТГ</label>
+          <label class="checkbox-label"><input type="checkbox" name="platform" value="dzen" /> Дзен</label>
+          <label class="checkbox-label"><input type="checkbox" name="platform" value="maks" /> МАКС</label>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="btn-cancel">Отмена</button>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'antigravity_content_plan';
+  let currentPlatformFilter = 'all';
+
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+  function load() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; } }
+  function save(items) { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+
+  const PLATFORM_LABELS = { vk:'ВК', ok:'ОК', tg:'ТГ', dzen:'Дзен', maks:'МАКС' };
+  const PLATFORM_COLORS = { vk:'#4a76a8', ok:'#ee8208', tg:'#26a5e4', dzen:'#ffcc00', maks:'#ff4444' };
+  const STATUS_LABELS = { Planned:'Запланировано', Ready:'Готово', Posted:'Опубликовано' };
+  const GROUP_LABELS = { vezemcyp:'ВезёмЦып', podvorye:'Подворье' };
+
+  // Seed real data from content plans
+  if (!localStorage.getItem(STORAGE_KEY)) {
+    const seed = [
+      // ВезёмЦып стартовые
+      { id:uid(), group:'vezemcyp', title:'Знакомство — Главный (закрепить)', content:'Приветственный пост: породы, доставка, гарантии', platforms:['vk','ok'], scheduleAt:'2026-05-03', status:'Ready' },
+      { id:uid(), group:'vezemcyp', title:'Наш инкубатор — 10 лет опыта', content:'О нас: 15000 яиц, 85-92% выводимость', platforms:['vk','ok','dzen'], scheduleAt:'2026-05-03', status:'Ready' },
+      { id:uid(), group:'vezemcyp', title:'Куда мы доставляем цыплят', content:'Зоны доставки: Крым, Юг, Центр', platforms:['vk','ok'], scheduleAt:'2026-05-03', status:'Ready' },
+      { id:uid(), group:'vezemcyp', title:'Прайс-лист — Май 2026', content:'Бройлеры 60-65₽, несушки 80-90₽, индюки 250₽', platforms:['vk','ok','tg'], scheduleAt:'2026-05-03', status:'Ready' },
+      { id:uid(), group:'vezemcyp', title:'График выводов — Май-Июнь', content:'Расписание выводов, бронирование', platforms:['vk','ok','tg'], scheduleAt:'2026-05-04', status:'Ready' },
+      { id:uid(), group:'vezemcyp', title:'Фоторепортаж из инкубатора', content:'НУЖНЫ ФОТО АНДРЕЯ — 3-5 снимков', platforms:['vk','ok'], scheduleAt:'2026-05-04', status:'Planned' },
+      { id:uid(), group:'vezemcyp', title:'Отзыв: 300 Кобб-500 → Краснодар', content:'Татьяна М., падёж 1.3%, 2.3кг в 40 дней', platforms:['vk','ok','dzen'], scheduleAt:'2026-05-05', status:'Ready' },
+      { id:uid(), group:'vezemcyp', title:'Отзыв: 100 Ломан Браун → Симферополь', content:'Наталья К., 0% падежа, первые яйца в 4.5мес', platforms:['vk','ok','dzen'], scheduleAt:'2026-05-05', status:'Ready' },
+      { id:uid(), group:'vezemcyp', title:'Как заказать цыплят — 4 шага', content:'Инструкция: выбор, количество, дата, получение', platforms:['vk','ok','tg'], scheduleAt:'2026-05-06', status:'Ready' },
+      { id:uid(), group:'vezemcyp', title:'Чеклист: что подготовить до приезда цыплят', content:'Брудер, обогрев, поилки, аптечка', platforms:['vk','ok','tg','dzen'], scheduleAt:'2026-05-06', status:'Ready' },
+      // Подворье — неделя 1
+      { id:uid(), group:'podvorye', title:'Кобб-500 vs Росс-308: честный разбор', content:'Для тех, кто выбирает первых бройлеров', platforms:['vk','ok','dzen'], scheduleAt:'2026-05-05', status:'Planned' },
+      { id:uid(), group:'podvorye', title:'Что посадить в мае на Юге: 12 культур', content:'Огород, посадки, сезон', platforms:['vk','ok'], scheduleAt:'2026-05-06', status:'Planned' },
+      { id:uid(), group:'podvorye', title:'Опрос: Что у вас на подворье?', content:'Вовлечённость: 🐔🐇🐐🌱🐝', platforms:['vk','ok'], scheduleAt:'2026-05-07', status:'Planned' },
+      { id:uid(), group:'podvorye', title:'Кролики на мясо: 3 лучшие породы', content:'С расчётом окупаемости', platforms:['vk','ok','dzen'], scheduleAt:'2026-05-08', status:'Planned' },
+      { id:uid(), group:'podvorye', title:'VK Clip: суточный цыплёнок в руке', content:'Вирусный формат', platforms:['vk'], scheduleAt:'2026-05-09', status:'Planned' },
+      { id:uid(), group:'podvorye', title:'Бразилия — лидер по бройлерам', content:'Зарубежный опыт', platforms:['vk','ok','dzen'], scheduleAt:'2026-05-10', status:'Planned' },
+      { id:uid(), group:'podvorye', title:'Дайджест: Добро пожаловать в Своё Подворье!', content:'Итоги недели + анонсы', platforms:['vk','ok','tg'], scheduleAt:'2026-05-11', status:'Planned' },
+    ];
+    save(seed);
+  }
+
+  // ===== NAVIGATION =====
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item[data-page]').forEach(n => n.classList.remove('active'));
+    const page = document.getElementById('page-' + name);
+    const nav = document.querySelector(`[data-page="${name}"]`);
+    if (page) page.classList.add('active');
+    if (nav) nav.classList.add('active');
+    document.getElementById('page-title').textContent = name === 'plan' ? 'Контент-план продвижения' : 'Группы и каналы';
+    if (name === 'plan') renderPlan();
+  }
+
+  function filterPlatform(p) {
+    currentPlatformFilter = p;
+    document.getElementById('filter-label').textContent = p === 'all' ? 'Все посты' : `Платформа: ${PLATFORM_LABELS[p] || p}`;
+    showPage('plan');
+  }
+
+  // ===== RENDER =====
+  function renderPlan() {
+    let items = load();
+    const statusFilter = document.getElementById('status-filter').value;
+    const now = new Date().toISOString().slice(0,10);
+
+    // Filters
+    if (currentPlatformFilter !== 'all') {
+      items = items.filter(i => (i.platforms||[]).includes(currentPlatformFilter));
+    }
+    if (statusFilter !== 'all') {
+      items = items.filter(i => i.status === statusFilter);
+    }
+
+    // Sort by date
+    items.sort((a,b) => a.scheduleAt.localeCompare(b.scheduleAt));
+
+    // KPI (from full data)
+    const all = load();
+    document.getElementById('kpi-total').textContent = all.length;
+    document.getElementById('kpi-planned').textContent = all.filter(i => i.status === 'Planned').length;
+    document.getElementById('kpi-posted').textContent = all.filter(i => i.status === 'Posted').length;
+    const overdue = all.filter(i => i.status === 'Planned' && i.scheduleAt < now);
+    document.getElementById('kpi-overdue').textContent = overdue.length;
+    document.getElementById('nav-badge-queued').textContent = all.filter(i => i.status !== 'Posted').length;
+
+    // Table
+    const tbody = document.getElementById('table-body');
+    if (!items.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">Нет постов по фильтру</td></tr>';
+      return;
+    }
+    tbody.innerHTML = items.map(i => {
+      const isOverdue = i.status === 'Planned' && i.scheduleAt < now;
+      const dateStr = new Date(i.scheduleAt + 'T00:00:00').toLocaleDateString('ru-RU', {day:'numeric',month:'short'});
+      const platforms = (i.platforms||[]).map(p =>
+        `<span class="platform-tag" style="background:${PLATFORM_COLORS[p]||'#666'}20;color:${PLATFORM_COLORS[p]||'#666'}">${PLATFORM_LABELS[p]||p}</span>`
+      ).join(' ');
+      const statusClass = i.status.toLowerCase();
+      const rowClass = isOverdue ? 'row-overdue' : '';
+      return `<tr class="${rowClass}">
+        <td>${dateStr}</td>
+        <td><span class="group-tag">${GROUP_LABELS[i.group]||i.group}</span></td>
+        <td><strong>${esc(i.title)}</strong>${i.content ? '<br><small style="color:var(--text-muted)">'+esc(i.content)+'</small>' : ''}</td>
+        <td>${platforms}</td>
+        <td><span class="status-badge ${statusClass}">${STATUS_LABELS[i.status]}</span></td>
+        <td class="actions-cell">
+          <button class="btn btn-sm btn-outline" onclick="editItem('${i.id}')" title="Редактировать">✏️</button>
+          ${i.status !== 'Posted' ? `<button class="btn btn-sm btn-green" onclick="markPosted('${i.id}')" title="Опубликовано">✅</button>` : ''}
+          <button class="btn btn-sm btn-danger" onclick="deleteItem('${i.id}')" title="Удалить">✕</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  // ===== MODAL =====
+  const modal = document.getElementById('modal');
+  const form = document.getElementById('article-form');
+
+  document.getElementById('btn-add').addEventListener('click', () => {
+    document.getElementById('modal-title').textContent = 'Новый пост';
+    form.reset();
+    document.getElementById('form-id').value = '';
+    document.getElementById('form-date').value = new Date(Date.now()+86400000).toISOString().slice(0,10);
+    document.querySelector('input[name=platform][value=vk]').checked = true;
+    modal.style.display = 'flex';
+  });
+
+  document.getElementById('btn-cancel').addEventListener('click', () => { modal.style.display = 'none'; });
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const items = load();
+    const id = document.getElementById('form-id').value;
+    const platforms = [...document.querySelectorAll('input[name=platform]:checked')].map(c => c.value);
+    const data = {
+      group: document.getElementById('form-group').value,
+      title: document.getElementById('form-title').value,
+      content: document.getElementById('form-content').value,
+      scheduleAt: document.getElementById('form-date').value,
+      status: document.getElementById('form-status').value,
+      platforms,
+    };
+    if (id) {
+      const idx = items.findIndex(a => a.id === id);
+      if (idx >= 0) items[idx] = { ...items[idx], ...data };
+    } else {
+      items.push({ id: uid(), ...data });
+    }
+    save(items);
+    modal.style.display = 'none';
+    renderPlan();
+  });
+
+  window.editItem = function(id) {
+    const a = load().find(x => x.id === id);
+    if (!a) return;
+    document.getElementById('modal-title').textContent = 'Редактировать';
+    document.getElementById('form-id').value = a.id;
+    document.getElementById('form-group').value = a.group || 'vezemcyp';
+    document.getElementById('form-title').value = a.title;
+    document.getElementById('form-content').value = a.content || '';
+    document.getElementById('form-date').value = a.scheduleAt;
+    document.getElementById('form-status').value = a.status;
+    document.querySelectorAll('input[name=platform]').forEach(c => { c.checked = (a.platforms||[]).includes(c.value); });
+    modal.style.display = 'flex';
+  };
+
+  window.markPosted = function(id) {
+    const items = load();
+    const a = items.find(x => x.id === id);
+    if (a) { a.status = 'Posted'; save(items); renderPlan(); }
+  };
+
+  window.deleteItem = function(id) {
+    if (!confirm('Удалить пост?')) return;
+    save(load().filter(a => a.id !== id));
+    renderPlan();
+  };
+
+  // ===== CLOCK =====
+  function updateClock() {
+    document.getElementById('clock').textContent = new Date().toLocaleString('ru-RU', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+  }
+  setInterval(updateClock, 30000);
+  updateClock();
+
+  // ===== INIT =====
+  renderPlan();
+</script>
+
+</body>
+</html>

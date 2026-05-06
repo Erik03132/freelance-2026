@@ -22,7 +22,7 @@
 # Или вручную: bash tools/night_audit.sh [--phase1-only] [--no-tg]
 # ============================================================
 
-set -euo pipefail
+set -eu
 
 # PATH для cron-окружения
 export PATH="/usr/local/bin:/opt/homebrew/bin:/Users/igorvasin/.npm-global/bin:/Users/igorvasin/Library/Python/3.13/bin:$PATH"
@@ -113,11 +113,17 @@ send_telegram() {
     [ "$NO_TG" = true ] && return
     local text="$1"
     if [ -n "$TG_BOT_TOKEN" ]; then
-        local proxy_flag=""
+        # Попытка 1: с прокси (5с connect, 15с total)
         if [ -n "${TG_PROXY:-}" ]; then
-            proxy_flag="--proxy ${TG_PROXY}"
+            curl -s --connect-timeout 5 --max-time 15 --proxy "${TG_PROXY}" -X POST \
+                "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+                -d "chat_id=${TG_ADMIN_ID}" \
+                -d "text=${text}" \
+                -d "parse_mode=Markdown" \
+                > /dev/null 2>&1 && return || true
         fi
-        curl -s --max-time 30 $proxy_flag -X POST \
+        # Попытка 2: напрямую (5с connect, 15с total)
+        curl -s --connect-timeout 5 --max-time 15 -X POST \
             "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TG_ADMIN_ID}" \
             -d "text=${text}" \
@@ -180,8 +186,12 @@ TOTAL_PY=$(find "$AUDIT_DIR" -name "*.py" \
 
 # Получаем дифф за день (КЛЮЧЕВОЕ — проверяем только ИЗМЕНЕНИЯ)
 cd "$PROJECT_ROOT"
-CHANGED_PY=$(git diff --name-only HEAD~1 2>/dev/null | grep '\.py$' || echo "")
-CHANGED_COUNT=$(echo "$CHANGED_PY" | grep -c '.' || echo "0")
+CHANGED_PY=$(git diff --name-only HEAD~1 2>/dev/null | grep '\.py$' || true)
+if [ -z "$CHANGED_PY" ]; then
+    CHANGED_COUNT=0
+else
+    CHANGED_COUNT=$(echo "$CHANGED_PY" | wc -l | tr -d ' ')
+fi
 
 # Если нет диффа — берём ТОП-5 критических файлов
 if [ "$CHANGED_COUNT" -eq 0 ] || [ -z "$CHANGED_PY" ]; then
@@ -551,3 +561,16 @@ ${SEVERITY}
 
 send_telegram "$TG_MSG"
 log "📤 Telegram отправлен"
+
+# Lock-файл для каскада: создаём на VPS, чтобы VPS fallback не дублировал
+LOCK_FILE="/tmp/night_audit_done_${DATE}.lock"
+touch "$LOCK_FILE"
+# Отправляем lock на VPS
+SSH_KEY="/Users/igorvasin/freelance-2026/.ssh_agent_key"
+if [ -f "$SSH_KEY" ]; then
+    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=5 \
+        root@72.56.38.19 "touch $LOCK_FILE" 2>/dev/null || true
+    log "🔒 Lock создан: локально + VPS"
+else
+    log "🔒 Lock создан: только локально (нет SSH ключа)"
+fi

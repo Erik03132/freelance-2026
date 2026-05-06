@@ -76,3 +76,20 @@ tmp_restore/
 .ssh_agent_key
 .ssh_agent_key.pub
 .credentials_vezemcip.md
+svo-start/
+.ecc-library/
+antigravity-brain/
+
+# Heavy dirs
+dashboard/node_modules/
+dashboard/.next/
+agent-lab/.venv/
+*.so
+*.node
+*.pack.gz
+*.pack.gz.old
+agent-lab/.venv/
+dashboard/node_modules/
+dashboard/.next/
+*.so
+*.node
