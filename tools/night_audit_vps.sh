@@ -17,8 +17,8 @@ AI_EGGS_DIR="${PROJECT_ROOT}/ai-eggs"
 AGENT_DIR="${AI_EGGS_DIR}/agent"
 REPORTS_DIR="${PROJECT_ROOT}/reports"
 
-DATE=$(date +%Y-%m-%d)
-TIME_START=$(date +%H:%M:%S)
+DATE=$(TZ="Europe/Moscow" date +%Y-%m-%d)
+TIME_START=$(TZ="Europe/Moscow" date +%H:%M:%S)
 LOG_FILE="/tmp/night_audit_vps_${DATE}.log"
 REPORT_FILE="${REPORTS_DIR}/night_audit_vps_${DATE}.md"
 LOCK_FILE="/tmp/night_audit_done_${DATE}.lock"

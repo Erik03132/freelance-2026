@@ -33,11 +33,15 @@
 2. view_file → .agent/rules/IRON_RULES.md           (SSH, структура, протоколы)
 3. view_file → .agent/rules/document-governance.md   (SSoT, запрещённые типы файлов)
 4. view_file → .agent/rules/two-angelas-map.md       (Анжела, heartbeat rules)
-5. view_file → chronicles/chronicle_СЕГОДНЯ.md       (хроника дня, если есть)
-6. bash tools/chronicle.sh --init "session"          (запись старта в хронику)
+5. view_file → ~/.gemini/antigravity/skills/MANIFEST.md  (каталог скиллов — Progressive Disclosure)
+6. view_file → chronicles/chronicle_СЕГОДНЯ.md       (хроника дня, если есть)
+7. bash tools/chronicle.sh --init "session"          (запись старта в хронику)
 ```
 
 **НЕ пересказывай** содержимое файлов пользователю. Просто прочитай и подтверди: `✅ Boot OK — [что загружено]`.
+
+**⚠️ НЕ читай все SKILL.md при boot!** Используй MANIFEST.md (1.4K токенов вместо 104K).
+Загружай полный SKILL.md только когда задача матчит описание/триггеры из манифеста.
 
 ### Граф загрузки
 
@@ -47,7 +51,8 @@ graph TD
     B --> C["🔩 IRON_RULES.md<br/>SSH, структура, протоколы"]
     C --> D["📐 document-governance.md<br/>SSoT, запреты на дубли"]
     D --> E["⚡ two-angelas-map.md<br/>Анжела, heartbeat rules"]
-    E --> F{"📜 chronicle сегодня<br/>существует?"}
+    E --> M["📋 MANIFEST.md<br/>28 скиллов, ~1.4K токенов"]
+    M --> F{"📜 chronicle сегодня<br/>существует?"}
     F -->|Да| G["Прочитать хронику"]
     F -->|Нет| H["Создать новую"]
     G --> I["🟢 chronicle.sh --init<br/>Запись старта"]
@@ -57,4 +62,6 @@ graph TD
     style A fill:#4CAF50,color:#fff
     style J fill:#2196F3,color:#fff
     style F fill:#FF9800,color:#fff
+    style M fill:#9C27B0,color:#fff
 ```
+

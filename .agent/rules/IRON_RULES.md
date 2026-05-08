@@ -40,6 +40,10 @@
 ├── chp.md                                 ← Чекпоинт текущего состояния
 ├── ACTIVE_TASKS.md                        ← Дорожная карта задач
 ├── reports/                               ← Дневные отчёты сессий
+├── chronicles/                            ← Хроники дней (автозапись)
+├── dreams/                                ← 🌙 Dreaming: паттерны из хроник
+│   ├── patterns.md                        ← Кумулятивная память (читать при boot)
+│   └── dream_YYYY-MM-DD.md               ← Ежедневные dream-отчёты
 ├── tools/                                 ← Общие скрипты
 ├── ai-eggs/                               ← Проект AI-EGGS (Заботкина + Птенчикова)
 ├── freelance-agent/                       ← Навыки агента, SKILL.md
@@ -58,6 +62,20 @@
 2. Создать `checkpoints/chp_YYYYMMDD_HHMM.md`
 3. Создать `reports/report-day_YYYY-MM-DD_HHMM.md`
 4. Запустить `bash ~/freelance-2026/tools/finish_day.sh`
+
+### 🌙 Morning Dream (cron 07:00 MSK или вручную):
+```bash
+bash ~/freelance-2026/tools/morning_dream.sh          # анализ за 3 дня
+bash ~/freelance-2026/tools/morning_dream.sh --days 7  # за неделю
+```
+Анализирует хроники → извлекает паттерны → обновляет `dreams/patterns.md`.
+При boot можно прочитать `dreams/patterns.md` для быстрого восстановления контекста.
+
+### 🎯 Content Outcomes (перед публикацией контента):
+```bash
+python3 ~/freelance-2026/tools/content_grader.py -f draft.md --rubric all
+```
+Отдельный grader по E-E-A-T, Human-First, VK Farm. FAIL → переделка.
 
 ### Деплой на VPS:
 1. rsync код → VPS (через SSH-ключ)
@@ -115,17 +133,43 @@
 1. Прочитать **этот файл** (IRON_RULES.md)
 2. Прочитать `chp.md` — текущий чекпоинт
 3. Прочитать `ACTIVE_TASKS.md` — активные задачи
-4. Если работа с конкретным проектом — прочитать его `PROJECT.md` / `README.md`
-5. **Agent Readiness Check** — проверить заряженность ВСЕХ агентов по таблице ниже
-6. НЕ пересказывать содержимое пользователю, просто работать
+4. Прочитать `dreams/patterns.md` — кумулятивные паттерны из Dreaming (если есть)
+5. Прочитать `~/.gemini/antigravity/skills/MANIFEST.md` — **лёгкий каталог скиллов** (Progressive Disclosure)
+6. Если работа с конкретным проектом — прочитать его `PROJECT.md` / `README.md`
+7. НЕ пересказывать содержимое пользователю, просто работать
+
+### 🎯 Progressive Disclosure (загрузка скиллов)
+
+**НЕ читай все SKILL.md при boot!** 28 скиллов = ~104K токенов — это убивает контекст.
+
+```
+┌──────────────────────────────────────────────────┐
+│  BOOT: Читай MANIFEST.md (~1.4K токенов)         │
+│  Содержит name + description + triggers           │
+│                                                    │
+│  MATCH: Когда задача пришла →                     │
+│    1. Найди скилл по триггерам в MANIFEST.md      │
+│    2. view_file → полный SKILL.md этого скилла    │
+│    3. Следуй инструкциям                          │
+│                                                    │
+│  CLI: python3 ~/freelance-2026/tools/             │
+│       skills_manifest.py --match "описание задачи"│
+│                                                    │
+│  RELEASE: После задачи контекст скилла не нужен   │
+└──────────────────────────────────────────────────┘
+```
+
+**Регенерация манифеста** (после добавления/изменения скиллов):
+```bash
+python3 ~/freelance-2026/tools/skills_manifest.py
+```
 
 ---
 
 ## 8. 🛡️ AGENT READINESS — ПОЛНАЯ КАРТА АГЕНТОВ
 
-**ОБЯЗАТЕЛЬНО при каждом буте.** Проверить `view_file` на каждый путь из колонки «Global SKILL.md».
-Если файл не найден → агент `❌ MISSING` → сессия **НЕ Safe**.
-Проектные скиллы: warning, не блокер.
+**При буте проверяй наличие `MANIFEST.md`** — если нет, регенерируй.
+Полная проверка всех SKILL.md — только по запросу или при подозрении на проблемы.
 
 ### 7.1. Фундаментальные (Global) скиллы — 8 агентов
 
