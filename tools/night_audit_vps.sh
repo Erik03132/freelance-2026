@@ -8,7 +8,7 @@
 # Запуск: crontab → 02:05 каждую ночь на VPS
 # ============================================================
 
-set -eu
+set -e
 
 # ============ КОНФИГУРАЦИЯ ============
 
@@ -28,8 +28,8 @@ TG_BOT_TOKEN=$(grep "ANGELOCHKA_BOT_TOKEN" "${AI_EGGS_DIR}/.env" 2>/dev/null | c
 TG_ADMIN_ID="176203333"
 TG_PROXY=$(grep "TELEGRAM_PROXY" "${AI_EGGS_DIR}/.env" 2>/dev/null | cut -d= -f2 || echo "")
 
-# OpenRouter
-OPENROUTER_KEY=$(grep "OPENROUTER_API_KEY" "${AI_EGGS_DIR}/.env" 2>/dev/null | cut -d= -f2 || echo "")
+# OpenRouter мёртв с 09.05 — используем Gemini через прокси USA
+# OPENROUTER_KEY не нужен
 
 # ============ УТИЛИТЫ ============
 
@@ -41,24 +41,45 @@ log() {
 send_telegram() {
     local text="$1"
     if [ -n "$TG_BOT_TOKEN" ]; then
-        local proxy_flag=""
-        if [ -n "${TG_PROXY:-}" ]; then
-            proxy_flag="--proxy ${TG_PROXY}"
-        fi
-        curl -s --max-time 15 $proxy_flag -X POST \
+        # Попытка 1: прямое соединение (без прокси)
+        local result
+        result=$(curl -s --max-time 15 -X POST \
             "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
             -d "chat_id=${TG_ADMIN_ID}" \
-            -d "text=${text}" \
-            -d "parse_mode=Markdown" \
-            > /dev/null 2>&1 || {
-            # Retry without proxy
-            curl -s --max-time 15 -X POST \
+            --data-urlencode "text=${text}" \
+            -d "parse_mode=Markdown" 2>&1)
+        
+        if echo "$result" | grep -q '"ok":true'; then
+            log "📤 TG отправлен"
+            return 0
+        fi
+        
+        # Попытка 2: через прокси
+        if [ -n "${TG_PROXY:-}" ]; then
+            result=$(curl -s --max-time 15 --proxy "${TG_PROXY}" -X POST \
                 "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
                 -d "chat_id=${TG_ADMIN_ID}" \
-                -d "text=${text}" \
-                -d "parse_mode=Markdown" \
-                > /dev/null 2>&1 || true
-        }
+                --data-urlencode "text=${text}" \
+                -d "parse_mode=Markdown" 2>&1)
+            
+            if echo "$result" | grep -q '"ok":true'; then
+                log "📤 TG отправлен (через прокси)"
+                return 0
+            fi
+        fi
+        
+        # Попытка 3: без Markdown (на случай спецсимволов)
+        result=$(curl -s --max-time 15 -X POST \
+            "https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TG_ADMIN_ID}" \
+            --data-urlencode "text=${text}" 2>&1)
+        
+        if echo "$result" | grep -q '"ok":true'; then
+            log "📤 TG отправлен (без Markdown)"
+            return 0
+        fi
+        
+        log "⚠️ TG отправка не удалась: $result"
     fi
 }
 
@@ -123,14 +144,32 @@ done < <(find "$AGENT_DIR" -name "*.py" \
 
 log "  Секреты: ${SECRET_HITS}"
 
-# ============ ФАЗА 2: Claude (через OpenRouter) ============
+# ============ ФАЗА 1.5: Обучение Заботкиной ============
+log "📚 Фаза 1.5: call_learner (обучение на звонках)..."
+LEARNER_VENV="/root/antigravity/ai-eggs/venv/bin/python3"
+LEARNER_SCRIPT="/root/antigravity/ai-eggs/agent/call_learner.py"
+if [ -f "$LEARNER_SCRIPT" ]; then
+    LEARNER_OUT=$(cd /root/antigravity/ai-eggs/agent && $LEARNER_VENV $LEARNER_SCRIPT --days 1 2>&1 | tail -5)
+    LEARNER_FACTS=$(echo "$LEARNER_OUT" | grep -oP 'Фактов извлечено: \K[0-9]+' || echo "0")
+    LEARNER_TRANSCRIPTS=$(echo "$LEARNER_OUT" | grep -oP 'Транскриптов обработано: \K[0-9]+' || echo "0")
+    log "  📞 Транскриптов: $LEARNER_TRANSCRIPTS, фактов: $LEARNER_FACTS"
+else
+    log "  ⚠️ call_learner.py не найден"
+    LEARNER_TRANSCRIPTS=0
+    LEARNER_FACTS=0
+fi
+
+# ============ ФАЗА 2: Gemini code review (через прокси USA) ============
 
 CLAUDE_CRITICAL=0
 CLAUDE_IMPORTANT=0
 CLAUDE_MINOR=0
 
-if [ -n "$OPENROUTER_KEY" ]; then
-    log "🧠 Фаза 2: Claude cross-review..."
+GEMINI_KEY=$(grep "GEMINI_API_KEY" "${AI_EGGS_DIR}/.env" 2>/dev/null | head -1 | cut -d= -f2)
+US_PROXY=$(grep "TELEGRAM_PROXY" "${AI_EGGS_DIR}/.env" 2>/dev/null | head -1 | cut -d= -f2 || echo "")
+
+if [ -n "$GEMINI_KEY" ]; then
+    log "🧠 Фаза 2: Gemini cross-review (через прокси USA)..."
 
     # Собираем ТОП-5 файлов для ревью
     TOP_FILES="angelochka_core.py tg_bot.py bitrix_intelligence.py chat_listener.py sales_logic.py"
@@ -149,52 +188,53 @@ $(head -60 "$fpath")
     # Обрезаем
     CODE_SAMPLE=$(echo "$CODE_SAMPLE" | head -250)
 
-    CLAUDE_PROMPT="Ты — ночной код-аудитор. Кратко проверь Python-код AI-агента для птицефабрики.
+    REVIEW_PROMPT="Ты — ночной код-аудитор. Кратко проверь Python-код AI-агента для птицефабрики.
 
 ФОКУС:
-1. 🐛 Логические баги
-2. 🔒 Безопасность (ключи, инъекции)
-3. ⚡ Async-проблемы
-4. 💣 Потенциальные крэши
+1. Логические баги
+2. Безопасность (ключи, инъекции)
+3. Async-проблемы
+4. Потенциальные крэши
 
 \`\`\`python
 ${CODE_SAMPLE}
 \`\`\`
 
-Ответь КРАТКО (макс 30 строк). Для каждого бага: файл:строка, критичность (🔴/🟡/🟢), исправление.
-Если код чист — скажи '✅ Код чист'."
+Ответь КРАТКО (макс 30 строк). Для каждого бага: файл:строка, критичность (CRITICAL/IMPORTANT/MINOR), исправление.
+Если код чист — скажи 'Код чист'."
 
-    escaped_prompt=$(echo "$CLAUDE_PROMPT" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))")
+    escaped_prompt=$(echo "$REVIEW_PROMPT" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))")
 
-    CLAUDE_RESPONSE=$(curl -s --max-time 120 \
-        -H "Authorization: Bearer ${OPENROUTER_KEY}" \
+    CLAUDE_RESPONSE=$(curl -s --max-time 120 --proxy "${US_PROXY}" \
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}" \
         -H "Content-Type: application/json" \
-        -d "{
-            \"model\": \"anthropic/claude-sonnet-4\",
-            \"max_tokens\": 2048,
-            \"messages\": [{\"role\": \"user\", \"content\": ${escaped_prompt}}]
-        }" \
-        "https://openrouter.ai/api/v1/chat/completions" 2>/dev/null | \
+        -d "{\"contents\":[{\"parts\":[{\"text\": ${escaped_prompt}}]}]}" 2>/dev/null | \
         python3 -c "
 import sys, json
 try:
     r = json.load(sys.stdin)
-    print(r['choices'][0]['message']['content'])
+    print(r['candidates'][0]['content']['parts'][0]['text'])
 except Exception as e:
-    print(f'❌ Ошибка Claude API: {e}')
-" 2>/dev/null || echo "❌ Claude недоступен")
+    print(f'ERR Gemini API: {e}')
+" 2>/dev/null || echo "ERR Gemini недоступен")
 
-    if echo "$CLAUDE_RESPONSE" | grep -q "❌"; then
-        log "  ⚠️ Claude API ошибка"
+    if echo "$CLAUDE_RESPONSE" | grep -q "ERR"; then
+        log "  ⚠️ Gemini API ошибка"
     else
-        CLAUDE_CRITICAL=$(echo "$CLAUDE_RESPONSE" | grep -c "🔴" || echo "0")
-        CLAUDE_IMPORTANT=$(echo "$CLAUDE_RESPONSE" | grep -c "🟡" || echo "0")
-        CLAUDE_MINOR=$(echo "$CLAUDE_RESPONSE" | grep -c "🟢" || echo "0")
-        log "  Claude: 🔴${CLAUDE_CRITICAL} 🟡${CLAUDE_IMPORTANT} 🟢${CLAUDE_MINOR}"
+        CLAUDE_CRITICAL=$(echo "$CLAUDE_RESPONSE" | grep -ci "critical" 2>/dev/null | head -1 || echo "0")
+        CLAUDE_CRITICAL=$(echo "$CLAUDE_CRITICAL" | tr -d '[:space:]')
+        CLAUDE_IMPORTANT=$(echo "$CLAUDE_RESPONSE" | grep -ci "important" 2>/dev/null | head -1 || echo "0")
+        CLAUDE_IMPORTANT=$(echo "$CLAUDE_IMPORTANT" | tr -d '[:space:]')
+        CLAUDE_MINOR=$(echo "$CLAUDE_RESPONSE" | grep -ci "minor" 2>/dev/null | head -1 || echo "0")
+        CLAUDE_MINOR=$(echo "$CLAUDE_MINOR" | tr -d '[:space:]')
+        [ -z "$CLAUDE_CRITICAL" ] && CLAUDE_CRITICAL=0
+        [ -z "$CLAUDE_IMPORTANT" ] && CLAUDE_IMPORTANT=0
+        [ -z "$CLAUDE_MINOR" ] && CLAUDE_MINOR=0
+        log "  Gemini: 🔴${CLAUDE_CRITICAL} 🟡${CLAUDE_IMPORTANT} 🟢${CLAUDE_MINOR}"
     fi
 else
-    log "  ⚠️ Нет OPENROUTER_KEY — Claude пропущен"
-    CLAUDE_RESPONSE="⚠️ OPENROUTER_API_KEY не найден"
+    log "  ⚠️ Нет GEMINI_API_KEY — code review пропущен"
+    CLAUDE_RESPONSE="⚠️ GEMINI_API_KEY не найден"
 fi
 
 # ============ ОТЧЁТ ============
@@ -233,11 +273,20 @@ log "📄 Отчёт: ${REPORT_FILE}"
 
 # ============ TELEGRAM ============
 
-if [ "${SECRET_HITS:-0}" -gt 0 ]; then
+set +e  # отключаем -e — integer comparisons дают false positives
+
+_CC=${CLAUDE_CRITICAL:-0}; _CC=$(echo "$_CC" | tr -d '[:space:]')
+[ -z "$_CC" ] && _CC=0
+_RE=${RUFF_ERRORS:-0}; _RE=$(echo "$_RE" | tr -d '[:space:]')
+[ -z "$_RE" ] && _RE=0
+_SH=${SECRET_HITS:-0}; _SH=$(echo "$_SH" | tr -d '[:space:]')
+[ -z "$_SH" ] && _SH=0
+
+if [ "$_SH" -gt 0 ] 2>/dev/null; then
     SEVERITY="🔴 КРИТИЧНО — hardcoded секреты!"
-elif [ "${CLAUDE_CRITICAL:-0}" -gt 0 ]; then
-    SEVERITY="🔴 Claude: ${CLAUDE_CRITICAL} критичных"
-elif [ "${RUFF_ERRORS:-0}" -gt 20 ]; then
+elif [ "$_CC" -gt 0 ] 2>/dev/null; then
+    SEVERITY="🔴 Gemini: ${CLAUDE_CRITICAL} критичных"
+elif [ "$_RE" -gt 20 ] 2>/dev/null; then
     SEVERITY="🟡 ruff: ${RUFF_ERRORS} ошибок"
 else
     SEVERITY="🟢 Код чист"
@@ -250,6 +299,7 @@ ${SEVERITY}
 📊 ruff: ${RUFF_ERRORS} | секреты: ${SECRET_HITS}
 🧠 Claude: 🔴${CLAUDE_CRITICAL} 🟡${CLAUDE_IMPORTANT} 🟢${CLAUDE_MINOR}
 📁 Файлов: ${TOTAL_PY}
+📚 Обучение: ${LEARNER_TRANSCRIPTS:-0} звонков, ${LEARNER_FACTS:-0} фактов
 
 📄 \`reports/night_audit_vps_${DATE}.md\`"
 

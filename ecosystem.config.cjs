@@ -47,7 +47,7 @@ module.exports = {
       script: "ai-eggs/agent/scheduler.py",
       cwd: "/root/antigravity",
       interpreter: "/root/antigravity/ai-eggs/.server_venv/bin/python3",
-      autorestart: false,
+      ...CRASH_PROTECTION,
       watch: false,
       env: {
         PYTHONPATH: "/root/antigravity/ai-eggs/agent"

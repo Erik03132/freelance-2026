@@ -1,0 +1,8 @@
+fields:
+  - id: string      # uuid
+  - agentId: string  # target agent
+  - action: string   # operation name
+  - payload: object  # data payload
+  - ts: timestamp   # creation time
+  - status: enum[pending, processing, done, error]
+  - response: object # optional response data

@@ -17,7 +17,7 @@
 # Чекпоинт агент создаёт ПЕРЕД запуском этого скрипта.
 # ============================================================================
 
-set -euo pipefail
+set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE="$HOME/freelance-2026"
@@ -165,16 +165,35 @@ if [[ "$project_tmp" -gt 0 ]]; then
 fi
 
 # TTL-проверка: MD-файлы со словами SESSION/DAILY/HANDOVER старше 3 дней
+set +e  # pipeline ниже может дать exit 1 от grep если файлов нет
 stale_docs=$(find "$WORKSPACE" -maxdepth 3 -name "*SESSION*" -o -name "*DAILY*" -o -name "*HANDOVER*" 2>/dev/null | grep "\.md$" | xargs ls -t 2>/dev/null | awk -v d="$(date -v-3d +%s 2>/dev/null || date -d '3 days ago' +%s 2>/dev/null)" 'BEGIN{c=0} {if (systime()<d) c++} END{print c}' 2>/dev/null || echo "0")
+set -e
 if [[ "$stale_docs" -gt 0 ]]; then
     echo -e "  ${YELLOW}⚠️  Устаревшие SESSION/DAILY/HANDOVER файлы: проверь и удали${NC}"
 fi
 
+# ========================= ФАЗА 2.5: WAZA AUDIT =============================
+
+echo ""
+echo -e "  ${BOLD}🔍 ФАЗА 2.5: Waza Skill Audit...${NC}"
+
+WAZA_AUDIT_SCRIPT="$WORKSPACE/tools/waza-audit.sh"
+if command -v waza &> /dev/null || [[ -f "$HOME/bin/waza" ]]; then
+    if [[ -f "$WAZA_AUDIT_SCRIPT" ]]; then
+        bash "$WAZA_AUDIT_SCRIPT" 2>/dev/null || echo -e "  ${YELLOW}⚠️  Waza audit завершился с предупреждениями${NC}"
+    else
+        echo -e "  ${YELLOW}⚠️  Скрипт waza-audit.sh не найден${NC}"
+    fi
+else
+    echo -e "  ${YELLOW}⚠️  Waza не установлен. Пропускаю.${NC}"
+fi
 
 # ========================= ФАЗА 3: GIT SYNC (GitHub) ========================
 
 echo ""
 echo -e "  ${BOLD}🚀 ФАЗА 3: Синхронизация с GitHub...${NC}"
+
+set +e  # фазы 3-5 опциональны — не убиваем скрипт при ошибке
 
 if [[ ! -d "$BACKUP_ROOT/.git" ]]; then
     git -C "$BACKUP_ROOT" init
