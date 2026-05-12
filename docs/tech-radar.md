@@ -166,10 +166,207 @@ curl -fsSL https://raw.githubusercontent.com/microsoft/waza/main/install.sh | ba
 
 ---
 
+### 4. DFlash — Block Diffusion для ускорения LLM-инференса (Z Lab)
+
+| Поле | Значение |
+|------|----------|
+| **Статус** | 🔵 ASSESS |
+| **URL** | https://github.com/z-lab/dflash |
+| **Компания** | Z Lab (MIT, Zhijian Liu) |
+| **Лицензия** | ✅ MIT (open source) |
+| **Язык** | Python (PyTorch, MLX) |
+| **Paper** | [arXiv:2602.06036](https://arxiv.org/abs/2602.06036) |
+| **Что делает** | Speculative decoding через блочную диффузионную модель. Маленький «draft model» генерирует 16 токенов за один параллельный forward pass, большая LLM верифицирует. Результат: **2-6× lossless ускорение** инференса без потери качества. |
+| **Дата оценки** | 2026-05-12 |
+
+**Как это работает (ключевая идея):**
+- Обычный speculative decoding (EAGLE-3): draft-модель генерирует токены последовательно → потолок 2-3×
+- **DFlash**: draft-модель на основе block diffusion генерирует **все 16 токенов параллельно за 1 pass**
+- Архитектура: Feature Fusion (скрытые слои target-модели) → KV Injection (каждый слой draft-модели) → Parallel Drafting
+- Draft-модель переиспользует embedding и LM head от target → минимум параметров
+
+**Заявленные результаты (Qwen3-8B):**
+- До **6× lossless ускорение** (greedy decoding)
+- **~4.5× ускорение** с sampling (temperature=1) и thinking mode
+- **~2.5× быстрее** чем EAGLE-3 (предыдущий SOTA)
+
+**Поддерживаемые модели (20+):**
+- Qwen3/3.5/3.6 (4B — 122B), Qwen3-Coder
+- Gemma-4 (26B, 31B)
+- GPT-OSS (20B, 120B)
+- Kimi-K2.5/K2.6, MiniMax-M2.5/M2.7
+- Llama-3.1-8B
+- DeepSeek-V4 (coming soon)
+
+**Бэкенды:**
+| Backend | Статус | Применимость |
+|---------|--------|-------------|
+| **vLLM** | ✅ v0.20.1+ | Production serving |
+| **SGLang** | ✅ Полная | Production serving |
+| **Transformers** | ✅ Qwen3/Llama | Эксперименты |
+| **MLX (Apple Silicon)** | ✅ M-серия | Локальный инференс на Mac |
+
+**Установка (MLX для нашего Mac):**
+```bash
+pip install -e ".[mlx]"
+```
+
+```python
+from dflash.model_mlx import load, load_draft, stream_generate
+
+model, tokenizer = load("Qwen/Qwen3.5-4B")
+draft = load_draft("z-lab/Qwen3.5-4B-DFlash")
+
+messages = [{"role": "user", "content": "Вопрос"}]
+prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+for r in stream_generate(model, draft, tokenizer, prompt, block_size=16, max_tokens=2048):
+    print(r.text, end="", flush=True)
+```
+
+**Почему ASSESS (а не TRIAL):**
+- 🎯 Мы пока не хостим LLM сами — используем API (OpenRouter, Gemini)
+- 🖥️ Для продакшн-сервинга нужны GPU (NVIDIA A100/H100)
+- 🍎 MLX-бэкенд на Mac M-серии — интересно для локальных экспериментов
+- 📊 Когда перейдём на self-hosted LLM (Ollama / vLLM) — DFlash станет критически важным
+
+**Где может пригодиться:**
+- 🔥 **Self-hosted LLM** — если развернём Qwen3 или DeepSeek на VPS с GPU → DFlash даст 3-6× ускорение бесплатно
+- 🍎 **Локальный Mac инференс** — MLX + DFlash для быстрого Qwen3.5-4B на M5 Pro
+- 🧪 **RAG-пайплайны** — ускорение генерации ответов из базы знаний
+- 💰 **Cost reduction** — за ту же цену GPU обслуживаем в 3-6× больше запросов
+
+**Когда внедрять:**
+- При переходе на self-hosted LLM (запланирован в Q3 2026 roadmap)
+- Или сейчас для локальных экспериментов с MLX на Mac
+
+---
+
+### 5. Open Design — Каталог AI-дизайн-скиллов (nexu-io)
+
+| Поле | Значение |
+|------|----------|
+| **Статус** | 🟡 TRIAL |
+| **URL** | https://github.com/nexu-io/open-design |
+| **Компания** | nexu.io (open-source community) |
+| **Лицензия** | ✅ Apache 2.0 |
+| **Язык** | TypeScript |
+| **GitHub** | ⭐ 37 670 stars · 4 280 forks · обновляется ежедневно |
+| **Что делает** | Local-first open-source альтернатива Claude Design. 100+ скиллов, 71 дизайн-система. Генерация прототипов web/mobile/desktop, слайдов, видео, изображений с экспортом в HTML/PDF/PPTX/MP4. |
+| **Совместимость** | ✅ Claude Code, Codex, Cursor, **Gemini**, Copilot, Qwen, Kimi CLI |
+| **Дата оценки** | 2026-05-12 |
+
+**Что внутри (100+ скиллов по категориям):**
+
+| Категория | Примеры скиллов | Кол-во |
+|-----------|----------------|--------|
+| **Design Systems** | frontend-design, shadcn-ui, platform-design, apple-hig, brand-guidelines | ~15 |
+| **Presentations** | slides, pptx-generator, nanobanana-ppt, html-ppt-retro | ~8 |
+| **Image/Video Gen** | fal-generate, fal-video-edit, fal-3d, sora, replicate, imagen, imagegen | ~15 |
+| **Marketing** | ad-creative, copywriting, marketing-psychology, screenshots-marketing | ~6 |
+| **Animation** | gsap-core, gsap-react, gsap-scrolltrigger, threejs, remotion, shader-dev | ~8 |
+| **Documents** | pdf, docx, minimax-pdf, minimax-docx, doc | ~5 |
+| **UX/UI** | design-review, design-consultation, design-brief, ui-ux-pro-max, taste-skill | ~10 |
+| **Figma** | figma-generate-design, figma-implement-design, figma-create-design-system-rules | ~7 |
+| **Media** | venice-image-generate, venice-video, venice-audio-music, speech, ai-music-album | ~8 |
+| **Прочие** | agent-browser, youtube-clipper, video-downloader, domain-name-brainstormer | ~10+ |
+
+**Архитектура:**
+- Каждый скилл — SKILL.md + assets (frames, templates, examples)
+- Формат совместим с agentskills.io (тот же формат, что у нас!)
+- Upstream-ссылки на оригинальные Anthropic skills
+- `od:` метаданные для категоризации и discovery
+
+**Пересечение с нашими скиллами:**
+| Наш скилл | Open Design аналог | Что полезного |
+|-----------|-------------------|---------------|
+| `rembrandt-designer` | `frontend-design`, `design-review`, `ui-ux-pro-max` | Референсные дизайн-системы, паттерны ревью |
+| `frontend-design` | `frontend-design`, `shadcn-ui`, `gsap-*` | GSAP-анимации, shadcn-компоненты |
+| `copywriting` | `copywriting`, `ad-creative` | Шаблоны рекламных креативов |
+| `marketing-psychology` | `marketing-psychology` | Альтернативная база паттернов |
+| `brainstorming` | `brainstorming`, `design-brief` | Design brief + brainstorming workflow |
+| `social-content` | `social-carousel` | Карусели для соцсетей |
+| — (нет) | `fal-*` (15 скиллов!) | 🔥 Генерация изображений/видео через Fal.ai |
+| — (нет) | `slides`, `pptx` | 🔥 Генерация презентаций |
+| — (нет) | `figma-*` (7 скиллов) | 🔥 Прямая работа с Figma |
+
+**Почему TRIAL:**
+- ✅ Apache 2.0 — полная свобода использования
+- ✅ 37K+ ⭐ — самый популярный open-source дизайн-каталог
+- ✅ Совместимый формат скиллов (agentskills.io)
+- ✅ Можно cherry-pick отдельные скиллы в нашу экосистему
+- 🎯 Прямая польза: `fal-*` скиллы для генерации картинок/видео, `slides` для презентаций
+- 🎯 Рембрандт может использовать их design systems как референсы
+
+**Что попробовать первым:**
+1. `fal-generate` — генерация изображений для постов ВК/ОК (замена стоковым фото)
+2. `slides` / `pptx` — генерация презентаций для грантов (ai-grant-consalt)
+3. `gsap-core` — анимации для лендингов
+
+---
+
+### 6. Vibeyard — IDE для AI-кодинг-агентов (elirantutia)
+
+| Поле | Значение |
+|------|----------|
+| **Статус** | 🔵 ASSESS |
+| **URL** | https://github.com/elirantutia/vibeyard |
+| **Автор** | Eliran Tutia (indie dev) |
+| **Лицензия** | ✅ MIT |
+| **Язык** | TypeScript / Electron |
+| **GitHub** | ⭐ 994 stars · 127 forks |
+| **Платформы** | macOS (DMG), Linux (deb/AppImage), Windows (exe), npm |
+| **Что делает** | Desktop IDE для управления несколькими AI-кодинг-агентами. Multi-session, parallel execution, cost tracking, kanban board, session resume. |
+| **Дата оценки** | 2026-05-12 |
+
+**Ключевые фичи:**
+- 🖥️ **Multi-session** — несколько агент-сессий параллельно, каждая в своём PTY
+- 📊 **Cost & context tracking** — расходы, токены, контекстное окно в реальном времени
+- 📋 **Kanban board** — drag-and-drop задачи, каждая карточка → CLI-сессия одним кликом
+- 🔄 **Session resume** — продолжение работы после перезапуска
+- 🌐 **P2P session sharing** — шаринг терминала через WebRTC (read-only / read-write)
+- 🔍 **Session inspector** — timeline, cost breakdown, tool usage stats (`Cmd+Shift+I`)
+- 🤖 **AI Readiness Score** — оценка готовности проекта к AI-кодингу
+- 🌐 **Embedded browser** — открытие localhost прямо в табе, click-to-inspect → AI-редактирование
+- 🎨 **Swarm mode** — grid view всех сессий одновременно
+
+**Поддерживаемые CLI:**
+| Agent CLI | Статус |
+|-----------|--------|
+| Claude Code | ✅ |
+| OpenAI Codex CLI | ✅ |
+| Gemini CLI | ✅ |
+
+**Установка:**
+```bash
+npm i -g vibeyard && vibeyard
+# или скачать .dmg из Releases
+```
+
+**Почему ASSESS (а не TRIAL):**
+- ⚠️ Мы уже используем **Antigravity** — наш основной IDE для AI-агентов
+- ⚠️ 994 ⭐ — ещё молодой проект (создан 19.03.2026)
+- ⚠️ Electron = тяжёлый (на M1 с 8 GB — лишняя нагрузка)
+- ✅ Но: kanban + cost tracking + multi-session — интересные фичи
+- ✅ P2P sharing — полезно для командной работы
+
+**Что можно позаимствовать (идеи):**
+- 💡 **AI Readiness Score** — можно реализовать как скилл для нашей экосистемы
+- 💡 **Cost tracking dashboard** — встроить в finish-day или waza-audit
+- 💡 **Embedded browser + click-to-inspect** — идея для лендинг-аудита
+
+**Когда пересмотреть:**
+- Если Antigravity не покроет multi-agent orchestration
+- Если появится потребность в P2P session sharing для команды
+
+---
+
 ## 📝 Журнал изменений
 
 | Дата | Действие |
 |------|----------|
+| 2026-05-12 | Добавлен: Vibeyard (ASSESS) — IDE для AI-агентов, kanban + cost tracking |
+| 2026-05-12 | Добавлен: Open Design (TRIAL) — 100+ AI-дизайн-скиллов, 71 design system, Apache 2.0 |
+| 2026-05-12 | Добавлен: DFlash (ASSESS) — block diffusion для 2-6× ускорения LLM-инференса |
 | 2026-05-11 | ✅ Waza v0.31.0 УСТАНОВЛЕН, waza-audit.sh создан, интеграция в finish-day.sh |
 | 2026-05-11 | Waza → 🟢 ADOPT. Первый аудит: 168K токенов, 76 файлов, 41 скилл проверен |
 | 2026-05-11 | Добавлен: Waza (TRIAL) — Microsoft CLI для тестирования AI-скиллов |

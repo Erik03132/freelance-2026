@@ -270,23 +270,23 @@ async def _search_tavily(query: str, max_results: int = 3) -> list[dict]:
 
 async def _search_perplexity(query: str) -> list[dict]:
     """
-    Уровень 2: Perplexity Sonar — поиск через LLM.
+    Уровень 2: Perplexity Sonar — через OpenRouter.
     
-    Статус: ❌ Квота исчерпана (401 insufficient_quota).
-    Код готов — заработает после пополнения. 
+    Используем perplexity/sonar через OpenRouter API (тот же ключ что для LLM).
+    Это обходит квоту прямого Perplexity API (401 insufficient_quota).
     """
-    if not PERPLEXITY_KEY:
+    if not OPENROUTER_KEY:
         return []
     try:
-        async with httpx.AsyncClient(timeout=15) as client:
+        async with httpx.AsyncClient(timeout=20) as client:
             resp = await client.post(
-                "https://api.perplexity.ai/chat/completions",
+                "https://openrouter.ai/api/v1/chat/completions",
                 headers={
-                    "Authorization": f"Bearer {PERPLEXITY_KEY}",
+                    "Authorization": f"Bearer {OPENROUTER_KEY}",
                     "Content-Type": "application/json",
                 },
                 json={
-                    "model": "sonar",
+                    "model": "perplexity/sonar",
                     "messages": [{"role": "user", "content": query}],
                     "max_tokens": 500,
                 },
@@ -297,17 +297,17 @@ async def _search_perplexity(query: str) -> list[dict]:
                 content = data["choices"][0]["message"]["content"]
                 citations = data.get("citations", [])
                 result = {
-                    "title": "Perplexity Sonar",
+                    "title": "Perplexity Sonar (via OpenRouter)",
                     "url": citations[0] if citations else "",
                     "snippet": content,
                 }
-                print(f"🔍 Perplexity: ответ получен")
+                print(f"🔍 Perplexity (OpenRouter): ответ получен")
                 return [result]
             else:
                 err = data.get("error", {}).get("message", "")[:60]
-                print(f"⚠️ Perplexity: {resp.status_code} — {err}")
+                print(f"⚠️ Perplexity (OpenRouter): {resp.status_code} — {err}")
     except Exception as e:
-        print(f"⚠️ Perplexity: {e}")
+        print(f"⚠️ Perplexity (OpenRouter): {e}")
     return []
 
 
@@ -355,7 +355,7 @@ async def web_search(query: str, max_results: int = 3) -> list[dict]:
     Железобетонный каскад поиска. 3 уровня:
     
       1. Tavily (✅ 1000 req/мес бесплатно, чистый текст)
-      2. Perplexity Sonar (❌ квота, но код готов)
+      2. Perplexity Sonar (✅ через OpenRouter, без отдельного ключа)
       3. DuckDuckGo (∞ бесплатно, Instant Answer)
     
     Returns:
@@ -366,7 +366,7 @@ async def web_search(query: str, max_results: int = 3) -> list[dict]:
     if results:
         return results
 
-    # Уровень 2: Perplexity  
+    # Уровень 2: Perplexity через OpenRouter
     results = await _search_perplexity(query)
     if results:
         return results

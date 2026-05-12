@@ -137,6 +137,40 @@ python3 ~/freelance-2026/tools/content_grader.py -f draft.md --rubric all
 5. Прочитать `~/.gemini/antigravity/skills/MANIFEST.md` — **лёгкий каталог скиллов** (Progressive Disclosure)
 6. Если работа с конкретным проектом — прочитать его `PROJECT.md` / `README.md`
 7. НЕ пересказывать содержимое пользователю, просто работать
+8. **🔌 ПИНГ ВСЕХ API** — выполнить `bash ~/freelance-2026/tools/ping_apis.sh` и вывести таблицу статусов
+
+### 🌐 ОБЯЗАТЕЛЬНЫЙ US ПРОКСИ ДЛЯ ВСЕХ ВНЕШНИХ API
+
+**ЖЕЛЕЗНОЕ ПРАВИЛО:** Любой запрос к внешним API (Gemini, OpenRouter, Tavily, Perplexity, Unsplash, Pexels, Pixabay, FAL.ai, Google AI) **ОБЯЗАН** идти через US SOCKS5 прокси.
+
+```
+ПРОКСИ: из .env → HTTPS_PROXY / TELEGRAM_PROXY
+ФОРМАТ: socks5://user:pass@host:port
+ИСТОЧНИК: ai-eggs/.env (единый файл ключей)
+```
+
+**При пинге API:**
+```bash
+# ✅ ПРАВИЛЬНО — через прокси:
+curl --proxy socks5://user:pass@host:port https://api.example.com
+
+# ❌ НЕПРАВИЛЬНО — напрямую из РФ:
+curl https://api.example.com   # 403 Forbidden / timeout
+```
+
+**В Python-коде:**
+```python
+# ✅ ПРАВИЛЬНО:
+import os
+from dotenv import load_dotenv
+load_dotenv("ai-eggs/.env")
+# httpx/requests подхватят HTTPS_PROXY автоматически
+
+# ❌ НЕПРАВИЛЬНО:
+httpx.get("https://api.google.com")  # без прокси → 403
+```
+
+> **НАРУШЕНИЕ:** Любой внешний API-запрос без прокси из РФ — это **ГРУБАЯ ОШИБКА**. Прокси ОБЯЗАТЕЛЕН.
 
 ### 🎯 Progressive Disclosure (загрузка скиллов)
 
