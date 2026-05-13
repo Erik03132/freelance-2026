@@ -3,8 +3,10 @@
     "allow": [
       "Bash(which *)",
       "Bash(python3 *)",
-      "Bash(npx *)"
+      "Bash(npx *)",
+      "Bash(pm2 *)",
+      "Bash(bash *)"
     ]
   },
-  "$version": 3
+  "$version": 4
 }
