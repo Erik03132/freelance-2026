@@ -5,7 +5,9 @@
       "Bash(python3 *)",
       "Bash(npx *)",
       "Bash(pm2 *)",
-      "Bash(bash *)"
+      "Bash(bash *)",
+      "Bash(git *)",
+      "Bash(ffprobe *)"
     ]
   },
   "$version": 4

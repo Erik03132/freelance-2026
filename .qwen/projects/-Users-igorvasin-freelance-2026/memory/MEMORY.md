@@ -1,6 +1,8 @@
 - [daily_report формат по REPORTS_FORMAT.md](feedback_daily_report_format.md) — отчёт Заботкиной строго по шаблону от 12.05.2026
 - [Заботкина website-режим vezemcip.ru](feedback_website_zabotkina.md) — продавец-консультант на сайте: 5 шагов, никаких RAG
 - [Хроника 13.05.2026](reference_chronicle_2026-05-13.md) — Website-Заботкина + daily_report fix
-- [CEO Report данные из Битрикс24](reference_ceo_report.md) — 62 права админского вебхука, CRM, телефония, счета, тимменеджер
 - [CEO Report использует bitrix_scanner](feedback_ceo_report_scanner.md) — 🔴 ЖЕЛЕЗНОЕ: данные ТОЛЬКО из bitrix_scanner.py, не API напрямую
 - [SEARCH-FIRST PROTOCOL](feedback_search_first_protocol.md) — 🔴 ЖЕЛЕЗНОЕ: скиллы → GitHub → своя голова
+- [Unified Morning Report](feedback_unified_morning_report.md) — 🌞 08:00 MSK: CRM + транскрибация + аудит в ОДНОМ отчёте Игорю
+- [Morning Report Cascade](reference_morning_cascade.md) — 🔄 02:00→03:00→08:00 с cron-страховкой
+- [TTS голос Puck — ЗАПРЕЩЁН](feedback_tts_voice_puck.md) — ❌ Puck ужасен, использовать Kore/Aoede/Charon
