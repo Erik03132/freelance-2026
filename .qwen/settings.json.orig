@@ -6,7 +6,21 @@
       "Bash(npx *)",
       "Bash(pm2 *)",
       "Bash(bash *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(ffprobe *)",
+      "Bash(brew *)",
+      "Bash(xargs *)",
+      "Bash(file *)",
+      "Bash(ssh *)",
+      "Bash(cat *)",
+      "Bash(do *)",
+      "Bash(head *)",
+      "Bash(done)",
+      "Bash(find *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(tee *)",
+      "Bash(curl *)"
     ]
   },
   "$version": 4
