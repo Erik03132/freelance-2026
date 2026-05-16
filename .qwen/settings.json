@@ -21,7 +21,11 @@
       "Bash(cp *)",
       "Bash(tee *)",
       "Bash(curl *)",
-      "Bash(echo *)"
+      "Bash(echo *)",
+      "Bash(open *)",
+      "Bash(nohup *)",
+      "Bash(pkill *)",
+      "Bash(sleep *)"
     ]
   },
   "$version": 4

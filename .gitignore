@@ -57,10 +57,15 @@ tmp/
 .env
 .env.local
 .env.*.local
+.env.mango
 collected_envs/
 *.pem
 *.key
 *.p12
+
+# === Root-level test files with secrets ===
+/mango_api.py
+/test_mango_call.py
 
 # === Git bundles ===
 *.bundle

@@ -20,7 +20,11 @@
       "Bash(mkdir *)",
       "Bash(cp *)",
       "Bash(tee *)",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Bash(echo *)",
+      "Bash(open *)",
+      "Bash(nohup *)",
+      "Bash(pkill *)"
     ]
   },
   "$version": 4
