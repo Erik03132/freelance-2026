@@ -97,8 +97,47 @@ done
 
 # 7. Чекпоинт и Стенограммы
 mkdir -p "$WORKSPACE/checkpoints" "$WORKSPACE/reports"
-cp "$WORKSPACE/chp.md" "$WORKSPACE/checkpoints/chp_${TIMESTAMP}.md"
-backup_file "$WORKSPACE/chp.md" "$BACKUP_DIR/chp.md" "chp.md (свежий)"
+
+# Проверяем свежесть chp.md — если старше 24ч, генерируем автоматический
+CHP_FILE="$WORKSPACE/chp.md"
+CHP_STALE=false
+if [[ -f "$CHP_FILE" ]]; then
+    CHP_AGE=$(( $(date +%s) - $(stat -f%m "$CHP_FILE" 2>/dev/null || stat -c%Y "$CHP_FILE" 2>/dev/null || echo 0) ))
+    if (( CHP_AGE > 86400 )); then
+        CHP_STALE=true
+    fi
+else
+    CHP_STALE=true
+fi
+
+if [[ "$CHP_STALE" == "true" ]]; then
+    echo -e "  ${YELLOW}⚠️  chp.md устарел (>24ч). Генерирую свежий чекпоинт...${NC}"
+    CHRONICLE_TODAY="$WORKSPACE/chronicles/chronicle_${DATE_SHORT}.md"
+
+    cat > "$CHP_FILE" <<AUTOCHP
+# 🏁 ЧЕКПОИНТ: $(date '+%Y-%m-%d %H:%M') MSK (авто)
+
+## ⚠️ Этот чекпоинт сгенерирован автоматически (finish_day.sh)
+> Агент не обновил chp.md вручную. Данные ниже — из автоматических источников.
+
+## 📜 Хроника дня
+$(if [[ -f "$CHRONICLE_TODAY" ]]; then head -50 "$CHRONICLE_TODAY"; else echo "Хроника за $DATE_SHORT не найдена."; fi)
+
+## 📝 Git log (последние 10 коммитов)
+\`\`\`
+$(cd "$WORKSPACE" && git log --oneline -10 2>/dev/null || echo "git log недоступен")
+\`\`\`
+
+---
+
+> 🤖 **Finish-Day автоматический:** $(date '+%H:%M %d.%m.%Y')
+AUTOCHP
+
+    echo -e "  ${GREEN}✅ Свежий chp.md сгенерирован${NC}"
+fi
+
+cp "$CHP_FILE" "$WORKSPACE/checkpoints/chp_${TIMESTAMP}.md"
+backup_file "$CHP_FILE" "$BACKUP_DIR/chp.md" "chp.md (свежий)"
 backup_dir "$WORKSPACE/reports" "$BACKUP_DIR/reports" "Technical Reports (Stenograms)"
 
 echo -e "  ${GREEN}✅ Чекпоинт архивирован: checkpoints/chp_${TIMESTAMP}.md${NC}"

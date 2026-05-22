@@ -84,6 +84,17 @@ module.exports = {
       env: {
         PYTHONPATH: "/root/antigravity/angel-backend:/root/antigravity/ai-eggs/agent"
       }
+    },
+    {
+      name: "baresip-watchdog",
+      script: "/opt/baresip_watchdog.sh",
+      cwd: "/root",
+      interpreter: "bash",
+      ...CRASH_PROTECTION,
+      env: {
+        SCREEN_NAME: "sip_bot",
+        BARESIP_BIN: "/usr/bin/baresip"
+      }
     }
   ]
 };
