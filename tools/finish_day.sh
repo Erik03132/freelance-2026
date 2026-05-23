@@ -306,6 +306,15 @@ fi
 # ========================= ИТОГ ==============================================
 
 echo ""
+echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "  🖱️  Синхронизация .cursor/rules/..."
+if [ -f "$WORKSPACE/tools/sync_cursor_rules.sh" ]; then
+    bash "$WORKSPACE/tools/sync_cursor_rules.sh" 2>/dev/null && \
+        echo -e "  ${GREEN}✅ Cursor rules обновлены ($(ls "$WORKSPACE/.cursor/rules/global/"*.mdc 2>/dev/null | wc -l | tr -d ' ') скиллов)${NC}" || \
+        echo -e "  ${YELLOW}⚠️  Cursor sync failed${NC}"
+fi
+
+echo ""
 echo -e "${BOLD}${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${BOLD}${GREEN}  ✅  FINISH-DAY ВЫПОЛНЕН${NC}"
 echo -e "${BOLD}${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"

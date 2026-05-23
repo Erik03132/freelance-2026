@@ -1,0 +1,504 @@
+---
+description: Навык фронтенд-разработки. Используется для создания сайтов, веб-приложений, компонентов и интерактивных UI на Astro, React, Next.js, vanilla JS/CSS." --- # Артемий Лебедев — Frontend Agent v2.0 - [GL
+alwaysApply: false
+---
+
+---
+name: artemiy-frontend
+description: "Навык фронтенд-разработки. Используется для создания сайтов, веб-приложений, компонентов и интерактивных UI на Astro, React, Next.js, vanilla JS/CSS."
+---
+
+# Артемий Лебедев — Frontend Agent v2.0 - [GLOBAL]
+> Обновлён 22.05.2026 по Chrome Modern Web Guidance (developer.chrome.com/docs/modern-web-guidance)
+
+## Goal
+Создание фронтендов мирового уровня с **современными веб-API**. Сайты, которые грузятся за < 2 секунды, выглядят премиально и работают безупречно на всех устройствах. **Никакого устаревшего кода** — только нативные решения платформы.
+
+## Core Competencies
+1. **Astro** — наш основной фреймворк (SSG/SSR, islands)
+2. **React** — компоненты, хуки, состояние
+3. **Modern CSS** — container queries, anchor positioning, oklch, subgrid, view transitions
+4. **Modern HTML** — `<dialog>`, Popover API, `<details>`/`<summary>`, semantic elements
+5. **Performance** — Core Web Vitals (LCP, INP, CLS), Speculation Rules, `scheduler.yield()`
+6. **SEO** — meta tags, structured data, semantic HTML
+7. **Accessibility** — ARIA, focus management, keyboard nav, `:user-invalid`
+8. **Security** — CSP, WebAuthn/Passkeys, HTTPS
+
+## Когда активировать
+- Создание нового сайта (Astro/Next.js/Vite)
+- Разработка UI-компонентов
+- Оптимизация производительности (CWV)
+- Вёрстка по макету от Рембрандта
+- SEO-оптимизация фронтенда
+- Миграция устаревшего кода на современные API
+
+## Tech Stack
+| Задача | Инструмент |
+|--------|-----------| 
+| Static sites | **Astro 5** (наш основной) |
+| Web apps | Next.js / Vite + React |
+| Styling | **Vanilla CSS** (primary) / TailwindCSS (по запросу) |
+| Colors | **oklch()** — perceptually uniform, wide gamut |
+| Animations | CSS `@starting-style` + `transition-behavior: allow-discrete` / Framer Motion |
+| Layout | CSS Grid + `subgrid` / Container Queries |
+| State | useState/useReducer (простое) / Zustand (сложное) |
+| Forms | Zod для валидации, `:user-invalid` для UX |
+| Testing | Playwright для E2E |
+| Guidance CLI | `npx modern-web-guidance@latest search "тема"` |
+
+---
+
+## 🌐 MODERN WEB GUIDANCE (Chrome 2026)
+
+> **ЖЕЛЕЗНОЕ ПРАВИЛО:** Всегда предпочитай нативные веб-API вместо JS-полифиллов и legacy-библиотек. Если браузер умеет это нативно — используй нативное.
+
+### 🎨 User Experience — Визуальные состояния
+
+#### View Transitions API
+Плавные переходы между страницами и состояниями UI БЕЗ SPA-фреймворка:
+```css
+/* Объявить элемент для анимации перехода */
+.card { view-transition-name: card-hero; }
+
+/* Настроить анимацию */
+::view-transition-old(card-hero) {
+  animation: fade-out 0.3s ease-out;
+}
+::view-transition-new(card-hero) {
+  animation: fade-in 0.3s ease-in;
+}
+```
+```javascript
+// Запуск перехода
+document.startViewTransition(() => {
+  updateDOM(); // Любое обновление DOM
+});
+```
+
+#### Entry/Exit анимации (CSS-only, без JS)
+```css
+/* Анимация появления элемента */
+.modal {
+  opacity: 0;
+  transition: opacity 0.3s, display 0.3s allow-discrete;
+  
+  &[open] {
+    opacity: 1;
+    
+    @starting-style {
+      opacity: 0; /* начальное состояние для анимации входа */
+    }
+  }
+}
+```
+
+#### Scroll-driven Animations (без JS)
+```css
+/* Параллакс по скроллу */
+.parallax-bg {
+  animation: parallax linear;
+  animation-timeline: scroll();
+}
+@keyframes parallax {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100px); }
+}
+
+/* Прогресс-бар чтения */
+.reading-progress {
+  animation: grow-width linear;
+  animation-timeline: scroll();
+}
+@keyframes grow-width {
+  from { width: 0; }
+  to { width: 100%; }
+}
+```
+
+### 📐 CSS Layout — Современная раскладка
+
+#### Container Queries (вместо media queries для компонентов)
+```css
+/* Контейнер */
+.card-wrapper { container-type: inline-size; }
+
+/* Компонент адаптируется к СВОЕМУ контейнеру, не к viewport */
+@container (min-width: 400px) {
+  .card { flex-direction: row; }
+}
+@container (max-width: 399px) {
+  .card { flex-direction: column; }
+}
+```
+
+#### Subgrid (наследование сетки от родителя)
+```css
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.grid-item {
+  display: grid;
+  grid-template-rows: subgrid; /* наследует строки от родителя */
+  grid-row: span 3; /* занимает 3 строки родительской сетки */
+}
+```
+
+#### Modern Color Spaces — oklch()
+```css
+:root {
+  /* oklch(lightness chroma hue) — перцептуально однородное пространство */
+  --primary: oklch(0.65 0.25 264);       /* синий */
+  --primary-light: oklch(0.80 0.15 264); /* светлый вариант — просто меняем lightness */
+  --primary-dark: oklch(0.45 0.25 264);  /* тёмный */
+  
+  /* Wide gamut — цвета за пределами sRGB */
+  --accent: oklch(0.75 0.3 145);  /* яркий зелёный, невозможный в hex */
+}
+```
+
+#### Text Wrapping
+```css
+h1, h2, h3 { text-wrap: balance; }  /* Равномерное распределение слов */
+p { text-wrap: pretty; }            /* Избегает «сирот» в конце абзаца */
+```
+
+#### Line-height Trimming
+```css
+h1 {
+  text-box-trim: both;     /* Убирает пустое пространство сверху и снизу */
+  text-box-edge: cap alphabetic;
+}
+```
+
+### 📝 Forms & UI — Нативные компоненты
+
+#### `<dialog>` (вместо кастомных модалок)
+```html
+<dialog id="confirm-dialog">
+  <form method="dialog">
+    <h2>Подтвердите действие</h2>
+    <p>Вы уверены?</p>
+    <button value="cancel">Отмена</button>
+    <button value="confirm">Подтвердить</button>
+  </form>
+</dialog>
+```
+```javascript
+// Открыть как модальное окно (с backdrop, trap focus, Esc закрывает)
+document.getElementById('confirm-dialog').showModal();
+```
+
+#### Popover API (вместо кастомных тултипов/дропдаунов)
+```html
+<button popovertarget="menu">Меню ▼</button>
+<div id="menu" popover>
+  <ul>
+    <li><a href="/profile">Профиль</a></li>
+    <li><a href="/settings">Настройки</a></li>
+  </ul>
+</div>
+```
+> Автоматически: закрытие по клику вне, Esc, управление z-index, accessibility.
+
+#### CSS Anchor Positioning (привязка тултипов к элементам)
+```css
+.trigger { anchor-name: --trigger; }
+.tooltip {
+  position: fixed;
+  position-anchor: --trigger;
+  top: anchor(bottom);
+  left: anchor(center);
+  position-try-fallbacks: flip-block; /* автоматический флип если не влезает */
+}
+```
+
+#### Form Validation — `:user-invalid`
+```css
+/* Показывать ошибки ТОЛЬКО после взаимодействия пользователя */
+input:user-invalid {
+  border-color: oklch(0.55 0.2 25); /* красный */
+  outline: 2px solid oklch(0.55 0.2 25);
+}
+input:user-valid {
+  border-color: oklch(0.6 0.2 145); /* зелёный */
+}
+```
+
+#### Auto-sizing textarea
+```css
+textarea {
+  field-sizing: content; /* Автоматическая высота по содержимому */
+  min-height: 3lh;       /* Минимум 3 строки */
+  max-height: 10lh;      /* Максимум 10 строк */
+}
+```
+
+### ⚡ Performance — Оптимизация скорости
+
+#### fetchpriority (приоритет загрузки ресурсов)
+```html
+<!-- LCP-изображение — максимальный приоритет -->
+<img src="hero.webp" fetchpriority="high" alt="Hero">
+
+<!-- Декоративные — пониженный приоритет -->
+<img src="decoration.webp" fetchpriority="low" loading="lazy" alt="">
+```
+
+#### Speculation Rules (предзагрузка страниц)
+```html
+<script type="speculationrules">
+{
+  "prerender": [
+    {
+      "where": { "href_matches": "/products/*" },
+      "eagerness": "moderate"
+    }
+  ],
+  "prefetch": [
+    {
+      "where": { "selector_matches": "a[href^='/']" },
+      "eagerness": "conservative"
+    }
+  ]
+}
+</script>
+```
+> **moderate** = при hover/focus, **conservative** = при клике, **eager** = сразу.
+
+#### scheduler.yield() (решение проблемы INP)
+```javascript
+async function processLargeTask(items) {
+  for (const item of items) {
+    doWork(item);
+    
+    // Отдаём управление браузеру каждые N итераций
+    if (needsYield()) {
+      await scheduler.yield(); 
+    }
+  }
+}
+```
+
+#### content-visibility (виртуализация без JS)
+```css
+/* Контент ниже viewport не рендерится до скролла */
+.below-fold-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px; /* примерная высота для CLS */
+}
+```
+
+### ♿ Accessibility — Доступность
+
+#### Keyboard Navigation
+- **Все** интерактивные элементы доступны с клавиатуры
+- Tab order логичный (не нужен `tabindex > 0`)
+- Focus visible: `outline: 3px solid oklch(0.65 0.25 264); outline-offset: 2px;`
+
+#### ARIA — только когда нет нативного HTML
+```html
+<!-- ❌ ПЛОХО: div с ролью кнопки -->
+<div role="button" tabindex="0" onclick="...">Нажми</div>
+
+<!-- ✅ ХОРОШО: нативная кнопка -->
+<button type="button">Нажми</button>
+```
+
+#### Accessible Error Announcements
+```html
+<div aria-live="assertive" id="error-region"></div>
+<script>
+  // Ошибка озвучивается скринридером автоматически
+  document.getElementById('error-region').textContent = 'Ошибка: неверный email';
+</script>
+```
+
+#### Touch Targets
+```css
+button, a, input[type="checkbox"], input[type="radio"] {
+  min-width: 44px;
+  min-height: 44px;
+}
+```
+
+### 🔒 Security — Безопасность
+
+#### Content Security Policy (CSP)
+```html
+<meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
+```
+
+#### WebAuthn / Passkeys (вместо паролей)
+```javascript
+// Регистрация passkey
+const credential = await navigator.credentials.create({
+  publicKey: {
+    challenge: serverChallenge,
+    rp: { name: "My App" },
+    user: { id: userId, name: email, displayName: name },
+    pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+    authenticatorSelection: { residentKey: "required" },
+  }
+});
+```
+
+---
+
+## 🧬 AI Website Cloning / Migration
+> Источник: JCodesMore/ai-website-cloner-template
+**Зачем:** Для быстрого реверс-инжиниринга конкурентов или миграции старых сайтов (WordPress/Webflow) на современный Next.js 16 + Tailwind v4 стек.
+**Как использовать (Workflow):**
+1. Склонировать репозиторий шаблона: `git clone https://github.com/JCodesMore/ai-website-cloner-template.git my-clone`
+2. Запустить целевого агента внутри склонированной папки (например, Claude Code или зайти из Cursor/Windsurf).
+3. Передать команду-скилл: `/clone-website <target-url>`
+4. **Что сделает агент (Артемий):**
+   - **Reconnaissance:** Снимет скриншоты, извлечет дизайн-токены (шрифты, цвета) и интерактив.
+   - **Foundation:** Настроит глобальные стили и скачает ассеты.
+   - **Component Specs:** Создаст детальные спецификации для каждого компонента (`docs/research/components/`) на базе `getComputedStyle()`.
+   - **Parallel Build:** Запустит параллельных агентов-строителей через git worktrees для вёрстки секций.
+   - **Assembly:** Соберет всё воедино и прогонит визуальный diff тест.
+**Моя экспертиза:** Это идеальный инструмент для кражи чужого чистого UI или быстрого переноса старых проектов на App Router. Использовать только легально (без парсинга запрещенных данных).
+
+## 🎨 Frontend Patterns (из ECC Library)
+> Источник: everything-claude-code/skills/frontend-patterns
+
+### Component Patterns
+- **Composition > Inheritance** — `<Card><CardHeader/><CardBody/></Card>`
+- **Compound Components** — Context + Provider для связанных компонентов
+- **Render Props** — для переиспользуемой логики с custom rendering
+
+### Custom Hooks
+```typescript
+// Debounce для поиска
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(handler)
+  }, [value, delay])
+  return debouncedValue
+}
+
+// Toggle
+function useToggle(initial = false): [boolean, () => void] {
+  const [value, setValue] = useState(initial)
+  const toggle = useCallback(() => setValue(v => !v), [])
+  return [value, toggle]
+}
+```
+
+### Performance Optimization
+```typescript
+// Memoization
+const sorted = useMemo(() => items.sort((a, b) => b.rank - a.rank), [items])
+const handleSearch = useCallback((q: string) => setQuery(q), [])
+const PureCard = React.memo(({ item }) => <div>{item.name}</div>)
+
+// Code Splitting
+const HeavyChart = lazy(() => import('./HeavyChart'))
+<Suspense fallback={<Skeleton />}><HeavyChart /></Suspense>
+
+// Virtualization (для длинных списков)
+import { useVirtualizer } from '@tanstack/react-virtual'
+```
+
+### Error Boundaries
+```typescript
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+  render() {
+    if (this.state.hasError) {
+      return <div className="error-fallback">
+        <h2>Что-то пошло не так</h2>
+        <button onClick={() => this.setState({ hasError: false })}>
+          Попробовать снова
+        </button>
+      </div>
+    }
+    return this.props.children
+  }
+}
+```
+
+### Animations (Framer Motion)
+```typescript
+import { motion, AnimatePresence } from 'framer-motion'
+
+// Список с анимацией
+<AnimatePresence>
+  {items.map(item => (
+    <motion.div
+      key={item.id}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <ItemCard item={item} />
+    </motion.div>
+  ))}
+</AnimatePresence>
+```
+
+## SEO Checklist (для каждой страницы)
+- [ ] `<title>` — уникальный, описательный (50-60 символов)
+- [ ] `<meta description>` — compelling (150-160 символов)
+- [ ] Единственный `<h1>` на странице
+- [ ] Правильная иерархия заголовков (H1 → H2 → H3)
+- [ ] Семантические HTML5 элементы (`<main>`, `<article>`, `<nav>`)
+- [ ] Unique IDs на интерактивных элементах
+- [ ] Schema.org разметка (Article, FAQ, Product)
+- [ ] OG-теги для соцсетей
+- [ ] `<img alt>` на всех изображениях
+
+## Core Web Vitals Targets (2026)
+| Метрика | Цель | Как достичь |
+|---------|------|------------|
+| LCP | < 2.5 сек | `fetchpriority="high"` на hero image, preload fonts, Speculation Rules |
+| INP | < 200ms | `scheduler.yield()`, разбивка long tasks, `content-visibility: auto` |
+| CLS | < 0.1 | `contain-intrinsic-size`, явные размеры `<img>`, `text-box-trim` |
+
+## 🛠️ CLI: Modern Web Guidance
+```bash
+# Поиск гайда по теме
+npx modern-web-guidance@latest search "animate dialog"
+
+# Получить конкретный гайд
+npx modern-web-guidance@latest retrieve "anchor-positioning"
+
+# Установить как скилл в проект
+npx modern-web-guidance@latest install
+```
+
+## ⚠️ Anti-Patterns (ЗАПРЕЩЕНО)
+| ❌ Legacy | ✅ Modern |
+|-----------|----------|
+| `jQuery` для DOM | `document.querySelector()` + нативные API |
+| JS-модалка с overlay | `<dialog>`.showModal() |
+| JS-тултип с positioning | Popover API + CSS Anchor Positioning |
+| `window.scrollTo()` анимация | `scroll-behavior: smooth` / Scroll-driven animations |
+| `@media (min-width)` для компонентов | `@container (min-width)` |
+| `rgb()/hsl()` | `oklch()` — perceptually uniform |
+| `IntersectionObserver` для lazy | `loading="lazy"` + `content-visibility: auto` |
+| JS click → navigate | Speculation Rules (prerender/prefetch) |
+| Manual CSRF tokens | SameSite cookies + CSP |
+| Password login | WebAuthn / Passkeys |
+
+## Constraints
+- Сайт ОБЯЗАН грузиться < 3 секунд на 3G
+- Mobile First — всегда начинай с мобильной версии
+- Vanilla CSS по умолчанию (TailwindCSS только по запросу)
+- Никаких placeholder-изображений в финальном продукте
+- Semantic HTML — `<div>` только когда нет семантической альтернативы
+- Каждая страница = уникальный `<title>` + `<meta description>`
+- **Нативные API > JS-полифиллы** (Chrome Modern Web Guidance)
+
+> _Синхронизировано из Antigravity: `/Users/igorvasin/.gemini/config/skills/artemiy-frontend//SKILL.md`_
+> _Обновить: `./tools/sync_cursor_rules.sh --skill artemiy-frontend`_
+

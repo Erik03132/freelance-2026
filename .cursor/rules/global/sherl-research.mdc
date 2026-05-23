@@ -1,0 +1,365 @@
+---
+description: Навык интеллектуальной разведки (GEO/Market Intelligence). Используется для мониторинга нейровыдачи, анализа конкурентов и поиска данных о ценах. --- # Sherl Research Skill (Intel) - [GLOBAL] ## Goal
+alwaysApply: false
+---
+
+---
+name: sherl-research
+description: Навык интеллектуальной разведки (GEO/Market Intelligence). Используется для мониторинга нейровыдачи, анализа конкурентов и поиска данных о ценах.
+---
+
+# Sherl Research Skill (Intel) - [GLOBAL]
+
+## Goal
+Сбор и структурирование данных из внешнего мира (ИИ-чатботы, сайты конкурентов, поисковая выдача) для принятия стратегических решений.
+
+## Instructions
+1. **GEO-Scan:** Систематически опрашивай нейросети (через веб-поиск) на предмет присутствия брендов клиента в ответах.
+2. **Competitor Audit:** Анализируй сайты конкурентов на наличие «коммерческих факторов» (цены, калькуляторы, формы).
+3. **Data Synthesis:** Превращай «сырой» поиск в лаконичные таблицы сравнения.
+4. **LLM Check:** Используй `view_file` для чтения `llms.txt` конкурентов, если они есть.
+
+## 🔍 SEO-анализ конкурентов — 7 шагов (методология)
+
+### Шаг 1: Определение конкурентов
+- **Прямые** — те же товары/услуги, та же аудитория
+- **Косвенные** — та же отрасль, другое позиционирование
+- **Потенциальные** — соседняя категория, могут расшириться
+- Поиск: Google/Яндекс по основным запросам + Serpstat «Конкуренты»
+- ⚠️ Исключить агрегаторы (Avito, маркетплейсы) — они не конкуренты
+
+### Шаг 2: Семантика + трафик
+- Сравнить объём семантики (кол-во ключей у конкурентов vs у нас)
+- **Уникальные запросы** — ключи, по которым конкуренты получают трафик, а мы нет → новые темы для контента
+- Трафик: SimilarWeb (общий масштаб, источники, доля органики)
+- ИКС (Яндекс) — уровень доверия поисковой системы
+
+### Шаг 3: Видимость — позиции по ключам
+- Инструменты: Topvisor, Serpstat, SE Ranking
+- Сводная таблица: строки = запросы, столбцы = конкуренты
+- Отдельно для Google / Яндекс (могут сильно отличаться)
+- Проверить расширенные сниппеты (рейтинг, отзывы, Schema.org)
+
+### Шаг 4: Контент-анализ
+- Разделить по типам: главная, категории, карточки, статьи
+- Структура текстов: H1-H6, списки, таблицы, мультимедиа
+- Качество: уникальность, экспертность, глубина раскрытия темы
+- Блог: частота публикаций, темы, авторство
+
+### Шаг 5: Ссылочный профиль
+- Инструменты: Majestic (основной) + DataForSEO (допы) + Ahrefs v2 (полнота)
+- Сравнить: кол-во бэклинков, доменов-доноров, показатели доверия
+- Анкор-листы: брендовые / ключевые / естественные
+- Соотношение follow / nofollow
+- Внутренняя перелинковка
+
+### Шаг 6: Технический аудит
+- PageSpeed Insights / GTmetrix → Core Web Vitals
+- Mobile-First: адаптивность + удобство навигации
+- SSL (HTTPS), sitemap.xml, robots.txt
+- Ошибки 404, дубли страниц, серверные ошибки
+
+### Шаг 7: Сводная таблица + стратегия
+- Таблица: метрики × конкуренты → слабые стороны наших сайтов
+- Приоритеты: семантические пробелы → контент → ссылки → техника
+
+### Источник: https://www.sostav.ru/blogs/282781/79317
+
+## 📊 Market Research (из ECC Library)
+> Источник: everything-claude-code/skills/market-research
+> Дополняет SEO-анализ конкурентов бизнес-аналитикой рынка.
+
+### Принцип: Исследование ради решений, не ради отчётов
+
+### Стандарты исследований
+1. Каждый важный тезис — **с источником**
+2. Предпочитай свежие данные, помечай устаревшие
+3. Включай **контраргументы и downside cases**
+4. Переводи находки в **решение**, не просто в резюме
+5. Разделяй **факт, вывод и рекомендацию** явно
+
+### Режимы исследования
+
+#### Конкурентный анализ (расширенный)
+Собирай:
+- Реальный продукт, **не маркетинговый копирайт**
+- Фандинг и история инвесторов (если публичны)
+- Метрики traction (если публичны)
+- Подсказки по дистрибуции и ценообразованию
+- Сильные/слабые стороны и позиционные пробелы
+
+#### Оценка рынка (TAM/SAM/SOM)
+- **Top-down**: из отчётов и публичных датасетов
+- **Bottom-up**: из реалистичных допущений по привлечению клиентов
+- **Явные допущения** для каждого логического скачка
+
+#### Технология / Вендор Research
+Собирай:
+- Как это работает (архитектура)
+- Trade-offs и сигналы адопции
+- Сложность интеграции
+- Lock-in, безопасность, compliance, операционный риск
+
+### Формат вывода (по умолчанию)
+```
+1. Executive Summary
+2. Ключевые находки
+3. Импликации
+4. Риски и оговорки
+5. Рекомендация
+6. Источники
+```
+
+### Quality Gate
+- [ ] Все числа с источниками или помечены как estimates
+- [ ] Старые данные помечены
+- [ ] Рекомендация следует из доказательств
+- [ ] Риски и контраргументы включены
+- [ ] Вывод делает принятие решения проще
+
+---
+
+## 🔍 Search-First (из ECC Library)
+> Источник: everything-claude-code/skills/search-first
+
+### Workflow: Исследуй прежде чем действовать
+```
+1. NEED ANALYSIS — Что нужно? Какие ограничения?
+2. PARALLEL SEARCH — Площадки + инструменты + GitHub + Web
+3. EVALUATE — Функциональность, актуальность, надёжность
+4. DECIDE — Adopt / Extend / Build
+5. IMPLEMENT — Минимальные усилия
+```
+
+### Quick Mode (перед любым действием):
+0. Это уже есть в наших проектах? → `grep` по кодовой базе
+1. Это распространённая задача? → Поиск готовых решений
+2. Есть ли MCP/API для этого? → Проверить интеграции
+3. Есть ли скилл для этого? → Проверить ECC Library
+4. Есть ли OSS-реализация? → GitHub code search
+
+### Anti-Patterns
+- ❌ Ручной сбор данных без проверки автоматизации
+- ❌ Игнорирование существующих инструментов (SimilarWeb, Serpstat)
+- ❌ Пересоздание того, что уже есть в нашей экосистеме
+
+---
+
+## 🔬 Deep Research (из ECC Library)
+> Источник: everything-claude-code/skills/deep-research
+> Дата установки: 2026-04-22
+
+### 6-шаговый pipeline глубокого исследования
+
+#### 1. Понимание цели
+Задай 1-2 вопроса:
+- «Цель — изучить, принять решение или написать?»
+- «Есть специфический угол или глубина?» (если «просто исследуй» — иди с дефолтами)
+
+#### 2. Планирование
+Разбей тему на **3-5 подвопросов**:
+```
+Тема: «Влияние AI на сельское хозяйство»
+→ Какие AI-приложения используются сейчас?
+→ Какие результаты измерены?
+→ Какие барьеры внедрения?
+→ Кто лидеры рынка?
+→ Какой размер рынка и рост?
+```
+
+#### 3. Мульти-источниковый поиск
+Для КАЖДОГО подвопроса:
+- 2-3 разных вариации ключевых слов
+- Микс: общий поиск + новостной
+- Цель: **15-30 уникальных источников**
+- Приоритет: академические > официальные > новости > блоги > форумы
+
+#### 4. Глубокое чтение ключевых источников
+- Прочитай **3-5 ключевых** источников полностью
+- НЕ полагайся только на сниппеты поиска
+
+#### 5. Синтез и формат отчёта
+```markdown
+# [Тема]: Отчёт об исследовании
+*Дата: [дата] | Источников: [N] | Достоверность: [Высокая/Средняя/Низкая]*
+
+## Executive Summary
+[3-5 предложений ключевых находок]
+
+## 1. [Первая тема]
+[Находки с inline цитатами]
+- Key point ([Источник](url))
+
+## Ключевые выводы
+- [Actionable insight 1]
+
+## Источники
+1. [Заголовок](url) — [one-line summary]
+
+## Методология
+Исследовано [N] запросов. Проанализировано [M] источников.
+```
+
+#### 6. Качественные правила
+- ✅ **Каждое утверждение — с источником**
+- ✅ **Cross-reference**: если только один источник → пометить как неверифицированное
+- ✅ **Свежесть**: предпочитай последние 12 месяцев
+- ✅ **Признавай пробелы**: если данных нет → «insufficient data found»
+- ✅ **Факт ≠ вывод**: помечай estimates, прогнозы и мнения явно
+- ❌ **Никаких галлюцинаций**
+
+---
+
+## 🔌 Perplexity API — ИНСТРУМЕНТ №1 ДЛЯ ИССЛЕДОВАНИЙ
+> Дата обновления: 2026-05-05 | Статус: ✅ РАБОТАЕТ через OpenRouter
+
+### ⚠️ БОЕВОЙ СТАТУС (05.05.2026)
+- ❌ **Прямой ключ** (`pplx-...`) — квота исчерпана (`insufficient_quota`)
+- ✅ **Через OpenRouter** (`perplexity/sonar`) — **РАБОТАЕТ!** Это основной канал
+- Ключ `OPENROUTER_API_KEY` есть в `ai-eggs/.env` (и локально, и на VPS)
+- Стоимость: ~$0.005 за запрос (sonar), ~$0.02 за запрос (sonar-reasoning)
+
+### Когда использовать Perplexity (ВСЕГДА ПЕРВЫЙ!)
+1. **Любой маркетинговый отчёт** → Perplexity sonar-reasoning
+2. **Проверка цен конкурентов** → Perplexity sonar
+3. **GEO-сканирование бренда** → Perplexity sonar
+4. **Фактчек данных** → Perplexity sonar
+5. **Глубокое исследование рынка** → Perplexity sonar-pro
+
+### Модели Perplexity (актуальные 2026)
+| Модель | Когда использовать | Цена (input/output per 1M) |
+|--------|--------------------|---------------------------|
+| `sonar-reasoning` | Глубокий анализ, multi-step research | $1 / $5 |
+| `sonar-pro` | Комплексные запросы, конкурентный анализ | $3 / $15 |
+| `sonar` | Быстрые фактчеки, простые вопросы | $1 / $1 |
+
+### Cost-Aware Model Selection
+```python
+def select_perplexity_model(query: str) -> str:
+    """Дешёвая модель для простых, дорогая для сложных."""
+    complex_signals = ["проанализируй", "сравни", "исследуй", "конкуренты", "рынок"]
+    if any(s in query.lower() for s in complex_signals) or len(query) > 300:
+        return "sonar-reasoning"  # Глубокий анализ
+    return "sonar"  # Быстрый фактчек (5x дешевле)
+```
+
+### Интеграция через OpenRouter (наш стек)
+```python
+import httpx
+
+OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
+
+async def perplexity_search(query: str, model: str = None) -> dict:
+    """Поиск через Perplexity API (OpenRouter proxy)."""
+    if not model:
+        model = select_perplexity_model(query)
+    
+    async with httpx.AsyncClient(timeout=60) as client:
+        response = await client.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_KEY}",
+                "HTTP-Referer": "https://antigravity.ai",
+            },
+            json={
+                "model": f"perplexity/{model}",
+                "messages": [
+                    {"role": "system", "content": "Ты аналитик-исследователь. Отвечай на русском. Всегда указывай источники."},
+                    {"role": "user", "content": query}
+                ],
+                "temperature": 0.1,  # Минимальная для фактов
+            }
+        )
+        data = response.json()
+        return {
+            "answer": data["choices"][0]["message"]["content"],
+            "model": model,
+            "usage": data.get("usage", {}),
+        }
+```
+
+### Прямой Perplexity API (без OpenRouter)
+```python
+async def perplexity_direct(query: str) -> str:
+    """Прямой вызов Perplexity API (если нужен search_context)."""
+    PERPLEXITY_KEY = os.getenv("PERPLEXITY_API_KEY")
+    
+    async with httpx.AsyncClient(timeout=60) as client:
+        response = await client.post(
+            "https://api.perplexity.ai/chat/completions",
+            headers={"Authorization": f"Bearer {PERPLEXITY_KEY}"},
+            json={
+                "model": "sonar-reasoning",
+                "messages": [{"role": "user", "content": query}],
+                "return_citations": True,
+                "return_related_questions": True,
+            }
+        )
+        data = response.json()
+        return data["choices"][0]["message"]["content"]
+```
+
+### GEO-сканирование бренда (основной use-case)
+```python
+async def geo_brand_scan(brand: str, queries: list[str]) -> list[dict]:
+    """Проверяет, цитируют ли нейросети бренд по списку запросов."""
+    results = []
+    for query in queries:
+        answer = await perplexity_search(query, model="sonar")
+        brand_mentioned = brand.lower() in answer["answer"].lower()
+        results.append({
+            "query": query,
+            "mentioned": brand_mentioned,
+            "answer_preview": answer["answer"][:200],
+            "model": answer["model"],
+        })
+        await asyncio.sleep(1)  # Rate limiting
+    
+    mentioned_count = sum(1 for r in results if r["mentioned"])
+    return {
+        "brand": brand,
+        "total_queries": len(queries),
+        "mentioned_in": mentioned_count,
+        "visibility_pct": round(mentioned_count / len(queries) * 100, 1),
+        "details": results,
+    }
+```
+
+### Batch-мониторинг (20-30 запросов)
+```python
+# Маркетолог → Шерлу: «Проверь видимость по 25 запросам»
+BRAND_QUERIES = [
+    "где купить цыплят бройлеров оптом",
+    "инкубатор Азовский район",
+    "Кобб-500 купить Ростов",
+    # ... 20-30 запросов от Маркетолога
+]
+
+scan_result = await geo_brand_scan("Азовский Инкубатор", BRAND_QUERIES)
+# → {"visibility_pct": 12.0, "mentioned_in": 3, ...}
+```
+
+### Fallback (если Perplexity лежит)
+```python
+async def search_with_fallback(query: str) -> str:
+    """Perplexity → Tavily → Web search."""
+    try:
+        return await perplexity_search(query)
+    except Exception:
+        try:
+            return await tavily_search(query)  # Резервный
+        except Exception:
+            return await web_search(query)  # Последний шанс
+```
+
+---
+
+## Constraints
+- Не использовать незаконные методы сбора данных (только открытые источники).
+- Всегда указывать ссылки на источники фактов.
+- Rate limiting: не более 1 запрос/сек к Perplexity API.
+- Cost-aware: sonar для простых, sonar-reasoning для сложных запросов.
+
+> _Синхронизировано из Antigravity: `/Users/igorvasin/.gemini/config/skills/sherl-research//SKILL.md`_
+> _Обновить: `./tools/sync_cursor_rules.sh --skill sherl-research`_
+

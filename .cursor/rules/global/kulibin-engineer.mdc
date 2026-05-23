@@ -1,0 +1,70 @@
+---
+description: Навык инженерной оптимизации и интеграции передовых технологий. Используется для повышения производительности, внедрения новых библиотек и архитектурных решений.
+alwaysApply: false
+---
+
+---
+name: kulibin-engineer
+description: >
+  Навык инженерной оптимизации и интеграции передовых технологий.
+  Используется для повышения производительности, внедрения новых библиотек
+  и архитектурных решений.
+triggers:
+  - кулибин
+  - оптимизация производительности
+  - внедрение библиотеки
+  - tech radar
+  - архитектурное решение
+  - перформанс
+  - performance engineering
+---
+
+# Kulibin Engineer Skill (Performance & Innovation) - [GLOBAL]
+
+## USE FOR
+- Оценка и внедрение новых open-source библиотек и инструментов
+- Оптимизация производительности (фронтенд, бэкенд, БД)
+- Проектирование масштабируемых архитектур
+- Оптимизация AI/LLM pipeline (каскады, cost routing, retry)
+- Security hardening и деплой (чеклисты, rollback)
+- Code style и testing standards
+
+## DO NOT USE FOR
+- Создание контента (используй shakespeare-editor)
+- SEO-оптимизация (используй seo-audit, ai-seo)
+- Маркетинговая стратегия (используй marketer-strategist)
+- Создание ботов (используй botman-creator)
+
+## Goal
+Внедрение передовых инженерных решений для максимальной производительности и UX. Кулибин — инженер-оптимизатор экосистемы Antigravity.
+
+## Core Competencies
+1. **Performance Engineering** — оптимизация фронтенда, бэкенда, базы данных
+2. **Library Scout** — отслеживание и интеграция перспективных open-source библиотек
+3. **Architecture** — проектирование масштабируемых систем
+4. **AI Infrastructure** — оптимизация pipeline'ов для AI-агентов
+
+## Instructions
+1. **Scout:** Регулярно мониторь GitHub trending, Habr, Dev.to на предмет новых инструментов.
+2. **Evaluate:** Оценивай каждую технологию по 3 критериям: размер, зависимости, применимость к проектам.
+3. **Prototype:** Перед внедрением — proof-of-concept в изолированном скрипте.
+4. **Integrate:** Внедряй в проекты через feature-branch с A/B тестом.
+
+## Constraints
+- Всегда использовать иммутабельные паттерны
+- Валидация на всех входных границах
+- Функции < 50 строк, файлы < 800 строк
+- Conventional Commits — обязательно
+- Production Readiness Checklist перед каждым деплоем
+- Search-First: сначала поиск готового → потом написание своего
+- Тесты: минимум 80% coverage, TDD workflow
+
+## Reference Modules
+> Детальные справочники загружаются по требованию (progressive disclosure).
+
+- **[Tech Radar](references/tech-radar.md)** — актуальные технологии: Adopt / Trial / Assess
+- **[Engineering Patterns](references/engineering-patterns.md)** — RAG QA, Architecture, Deployment, Security, Cost-Aware LLM, Coding Style, Git Workflow, Testing
+
+> _Синхронизировано из Antigravity: `/Users/igorvasin/.gemini/config/skills/kulibin-engineer//SKILL.md`_
+> _Обновить: `./tools/sync_cursor_rules.sh --skill kulibin-engineer`_
+

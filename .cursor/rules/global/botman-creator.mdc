@@ -1,0 +1,497 @@
+---
+description: Навык создания ботов и чат-агентов для Telegram, MAX (VK), ВКонтакте. Используется для разработки, деплоя и поддержки AI-ботов с интеграциями в CRM, мессенджеры и внешние API.
+alwaysApply: false
+---
+
+---
+name: botman-creator
+description: "Навык создания ботов и чат-агентов для Telegram, MAX (VK), ВКонтакте. Используется для разработки, деплоя и поддержки AI-ботов с интеграциями в CRM, мессенджеры и внешние API."
+triggers:
+  - telegram bot
+  - MAX бот
+  - MAX мессенджер
+  - VK MAX
+  - мессенджер бот
+  - чат-агент
+  - aiogram
+  - bot api
+---
+
+# Ботмэн — Bot Creator Agent - [GLOBAL]
+
+## Goal
+Создание и деплой «под ключ» Telegram-ботов и чат-агентов. От идеи до работающего бота на сервере.
+
+## Core Competencies
+1. **Telegram Bot API** — polling, webhooks, inline-режим, клавиатуры
+2. **AI Integration** — подключение LLM (Gemini, GPT, Ollama) к ботам
+3. **CRM Integration** — Bitrix24, AmoCRM — создание лидов, управление сделками
+4. **State Management** — FSM, контексты диалогов, персистентные данные
+5. **Deployment** — PM2, Docker, 24/7 uptime
+
+## Когда активировать
+- Создание нового Telegram-бота
+- Интеграция бота с CRM или внешним API
+- Добавление AI-возможностей в существующий бот
+- Миграция бота на сервер (деплой)
+- Отладка webhook/polling проблем
+
+## Telegram Bot Architecture
+```
+User → Telegram API
+        ↓
+    Bot Handler (polling/webhook)
+        ↓
+    Router (по командам/состояниям)
+        ↓
+   ┌────┼────┐
+   ↓    ↓    ↓
+ /start  AI   CRM
+ handler chat  lead
+        ↓
+    LLM API (Gemini/GPT)
+        ↓
+    Response → User
+```
+
+## Tech Stack (рекомендуемый)
+| Компонент | Python | TypeScript |
+|-----------|--------|-----------|
+| Framework | `aiogram 3.x` | `grammy` / `telegraf` |
+| LLM | `google-genai` / `openai` | `@google/generative-ai` |
+| State | FSMContext + Redis | sessions + Redis |
+| Deploy | PM2 + `python3 main.py` | PM2 + `node dist/bot.js` |
+| Scheduler | APScheduler | node-cron |
+
+## Best Practices
+
+### 1. Error Handling
+```python
+# Всегда оборачивай handler в try/except
+@router.message()
+async def handle_message(message: Message):
+    try:
+        response = await get_ai_response(message.text)
+        await message.answer(response)
+    except Exception as e:
+        logger.error(f"Error: {e}", exc_info=True)
+        await message.answer("Произошла ошибка, попробуйте позже.")
+```
+
+### 2. Rate Limiting
+```python
+# Не больше 30 сообщений/сек в один чат
+# Не больше 20 сообщений/мин в группу
+from asyncio import Semaphore
+semaphore = Semaphore(25)  # Ограничение параллельности
+
+async def safe_send(chat_id, text):
+    async with semaphore:
+        await bot.send_message(chat_id, text)
+```
+
+### 3. Webhook vs Polling
+| Метод | Когда использовать |
+|-------|-------------------|
+| **Polling** | Разработка, быстрый старт, нет SSL |
+| **Webhook** | Production, высокая нагрузка, SSL обязателен |
+
+### 4. FSM (Finite State Machine) для диалогов
+```python
+class OrderStates(StatesGroup):
+    waiting_name = State()
+    waiting_phone = State()
+    waiting_address = State()
+    confirm = State()
+
+@router.message(OrderStates.waiting_phone)
+async def process_phone(message: Message, state: FSMContext):
+    if not validate_phone(message.text):
+        await message.answer("Некорректный номер, попробуйте снова")
+        return
+    await state.update_data(phone=message.text)
+    await state.set_state(OrderStates.waiting_address)
+    await message.answer("Укажите адрес доставки:")
+```
+
+## 🔒 Security (из ECC Library)
+- Храни BOT_TOKEN только в env vars
+- Валидируй webhook secret (X-Telegram-Bot-Api-Secret-Token)
+- Не логируй полные сообщения пользователей
+- Rate limit на inline-запросы
+- Белый список admin_ids для административных команд
+
+## 💰 Cost-Aware AI в ботах (из ECC Library)
+```python
+def select_model(message_length: int) -> str:
+    """Дешёвая модель для коротких, дорогая для сложных запросов."""
+    if message_length > 500 or "проанализируй" in message.lower():
+        return "gemini-2.5-flash"      # Сложные задачи
+    return "gemini-2.0-flash-lite"     # Простые ответы (4x дешевле)
+```
+
+## 🚀 Deployment Checklist (из ECC Library)
+- [ ] BOT_TOKEN в env vars (не в коде!)
+- [ ] PM2 ecosystem.config.js с max_restarts
+- [ ] Health check: бот отвечает на /health
+- [ ] Логирование без PII
+- [ ] Graceful shutdown (обработка SIGTERM)
+- [ ] `pm2 save` после старта
+- [ ] Webhook URL с HTTPS (для production)
+
+## 🌐 Webhook Production Patterns
+> Дата: 2026-05-01 | Источник: боевой опыт Анжелочки (ai-eggs/agent/tg_bot.py)
+
+### Webhook vs Polling — углублённый выбор
+```python
+# Production: webhook с SSL + secret token
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiohttp import web
+
+WEBHOOK_PATH = f"/webhook/{BOT_TOKEN}"
+WEBHOOK_URL = f"https://your-domain.ru{WEBHOOK_PATH}"
+
+async def on_startup(bot: Bot):
+    await bot.set_webhook(
+        url=WEBHOOK_URL,
+        secret_token=os.getenv("WEBHOOK_SECRET"),  # ОБЯЗАТЕЛЬНО!
+        drop_pending_updates=True,
+    )
+
+# Fallback: polling с retry + backoff (как у Анжелочки)
+max_retries = 5
+for attempt in range(1, max_retries + 1):
+    try:
+        await bot.delete_webhook(drop_pending_updates=True)
+        await dp.start_polling(bot, polling_timeout=30)
+        break
+    except Exception as e:
+        if "conflict" in str(e).lower() or "409" in str(e).lower():
+            wait = min(2 ** attempt, 30)
+            await asyncio.sleep(wait)
+            continue
+        raise
+```
+
+### Обход блокировок Telegram (Timeweb/РФ VPS)
+```python
+# Форсирование IPv4 + прямой IP Telegram API
+class ForcedIPResolver:
+    def __init__(self, ip):
+        self.ip = ip
+    async def resolve(self, host, port, family=0):
+        if host == "api.telegram.org":
+            return [{"hostname": host, "host": self.ip, "port": port,
+                     "family": socket.AF_INET, "proto": 0, "flags": 0}]
+        return [{"hostname": host, "host": host, "port": port,
+                 "family": family, "proto": 0, "flags": 0}]
+
+# IP Telegram API (актуальные на 2026):
+# 149.154.167.220, 149.154.167.221
+```
+
+### Health Check для бота
+```python
+# /health endpoint через aiohttp (если webhook)
+async def health_handler(request):
+    return web.json_response({"status": "ok", "bot": "alive", "pid": os.getpid()})
+
+# Или через Telegram-команду
+@router.message(Command("health"))
+async def cmd_health(message: Message):
+    await message.answer(f"✅ PID: {os.getpid()}, uptime: {time.time() - START_TIME:.0f}s")
+```
+
+## 🔐 Advanced Bot Security
+> Дата: 2026-05-01 | Источник: боевой опыт + ECC security-review
+
+### 1. HMAC-верификация Webhook
+```python
+import hmac, hashlib
+
+def verify_telegram_webhook(request, secret_token: str) -> bool:
+    """Проверка X-Telegram-Bot-Api-Secret-Token."""
+    header = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "")
+    return hmac.compare_digest(header, secret_token)
+```
+
+### 2. Admin Whitelist Pattern (из Анжелочки)
+```python
+ADMIN_ID = 176203333  # Hardcoded — НЕ в env (это не секрет, а политика)
+
+def is_admin(user_id: int) -> bool:
+    return user_id == ADMIN_ID
+
+# Защита админ-команд
+@router.message(Command("restart"))
+async def cmd_restart(message: Message):
+    if not is_admin(message.from_user.id):
+        return  # Молча игнорируем — не отвечаем «нет прав»
+    ...
+```
+
+### 3. Per-User Rate Limiting
+```python
+from collections import defaultdict
+import time
+
+user_last_msg: dict[int, float] = defaultdict(float)
+MIN_INTERVAL = 1.0  # секунда между сообщениями
+
+@router.message()
+async def handler(message: Message):
+    uid = message.from_user.id
+    now = time.time()
+    if now - user_last_msg[uid] < MIN_INTERVAL:
+        return  # Тихо дропаем спам
+    user_last_msg[uid] = now
+    ...
+```
+
+### 4. Input Sanitization
+```python
+def sanitize_input(text: str, max_len: int = 4000) -> str:
+    """Обрезка + очистка пользовательского ввода."""
+    if not text:
+        return ""
+    text = text[:max_len]  # Лимит длины
+    text = text.replace("\x00", "")  # Null bytes
+    return text.strip()
+```
+
+### 5. Anti-Duplicate Lock (из Анжелочки)
+```python
+LOCK_FILE = os.path.join(LOG_DIR, "bot.lock")
+
+def acquire_lock() -> bool:
+    if os.path.exists(LOCK_FILE):
+        try:
+            with open(LOCK_FILE, 'r') as f:
+                old_pid = int(f.read().strip())
+            os.kill(old_pid, 0)  # Проверяем жив ли
+            return False  # Жив — не запускаемся
+        except (ProcessLookupError, ValueError):
+            os.remove(LOCK_FILE)  # Stale lock
+    with open(LOCK_FILE, 'w') as f:
+        f.write(str(os.getpid()))
+    return True
+```
+
+## ⚡ Graceful Lifecycle
+> Дата: 2026-05-01 | Источник: боевой опыт Анжелочки
+
+### Signal Handling + Cleanup
+```python
+import signal
+
+async def main():
+    if not acquire_lock():
+        return
+
+    loop = asyncio.get_event_loop()
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        loop.add_signal_handler(sig, lambda: asyncio.create_task(shutdown()))
+    
+    await dp.start_polling(bot)
+    release_lock()
+
+async def shutdown():
+    print("🛑 Graceful shutdown...")
+    release_lock()
+    await dp.stop_polling()
+```
+
+### PM2 ecosystem.config.js (шаблон для ботов)
+```javascript
+module.exports = {
+  apps: [{
+    name: "bot-name",
+    script: "python3",
+    args: "tg_bot.py",
+    cwd: "/path/to/agent/",
+    max_restarts: 10,
+    restart_delay: 5000,
+    exp_backoff_restart_delay: 100,
+    env: {
+      BOT_TOKEN: "from-env",
+      PYTHONUNBUFFERED: "1",
+    }
+  }]
+}
+```
+
+---
+
+## 📱 MAX Мессенджер (VK) — Боты и Автоматизация
+> Источник: https://habr.com/ru/articles/1037182/ (май 2026)
+> MAX — основной мессенджер РФ (заменил VK Messenger, ~90 млн активных)
+
+### Уровни интеграции с MAX
+
+| Уровень | Метод | Статус | Риск |
+|---------|-------|--------|------|
+| **Bot API** | Официальный, публичный | ✅ Безопасно | Нет |
+| **User API** | Неофициальный, реверс-инжиниринг | ⚠️ ToS нарушение | Бан аккаунта |
+| **Массовая рассылка** | Любой метод | 🚫 Незаконно | КоАП/УК |
+
+### Официальный Bot API MAX (рекомендуется)
+
+```
+Документация: dev.max.ru
+Аналог: Telegram Bot API (почти совместимые методы)
+Формат: REST + webhooks
+```
+
+```python
+import requests
+
+MAX_BOT_TOKEN = os.getenv("MAX_BOT_TOKEN")
+MAX_API = "https://botapi.max.ru"
+
+def send_message(chat_id: str, text: str):
+    """Отправить сообщение через официальный Bot API MAX."""
+    resp = requests.post(
+        f"{MAX_API}/messages",
+        headers={"Authorization": f"Bearer {MAX_BOT_TOKEN}"},
+        json={
+            "recipient": {"chat_id": chat_id},
+            "type": "text",
+            "text": text
+        }
+    )
+    return resp.json()
+
+def set_webhook(url: str):
+    """Webhook для получения сообщений."""
+    return requests.post(
+        f"{MAX_API}/subscriptions",
+        headers={"Authorization": f"Bearer {MAX_BOT_TOKEN}"},
+        json={"url": url}
+    ).json()
+```
+
+**Получение событий (webhook payload):**
+```python
+# MAX отправляет POST на твой URL
+# Структура события:
+{
+    "update_type": "message_created",
+    "timestamp": 1716000000000,  # ms
+    "message": {
+        "sender": {"user_id": 123, "name": "Иван"},
+        "recipient": {"chat_id": "..."},
+        "body": {"text": "Привет", "mid": "mid.xxx"}
+    }
+}
+```
+
+### ⚠️ User API MAX (grey zone — только для понимания архитектуры)
+
+> **НЕ ИСПОЛЬЗОВАТЬ** для коммерческих задач. Только личная бытовая автоматизация одного физлица на секонд-симке.
+
+**Транспорт**: TLS-сокет `api.oneme.ru:443` + кастомный фрейм 10 байт + msgpack body.
+
+**Библиотеки сообщества:**
+- `nsdkinx/vkmax` — активный, документация опкодов в `/docs/opcodes.md`
+- `MaxApiTeam/PyMax` — 178 звёзд, заархивирован фев.2026, код рабочий
+- `rast-games/pyromax` — alpha, aiogram-like архитектура
+
+**Ключевые опкоды:**
+| Op | Действие |
+|----|----------|
+| 6 | INIT / handshake |
+| 17 | AUTH_REQUEST (SMS) |
+| 18 | AUTH_CONFIRM (код + 2FA) |
+| 19 | LOGIN |
+| 46 | CONTACT_INFO_BY_PHONE |
+| 64 | MSG_SEND |
+| 97 | LOGOUT_OTHER_SESSIONS |
+
+**Грабля #1 — дедупликация по CID (критично!):**
+```python
+# ❌ НЕПРАВИЛЬНО — сервер дедупит все send без cid
+payload = {"text": "Привет", "randomId": 12345}
+
+# ✅ ПРАВИЛЬНО — уникальный cid на каждое сообщение
+import time
+payload = {
+    "message": {
+        "text": "Привет",
+        "cid": int(time.time() * 1000),  # unix timestamp ms — ОБЯЗАТЕЛЬНО
+        "elements": [],    # пустой список — всегда включать
+        "attaches": [],    # пустой список — всегда включать
+    }
+}
+# Диапазон cid: 1_750_000_000_000..2_000_000_000_000 (timestamp ms 2025-2033)
+```
+
+**Грабля #2 — стабильный deviceId:**
+```python
+import uuid, os
+
+DEVICE_FILE = "max_device_id.txt"
+
+def get_device_id() -> str:
+    """DeviceId должен быть ПОСТОЯННЫМ. Новый uuid = бан сессии за ~10 минут."""
+    if os.path.exists(DEVICE_FILE):
+        return open(DEVICE_FILE).read().strip()
+    device_id = str(uuid.uuid4())
+    open(DEVICE_FILE, 'w').write(device_id)
+    return device_id
+```
+
+**Антибот-эвристики MAX (по анализу сообщества):**
+- IP-геолокация (VPN-флаг → бан)
+- Отсутствие push-токена
+- Скорость запросов выше нормы
+- Нестабильный deviceId между запросами
+
+### 🚫 Правовые ограничения (РФ, май 2026)
+
+| Закон | Суть | Санкция |
+|-------|------|---------|
+| 152-ФЗ ст.6 | Обработка чужих данных без согласия | КоАП: 10-300 тыс ₽ |
+| 38-ФЗ ст.18 | Массрассылка без согласия | КоАП: до 500 тыс ₽ (юрлицо) |
+| УК ст.159 | Бот выдаёт себя за человека, имущественные действия | До 6 лет |
+| УК ст.137 | Авт. сбор переписок третьих лиц | До 2 лет |
+
+**Красные линии:**
+- ❌ Коммерческая рассылка через User API
+- ❌ Автоматизация от лица других людей
+- ❌ Автообзвон без явного согласия
+- ✅ Личная автоматизация одного аккаунта для бытовых задач
+- ✅ Официальный Bot API для любого бизнеса
+
+### Сравнение: Telegram vs MAX (2026)
+
+| Параметр | Telegram | MAX |
+|----------|----------|-----|
+| Аудитория РФ | ~60 млн | ~90 млн |
+| Bot API | Зрелый, стабильный | Молодой, активно развивается |
+| Webhook | ✅ | ✅ |
+| Inline режим | ✅ | ⏳ Частично |
+| Mini Apps | ✅ | ✅ (VK Mini Apps) |
+| Блокировка РФ VPS | Возможна | Нет (российский сервис) |
+| Оплата в боте | ✅ ЮKassa | ✅ VK Pay |
+
+### Когда выбирать MAX Bot API
+- Аудитория преимущественно в РФ
+- Нужна интеграция с VK Pay
+- Telegram заблокирован на VPS клиента
+- Продукт для госструктур/корпораций (Telegram вызывает вопросы)
+
+---
+
+## Constraints
+- Бот ОБЯЗАН отвечать на /start (Telegram) или аналог для MAX
+- Бот ОБЯЗАН иметь graceful error handling (пользователь не видит stack traces)
+- Бот НЕ ДОЛЖЕН отправлять более 30 сообщений/сек (Telegram) / 20/сек (MAX)
+- Secrets только через environment variables
+- Каждый бот = отдельный PM2 process
+- Бот ОБЯЗАН иметь lock-файл для защиты от дублей
+- Webhook ОБЯЗАН верифицировать secret token
+- MAX User API: только секонд-симка, только личная автоматизация, не для коммерции
+
+> _Синхронизировано из Antigravity: `/Users/igorvasin/.gemini/config/skills/botman-creator//SKILL.md`_
+> _Обновить: `./tools/sync_cursor_rules.sh --skill botman-creator`_
+

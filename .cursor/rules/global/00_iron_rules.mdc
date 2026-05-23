@@ -1,0 +1,350 @@
+---
+description: Железные правила Antigravity — SSH, структура, SSoT, протоколы. Читать при каждом старте.
+alwaysApply: true
+---
+
+# 🔩 ЖЕЛЕЗНЫЕ ПРАВИЛА АГЕНТА (IRON RULES)
+# Фундаментальные правила, действующие ВСЕГДА, в ЛЮБОМ проекте.
+# Читать при КАЖДОМ старте сессии. Нарушение = ГРУБАЯ ОШИБКА.
+# Обновлено: 2026-04-30
+
+---
+
+## 1. 🚀 АВТОНОМНЫЙ ДОСТУП К СЕРВЕРУ
+
+**ЗАПРЕЩЕНО просить пользователя вводить серверные команды.**
+Агент выполняет ВСЕ деплои, рестарты, чтение логов **САМОСТОЯТЕЛЬНО** через `run_command` + SSH.
+
+### Реквизиты:
+- **SSH-ключ:** `/Users/igorvasin/freelance-2026/.ssh_agent_key`
+- **Сервер:** `root@72.56.38.19` (Timeweb VDS)
+- **Шаблон:**
+  ```bash
+  ssh -i /Users/igorvasin/freelance-2026/.ssh_agent_key -o StrictHostKeyChecking=no root@72.56.38.19 'КОМАНДА'
+  ```
+
+> Если агент пишет «зайди на сервер и выполни...» — это **ГРУБОЕ НАРУШЕНИЕ**.
+
+---
+
+## 2. 🌐 ЯЗЫК И СТИЛЬ ОБЩЕНИЯ
+
+- Общаться **на русском языке**
+- Не повторять информацию, которую пользователь уже знает
+- Не предлагать пользователю сделать то, что агент может выполнить сам
+- Быть кратким, по делу
+
+---
+
+## 3. 📂 СТРУКТУРА РАБОЧЕЙ СРЕДЫ
+
+```
+/Users/igorvasin/freelance-2026/           ← Корень всех проектов
+├── .agent/rules/                          ← Фундаментальные правила (этот файл)
+├── .ssh_agent_key                         ← SSH-ключ для VPS
+├── chp.md                                 ← Чекпоинт текущего состояния
+├── ACTIVE_TASKS.md                        ← Дорожная карта задач
+├── reports/                               ← Дневные отчёты сессий
+├── chronicles/                            ← Хроники дней (автозапись)
+├── dreams/                                ← 🌙 Dreaming: паттерны из хроник
+│   ├── patterns.md                        ← Кумулятивная память (читать при boot)
+│   └── dream_YYYY-MM-DD.md               ← Ежедневные dream-отчёты
+├── tools/                                 ← Общие скрипты
+├── ai-eggs/                               ← Проект AI-EGGS (Заботкина + Птенчикова)
+├── freelance-agent/                       ← Навыки агента, SKILL.md
+└── [другие проекты]/                      ← Каждый проект — отдельная папка
+```
+
+**Правило:** проектные знания (каскад моделей, PM2 конфиг, расписание) лежат
+в `.md` файлах **внутри папки проекта**, а НЕ здесь.
+
+---
+
+## 4. 🔒 ПРОТОКОЛЫ
+
+### Finish Day (команда: "финиш", "конец дня"):
+1. Перезаписать `chp.md`
+2. Создать `checkpoints/chp_YYYYMMDD_HHMM.md`
+3. Создать `reports/report-day_YYYY-MM-DD_HHMM.md`
+4. Запустить `bash ~/freelance-2026/tools/finish_day.sh`
+
+### 🌙 Morning Dream (cron 07:00 MSK или вручную):
+```bash
+bash ~/freelance-2026/tools/morning_dream.sh          # анализ за 3 дня
+bash ~/freelance-2026/tools/morning_dream.sh --days 7  # за неделю
+```
+Анализирует хроники → извлекает паттерны → обновляет `dreams/patterns.md`.
+При boot можно прочитать `dreams/patterns.md` для быстрого восстановления контекста.
+
+### 🎯 Content Outcomes (перед публикацией контента):
+```bash
+python3 ~/freelance-2026/tools/content_grader.py -f draft.md --rubric all
+```
+Отдельный grader по E-E-A-T, Human-First, VK Farm. FAIL → переделка.
+
+### Деплой на VPS:
+1. rsync код → VPS (через SSH-ключ)
+2. Перезапуск PM2 из ecosystem.config.js
+3. Проверить `pm2 list` после деплоя
+
+### NAS бэкап (Synology DS720+):
+- IP: 192.168.0.107, user: erik03132
+- Встроен в finish-day (Фаза 4)
+
+---
+
+## 5. 💰 ЦЕНООБРАЗОВАНИЕ
+
+1500₽/час × ОБЩЕЕ_время_всех_агентов + 50% = ourPrice.
+Если бюджет клиента > ourPrice → берём бюджет − 10%.
+
+---
+
+## 6. 🔍 SEARCH-FIRST PROTOCOL (обязательный каскад решений)
+
+**ПЕРЕД тем как писать код или решать техническую проблему — ОБЯЗАТЕЛЬНЫЙ каскад:**
+
+```
+┌──────────────────────────────────────────────┐
+│  1️⃣  СВОИ СКИЛЛЫ                             │
+│     grep/find по skills/ и knowledge/        │
+│     Если решение найдено → ИСПОЛЬЗОВАТЬ      │
+│                                              │
+│  2️⃣  GITHUB                                  │
+│     Поиск рабочих библиотек и примеров       │
+│     Если нашёл → адаптировать                │
+│                                              │
+│  3️⃣  СВОЯ ГОЛОВА                             │
+│     Только если 1️⃣ и 2️⃣ не дали результата   │
+│     Писать собственное решение               │
+└──────────────────────────────────────────────┘
+```
+
+### Где искать скиллы:
+| Тип | Путь |
+|-----|------|
+| Глобальные | `/Users/igorvasin/.gemini/antigravity/skills/*/SKILL.md` |
+| Проектные | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/*/SKILL.md` |
+| Knowledge Items | `/Users/igorvasin/.gemini/antigravity/knowledge/*/` |
+| Brain (артефакты прошлых сессий) | `/Users/igorvasin/.gemini/antigravity/brain/*/artifacts/` |
+
+> **НАРУШЕНИЕ:** агент тратит 20+ минут на изобретение решения, которое УЖЕ есть в скиллах — это **ГРУБАЯ ОШИБКА**.
+
+---
+
+## 7. 🧠 BOOT SEQUENCE
+
+При старте сессии по команде `boot` / `старт` / `инициализация`:
+1. Прочитать **этот файл** (IRON_RULES.md)
+2. Прочитать `chp.md` — текущий чекпоинт
+3. Прочитать `ACTIVE_TASKS.md` — активные задачи
+4. Прочитать `dreams/patterns.md` — кумулятивные паттерны из Dreaming (если есть)
+5. Прочитать `~/.gemini/antigravity/skills/MANIFEST.md` — **лёгкий каталог скиллов** (Progressive Disclosure)
+6. Если работа с конкретным проектом — прочитать его `PROJECT.md` / `README.md`
+7. НЕ пересказывать содержимое пользователю, просто работать
+8. **🔌 ПИНГ ВСЕХ API** — выполнить `bash ~/freelance-2026/tools/ping_apis.sh` и вывести таблицу статусов
+
+### 🌐 ОБЯЗАТЕЛЬНЫЙ US ПРОКСИ ДЛЯ ВСЕХ ВНЕШНИХ API
+
+**ЖЕЛЕЗНОЕ ПРАВИЛО:** Любой запрос к внешним API (Gemini, OpenRouter, Tavily, Perplexity, Unsplash, Pexels, Pixabay, FAL.ai, Google AI) **ОБЯЗАН** идти через US SOCKS5 прокси.
+
+```
+ПРОКСИ: из .env → HTTPS_PROXY / TELEGRAM_PROXY
+ФОРМАТ: socks5://user:pass@host:port
+ИСТОЧНИК: ai-eggs/.env (единый файл ключей)
+```
+
+**При пинге API:**
+```bash
+# ✅ ПРАВИЛЬНО — через прокси:
+curl --proxy socks5://user:pass@host:port https://api.example.com
+
+# ❌ НЕПРАВИЛЬНО — напрямую из РФ:
+curl https://api.example.com   # 403 Forbidden / timeout
+```
+
+**В Python-коде:**
+```python
+# ✅ ПРАВИЛЬНО:
+import os
+from dotenv import load_dotenv
+load_dotenv("ai-eggs/.env")
+# httpx/requests подхватят HTTPS_PROXY автоматически
+
+# ❌ НЕПРАВИЛЬНО:
+httpx.get("https://api.google.com")  # без прокси → 403
+```
+
+> **НАРУШЕНИЕ:** Любой внешний API-запрос без прокси из РФ — это **ГРУБАЯ ОШИБКА**. Прокси ОБЯЗАТЕЛЕН.
+
+### 🎯 Progressive Disclosure (загрузка скиллов)
+
+**НЕ читай все SKILL.md при boot!** 28 скиллов = ~104K токенов — это убивает контекст.
+
+```
+┌──────────────────────────────────────────────────┐
+│  BOOT: Читай MANIFEST.md (~1.4K токенов)         │
+│  Содержит name + description + triggers           │
+│                                                    │
+│  MATCH: Когда задача пришла →                     │
+│    1. Найди скилл по триггерам в MANIFEST.md      │
+│    2. view_file → полный SKILL.md этого скилла    │
+│    3. Следуй инструкциям                          │
+│                                                    │
+│  CLI: python3 ~/freelance-2026/tools/             │
+│       skills_manifest.py --match "описание задачи"│
+│                                                    │
+│  RELEASE: После задачи контекст скилла не нужен   │
+└──────────────────────────────────────────────────┘
+```
+
+**Регенерация манифеста** (после добавления/изменения скиллов):
+```bash
+python3 ~/freelance-2026/tools/skills_manifest.py
+```
+
+---
+
+## 8. 🛡️ AGENT READINESS — ПОЛНАЯ КАРТА АГЕНТОВ
+
+**При буте проверяй наличие `MANIFEST.md`** — если нет, регенерируй.
+Полная проверка всех SKILL.md — только по запросу или при подозрении на проблемы.
+
+### 7.1. Фундаментальные (Global) скиллы — 8 агентов
+
+| # | Агент | Global SKILL.md (абсолютный путь) | ECC-скиллы (встроены в SKILL.md) |
+|---|-------|----------------------------------|----------------------------------|
+| 1 | **Игорёк** (igorek-core) | `/Users/igorvasin/.gemini/antigravity/skills/igorek-core/SKILL.md` | agentic-engineering, search-first, ADR, parallel execution, model routing, hooks |
+| 2 | **Кулибин** (kulibin-engineer) | `/Users/igorvasin/.gemini/antigravity/skills/kulibin-engineer/SKILL.md` | deployment-patterns, security-review, cost-aware-llm, search-first, coding-style, patterns, git-workflow, testing |
+| 3 | **Артемий** (artemiy-frontend) | `/Users/igorvasin/.gemini/antigravity/skills/artemiy-frontend/SKILL.md` | frontend-patterns, AI website cloning |
+| 4 | **Ботмэн** (botman-creator) | `/Users/igorvasin/.gemini/antigravity/skills/botman-creator/SKILL.md` | security, cost-aware-ai, deployment-checklist |
+| 5 | **Рембрандт** (rembrandt-designer) | `/Users/igorvasin/.gemini/antigravity/skills/rembrandt-designer/SKILL.md` | design-system, SVG→3D WebGL |
+| 6 | **Шекспир** (shakespeare-editor) | `/Users/igorvasin/.gemini/antigravity/skills/shakespeare-editor/SKILL.md` | content-engine, brand-voice, article-writing, human-first writing |
+| 7 | **Шерл** (sherl-research) | `/Users/igorvasin/.gemini/antigravity/skills/sherl-research/SKILL.md` | market-research, search-first, deep-research |
+| 8 | **Маркетолог** (marketer-strategist) | `/Users/igorvasin/.gemini/antigravity/skills/marketer-strategist/SKILL.md` | technical-seo, dashboard-builder, CMO-framework, AI-ORM |
+
+### 7.2. Проектные скиллы (абсолютные пути)
+
+| # | Скилл | Абсолютный путь | Назначение |
+|---|-------|-----------------|------------|
+| 1 | bitrix-integration | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/bitrix-integration/SKILL.md` | CRM Битрикс24 |
+| 2 | brand-voice | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/brand-voice/SKILL.md` | Голос бренда |
+| 3 | deployment-procedures | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/deployment-procedures/SKILL.md` | Процедуры деплоя |
+| 4 | geo-fundamentals | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/geo-fundamentals/SKILL.md` | GEO-оптимизация |
+| 5 | react-patterns | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/react-patterns/SKILL.md` | React-паттерны |
+| 6 | telegram-bot-patterns | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/telegram-bot-patterns/SKILL.md` | Telegram-боты |
+| 7 | svo-veteran-support | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/svo-veteran-support/SKILL.md` | Гранты для ветеранов |
+| 8 | **vk-integration** | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/vk-integration/SKILL.md` | VK API, постинг, фото, токены |
+| 9 | **ok-social** | `/Users/igorvasin/.gemini/antigravity/skills/ok-social/SKILL.md` | OK.ru API, автопостинг |
+
+### 7.3. Реестр скиллов
+
+Полный реестр с версиями и маршрутизацией:
+`/Users/igorvasin/.gemini/antigravity/skills/skills-registry.json`
+
+### 7.4. Формат вывода при буте
+
+```
+=== AGENT READINESS ===
+✅ igorek-core        — ARMED (global + 6 ECC)
+✅ kulibin-engineer    — ARMED (global + 8 ECC + 1 project)
+✅ artemiy-frontend    — ARMED (global + 2 ECC + 2 project)
+✅ botman-creator      — ARMED (global + 3 ECC + 1 project)
+✅ rembrandt-designer  — ARMED (global + 2 ECC)
+✅ shakespeare-editor  — ARMED (global + 4 ECC + 1 project)
+✅ sherl-research      — ARMED (global + 3 ECC)
+✅ marketer-strategist — ARMED (global + 4 ECC + 1 project)
+PROJECT SKILLS: 7/7 ✅
+SESSION: ✅ SAFE
+```
+# 📐 DOCUMENT GOVERNANCE — Управление документами Antigravity
+# Формализовано: 01.05.2026 (из аудита 30.04.2026)
+# ОБЯЗАТЕЛЬНО для всех агентов при создании/редактировании файлов
+
+---
+
+## Правило 1: Single Source of Truth (SSoT)
+
+```
+Каждой теме — ОДИН файл.
+Нет файла по теме — создать.
+Есть файл по теме — ДОПОЛНИТЬ, не создавать новый.
+```
+
+**Перед созданием нового MD-файла, ответь на вопросы:**
+
+1. Существует ли уже файл с похожей темой? → `grep` по названию
+2. Это временная заметка? → пиши в `chp.md`, не в файл
+3. Это статус проекта? → обновляй `PROJECT.md`
+4. Это задача? → пиши в `ACTIVE_TASKS.md`
+5. Это план/дорожная карта? → обновляй `ROADMAP.md`
+6. Только если НИ ОДИН файл не подходит → создавай новый
+
+---
+
+## Правило 2: Иерархия документов по типу
+
+```
+📁 project/
+├── PROJECT.md          ← Всё о проекте (1 файл!)
+│   ├── Overview
+│   ├── Current Status  ← сюда STATUS.md
+│   ├── Agent Config
+│   └── Architecture
+├── ROADMAP.md          ← Единая дорожная карта (1 файл!)
+│   ├── Done
+│   ├── In Progress
+│   └── Backlog
+├── data/               ← Только данные агента (не трогать)
+└── logs/               ← Логи (не трогать)
+```
+
+---
+
+## Правило 3: Запрещённые типы файлов
+
+| Запрещённый тип | Куда вместо |
+|----------------|------------|
+| `DAILY_PLAN_*.md` | → Задача в `chp.md` |
+| `SESSION_HANDOVER*.md` | → Секция в `chp.md` |
+| `STATUS_*.md` | → Секция в `PROJECT.md` |
+| `TODO.md` | → Задача в `ACTIVE_TASKS.md` |
+| `*_V2.md`, `*_NEW.md` | → Обновить оригинал! |
+| Файлы в `tmp/` | → Удалить после сессии |
+
+---
+
+## Правило 4: TTL (Time To Live)
+
+| Тип документа | TTL | Действие |
+|--------------|-----|----------|
+| `DAILY_PLAN` | 1 день | Автоудаление |
+| `SESSION_HANDOVER` | 3 дня | Архив |
+| `STATUS.md` | 7 дней | Влить в PROJECT.md |
+| `ROADMAP.md` | 30 дней | Ревью |
+| Данные агента (`data/`) | ∞ | Не удалять |
+
+---
+
+## Правило 5: Merge-группы (текущие задолженности)
+
+Эти файлы должны быть объединены при следующей возможности:
+
+### Группа: Роадмапы ai-eggs → `UNIFIED_ROADMAP.md`
+- `BITRIX_ROADMAP.md` → секция "Bitrix"
+- `PHASE_1_DETAILED_ROADMAP.md` → секция "Phase History"
+- `IMPROVEMENTS.md` → секция "Backlog"
+- `INCUBIRD_AUDIT_CHECKLIST.md` → секция "Audit"
+
+### Группа: VK → `VK_EXPANSION_STRATEGY.md`
+- `VK_INCUBATOR_KNOWLEDGE.md` → секция "Знания Инкубатора"
+- `VK_MARKET_RESEARCH.md` → секция "Исследование"
+- `VK_READY_TEXTS.md` → секция "Готовые тексты"
+- `VK_ACTION_PLAN.md` → секция "Пошаговый план"
+
+### Группа: Аудиты → `TECHNICAL_AUDIT_REPORT.md`
+- `FINAL_BUSINESS_AUDIT_REPORT.md`
+- `MASTER_CHECKLIST.md`
+- `DEBUG_PROTOCOLS.md`
+
+> _Синхронизировано из: `.agent/rules/IRON_RULES.md` + `document-governance.md`_

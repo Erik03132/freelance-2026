@@ -1,0 +1,271 @@
+---
+description: Навык управления сообществами в Одноклассниках (OK.ru). Используется для создания групп, автопостинга (текст+фото), интеграции с контент-машиной и дашбордом." --- # OK Social — Менеджер сообществ Одно
+alwaysApply: false
+---
+
+---
+name: ok-social
+description: "Навык управления сообществами в Одноклассниках (OK.ru). Используется для создания групп, автопостинга (текст+фото), интеграции с контент-машиной и дашбордом."
+---
+
+# OK Social — Менеджер сообществ Одноклассники - [GLOBAL]
+
+## Goal
+Полный цикл управления группами/сообществами в OK.ru: от создания до автоматического постинга контента с аналитикой. Интеграция в контент-машину экосистемы Antigravity.
+
+## Когда активировать
+- Создание/настройка группы в ОК
+- Автопостинг контента (текст + картинка) в группу
+- Получение статистики группы
+- Интеграция OK-постинга в дашборд/контент-машину
+- Мониторинг аудитории ОК
+
+## Проекты
+| Проект | Тип | Группа ОК | Аналог ВК |
+|--------|-----|-----------|-----------|
+| **ВезёмЦыплят** | Бизнес (продажи) | `vezemcip` (создать) | ВК-сообщество ВеsёмЦыплят |
+| **Свое Подворье** | Информационная | `svoe-podvorye` (создать) | ВК-сообщество Свое Подворье |
+
+## Архитектура OK API
+
+### Эндпоинты
+```
+Base URL: https://api.ok.ru/
+Формат 1: https://api.ok.ru/fb.do?method=[method_name]
+Формат 2: https://api.ok.ru/api/[method_group]/[method_name]
+```
+
+### Подпись запроса (sig)
+```python
+import hashlib
+
+def sign_request(params: dict, access_token: str, app_secret: str) -> str:
+    """Подпись запроса OK API (MD5-схема)."""
+    # 1. Вычисляем session_secret_key
+    session_secret = hashlib.md5(
+        (access_token + app_secret).encode()
+    ).hexdigest().lower()
+
+    # 2. Убираем access_token из параметров
+    sign_params = {k: v for k, v in params.items() if k != 'access_token'}
+
+    # 3. Сортируем лексикографически и склеиваем
+    sorted_str = ''.join(f'{k}={v}' for k, v in sorted(sign_params.items()))
+
+    # 4. MD5(склеенные_параметры + session_secret_key)
+    sig = hashlib.md5(
+        (sorted_str + session_secret).encode()
+    ).hexdigest().lower()
+
+    return sig
+```
+
+### Ключевые переменные окружения
+```bash
+# .env
+OK_APP_ID=            # ID приложения (apiok.ru)
+OK_APP_KEY=           # application_key
+OK_APP_SECRET=        # application_secret_key
+OK_ACCESS_TOKEN=      # access_token (OAuth 2.0)
+OK_GROUP_VEZEMCIP=    # GID группы ВезёмЦыплят
+OK_GROUP_PODVORYE=    # GID группы Свое Подворье
+```
+
+## API-методы (ключевые для наших задач)
+
+### Постинг контента
+| Метод | Описание | Приоритет |
+|---|---|---|
+| `mediatopic.post` | Публикация поста (текст + фото + видео) | 🔴 P0 |
+| `mediatopic.edit` | Редактирование поста | 🟡 P1 |
+| `mediatopic.deleteTopic` | Удаление поста | 🟡 P1 |
+| `mediatopic.getByIds` | Получение поста по ID | 🟡 P1 |
+
+### Загрузка медиа (3 шага!)
+| Шаг | Метод | Описание |
+|---|---|---|
+| 1 | `photosV2.getUploadUrl` | Получить URL для загрузки (с `gid` группы) |
+| 2 | `POST multipart/form-data` | Отправить файл на upload_url |
+| 3 | Получить token | ID загруженного фото для вложения |
+
+### Управление группой
+| Метод | Описание |
+|---|---|
+| `group.getInfo` | Информация о группе |
+| `group.getMembers` | Список участников |
+| `group.getCounters` | Счётчики (участники, фото и т.п.) |
+| `group.pinGroupFeed` | Закрепить/открепить пост |
+| `group.setMainPhoto` | Установить аватар группы |
+
+### Аналитика
+| Метод | Описание |
+|---|---|
+| `group.getStatOverview` | Основные счётчики статистики |
+| `group.getStatPeople` | Демография, география (за 7 дней) |
+| `group.getStatTopic` | Статистика конкретного поста |
+| `group.getStatTopics` | Статистика всех постов |
+| `group.getStatTrends` | Динамика по дням |
+
+## Workflow автопостинга (текст + картинка)
+
+```mermaid
+graph TD
+    A["Контент-машина<br/>(Шекспир → текст)<br/>(Рембрандт → картинка)"] --> B["OK AutoPoster"]
+    B --> C{"Загрузка фото"}
+    C --> C1["photosV2.getUploadUrl<br/>gid=GROUP_ID"]
+    C1 --> C2["POST file → upload_url"]
+    C2 --> C3["photo_token"]
+    C3 --> D{"Публикация"}
+    D --> D1["mediatopic.post<br/>gid + text + attachment"]
+    D1 --> E["✅ Пост опубликован"]
+    E --> F["Дашборд: логирование"]
+    F --> G["Через 24ч: group.getStatTopic"]
+
+    style A fill:#FF9800,color:#fff
+    style E fill:#4CAF50,color:#fff
+```
+
+### Минимальный рабочий пример (Python)
+```python
+import requests
+import hashlib
+import json
+import os
+
+# --- Конфигурация ---
+APP_KEY = os.getenv('OK_APP_KEY')
+APP_SECRET = os.getenv('OK_APP_SECRET')
+ACCESS_TOKEN = os.getenv('OK_ACCESS_TOKEN')
+GROUP_ID = os.getenv('OK_GROUP_VEZEMCIP')
+API_URL = 'https://api.ok.ru/fb.do'
+
+def sign(params: dict) -> str:
+    """Подпись запроса."""
+    session_secret = hashlib.md5(
+        (ACCESS_TOKEN + APP_SECRET).encode()
+    ).hexdigest().lower()
+    sign_params = {k: v for k, v in params.items()
+                   if k not in ('access_token', 'sig')}
+    sorted_str = ''.join(f'{k}={v}' for k, v in sorted(sign_params.items()))
+    return hashlib.md5((sorted_str + session_secret).encode()).hexdigest().lower()
+
+def api_call(method: str, **kwargs) -> dict:
+    """Вызов OK API."""
+    params = {'method': method, 'application_key': APP_KEY,
+              'access_token': ACCESS_TOKEN, 'format': 'json', **kwargs}
+    params['sig'] = sign(params)
+    resp = requests.get(API_URL, params=params)
+    return resp.json()
+
+# --- Шаг 1: Загрузка картинки ---
+def upload_photo(group_id: str, file_path: str) -> str:
+    """Загрузить фото в группу, вернуть token."""
+    # 1a. Получаем upload URL
+    result = api_call('photosV2.getUploadUrl', gid=group_id)
+    upload_url = result.get('upload_url')
+
+    # 1b. Отправляем файл
+    with open(file_path, 'rb') as f:
+        resp = requests.post(upload_url, files={'pic1': f})
+    photo_data = resp.json()
+
+    # 1c. Возвращаем токен фото
+    return photo_data.get('photos', {})
+
+# --- Шаг 2: Публикация поста ---
+def post_to_group(group_id: str, text: str, photo_tokens: dict = None):
+    """Опубликовать медиатопик в группу."""
+    # Формируем attachment
+    media = []
+    media.append({"type": "text", "text": text})
+
+    if photo_tokens:
+        for token_id, token_val in photo_tokens.items():
+            media.append({"type": "photo", "list": [{"id": token_val}]})
+
+    attachment = {"media": media}
+
+    result = api_call(
+        'mediatopic.post',
+        gid=group_id,
+        type='GROUP_THEME',
+        attachment=json.dumps(attachment)
+    )
+    return result
+
+# --- Использование ---
+if __name__ == '__main__':
+    # Загружаем фото
+    tokens = upload_photo(GROUP_ID, '/path/to/image.jpg')
+
+    # Публикуем пост
+    result = post_to_group(
+        GROUP_ID,
+        text="🐥 Свежие бройлеры Кобб-500! Доставка по ЮФО. Заказ: +7...",
+        photo_tokens=tokens
+    )
+    print(f"Пост опубликован: {result}")
+```
+
+## Интеграция с контент-машиной
+
+### Pipeline: Шекспир → OK
+```
+1. Шекспир генерирует текст поста (формат: ОК-адаптация)
+2. Рембрандт создаёт картинку (16:9, с текстовым оверлеем)
+3. OK AutoPoster:
+   a. upload_photo → token
+   b. mediatopic.post → публикация
+4. Дашборд: запись в БД (post_id, group_id, timestamp, text_preview)
+5. Cron (через 24ч): group.getStatTopic → обновить метрики в дашборде
+```
+
+### Контент-адаптация ВК → ОК
+| Параметр | ВК | ОК |
+|----------|----|----|
+| Аудитория | 25-45 лет | **35-60+ лет** |
+| Тон | Современный, деловой | **Тёплый, домашний, разговорный** |
+| Эмодзи | Умеренно | **Активно** (ОК-аудитория любит) |
+| CTA | "Оставьте заявку" | **"Напишите нам — поможем выбрать!"** |
+| Фото | Профессиональные | **Живые, "настоящие"** |
+| Время постинга | 10-12, 18-20 | **8-10, 12-14, 19-21** |
+| Хештеги | #бройлеры | **#курочки #домашняяптица #подворье** |
+
+## Ограничения OK API
+1. ❌ **Создание группы через API невозможно** — только UI ok.ru
+2. ⚠️ **User = ADMIN группы** для постинга
+3. ⚠️ **MD5-подпись** каждого запроса (не просто Bearer token)
+4. ⚠️ **Rate limits** — не задокументированы чётко, действовать аккуратно
+5. ⚠️ **Сторонние SDK слабые** — пишем свой модуль
+
+## GitHub-референсы
+| Репо | Язык | ⭐ | Зачем |
+|---|---|---|---|
+| [aiookru](https://github.com/konstantintogoi/aiookru) | Python | 7 | Async wrapper — паттерны авторизации |
+| [python-odnoklassniki](https://github.com/alternativshik/python-odnoklassniki) | Python | 12 | Самый звёздный wrapper |
+| [ok-js-sdk](https://github.com/odnoklassniki/ok-js-sdk) | JS | 16 | Официальный SDK (для iframe) |
+| [node-ok-bot-api](https://github.com/b3namine/node-ok-bot-api) | JS | 0 | Node.js Bot API |
+| [django-odnoklassniki-groups](https://github.com/ramusus/django-odnoklassniki-groups) | Python | 0 | Django Groups API |
+
+## Документация
+- **API Reference:** https://apiok.ru/dev/methods/rest
+- **Примеры:** https://apiok.ru/dev/examples/
+- **Загрузка фото:** https://apiok.ru/dev/examples/photo_upload
+- **OAuth:** https://apiok.ru/dev/app/
+- **Graph API:** https://apiok.ru/dev/graph_api/
+
+## Constraints
+- Secrets только через env vars (НИКОГДА в коде!)
+- Каждый пост логируется в дашборд
+- Контент адаптируется под аудиторию ОК (35-60+, тёплый тон)
+- Rate limiting: пауза 2-3 сек между вызовами API
+- Фото: загрузка через 3-шаговый процесс (getUploadUrl → POST → token)
+- Все ошибки API логируются с полным контекстом (метод, params, response)
+- Скилл дополняется по мере практики освоения API
+
+---
+*Скилл создан: 2026-05-03. Будет дополняться по мере практики.*
+
+> _Синхронизировано из Antigravity: `/Users/igorvasin/.gemini/config/skills/ok-social//SKILL.md`_
+> _Обновить: `./tools/sync_cursor_rules.sh --skill ok-social`_
+

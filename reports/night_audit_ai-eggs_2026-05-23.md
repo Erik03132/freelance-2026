@@ -1,9 +1,9 @@
 # 🌙 Ночной аудит кода — 2026-05-23
 
 > **Проект:** AI-Eggs (Анжелочка)  
-> **Время:** 02:02:10  
+> **Время:** 04:13:38  
 > **Метод:** Cross-Model Peer Review  
-> **Режим:** 🔧 AUTO-FIX  
+> **Режим:** 📋 Только отчёт  
 > **Python файлов:** 188 (проверяем: 5)  
 > **Источник:** ТОП-5 критических файлов (нет git diff)
 
@@ -64,3 +64,59 @@ ai-eggs/agent/angelochka_core.py:683:89: E501 Line too long (94 > 88)
 ai-eggs/agent/angelochka_core.py:685:89: E501 Line too long (91 > 88)
 ai-eggs/agent/angelochka_core.py:688:89: E501 Line too long (100 > 88)
 ```
+
+**Критических ошибок ruff (E,F,S,B):** 1547
+
+### 🔐 Hardcoded секреты
+✅ Не найдено
+
+### 📝 Изменения за день
+```
+ reports/night_audit_ai-eggs_2026-05-19.md | 186 ++++++++++++++++++++
+ reports/night_audit_ai-eggs_2026-05-20.md | 205 ++++++++++++++++++++++
+ reports/night_audit_ai-eggs_2026-05-21.md | 136 ++++++++++++++
+ reports/night_audit_ai-eggs_2026-05-22.md | 200 +++++++++++++++++++++
+ reports/night_audit_ai-eggs_2026-05-23.md |  74 ++++++++
+ reports/report-day_2026-05-22_1919.md     |  67 +++++++
+ tools/finish_day.sh                       |  52 +++++-
+ tools/morning_dream.sh                    |  37 +++-
+ tools/night_audit.sh                      |  38 +++-
+ 28 files changed, 2828 insertions(+), 83 deletions(-)
+```
+
+---
+⏭️ AI-фазы пропущены (--phase1-only)
+
+---
+
+## 📋 Итоговая сводка
+
+| Метрика | Значение |
+|---------|----------|
+| 📅 Дата | 2026-05-23 |
+| ⏰ Время | 04:13:38 → 04:13:39 |
+| 📁 Python файлов | 188 |
+| 📝 Изменено за день | 28 |
+| ⚡ ruff ошибок (E,F,S,B) | 1547 |
+| 🔐 Hardcoded секретов | 0 |
+| 🔬 Gemini аудит | ⏭️ |
+| 🧠 Claude cross-review | ⏭️ |
+| 🔴 Критичных (Claude) | 0 |
+| 🟡 Важных (Claude) | 0 |
+| 🟢 Минорных (Claude) | 0 |
+
+### Метод аудита
+```
+Код писали: Gemini 2.5 Pro + Claude Opus (через Antigravity)
+Проверяли:
+  Фаза 1: ruff 0.15 (машина, 100% точность)
+  Фаза 2: Gemini CLI 2.5 Pro (глубокий анализ, бесплатно)
+  Фаза 3: anthropic/claude-opus-4-5 (cross-model review, OpenRouter)
+  
+Cross-Model Peer Review: два профессора из разных школ
+проверяют код друг друга → максимум найденных багов
+```
+
+---
+
+> 🤖 Сгенерировано: `tools/night_audit.sh v2` — Cross-Model Peer Review

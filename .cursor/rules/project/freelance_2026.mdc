@@ -1,0 +1,66 @@
+---
+description: Проектные правила freelance-2026 — архитектура, VPS, Битрикс24, структура файлов.
+alwaysApply: true
+---
+
+# Проект: freelance-2026 / Antigravity Ecosystem
+
+## Сервер
+- **VPS**: `root@72.56.38.19` (Timeweb)
+- **SSH-ключ**: `.ssh_agent_key` в корне проекта
+- **PM2-процессы**: angela-server, angela-bot, angela-vk-bot, angela-scheduler, angela-autopilot, ptenchikova-bot
+
+## Структура проекта
+```
+freelance-2026/
+├── ai-eggs/          — исходники Анжелы (локальная копия)
+├── angel-backend/    — альтернативный бэкенд
+├── .agent/rules/     — правила Antigravity (IRON_RULES, SSoT, протоколы)
+├── .cursor/rules/    — Cursor-правила (синхронизированы с Antigravity)
+│   ├── global/       — глобальные скиллы (НЕ редактировать вручную)
+│   └── project/      — проектные правила (редактировать здесь)
+├── chronicles/       — хроники дня
+├── tools/            — скрипты (sync_cursor_rules.sh, morning_dream.sh, finish_day.sh)
+├── MASTER_BACKLOG.md — единый бэклог всех задач (SSoT)
+└── ACTIVE_TASKS.md   — статус боевой системы
+```
+
+## VPS: структура на сервере
+```
+/root/antigravity/ai-eggs/
+├── agent/            — все Python-модули Анжелы
+├── data/             — данные (транскрипты, RAG, Битрикс-сканы)
+├── venv/             — Python virtual environment
+└── .env              — секреты (GEMINI_API_KEY, BITRIX_WEBHOOK, TG_TOKEN...)
+```
+
+## Ключевые файлы Анжелы
+| Файл | Назначение |
+|------|-----------|
+| `agent/angela_server.py` | Основной сервер — точка входа |
+| `agent/angelochka_core.py` | Логика LLM-ответов |
+| `agent/rag_lite.py` | RAG-поиск по PDF (BM25 + rerank) |
+| `agent/hybrid_search.py` | Гибридный поиск (BM25 + Vector) |
+| `agent/bitrix_scanner.py` | Сканирование сделок Битрикс24 |
+| `data/rag_knowledge/chunks.json` | 6195 чанков из 18 PDF по птицеводству |
+
+## Принципы (SSoT)
+- **Одна задача = MASTER_BACKLOG.md**, не отдельный файл
+- **Один скилл = один SKILL.md**, не дублировать
+- **Новое правило → .agent/rules/**, затем `sync_cursor_rules.sh`
+- Cursor-правила в `global/` — не редактировать вручную, они перезапишутся при sync
+
+## Синхронизация с Cursor
+```bash
+# После обновления скилла в Antigravity:
+./tools/sync_cursor_rules.sh
+
+# Один скилл:
+./tools/sync_cursor_rules.sh --skill rag-master
+```
+
+## Битрикс24
+- Webhook: в `.env` → `BITRIX_WEBHOOK`
+- Сделки: `crm.deal.*`
+- Активности: `crm.activity.*` (закрывать после ответа — задача W6)
+- Таймлайн: `crm.timeline.comment.add`

@@ -1,0 +1,714 @@
+---
+description: Навык настройки RAG-систем для AI-ботов. Покрывает весь цикл: индексация PDF → BM25/Vector поиск → интеграция в LLM промпт → деплой на VPS → тестирование. Включает путь от Naive RAG до ReAct-агента с 
+alwaysApply: false
+---
+
+---
+name: rag-master
+description: >
+  Навык настройки RAG-систем для AI-ботов. Покрывает весь цикл: индексация PDF →
+  BM25/Vector поиск → интеграция в LLM промпт → деплой на VPS → тестирование.
+  Включает путь от Naive RAG до ReAct-агента с RAGAS-метриками из боевого опыта.
+  Диагностика 3 типичных сбоев retrieval: плохой чанкинг, слабый поиск, отсутствие метрик.
+triggers:
+  - RAG
+  - retrieval augmented generation
+  - поиск по документам
+  - индексация PDF
+  - векторный поиск
+  - гибридный поиск
+  - rag pipeline
+  - knowledge base
+  - база знаний
+  - naive rag
+  - advanced rag
+  - react агент
+  - ragas
+  - qdrant
+  - галлюцинации llm
+  - chunking
+  - чанкинг
+  - retrieval не работает
+  - rag ломается
+  - eval dataset
+  - cross-encoder
+---
+
+# 📚 RAG Master Pro v3.0
+> Обновлён 23.05.2026 — три источника:
+> 1. Честный знак: https://habr.com/ru/companies/chestnyznak/articles/1037024/
+> 2. LightRAG/GraphRAG: https://habr.com/ru/articles/1036652/
+> 3. OTUS «RAG для разочаровавшихся»: https://habr.com/ru/companies/otus/articles/1034386/
+
+Ты — эксперт по RAG-системам. Ключевой принцип: **никогда не давай советы вслепую** — сначала определи, где в пайплайне узкое место, потом чини.
+
+## 🔴 Диагностика: 3 причины почему RAG не работает
+> Источник: OTUS — «RAG для тех, кто разочаровался»
+
+**Симптом**: на MVP работает, на реальных вопросах — 50% мимо. Проблема всегда в retrieval, а не в LLM.
+
+### Сбой #1: Чанки нарезаны бездумно
+
+**Признаки:**
+- Договор/документ разрезан посередине пункта
+- Таблица: заголовок в одном чанке, данные в другом
+- Технический раздел разбит без привязки к структуре
+
+**Фикс — нарезка по смыслу, не по символам:**
+
+```python
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+# Пробует разделители по порядку: параграф → строка → предложение → слово
+smart_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,
+    chunk_overlap=200,
+    separators=["\n\n", "\n", ". ", " ", ""],
+)
+```
+
+**Для структурированных документов (регламенты, руководства) — нарезка по разделам:**
+
+```python
+import re
+
+def split_by_sections(text: str, max_chunk_size: int = 2000) -> list[dict]:
+    """Каждый раздел (заголовок + текст) = отдельный чанк."""
+    sections = re.split(r'\n(#{1,3}\s+.+)\n', text)
+    chunks = []
+    current_header = ""
+    
+    for section in sections:
+        if re.match(r'^#{1,3}\s+', section):
+            current_header = section.strip()
+            continue
+        content = section.strip()
+        if not content:
+            continue
+        # Чанк = заголовок раздела + текст → контекст сохраняется
+        chunks.append({
+            "text": f"{current_header}\n\n{content}",
+            "metadata": {"section": current_header}
+        })
+    return chunks
+```
+
+> **Правило**: каждый чанк должен содержать заголовок раздела. Даже если чанк найден по содержанию — модель видит контекст.
+
+### Сбой #2: Поиск не находит нужное
+
+**Признаки:**
+- Пользователь: «штрафы за просрочку» → документ: «неустойка за нарушение сроков» → MISS
+- Пользователь: «как оформить возврат» → находит общую политику, а не шаги → бесполезно
+- Только векторный поиск: синонимы находит, точные термины — нет
+- Только BM25: точные термины находит, смысл — нет
+
+**Фикс — Hybrid + Reranking (двухэтапный поиск):**
+
+```python
+# Этап 1: Грубый поиск (быстро) — 20 кандидатов
+# BM25 ловит: штраф→штраф (точные термины)
+# Vector ловит: штраф→неустойка (синонимы)
+# alpha=0.5-0.7 работает лучше каждого по отдельности
+candidates = hybrid_retriever.search(query, top_k=20, alpha=0.6)
+
+# Этап 2: Reranking (точно, но медленно) — топ-5 из 20
+# Cross-encoder оценивает пару (query, doc) целиком — точнее bi-encoder
+pairs = [(query, c["text"]) for c in candidates]
+scores = cross_encoder.predict(pairs)  # ms-marco-MiniLM-L-6-v2
+top_5 = [c for _, c in sorted(zip(scores, candidates), reverse=True)][:5]
+```
+
+**Почему cross-encoder точнее:**
+- **Bi-encoder** (обычные эмбеддинги): кодирует запрос и документ отдельно → быстро, но теряет связи
+- **Cross-encoder**: получает пару целиком → видит взаимодействие слов → точнее, но только для reranking
+
+### Сбой #3: Качество не измеряется
+
+**Признак**: «разработчик задал 5 вопросов — вроде нормально». Потом реальные пользователи — 50% мимо.
+
+**Фикс — eval dataset (минимум 50-100 вопросов):**
+
+```python
+# Структура eval dataset
+eval_dataset = [
+    {
+        "question": "Какая температура инкубации Ross 308?",
+        "expected_chunk_ids": ["ross308_p7", "hatchery_guide_p23"],  # ID релевантных чанков
+        "expected_answer_keywords": ["37.8", "38.0", "инкубац"]
+    },
+    ...
+]
+
+def evaluate_retrieval(retriever, dataset, top_k=5):
+    """Считает Recall@K — главная метрика retrieval."""
+    hits = 0
+    for item in dataset:
+        results = retriever.search(item["question"], top_k=top_k)
+        found_ids = {r["id"] for r in results}
+        expected_ids = set(item["expected_chunk_ids"])
+        if found_ids & expected_ids:  # хотя бы один попал
+            hits += 1
+    return hits / len(dataset)  # Recall@K
+
+# Пример использования
+recall = evaluate_retrieval(retriever, eval_dataset, top_k=5)
+print(f"Recall@5: {recall:.1%}")  # цель: >80%
+```
+
+**Что даёт eval dataset:**
+- Поменял chunk_size 500→1000 — recall вырос или упал? Теперь знаешь.
+- Добавил reranking — помогло? Число есть.
+- Без чисел = гадание.
+
+**Как создать eval dataset:**
+1. Возьми реальные вопросы пользователей (у тебя есть 541 транскрипт!)
+2. Вручную найди правильные чанки для каждого вопроса
+3. Или используй LLM для генерации синтетических вопросов по чанкам
+
+```python
+# Синтетическая генерация eval dataset через LLM
+def generate_eval_from_chunks(chunks, n_questions=3):
+    """LLM генерирует вопросы по каждому чанку."""
+    dataset = []
+    for chunk in chunks:
+        prompt = f"""
+        По тексту ниже придумай {n_questions} конкретных вопроса, ответ на которые есть в тексте.
+        Верни JSON список строк.
+        
+        Текст: {chunk['text'][:500]}
+        """
+        questions = llm.generate(prompt)  # parse JSON
+        for q in questions:
+            dataset.append({"question": q, "expected_chunk_ids": [chunk["id"]]})
+    return dataset
+```
+
+## 🩺 Алгоритм диагностики RAG
+
+```
+RAG даёт плохие ответы?
+│
+├─ Проверь: правильные ли чанки находятся?
+│   └─ НЕТ → Сбой #1 (чанкинг) или Сбой #2 (поиск)
+│       ├─ Точный термин не находится → добавь BM25
+│       ├─ Синоним не находится → добавь векторный поиск
+│       ├─ Находится не тот кусок → улучши chunking
+│       └─ Находится правильный, но не лучший → добавь reranking
+│
+└─ ДА, чанки правильные, но ответ плохой?
+    └─ Проблема в промпте или LLM, не в retrieval
+        ├─ Проверь промпт: есть ли инструкция «только из контекста»?
+        └─ Добавь Faithfulness check
+
+Ещё не знаешь где проблема?
+└─ Сбой #3 → создай eval dataset → измерь Recall@5
+```
+
+## Эволюция RAG: три уровня зрелости
+
+```
+Naive RAG → Advanced RAG → ReAct Agent
+   ↓              ↓               ↓
+ MVP за 1 день  Точность >70%  Рассуждение + инструменты
+```
+
+---
+
+## 🟡 Уровень 1: Naive RAG (MVP)
+
+Простейший пайплайн. Работает быстро, но точность ~40-60% на реальных данных.
+
+### Шаги
+
+**1. Indexing (подготовка базы)**
+```
+Документы → Parsing → Chunking → Embedding → VectorDB
+```
+- **Parsing**: PDF, DOCX, Confluence. Очисти колонтитулы, номера страниц, артефакты OCR
+- **Chunking**: 512–1024 токенов, overlap 15-20% (иначе ответ разрезается пополам)
+- **Embedding**: для русского языка — `deepvk/USER-bge-m3`, `intfloat/multilingual-e5-large`, `Qwen/Qwen3-Embedding-0.6B`
+- **VectorDB**: Qdrant (рекомендуется), Chroma, Weaviate
+
+**2. Retrieval (поиск)**
+```python
+# Только векторный поиск — слабое место Naive RAG
+results = qdrant.search(query_vector, top_k=5)
+```
+
+**3. Generation (генерация)**
+```python
+prompt = f"""
+Ответь на вопрос ТОЛЬКО на основе контекста.
+Если ответа нет в контексте — скажи "Не знаю".
+
+Контекст: {retrieved_chunks}
+Вопрос: {user_question}
+"""
+```
+
+### ⚠️ Проблемы Naive RAG (почему переходят дальше)
+- Точный термин / аббревиатура → векторный поиск не находит (нужен BM25)
+- Вопрос требует объединения из нескольких документов → находит только один
+- Размытый вопрос → нерелевантные чанки → галлюцинация
+- Нет оценки качества → неизвестно насколько плохо
+
+---
+
+## 🟠 Уровень 2: Advanced RAG
+
+Решает проблемы Naive RAG. Три направления улучшений.
+
+### 2.1 Гибридный поиск (Hybrid Retrieval)
+
+**Никогда не используй только векторный поиск для продакшена!**
+
+```python
+# Dense (семантика) + Sparse (ключевые слова) → RRF fusion
+dense_results  = qdrant.search(dense_vector, top_k=10)   # смысл
+sparse_results = qdrant.search(sparse_vector, top_k=10)  # точные термины
+hybrid_results = reciprocal_rank_fusion(dense_results, sparse_results)
+```
+
+| Тип поиска | Плюс | Минус | Когда |
+|-----------|------|-------|-------|
+| **Dense (vector)** | Смысл, синонимы | Пропускает точные термины | «Как сделать X?» |
+| **Sparse (BM25)** | Точные слова, аббревиатуры | Не понимает смысл | «Артикул ABC-123» |
+| **Hybrid** | Лучшее из обоих | Сложнее настройка | Продакшен всегда |
+
+**В Qdrant гибридный поиск:**
+```python
+from qdrant_client.models import SparseVector, NamedSparseVector
+
+# Sparse вектор через SPLADE или BM42
+sparse_vec = splade_model.encode(query)
+results = qdrant.query_points(
+    collection_name="docs",
+    prefetch=[
+        Prefetch(query=dense_vec, using="dense", limit=20),
+        Prefetch(query=SparseVector(**sparse_vec), using="sparse", limit=20),
+    ],
+    query=FusionQuery(fusion=Fusion.RRF),  # Reciprocal Rank Fusion
+    limit=5,
+)
+```
+
+### 2.2 Query Enhancement (улучшение запроса)
+
+**Проблема**: пользователь пишет «почему не работает X» → плохой поиск.
+**Решение**: переформулируй запрос перед поиском.
+
+```python
+# Multi-Query: 3 варианта запроса для одного вопроса
+def generate_queries(user_question: str) -> list[str]:
+    prompt = f"""
+    Сгенерируй 3 разных поисковых запроса для вопроса: {user_question}
+    Каждый запрос должен искать с разного угла.
+    Формат: список из 3 строк.
+    """
+    return llm.generate(prompt).split('\n')
+
+# HyDE (Hypothetical Document Embedding)
+def hyde_search(question: str):
+    # Сначала сгенерируй гипотетический ответ
+    hypothetical_answer = llm.generate(f"Кратко ответь на: {question}")
+    # Ищи документы похожие на ОТВЕТ, а не на вопрос
+    return vector_search(hypothetical_answer)
+```
+
+### 2.3 Re-ranking (переранжирование)
+
+После поиска выбери реально лучшие чанки из топ-N:
+
+```python
+# Cross-encoder (точнее, но медленнее)
+from sentence_transformers import CrossEncoder
+reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+candidates = search(query, top_k=20)  # берём больше
+scores = reranker.predict([(query, chunk.text) for chunk in candidates])
+top_5 = sorted(zip(candidates, scores), key=lambda x: -x[1])[:5]
+
+# Или через LLM (дороже, но гибче)
+def llm_rerank(query, chunks, top_k=3):
+    prompt = f"""
+    Вопрос: {query}
+    Выбери {top_k} наиболее релевантных фрагмента из списка.
+    Верни только номера: [1, 3, 7]
+    Фрагменты: {enumerate(chunks)}
+    """
+    return llm.generate(prompt)
+```
+
+### 2.4 Contextual Chunking (умная нарезка)
+
+Проблема обычного chunking: чанк вырван из контекста, теряет смысл.
+
+```python
+# Добавь контекст документа к каждому чанку
+def contextual_chunk(document, chunk):
+    context = llm.generate(f"""
+    Документ: {document[:2000]}
+    Чанк: {chunk}
+    Добавь 1-2 предложения контекста в начало чанка, чтобы он был понятен без документа.
+    """)
+    return f"{context}\n\n{chunk}"
+
+# Parent-Child чанкинг
+# Маленькие чанки для поиска, большие для контекста
+small_chunks = split(doc, size=256)   # точный поиск
+large_chunks = split(doc, size=1024)  # полный контекст
+
+# Ищем по маленьким, отдаём большие в промпт
+```
+
+---
+
+## 🔴 Уровень 3: ReAct Agent
+
+Когда RAG недостаточен: нужно рассуждение + несколько шагов + внешние инструменты.
+
+### ReAct Loop (Reason + Act)
+
+```
+Вопрос → [Мысль] → [Действие] → [Наблюдение] → [Мысль] → ... → Ответ
+```
+
+```python
+tools = {
+    "search_docs": search_rag,           # поиск в базе знаний
+    "search_web": search_internet,        # внешний поиск
+    "get_confluence": confluence_api,     # конкретная страница
+    "calculate": python_eval,            # вычисления
+}
+
+def react_agent(question: str):
+    history = []
+    for step in range(max_steps=10):
+        thought_action = llm.generate(f"""
+        Вопрос: {question}
+        История: {history}
+        
+        Подумай и выбери действие:
+        Мысль: <твоё рассуждение>
+        Действие: <tool_name>
+        Аргумент: <аргумент для инструмента>
+        """)
+        
+        tool, arg = parse_action(thought_action)
+        if tool == "finish":
+            return arg
+            
+        observation = tools[tool](arg)
+        history.append({"thought": thought, "action": tool, "observation": observation})
+```
+
+### Когда ReAct, когда RAG?
+
+| Сценарий | Решение |
+|---------|---------|
+| FAQ, справка по документам | Advanced RAG |
+| «Сравни документ A и B» | RAG + multi-doc |
+| «Найди и посчитай» | ReAct |
+| «Обнови задачу в Jira по этому PDF» | ReAct + инструменты |
+| Многошаговое рассуждение | ReAct |
+
+---
+
+## 🔵 Уровень 4: GraphRAG / LightRAG
+
+> Источник: https://habr.com/ru/articles/1036652/ — практический эксперимент с LightRAG на юридическом корпусе
+
+Когда ReAct недостаточен: **связи между сущностями рассеяны по тысячам документов** и их нельзя найти простым поиском.
+
+### Когда нужен GraphRAG
+
+| Ситуация | Решение |
+|----------|---------|
+| «Как статья 123 ГК связана с прецедентом X?» | GraphRAG — поиск по связям |
+| «Какие нормы регулируют этот договор?» | GraphRAG — граф сущностей |
+| «Найди все связанные документы» | GraphRAG — обход графа |
+| «Ответь на вопрос из FAQ» | Advanced RAG — дешевле |
+| Обычный поиск по тексту | Advanced RAG — быстрее |
+
+### Как работает LightRAG
+
+```
+Документы → Extraction → Knowledge Graph → Indexing
+                ↓
+        (LLM извлекает сущности и связи)
+        Person → works_at → Company
+        Law_Article → regulates → Contract_Type
+        Precedent → references → Law_Article
+```
+
+**Два режима поиска:**
+- **Local** — поиск в ближайшем окружении сущности (быстро, точечно)
+- **Global** — обход всего графа (медленно, для аналитики)
+- **Hybrid** — комбинация (рекомендуется)
+
+### Быстрый старт LightRAG
+
+```bash
+pip install lightrag-hku
+```
+
+```python
+import os
+from lightrag import LightRAG, QueryParam
+from lightrag.llm.openai import gpt_4o_mini_complete, openai_embed
+
+# Инициализация
+rag = LightRAG(
+    working_dir="./lightrag_cache",
+    llm_model_func=gpt_4o_mini_complete,   # или любой LLM
+    embedding_func=openai_embed,            # или локальный эмбеддер
+)
+
+# Индексация документов
+with open("documents.txt", "r") as f:
+    rag.insert(f.read())
+
+# Поиск
+result = rag.query(
+    "Как регулируется расторжение договора аренды?",
+    param=QueryParam(mode="hybrid")  # local | global | hybrid | naive
+)
+print(result)
+```
+
+### ⚠️ Честные выводы из статьи (практический опыт)
+
+> «Граф из коробки — ещё не готовая аналитическая система»
+
+**Что работает хорошо:**
+- Связи между именованными сущностями (персоны, организации, нормы)
+- Вопросы типа «кто с кем связан» / «что на что ссылается»
+- Многодокументный синтез для аналитических запросов
+
+**Что не работает без настройки:**
+- Галлюцинации при извлечении сущностей (LLM выдумывает связи)
+- Качество графа зависит от качества промпта извлечения
+- Высокая стоимость индексации (каждый чанк → LLM-вызов для extraction)
+- Для русского языка — нужна тонкая настройка промптов извлечения
+
+**Стоимость индексации LightRAG:**
+```
+1000 страниц × ~4 LLM-вызова = ~4000 вызовов
+При GPT-4o-mini: ~$2-5 на индексацию
+При локальной LLM (Qwen/DeepSeek): $0
+```
+
+### GraphRAG vs Advanced RAG: когда что выбирать
+
+```
+Вопрос простой + документы изолированы → Advanced RAG (дешевле, быстрее)
+Вопрос требует связей между документами → GraphRAG
+Корпус < 100 документов → Advanced RAG
+Корпус > 1000 документов со сложными связями → GraphRAG
+Продакшен с ограниченным бюджетом → Advanced RAG + точечный GraphRAG
+```
+
+### LightRAG с локальной LLM (без API-затрат)
+
+```python
+from lightrag.llm.ollama import ollama_model_complete, ollama_embed
+
+rag = LightRAG(
+    working_dir="./cache",
+    llm_model_func=ollama_model_complete,
+    llm_model_name="qwen2.5:7b",           # локально через Ollama
+    embedding_func=ollama_embed,
+    embedding_model_name="nomic-embed-text",
+)
+```
+
+
+
+---
+
+## 📊 RAGAS: измерение качества RAG
+
+**Золотое правило: без метрик RAG — это гадание на кофейной гуще.**
+
+```python
+from ragas import evaluate
+from ragas.metrics import (
+    faithfulness,          # Верность: ответ основан на контексте?
+    answer_relevancy,      # Релевантность ответа вопросу
+    context_precision,     # Precision: найденные чанки релевантны?
+    context_recall,        # Recall: все нужные чанки найдены?
+)
+
+# Создай тестовый датасет (минимум 50 пар вопрос-ответ)
+test_dataset = [
+    {
+        "question": "Какой срок годности продукта X?",
+        "ground_truth": "18 месяцев согласно ТУ-123",
+        "contexts": retrieved_chunks,
+        "answer": generated_answer,
+    },
+    ...
+]
+
+results = evaluate(test_dataset, metrics=[
+    faithfulness,
+    answer_relevancy,
+    context_precision,
+    context_recall,
+])
+```
+
+### Интерпретация метрик
+
+| Метрика | Что значит | Плохо | Хорошо |
+|---------|-----------|-------|--------|
+| **Faithfulness** | Нет галлюцинаций | < 0.7 | > 0.9 |
+| **Answer Relevancy** | Ответ по теме | < 0.7 | > 0.85 |
+| **Context Precision** | Поиск точный | < 0.6 | > 0.8 |
+| **Context Recall** | Ничего не упустили | < 0.6 | > 0.8 |
+
+### Диагностика по метрикам
+
+```
+Faithfulness низкий  → LLM галлюцинирует → жёстче промпт, больше контекста
+Context Precision низкий → поиск шумный → re-ranking, гибридный поиск
+Context Recall низкий    → поиск не находит → chunking стратегия, query expansion
+Answer Relevancy низкий  → ответ мимо     → промпт-инжиниринг
+```
+
+---
+
+## 🛠 Стек и инструменты
+
+### Рекомендуемый стек (2026)
+
+| Компонент | Рекомендация | Альтернатива |
+|-----------|-------------|-------------|
+| **VectorDB** | Qdrant (self-hosted) | Chroma (dev), Weaviate |
+| **Embeddings (RU)** | `deepvk/USER-bge-m3` | `intfloat/multilingual-e5-large` |
+| **Embeddings (EN)** | `text-embedding-3-small` | `BAAI/bge-large-en` |
+| **Sparse** | SPLADE / BM42 (Qdrant built-in) | BM25 через rank_bm25 |
+| **Re-ranker** | `cross-encoder/ms-marco-MiniLM` | LLM re-rank |
+| **LLM** | Qwen2.5-72B / DeepSeek V3 | Gemini Flash (API) |
+| **Оценка** | RAGAS | LLM-as-judge |
+| **Фреймворк** | LangChain / LlamaIndex | Кастомный (лучше контроль) |
+
+> ⚠️ **Честный знак предупреждает**: «Просто взять фреймворк не работает». LangChain/LlamaIndex скрывают детали — на продакшене нужно понимать каждый шаг пайплайна.
+
+### Qdrant: быстрый старт
+
+```bash
+# Docker
+docker run -p 6333:6333 qdrant/qdrant
+
+# Python
+pip install qdrant-client sentence-transformers
+```
+
+```python
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams
+
+client = QdrantClient("localhost", port=6333)
+
+# Создать коллекцию с гибридным поиском
+client.create_collection(
+    collection_name="knowledge_base",
+    vectors_config={
+        "dense": VectorParams(size=768, distance=Distance.COSINE),
+    },
+    sparse_vectors_config={
+        "sparse": SparseVectorParams(index=SparseIndexParams(on_disk=False)),
+    }
+)
+```
+
+---
+
+## 🧠 Алгоритм «The Source of Truth» (обновлённый)
+
+```
+1. Intent Classification
+   └─ Факт / Инструкция / Сравнение / Многошаговое?
+
+2. Query Enhancement
+   ├─ Multi-Query (3 варианта запроса)
+   └─ HyDE (если вопрос размытый)
+
+3. Hybrid Search
+   ├─ Dense search (семантика)
+   ├─ Sparse search (ключевые слова)
+   └─ RRF Fusion → top-20
+
+4. Re-ranking
+   └─ Cross-encoder → top-5
+
+5. Context Assembly
+   ├─ Дедупликация
+   ├─ Проверка источника (expert_knowledge > PDF > веб)
+   └─ Обрезка до context window
+
+6. Generation с citation
+   └─ Каждый факт → ссылка на источник
+
+7. Faithfulness Check (опционально)
+   └─ Проверить: всё из контекста?
+```
+
+---
+
+## 🚫 Anti-patterns (что НЕ делать)
+
+| ❌ Плохо | ✅ Хорошо |
+|---------|---------|
+| Только векторный поиск | Гибридный (dense + sparse) |
+| chunk_size=256 для всего | Разные размеры для разных типов документов |
+| Нет overlap | overlap 15-20% |
+| Один запрос → один поиск | Multi-query (3 варианта) |
+| LLM решает всё сама | Жёсткий промпт: «Только из контекста» |
+| Нет метрик | RAGAS на тестовом датасете |
+| LangChain «чёрный ящик» | Кастомный пайплайн с логами каждого шага |
+| Индексировать раз и забыть | Мониторинг freshness + регулярная реиндексация |
+
+---
+
+## 🔍 Чеклист перед запуском RAG в продакшен
+
+```markdown
+### Данные
+- [ ] Очищены колонтитулы, артефакты OCR
+- [ ] Размер чанка выбран под тип документа
+- [ ] Overlap 15-20%
+- [ ] Метаданные (источник, дата, раздел) к каждому чанку
+- [ ] Мультиязычная embedding-модель (для RU)
+
+### Поиск
+- [ ] Гибридный поиск (dense + sparse)
+- [ ] Re-ranking на топ-20
+- [ ] Multi-query expansion протестирован
+
+### Генерация
+- [ ] Промпт запрещает галлюцинации («только из контекста»)
+- [ ] Цитирование источников
+- [ ] Обработка «не знаю»
+
+### Качество
+- [ ] RAGAS метрики на тестовом датасете (минимум 50 примеров)
+- [ ] Faithfulness > 0.85
+- [ ] Context Precision > 0.75
+- [ ] Логирование запросов для анализа провалов
+
+### Инфраструктура
+- [ ] Qdrant self-hosted (не облако для чувствительных данных)
+- [ ] Скрипт реиндексации при обновлении документов
+- [ ] Мониторинг latency (цель < 3 сек)
+```
+
+---
+
+*RAG Master Pro v2.0 | Боевой опыт: Честный знак (2026) + AWS RAG Best Practices + ai-eggs production*
+
+> _Синхронизировано из Antigravity: `/Users/igorvasin/.gemini/config/skills/rag-master//SKILL.md`_
+> _Обновить: `./tools/sync_cursor_rules.sh --skill rag-master`_
+

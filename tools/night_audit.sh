@@ -18,8 +18,8 @@
 #   bash tools/night_audit.sh --fix               # авто-исправление в ветке
 #   bash tools/night_audit.sh --phase1-only       # только ruff, без AI
 #
-# Запуск: crontab → 02:00 каждую ночь
-# Или вручную: bash tools/night_audit.sh [--phase1-only] [--no-tg]
+# Запуск: launchd (macOS) → 02:00 каждую ночь
+# Или вручную: bash tools/night_audit.sh [--phase1-only] [--no-tg] [--sonnet]
 # ============================================================
 
 set -eu
@@ -49,6 +49,11 @@ OPENROUTER_KEY=$(grep "OPENROUTER_API_KEY" "${AI_EGGS_DIR}/.env" 2>/dev/null | c
 GEMINI_CLI=$(which gemini 2>/dev/null || echo "")
 OLLAMA_MODEL="gemma4:e2b"  # Fallback только
 
+# Модель аудита — Kimi K2 primary (SWE-bench #1=65.8%, в 6x дешевле Opus)
+# Бенчмарки (май 2026): Kimi K2=65.8% > Gemini 2.5 Pro=63.8% > Claude Opus≈62% > DeepSeek R1=49%
+CLAUDE_MODEL="moonshotai/kimi-k2"              # 🥇 Лучший SWE-bench, $2.50/M tok
+CLAUDE_FALLBACK_MODEL="deepseek/deepseek-r1"    # 💰 Fallback — $0.55/M tok
+
 # Флаги запуска
 PHASE1_ONLY=false
 NO_TG=false
@@ -60,6 +65,7 @@ for arg in "$@"; do
         --phase1-only) PHASE1_ONLY=true ;;
         --no-tg) NO_TG=true ;;
         --fix) AUTO_FIX=true ;;
+        --sonnet) CLAUDE_MODEL="anthropic/claude-sonnet-4" ;;  # ручной downgrade
         --project=*) TARGET_PROJECT="${arg#*=}" ;;
         --project) ;; # следующий аргумент
     esac
@@ -147,23 +153,44 @@ call_claude() {
     escaped_prompt=$(echo "$prompt" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))")
     
     local response
-    response=$(curl -s --max-time 120 \
+    # Opus медленнее — даём 180 сек; при ошибке fallback на Sonnet
+    response=$(curl -s --max-time 180 \
         -H "Authorization: Bearer ${OPENROUTER_KEY}" \
         -H "Content-Type: application/json" \
         -H "HTTP-Referer: https://antigravity.local" \
         -d "{
-            \"model\": \"anthropic/claude-sonnet-4\",
+            \"model\": \"${CLAUDE_MODEL}\",
             \"max_tokens\": ${max_tokens},
             \"messages\": [{\"role\": \"user\", \"content\": ${escaped_prompt}}]
         }" \
         "https://openrouter.ai/api/v1/chat/completions" 2>/dev/null)
     
+    # Проверяем ошибку модели — fallback на Sonnet
+    local err
+    err=$(echo "$response" | python3 -c "import sys,json; r=json.load(sys.stdin); print(r.get('error',{}).get('message',''))" 2>/dev/null || echo "")
+    if [ -n "$err" ] && [ "$CLAUDE_MODEL" != "$CLAUDE_FALLBACK_MODEL" ]; then
+        log "  ⚠️  Kimi K2 недоступен ($err) — fallback на DeepSeek R1"
+        response=$(curl -s --max-time 120 \
+            -H "Authorization: Bearer ${OPENROUTER_KEY}" \
+            -H "Content-Type: application/json" \
+            -H "HTTP-Referer: https://antigravity.local" \
+            -d "{
+                \"model\": \"${CLAUDE_FALLBACK_MODEL}\",
+                \"max_tokens\": ${max_tokens},
+                \"messages\": [{\"role\": \"user\", \"content\": ${escaped_prompt}}]
+            }" \
+            "https://openrouter.ai/api/v1/chat/completions" 2>/dev/null)
+    fi
+
     # Извлекаем текст ответа
     echo "$response" | python3 -c "
 import sys, json
 try:
     r = json.load(sys.stdin)
-    print(r['choices'][0]['message']['content'])
+    if 'choices' in r:
+        print(r['choices'][0]['message']['content'])
+    else:
+        print(f'❌ API error: {r.get(\"error\",{}).get(\"message\",\"unknown\")}')
 except Exception as e:
     print(f'❌ Ошибка Claude API: {e}')
 " 2>/dev/null
@@ -370,7 +397,7 @@ if [ -n "$GEMINI_CLI" ]; then
 
     GEMINI_PROMPT="Ты — ночной код-аудитор проекта Antigravity (AI-агент для птицефабрики).
 
-КОНТЕКСТ: Код писали Gemini 2.5 Pro и Claude Opus. Ты проверяешь их работу.
+КОНТЕКСТ: Код писали Gemini 2.5 Pro и другие модели. Ты (Kimi K2) проверяешь их работу как независимый эксперт.
 
 ИЗМЕНЁННЫЕ ФАЙЛЫ:
 $(echo "$CHANGED_PY" | tr '\n' ', ')
@@ -516,7 +543,7 @@ cat >> "$REPORT_FILE" << EOF
 Проверяли:
   Фаза 1: ruff 0.15 (машина, 100% точность)
   Фаза 2: Gemini CLI 2.5 Pro (глубокий анализ, бесплатно)
-  Фаза 3: Claude Sonnet 4 (cross-model review, OpenRouter)
+  Фаза 3: ${CLAUDE_MODEL} (cross-model review, OpenRouter)
   
 Cross-Model Peer Review: два профессора из разных школ
 проверяют код друг друга → максимум найденных багов

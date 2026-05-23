@@ -340,13 +340,42 @@ log "📊 Patterns обновлён: ${PATTERNS_FILE}"
 
 # ============ TELEGRAM ============
 
-TG_MSG="🌙 *Morning Dream — ${DATE}*
+BACKLOG_FILE="/Users/igorvasin/freelance-2026/MASTER_BACKLOG.md"
+BACKLOG_SECTION=""
+
+if [ -f "$BACKLOG_FILE" ]; then
+    # Понедельник = полный обзор срочных задач
+    DAY_OF_WEEK=$(date +%u)  # 1=Пн, 7=Вс
+
+    if [ "$DAY_OF_WEEK" = "1" ]; then
+        # Каждый понедельник — срочные + важные задачи
+        URGENT=$(grep -A 20 "^## 🔴 СРОЧНО" "$BACKLOG_FILE" | grep "^| [A-Z]" | head -5 | awk -F'|' '{print "🔴 " $3}' | sed 's/^ *//;s/ *$//')
+        WEEK=$(grep -A 20 "^## 🟠 ВАЖНО" "$BACKLOG_FILE" | grep "^| [A-Z]" | head -3 | awk -F'|' '{print "🟠 " $3}' | sed 's/^ *//;s/ *$//')
+        BACKLOG_SECTION="
+
+━━━━━━━━━━━━━━━━━━━━━━
+📋 *BACKLOG REVIEW (Пн)*
+
+${URGENT}
+${WEEK}
+[Полный список](file:///Users/igorvasin/freelance-2026/MASTER_BACKLOG.md)"
+    else
+        # Остальные дни — случайный пункт из бэклога как напоминание
+        RANDOM_TASK=$(grep "^| [A-Z][0-9]" "$BACKLOG_FILE" | grep -v "✅\|заморожен\|архив" | shuf -n 1 | awk -F'|' '{print $3}' | sed 's/^ *\*\*//;s/\*\* *//')
+        if [ -n "$RANDOM_TASK" ]; then
+            BACKLOG_SECTION="
+
+━━━━━━━━━━━━━━━━━━━━━━
+💡 *Backlog reminder:* ${RANDOM_TASK}"
+        fi
+    fi
+fi
+
+send_telegram "🌙 *Morning Dream — ${DATE}*
 
 📚 Хроник: ${CHRONICLE_COUNT} (за ${DAYS} дней)
 📄 Отчёт: \`dreams/dream_${DATE}.md\`
 
-$(echo "$DREAM_RESULT" | grep -E "^##|^-" | head -12)"
-
-send_telegram "$TG_MSG"
+$(echo "$DREAM_RESULT" | grep -E "^##|^-" | head -12)${BACKLOG_SECTION}"
 
 log "✅ Dreaming завершён"

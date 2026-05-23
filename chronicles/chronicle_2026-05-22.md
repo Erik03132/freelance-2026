@@ -243,3 +243,36 @@ kill baresip → watchdog: ❌ не найден → 5с задержка → п
 launchctl load ~/Library/LaunchAgents/com.antigravity.morningdream.plist
 ```
 
+
+---
+
+## 🎓 Сессия прокачки навыков (02:47–03:35)
+
+### Скиллы обновлены
+
+| Скилл | Версия | Что добавлено |
+|-------|--------|---------------|
+| `code-review-and-quality` | v2.0 | Thermo-nuclear rules из Cursor Team Kit: Code Judo, правило 1000 строк, анти-спагетти |
+| `rag-master` | v3.0 | Честный знак + LightRAG + OTUS. Naive→Advanced→ReAct→GraphRAG, RAGAS, диагностика 3 сбоев retrieval |
+| `artemiy-frontend` | v2.0 | Modern Web Guidance: oklch, container queries, view transitions, Speculation Rules |
+
+### RAG Анжелы — аудит
+
+- Реальный стек: **Advanced RAG** (ChromaDB + BM25 + гибридный RRF) ✅
+- Добавлены: `rerank_with_llm()` и `search_with_rerank()` в `rag_lite.py`
+- Тест качества: **100% (5/5)** на базовых вопросах
+- База: **6195 чанков** из **18 PDF** по птицеводству
+
+### Анализ 541 транскрипта
+
+| Тип вопросов | Кол-во | Для чего |
+|-------------|--------|---------|
+| RAG-worthy (птицеводство) | 46 | Тест RAG Recall@5 |
+| Цены/наличие | 138 | Тест Анжелы-продавца |
+| Логистика | 54 | Тест обработки запросов |
+| Жалобы | 21 | Тест тональности |
+| Нечёткие | 1849 | Пропустить |
+
+**Вывод**: 541 транскрипт = тест продавца, не RAG.
+**GraphRAG**: не нужен для Анжелы — Advanced RAG достаточен.
+**Eval план**: `/root/antigravity/ai-eggs/data/rag_knowledge/eval_plan.md`

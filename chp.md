@@ -106,3 +106,67 @@ SIP: user4@vpbx400161137.mangosip.ru
 ---
 
 > 🤖 **Finish-Day:** 19:19 22.05.2026
+
+---
+## 23.05.2026 — конец дня (МИНОРНАЯ НОТА)
+
+### Что пытались сделать
+- Запустить автообзвон с подтверждением через Mango `commands/callback`
+- Поймать DTMF (1/0) от клиента → менять статус в Bitrix
+
+### Что работало вчера (22.05 ~17:42)
+- Один звонок прошёл: `entry_result: 1`, `talk_time` ненулевой
+- STT поймал "Капа, горы, да?" — клиент слышал что-то и говорил
+
+### Что сломали сегодня
+1. Добавили UFW → заблокировали Mango INVITE (но оказалось INVITE вообще не шёл)
+2. Множественные перезапуски baresip → [3 bindings] в Mango → старый контакт перехватывал
+3. Разделили audio_source/audio_player → баг с пустым mango_record.wav
+4. sip_router → лишний, убрали
+
+### Доказанный root cause (tcpdump)
+```
+Mango commands/callback НЕ шлёт SIP INVITE к baresip (user4).
+За 2+ мин трафика — ноль INVITE от Mango. Только спам-сканеры.
+Клиент слышит ring-back = Mango ждёт ответа extension 22 (который не отвечает).
+```
+
+### Состояние на конец дня (ОТКАТ)
+- UFW: отключён
+- baresip: user4, auto_answer, mango_play.wav (бэкап 22.05, 20с)
+- accounts: оригинал без regint
+- SIP: 1 binding (чисто, старые снесли через digest dereg)
+- PM2: все процессы на месте
+
+### На завтра
+1. Разобраться ПОЧЕМУ Mango не шлёт INVITE — смотреть Mango ЛК → Маршрутизация → Callback
+2. Проверить: может callback работал потому что кто-то ещё был в Zoiper?
+3. Решить как получать DTMF (webhook vs baresip screen)
+4. Не трогать то что не сломано
+
+### Файлы для восстановления
+- Backup WAV: `/tmp/mango_play_backup.wav` (22.05, 20.6с)
+- Dereg скрипт: `/tmp/sip_dereg.py` (чистит stale contacts)
+- Rollback скрипт: `/tmp/rollback_to_22may.py`
+
+---
+## ПЛАН НА 24.05.2026 — СТАРТ ДНЯ
+
+### 1. AI Engineering Coach (первым делом!)
+```bash
+git clone https://github.com/microsoft/ai-engineering-coach.git
+cd ai-engineering-coach && npm install && npm run package
+# Установить .vsix в VS Code
+```
+- Посмотреть как парсится Claude/OpenCode логи
+- Написать адаптер: Antigravity transcript.jsonl → формат Coach
+- Подключить наши сессии → смотреть anti-patterns
+
+### 2. Телефония (только ПОСЛЕ Coach)
+- НЕ трогать конфиг, НЕ рестартовать baresip
+- Одна задача: понять ПОЧЕМУ Mango не шлёт INVITE
+  → Mango ЛК → Маршрутизация callback → читать документацию
+  → Одна гипотеза → один тест → результат → следующий шаг
+
+### Правило дня
+> Доказательство ПЕРЕД действием. Не наоборот.
