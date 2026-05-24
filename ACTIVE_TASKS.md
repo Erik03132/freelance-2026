@@ -108,3 +108,18 @@
 | 02:00 | night_audit.sh | Код-аудит (локальный) |
 | 07:00 | morning_dream.sh | Анализ паттернов |
 | 23:00 | finish_day_cron.sh | Бэкап + чистка + TG |
+
+---
+## 🛠️ СОВЕРШЕНСТВОВАНИЕ СИСТЕМЫ (meta / ops)
+
+### AI Engineering Coach — анализ сессий Antigravity
+- **Цель:** понять паттерны ошибок агента (антипаттерны, token waste, session hygiene)
+- **Что сделано:** написан адаптер `tools/antigravity_to_coach.py` (Antigravity JSONL → Claude формат)
+  - 7 сессий / 104 запроса / 624 tool calls конвертированы → `~/.claude/projects/antigravity-freelance-2026/`
+  - Расширение собрано: `/tmp/ai-coach/ai-engineer-coach-0.1.0.vsix`
+- **Блокер:** Cursor 1.105.1 несовместим с расширением (требует VS Code ^1.118.0)
+- **Варианты разблокировки:**
+  1. Установить чистый VS Code (не Cursor) → установить .vsix
+  2. Или: написать standalone Python-скрипт с теми же 45 правилами без VS Code
+- **Ценность:** «5 мин строим — 555 мин исправляем» → найти системные причины
+- **Приоритет:** LOW (не блокирует проект, делать когда будет время)
