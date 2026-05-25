@@ -3,17 +3,22 @@
 ## О проекте
 AI Bureau — агентство по разработке автономных ИИ-систем: кастомные AI-агенты, RAG, голосовой ИИ, AIO/GEO-оптимизация. Сайт на Vite + React + TypeScript, бот-лидогенератор (BureauBot) с Smart Fallback.
 
-**Проектные скиллы:** `.opencode/skills/`
-- `bureau-brand.md` — голос бренда, позиционирование, E-E-A-T
-- `geo-strategy.md` — GEO/AEO/AIO стратегия продвижения
-- `bureau-content.md` — контент-маркетинг, календарь, форматы
-- `bureau-frontend.md` — фронтенд-стандарты (React/Vite/CSS)
-- `bureau-bots.md` — паттерны создания ботов, Smart Fallback
-- `bureau-deploy.md` — деплой, PM2, Docker, безопасность
-- `bureau-workflow.md` — воркфлоу, TDD, code review, git, coding style
-- `bureau-governance.md` — SSoT, управление документами, правила общения
+## Глобальные скиллы (`~/.config/opencode/skills/`)
 
-**Ключевые документы:** `WEBSITE_COPY.md`, `SMART_FALLBACK_STANDARD.md`, `MARKETING_ROADMAP.md`, `llms.txt`, `CHRONICLE.md`
+Загружай через Skill tool по мере необходимости:
+
+| Файл | Когда использовать |
+|------|-------------------|
+| `brand-voice.md` | Создание/редактирование текстов, позиционирование, E-E-A-T |
+| `geo-strategy.md` | GEO/AEO/AIO оптимизация, SEO, нейропоиск |
+| `content-marketing.md` | Контент-план, статьи, кейсы, календарь |
+| `web-standards.md` | Фронтенд: React/Vite/CSS, Core Web Vitals, a11y |
+| `bot-development.md` | Создание AI-ботов, RAG, Smart Fallback |
+| `deployment.md` | Деплой, PM2, Docker, безопасность, откаты |
+| `workflow.md` | Воркфлоу, TDD, code review, finish-day протокол |
+| `governance.md` | SSoT, управление документами, контекст |
+
+**Ключевые документы:** `CHRONICLE.md`, `WEBSITE_COPY.md`, `SMART_FALLBACK_STANDARD.md`, `MARKETING_ROADMAP.md`, `llms.txt`
 
 **Главное правило:** Каждый день — хотя бы одно действие по продвижению. Системность бьёт гениальность.
 
