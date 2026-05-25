@@ -3,20 +3,19 @@
 ## О проекте
 AI Bureau — агентство по разработке автономных ИИ-систем: кастомные AI-агенты, RAG, голосовой ИИ, AIO/GEO-оптимизация. Сайт на Vite + React + TypeScript, бот-лидогенератор (BureauBot) с Smart Fallback.
 
-## Глобальные скиллы (`~/.config/opencode/skills/`)
+## Глобальные скиллы (автоопределяются)
 
+Скиллы в `~/.config/opencode/skills/` автоматически определяются OpenCode.
 Загружай через Skill tool по мере необходимости:
 
-| Файл | Когда использовать |
-|------|-------------------|
-| `brand-voice.md` | Создание/редактирование текстов, позиционирование, E-E-A-T |
-| `geo-strategy.md` | GEO/AEO/AIO оптимизация, SEO, нейропоиск |
-| `content-marketing.md` | Контент-план, статьи, кейсы, календарь |
-| `web-standards.md` | Фронтенд: React/Vite/CSS, Core Web Vitals, a11y |
-| `bot-development.md` | Создание AI-ботов, RAG, Smart Fallback |
-| `deployment.md` | Деплой, PM2, Docker, безопасность, откаты |
-| `workflow.md` | Воркфлоу, TDD, code review, finish-day протокол |
-| `governance.md` | SSoT, управление документами, контекст |
+- `brand-voice` — копирайтинг, E-E-A-T, тональность
+- `geo-strategy` — GEO/AEO/AIO оптимизация
+- `content-marketing` — контент-стратегия, календарь
+- `web-standards` — фронтенд (React/Vite/CSS)
+- `bot-development` — AI-боты, RAG, Smart Fallback
+- `deployment` — деплой, безопасность
+- `workflow` — воркфлоу, TDD, finish-day
+- `governance` — SSoT, контекст, организация файлов
 
 **Ключевые документы:** `CHRONICLE.md`, `WEBSITE_COPY.md`, `SMART_FALLBACK_STANDARD.md`, `MARKETING_ROADMAP.md`, `llms.txt`
 
