@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "openrouter/deepseek-v4-pro",
+  "small_model": "opencode/deepseek-v4-flash-free",
+  "instructions": ["AGENTS.md", ".opencode/skills/bureau-brand.md", ".opencode/skills/geo-strategy.md", ".opencode/skills/bureau-content.md", ".opencode/skills/bureau-frontend.md", ".opencode/skills/bureau-bots.md", ".opencode/skills/bureau-deploy.md", ".opencode/skills/bureau-workflow.md", ".opencode/skills/bureau-governance.md"],
+  "mcp": {
+    "claude-mem": {
+      "type": "local",
+      "command": ["node", "/Users/igorvasin/.claude/plugins/cache/thedotmack/claude-mem/13.3.0/scripts/mcp-server.cjs"],
+      "enabled": true
+    }
+  },
+  "permission": {
+    "edit": "allow",
+    "bash": "allow",
+    "task": "allow",
+    "read": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "external_directory": "allow"
+  },
+  "logLevel": "INFO"
+}

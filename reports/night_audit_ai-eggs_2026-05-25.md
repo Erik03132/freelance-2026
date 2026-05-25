@@ -64,3 +64,110 @@ ai-eggs/agent/angelochka_core.py:594:88: E501 Line too long (95 > 88)
 ai-eggs/agent/angelochka_core.py:603:88: E501 Line too long (93 > 88)
 ai-eggs/agent/angelochka_core.py:618:1: E402 Module level import not at top of file
 ```
+
+🔧 **ruff --fix:** 4 ошибок исправлено автоматически (ветка: \'auto-fix/night-audit-2026-05-25\')
+
+**Критических ошибок ruff (E,F,S,B):** 1591
+
+### 🔐 Hardcoded секреты
+✅ Не найдено
+
+### 📝 Изменения за день
+```
+ ACTIVE_TASKS.md                           |  15 ++
+ ai-eggs                                   |   0
+ angel-backend                             |   0
+ checkpoints/chp_20260524_230001.md        | 181 ++++++++++++++++++++
+ chp.md                                    |   9 +
+ reports/night_audit_ai-eggs_2026-05-24.md | 153 +++++++++++++++++
+ reports/night_audit_ai-eggs_2026-05-25.md |  76 +++++++++
+ tools/antigravity_to_coach.py             | 273 ++++++++++++++++++++++++++++++
+ 8 files changed, 707 insertions(+)
+```
+
+---
+
+## 🔬 Фаза 2: Gemini 2.5 Pro — Глубокий аудит
+
+⚠️ Gemini CLI недоступен — фаза пропущена
+
+---
+
+## 🧠 Фаза 3: Claude — Cross-Model Peer Review
+
+Диагностика скрипта `tools/antigravity_to_coach.py`
+
+1. antigravity_to_coach.py:273  
+   **Критичность:** 🔴 Критично  
+   **Описание:** При запуске скрипта с параметром `--id 12345` без `--dry-run` не проверяется, что после `--id` передан не-флаг, что приведёт к затираю выбранного ID появившимся флагом `--dry-run`.  
+   **Исправление:**  
+   ```
+   if "--dry-run" in sys.argv[1:]:
+       dry = True
+   ```
+
+2. antigravity_to_coach.py:145  
+   **Критичность:** 🟡 Важно  
+   **Описание:** `make_tool_use_block` принимает `args` в словаре `tc`, но `tc['args']` может быть `None`; `json.loads(None)` выбросит `TypeError`.  
+   **Исправление:**  
+   ```
+   if isinstance(args, str) and args:
+       try:
+   ```
+
+3. antigravity_to_coach.py:93–104  
+   **Критичность:** 🟢 Минорно  
+   **Описание:** При извлечении путей из аргументов значения не фильтруются от символов `"`, поэтому из строк типа `"../etc/passwd" "../../../../config"` может остаться спецификатор переменной `../etc/passwd`, приводяший к выходу за пределы проекта.  
+   **Исправление:**  
+   ```
+   import pathlib
+   f = pathlib.Path(args.get("TargetFile", "")).resolve()
+   if not str(f).startswith(WORKSPACE_PATH):
+       continue
+   ```
+
+4. antigravity_to_coach.py:152–157  
+   **Критичность:** 🟡 Важно  
+   **Описание:** Параметр `WORKSPACE_PATH` (151–152) захардкожен строкой `str(HOME / "freelance-2026")`, но в прод-окружении папка могла быть клонирована в другой каталог. Если в будущем сценарии требуется динамическое определение, код захочет обращаться к несуществующей директории.  
+   **Исправление:** Передавать путь к workspace через переменную окружения `AG_WORKSPACE_DIR` с fallback-значением.
+
+5. antigravity_to_coach.py:206  
+   **Критичность:** 🟢 Минорно  
+   **Описание:** Подсчёт токенов делением на 4 рискует недооценить цифровые строки и ASCII-буквы, что на длинных следствах может вызвать переполнение поля `out_tokens`, поскольку максимум не ограничен.  
+   **Исправление:** Ограничить `out_tokens = max(1, min(10**6, len(all_text) // 4))`.
+
+✅ Других критических или значимых проблем не обнаружено.
+
+---
+
+## 📋 Итоговая сводка
+
+| Метрика | Значение |
+|---------|----------|
+| 📅 Дата | 2026-05-25 |
+| ⏰ Время | 02:00:02 → 02:00:33 |
+| 📁 Python файлов | 191 |
+| 📝 Изменено за день | 8 |
+| ⚡ ruff ошибок (E,F,S,B) | 1591 |
+| 🔐 Hardcoded секретов | 0 |
+| 🔬 Gemini аудит | ⏭️ |
+| 🧠 Claude cross-review | ✅ |
+| 🔴 Критичных (Claude) | 1 |
+| 🟡 Важных (Claude) | 2 |
+| 🟢 Минорных (Claude) | 2 |
+
+### Метод аудита
+```
+Код писали: Gemini 2.5 Pro + Claude Opus (через Antigravity)
+Проверяли:
+  Фаза 1: ruff 0.15 (машина, 100% точность)
+  Фаза 2: Gemini CLI 2.5 Pro (глубокий анализ, бесплатно)
+  Фаза 3: moonshotai/kimi-k2 (cross-model review, OpenRouter)
+  
+Cross-Model Peer Review: два профессора из разных школ
+проверяют код друг друга → максимум найденных багов
+```
+
+---
+
+> 🤖 Сгенерировано: `tools/night_audit.sh v2` — Cross-Model Peer Review
