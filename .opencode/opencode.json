@@ -19,7 +19,10 @@
     "claude-mem": {
       "type": "local",
       "command": ["node", "/Users/igorvasin/.claude/plugins/cache/thedotmack/claude-mem/13.3.0/scripts/mcp-server.cjs"],
-      "enabled": true
+      "enabled": true,
+      "environment": {
+        "PATH": "/Users/igorvasin/.bun/bin:/Users/igorvasin/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     }
   },
   "permission": {
