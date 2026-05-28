@@ -1,10 +1,10 @@
-# 🌙 Ночной аудит кода — 2026-05-28
+# 🌙 Ночной аудит кода — 2026-05-29
 
 > **Проект:** AI-Eggs (Анжелочка)  
-> **Время:** 02:05:30  
+> **Время:** 02:11:57  
 > **Метод:** Cross-Model Peer Review  
 > **Режим:** 🔧 AUTO-FIX  
-> **Python файлов:** 194 (проверяем: 5)  
+> **Python файлов:** 196 (проверяем: 5)  
 > **Источник:** ТОП-5 критических файлов (нет git diff)
 
 ---
@@ -23,6 +23,16 @@ ai-eggs/agent/_archived/send_project_report.py:35:89: E501 Line too long (143 > 
 ai-eggs/agent/_archived/send_project_report.py:38:89: E501 Line too long (193 > 88)
 ai-eggs/agent/_archived/send_project_report.py:41:89: E501 Line too long (299 > 88)
 ai-eggs/agent/_archived/send_project_report.py:55:89: E501 Line too long (132 > 88)
+ai-eggs/agent/_vk_auth.py:3:1: E401 [*] Multiple imports on one line
+ai-eggs/agent/_vk_auth.py:25:14: S603 `subprocess` call: check for execution of untrusted input
+ai-eggs/agent/_vk_auth.py:37:10: S603 `subprocess` call: check for execution of untrusted input
+ai-eggs/agent/_vk_auth.py:48:11: F541 [*] f-string without any placeholders
+ai-eggs/agent/_vk_auth.py:53:7: F541 [*] f-string without any placeholders
+ai-eggs/agent/_vk_auth.py:54:7: F541 [*] f-string without any placeholders
+ai-eggs/agent/_vk_auth.py:55:7: F541 [*] f-string without any placeholders
+ai-eggs/agent/_vk_photo_workaround.py:6:1: E401 [*] Multiple imports on one line
+ai-eggs/agent/_vk_photo_workaround.py:31:9: S603 `subprocess` call: check for execution of untrusted input
+ai-eggs/agent/_vk_photo_workaround.py:61:13: S603 `subprocess` call: check for execution of untrusted input
 ai-eggs/agent/a2a_protocol.py:166:9: S110 `try`-`except`-`pass` detected, consider logging the exception
 ai-eggs/agent/a2a_protocol.py:176:89: E501 Line too long (91 > 88)
 ai-eggs/agent/agg_temp.py:8:89: E501 Line too long (113 > 88)
@@ -53,84 +63,4 @@ ai-eggs/agent/angelochka_core.py:368:89: E501 Line too long (102 > 88)
 ai-eggs/agent/angelochka_core.py:479:89: E501 Line too long (100 > 88)
 ai-eggs/agent/angelochka_core.py:491:89: E501 Line too long (89 > 88)
 ai-eggs/agent/angelochka_core.py:492:89: E501 Line too long (133 > 88)
-ai-eggs/agent/angelochka_core.py:509:89: E501 Line too long (110 > 88)
-ai-eggs/agent/angelochka_core.py:510:89: E501 Line too long (89 > 88)
-ai-eggs/agent/angelochka_core.py:523:90: E501 Line too long (93 > 88)
-ai-eggs/agent/angelochka_core.py:539:89: E501 Line too long (93 > 88)
-ai-eggs/agent/angelochka_core.py:540:89: E501 Line too long (137 > 88)
-ai-eggs/agent/angelochka_core.py:582:89: E501 Line too long (91 > 88)
-ai-eggs/agent/angelochka_core.py:600:88: E501 Line too long (95 > 88)
-ai-eggs/agent/angelochka_core.py:609:88: E501 Line too long (93 > 88)
-ai-eggs/agent/angelochka_core.py:624:1: E402 Module level import not at top of file
-ai-eggs/agent/angelochka_core.py:747:88: E501 Line too long (93 > 88)
 ```
-
-🔧 **ruff --fix:** 2 ошибок исправлено автоматически (ветка: \'auto-fix/night-audit-2026-05-28\')
-
-**Критических ошибок ruff (E,F,S,B):** 1635
-
-### 🔐 Hardcoded секреты
-✅ Не найдено
-
-### 📝 Изменения за день
-```
- ai-bureau/AGENTS.md                              |   3 +-
- ai-bureau/chp.md                                 |   5 +-
- ai-eggs                                          |   0
- angel-backend                                    |   0
- checkpoints/chp_20260527_233038.md               |  47 +++++++++
- dreams/dream_2026-05-27.md                       |  95 ++++++++++++++++++
- dreams/patterns.md                               |  86 ++++++++++++++++
- reports/night_audit_ai-eggs_2026-05-27.md        | 120 +++++++++++++++++++++++
- reports/night_audit_ai-eggs_2026-05-28.md        |  76 ++++++++++++++
- 11 files changed, 448 insertions(+), 4 deletions(-)
-```
-
----
-
-## 🔬 Фаза 2: Gemini 2.5 Pro — Глубокий аудит
-
-⚠️ Gemini CLI недоступен — фаза пропущена
-
----
-
-## 🧠 Фаза 3: Claude — Cross-Model Peer Review
-
-⚠️ Claude API недоступен: ❌ Ошибка Claude API: Expecting value: line 2 column 1 (char 1)
-
-### 🔄 Fallback: Gemma 4 (локальная)
-⏰ Таймаут Gemma 4
-
----
-
-## 📋 Итоговая сводка
-
-| Метрика | Значение |
-|---------|----------|
-| 📅 Дата | 2026-05-28 |
-| ⏰ Время | 02:05:30 → 02:21:01 |
-| 📁 Python файлов | 194 |
-| 📝 Изменено за день | 11 |
-| ⚡ ruff ошибок (E,F,S,B) | 1635 |
-| 🔐 Hardcoded секретов | 0 |
-| 🔬 Gemini аудит | ⏭️ |
-| 🧠 Claude cross-review | ⏭️ |
-| 🔴 Критичных (Claude) | 0 |
-| 🟡 Важных (Claude) | 0 |
-| 🟢 Минорных (Claude) | 0 |
-
-### Метод аудита
-```
-Код писали: Gemini 2.5 Pro + Claude Opus (через Antigravity)
-Проверяли:
-  Фаза 1: ruff 0.15 (машина, 100% точность)
-  Фаза 2: Gemini CLI 2.5 Pro (глубокий анализ, бесплатно)
-  Фаза 3: moonshotai/kimi-k2 (cross-model review, OpenRouter)
-  
-Cross-Model Peer Review: два профессора из разных школ
-проверяют код друг друга → максимум найденных багов
-```
-
----
-
-> 🤖 Сгенерировано: `tools/night_audit.sh v2` — Cross-Model Peer Review
