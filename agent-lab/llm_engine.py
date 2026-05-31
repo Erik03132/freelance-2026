@@ -33,12 +33,11 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma4:e2b")
 
 # Модели OpenRouter с tool calling
 OPENROUTER_MODELS = [
-    # Уровень 1: Elephant Alpha — бесплатная, 100B, #1 trending
-    # 256K контекст, 32K вывод, ~50-65 tok/s, function calling ✅
-    "openrouter/elephant-alpha",
+    # Уровень 1: Deepseek — мощный кодовый LLM
+    "deepseek/deepseek-coder-33b-instruct",
     
-    # Уровень 2: Auto — OpenRouter сам подбирает лучшую доступную
-    "openrouter/auto",
+    # Уровень 2: Qwen — китайская чат‑модель
+    "qwen/qwen-7b-chat",
     
     # Уровень 3: Gemini через OpenRouter (может упасть по гео)
     "google/gemini-2.0-flash-001",
@@ -212,9 +211,9 @@ async def call_llm(messages: list[dict], tools: list[dict] = None) -> str:
 
 # ============================================================
 # 🔍 КАСКАД ПОИСКА — 3 уровня
-# Tavily (✅ 1000 req/мес бесплатно) 
-# → Perplexity (❌ квота кончилась, код готов)
-# → DuckDuckGo (∞ бесплатно, без ключа)
+# 1. Perplexity Sonar (через OpenRouter, тот же ключ)
+# 2. DuckDuckGo (∞ бесплатно, без ключа)
+# 3. Tavily (резерв, 1000 req/мес бесплатно)
 # ============================================================
 
 TAVILY_KEY = os.getenv("TAVILY_API_KEY", "")
@@ -270,8 +269,8 @@ async def _search_tavily(query: str, max_results: int = 3) -> list[dict]:
 
 async def _search_perplexity(query: str) -> list[dict]:
     """
-    Уровень 2: Perplexity Sonar — через OpenRouter.
-    
+    Уровень 1: Perplexity Sonar — через OpenRouter.
+
     Используем perplexity/sonar через OpenRouter API (тот же ключ что для LLM).
     Это обходит квоту прямого Perplexity API (401 insufficient_quota).
     """
@@ -313,9 +312,9 @@ async def _search_perplexity(query: str) -> list[dict]:
 
 async def _search_duckduckgo(query: str, max_results: int = 3) -> list[dict]:
     """
-    Уровень 3: DuckDuckGo — бесплатный fallback.
-    
-    Без API ключа, без лимитов. 
+    Уровень 2: DuckDuckGo — бесплатный fallback.
+
+    Без API ключа, без лимитов.
     Ограничение: только Instant Answer (не полный поиск).
     """
     try:
@@ -353,26 +352,26 @@ async def _search_duckduckgo(query: str, max_results: int = 3) -> list[dict]:
 async def web_search(query: str, max_results: int = 3) -> list[dict]:
     """
     Железобетонный каскад поиска. 3 уровня:
-    
-      1. Tavily (✅ 1000 req/мес бесплатно, чистый текст)
-      2. Perplexity Sonar (✅ через OpenRouter, без отдельного ключа)
-      3. DuckDuckGo (∞ бесплатно, Instant Answer)
-    
+
+      1. Perplexity Sonar (через OpenRouter)
+      2. DuckDuckGo (∞ бесплатно, Instant Answer)
+      3. Tavily (резерв, 1000 req/мес)
+
     Returns:
         Список {title, url, snippet}
     """
-    # Уровень 1: Tavily
-    results = await _search_tavily(query, max_results)
-    if results:
-        return results
-
-    # Уровень 2: Perplexity через OpenRouter
+    # Уровень 1: Perplexity через OpenRouter
     results = await _search_perplexity(query)
     if results:
         return results
 
-    # Уровень 3: DuckDuckGo (fallback)
+    # Уровень 2: DuckDuckGo (fallback)
     results = await _search_duckduckgo(query, max_results)
+    if results:
+        return results
+
+    # Уровень 3: Tavily (резерв)
+    results = await _search_tavily(query, max_results)
     if results:
         return results
 

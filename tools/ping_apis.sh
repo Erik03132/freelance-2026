@@ -81,6 +81,38 @@ result=$(curl -s -o /dev/null -w "%{http_code}|%{time_total}" \
     --proxy "$PROXY" \
     "https://openrouter.ai/api/v1/models" 2>/dev/null || echo "000|0")
 show_result "OpenRouter" "$(echo "$result" | cut -d'|' -f1)" "$(echo "$result" | cut -d'|' -f2)"
+    # 2a. Deepseek via OpenRouter
+    result=$(curl -s -o /dev/null -w "%{http_code}|%{time_total}" \
+        --connect-timeout 10 --max-time 15 \
+        --proxy "$PROXY" \
+        -X POST \
+        -H "Authorization: Bearer ${OPENROUTER_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"model":"deepseek/deepseek-chat","messages":[{"role":"user","content":"ping"}],"max_tokens":5}' \
+        "https://openrouter.ai/api/v1/chat/completions" 2>/dev/null || echo "000|0")
+    show_result "Deepseek (OR)" "$(echo "$result" | cut -d'|' -f1)" "$(echo "$result" | cut -d'|' -f2)"
+
+    # 2b. Qwen via OpenRouter
+    result=$(curl -s -o /dev/null -w "%{http_code}|%{time_total}" \
+        --connect-timeout 10 --max-time 15 \
+        --proxy "$PROXY" \
+        -X POST \
+        -H "Authorization: Bearer ${OPENROUTER_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"model":"qwen/qwen-14b-chat","messages":[{"role":"user","content":"ping"}],"max_tokens":5}' \
+        "https://openrouter.ai/api/v1/chat/completions" 2>/dev/null || echo "000|0")
+    show_result "Qwen (OR)" "$(echo "$result" | cut -d'|' -f1)" "$(echo "$result" | cut -d'|' -f2)"
+
+    # 2c. Gemini via OpenRouter (fallback if direct key missing)
+    result=$(curl -s -o /dev/null -w "%{http_code}|%{time_total}" \
+        --connect-timeout 10 --max-time 15 \
+        --proxy "$PROXY" \
+        -X POST \
+        -H "Authorization: Bearer ${OPENROUTER_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"model":"google/gemini-pro","messages":[{"role":"user","content":"ping"}],"max_tokens":5}' \
+        "https://openrouter.ai/api/v1/chat/completions" 2>/dev/null || echo "000|0")
+    show_result "Gemini (OR)" "$(echo "$result" | cut -d'|' -f1)" "$(echo "$result" | cut -d'|' -f2)"
 
 # 2. Gemini Direct
 if [ -n "$GEMINI_KEY" ]; then
