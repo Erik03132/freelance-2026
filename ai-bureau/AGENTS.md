@@ -15,12 +15,13 @@ AI Bureau — агентство по разработке автономных 
 
 ### Завершение сессии
 1. Если делал изменения — `git add . && git commit -m "..." `
-2. Запусти: `bash tools/save_session_state.sh ai-bureau`
+2. Запусти: `bash tools/save_session_state.sh`
+   - Автоопределит проект из текущей директории
    - Обновит `SESSION_LATEST.md`
    - Допишет блок в `chp.md` в секцию `🟦 OpenCode Session`
 
 > **Команды (для агента):** `start-day` → читай chp.md + SESSION_LATEST.md + CHRONICLE.md  
-> `finish-day` → git commit + save_session_state.sh
+> `finish-day` → git commit + save_session_state.sh + finish_day.sh
 
 > **Монорепозиторий:** `freelance-2026/AGENTS.md`
 > **Каскадная система, глобальные скиллы, правила эскалации:** `~/.config/opencode/AGENTS.md`
