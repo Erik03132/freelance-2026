@@ -303,6 +303,25 @@ else
     fi
 fi
 
+# ========================= ФАЗА 6: OPENCODE SESSION STATE ====================
+
+echo ""
+echo -e "  ${BOLD}🟦 ФАЗА 6: Сохранение состояния OpenCode...${NC}"
+
+OPENCODE_PROJECT=""
+if echo "$(pwd)" | grep -q "^$WORKSPACE/"; then
+  OPENCODE_PROJECT=$(echo "$(pwd)" | sed "s|$WORKSPACE/||" | cut -d/ -f1)
+fi
+
+SAVE_SCRIPT="$WORKSPACE/tools/save_session_state.sh"
+if [[ -n "$OPENCODE_PROJECT" && -f "$SAVE_SCRIPT" ]]; then
+  bash "$SAVE_SCRIPT" "$OPENCODE_PROJECT" 2>/dev/null && \
+    echo -e "  ${GREEN}✅ OpenCode состояние сохранено [${OPENCODE_PROJECT}]${NC}" || \
+    echo -e "  ${YELLOW}⚠️  OpenCode save_state.sh завершился с ошибкой${NC}"
+else
+  echo -e "  ${YELLOW}ℹ️  OpenCode проект не определён. Пропускаю.${NC}"
+fi
+
 # ========================= ИТОГ ==============================================
 
 echo ""

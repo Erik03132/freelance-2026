@@ -33,6 +33,8 @@
 | `watchdog.py` | Мониторинг процессов | `*/5 * * * *` |
 | `ping_apis.sh` | Проверка доступности API | по требованию |
 | `save_session_state.sh` | Фиксация сессии: SESSION_LATEST.md + chp.md | вручную (конец сессии) |
+| `start_day.sh` | Старт сессии: сводка + контекст | по команде `start-day` |
+| `finish_day.sh` | Завершение: бэкап + OpenCode session state | `finish-day` |
 
 ## Правила размещения
 

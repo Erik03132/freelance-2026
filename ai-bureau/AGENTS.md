@@ -19,5 +19,8 @@ AI Bureau — агентство по разработке автономных 
    - Обновит `SESSION_LATEST.md`
    - Допишет блок в `chp.md` в секцию `🟦 OpenCode Session`
 
+> **Команды (для агента):** `start-day` → читай chp.md + SESSION_LATEST.md + CHRONICLE.md  
+> `finish-day` → git commit + save_session_state.sh
+
 > **Монорепозиторий:** `freelance-2026/AGENTS.md`
 > **Каскадная система, глобальные скиллы, правила эскалации:** `~/.config/opencode/AGENTS.md`
