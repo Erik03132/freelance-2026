@@ -36,8 +36,15 @@ PROXY_URL       = os.getenv("HTTPS_PROXY", os.getenv("TELEGRAM_PROXY", ""))
 OPENROUTER_KEY  = os.getenv("OPENROUTER_API_KEY", "")
 GEMINI_KEY      = os.getenv("GEMINI_API_KEY", "")
 GEMINI_BACKUP   = os.getenv("GEMINI_BACKUP_KEY", "")
+OLLAMA_HOST     = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_MODEL    = os.getenv("OLLAMA_MODEL", "gemma4:e2b")
 
 STATE_FILE = os.path.join(BASE_DIR, "data", "habr_intelligence_state.json")
+
+# Глобальная сессия БЕЗ прокси — Habr, Gemini, OpenRouter доступны напрямую из РФ
+# Прокси из .env нужен ТОЛЬКО для Telegram (отдельная сессия там где нужно)
+NO_PROXY_SESSION = requests.Session()
+NO_PROXY_SESSION.trust_env = False
 
 # ── Хабы ──────────────────────────────────────────────────────────────────────
 HABR_HUBS = [
@@ -127,7 +134,7 @@ ECOSYSTEM = """
 def fetch_hub_rss(hub: str, max_items: int = 15) -> list[dict]:
     url = f"https://habr.com/ru/rss/hub/{hub}/all/"
     try:
-        resp = requests.get(url, timeout=15, headers={"User-Agent": "Antigravity-HabrIntelligence/2.0"})
+        resp = NO_PROXY_SESSION.get(url, timeout=15, headers={"User-Agent": "Antigravity-HabrIntelligence/2.0"})
         if resp.status_code != 200:
             print(f"  ⚠ {hub}: HTTP {resp.status_code}")
             return []
@@ -173,7 +180,7 @@ def score_article(article: dict) -> int:
 # ── LLM-анализ ────────────────────────────────────────────────────────────────
 
 def _build_prompt(article: dict) -> str:
-    return f"""Ты — архитектор AI-экосистемы Antigravity. Тебе нужно дать короткую (2-3 предложения) практическую рекомендацию: как идею или технику из статьи можно применить в нашей системе.
+    return f"""Ты — технический директор AI-экосистемы. Твоя задача: найти конкретную ФИЧУ или ТЕХНИКУ из статьи, оценить её полезность для наших проектов и предложить: ставить или пропустить.
 
 {ECOSYSTEM}
 
@@ -182,20 +189,25 @@ def _build_prompt(article: dict) -> str:
 Описание: {article['description'][:300]}
 Теги: {', '.join(article['categories'][:5])}
 
-Ответь СТРОГО в формате:
-ПРИМЕНЕНИЕ: <2-3 предложения: что конкретно сделать и зачем>
+Ответь СТРОГО в формате (без маркдауна, без пояснений):
+ФИЧА: <название конкретной фичи/технологии из статьи, 5-8 слов>
+ОЦЕНКА: <цифра 1-10 и одна фраза почему это важно для нас>
+ПЛАН: <3 конкретных шага для внедрения, через запятую>
 ПРОЕКТ: <одно из: ai-eggs | ai-bureau | ai-scout | ai-sinergy | agent-lab | tools>
 АГЕНТ: <одно из: Кулибин | Игорек | Маркетолог | Заботкина | Артемий | Шерл | Шекспир | —>
+РЕШЕНИЕ: <СТАВИМ если оценка 7+ | ПРОПУСКАЕМ если оценка ниже 7>
 """
 
 
 def analyze_with_gemini(article: dict) -> dict:
-    """LLM-анализ через Gemini REST API. Пробует основной, потом резервный ключ."""
+    """LLM-анализ через Gemini REST API. Пробует основной, потом резервный ключ.
+    Gemini требует прокси (РФ заблокирована). Используем HTTP-прокси из HTTPS_PROXY.
+    """
+    proxies = {}
+    if PROXY_URL:
+        proxies = {"https": PROXY_URL, "http": PROXY_URL}
     for key in filter(None, [GEMINI_KEY, GEMINI_BACKUP]):
         try:
-            proxies = {}
-            if PROXY_URL:
-                proxies = {"https": PROXY_URL, "http": PROXY_URL}
             url = (
                 f"https://generativelanguage.googleapis.com/v1beta/models/"
                 f"gemini-2.0-flash:generateContent?key={key}"
@@ -206,6 +218,7 @@ def analyze_with_gemini(article: dict) -> dict:
             }
             resp = requests.post(url, json=payload, timeout=20, proxies=proxies)
             if resp.status_code == 200:
+                print(f"  ✅ Gemini OK")
                 text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
                 return _parse_llm_response(text)
             elif resp.status_code == 429:
@@ -215,19 +228,17 @@ def analyze_with_gemini(article: dict) -> dict:
                 print(f"  ⚠ Gemini {resp.status_code}: {resp.text[:100]}")
         except Exception as e:
             print(f"  ⚠ Gemini error: {e}")
-    return {"применение": "—", "проект": "—", "агент": "—"}
+    return {"фича": "—", "применение": "—", "проект": "—", "агент": "—", "решение": "—"}
 
 
 def analyze_with_openrouter(article: dict) -> dict:
-    """Fallback: LLM-анализ через OpenRouter."""
+    """Fallback: LLM-анализ через OpenRouter (без прокси — Session trust_env=False)."""
     if not OPENROUTER_KEY:
         return {"применение": "—", "проект": "—", "агент": "—"}
-    for model in ["google/gemini-2.0-flash-001", "deepseek/deepseek-chat", "qwen/qwen-turbo"]:
+    # deepseek первым — gemini-OR даёт 404, deepseek стабилен и бесплатен
+    for model in ["deepseek/deepseek-chat", "qwen/qwen-turbo", "google/gemini-2.0-flash-001"]:
         try:
-            proxies = {}
-            if PROXY_URL:
-                proxies = {"https": PROXY_URL, "http": PROXY_URL}
-            resp = requests.post(
+            resp = NO_PROXY_SESSION.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={"Authorization": f"Bearer {OPENROUTER_KEY}", "Content-Type": "application/json"},
                 json={
@@ -236,35 +247,122 @@ def analyze_with_openrouter(article: dict) -> dict:
                     "max_tokens": 256,
                 },
                 timeout=25,
-                proxies=proxies,
             )
             if resp.status_code == 200:
                 text = resp.json()["choices"][0]["message"]["content"]
-                return _parse_llm_response(text)
+                result = _parse_llm_response(text)
+                if result["фича"] != "—":
+                    print(f"  ✅ OpenRouter/{model} OK")
+                    return result
+                print(f"  ⚠ OpenRouter/{model}: ответ не распознан")
             else:
                 print(f"  ⚠ OpenRouter/{model}: {resp.status_code}")
         except Exception as e:
-            print(f"  ⚠ OpenRouter error: {e}")
+            print(f"  ⚠ OpenRouter/{model} error: {e}")
+    return {"фича": "—", "применение": "—", "проект": "—", "агент": "—", "решение": "—"}
+
+
+def _build_ollama_prompt(article: dict) -> str:
+    """Короткий промпт для локальной Ollama (2B модель, CPU).
+    Упрощённый формат: только самое важное — фича + оценка + решение.
+    """
+    return f"""Ты — технический директор. Найди КОНКРЕТНУЮ ФИЧУ из статьи и реши: внедрять или нет.
+
+Статья: {article['title']}
+Описание: {article['description'][:200]}
+
+Проекты: ai-eggs (птицеводство/CRM), ai-bureau (AI агентство), ai-scout (сбор контента), agent-lab (эксперименты)
+Агенты: Кулибин (DevOps), Маркетолог (SEO), Заботкина (CRM), Шерл (разведка), Шекспир (контент), Игорек (архитектор)
+
+Ответь СТРОГО в 5 строк:
+ФИЧА: <конкретное название технологии/подхода из статьи, 4-6 слов>
+ОЦЕНКА: <число 1-10> — <одна фраза почему полезно>
+ПРОЕКТ: <одно: ai-eggs | ai-bureau | ai-scout | agent-lab | tools>
+АГЕНТ: <одно: Кулибин | Игорек | Маркетолог | Заботкина | Шерл | Шекспир | —>
+РЕШЕНИЕ: <СТАВИМ если оценка 7 и выше, ПРОПУСКАЕМ если ниже 7>"""
+
+
+def analyze_with_ollama(article: dict) -> dict:
+    """Fallback: LLM-анализ через локальный Ollama (без прокси, без квот).
+    Использует /api/chat — корректный endpoint для chat-моделей.
+    Поддерживает thinking-модели (gemma4): fallback на поле thinking.
+    """
+    try:
+        resp = NO_PROXY_SESSION.post(
+            f"{OLLAMA_HOST}/api/chat",
+            json={
+                "model": OLLAMA_MODEL,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "Ты краткий AI-ассистент. Отвечай ТОЛЬКО в запрошенном формате, без рассуждений, без markdown, без лишних слов.",
+                    },
+                    {"role": "user", "content": _build_ollama_prompt(article)},
+                ],
+                "stream": False,
+                "think": False,  # отключаем thinking mode если модель поддерживает
+                "options": {"temperature": 0.3, "top_p": 0.9},
+            },
+            timeout=120,
+        )
+        if resp.status_code == 200:
+            body = resp.json()
+            msg = body.get("message", {})
+            # Пробуем content, потом thinking как fallback
+            text = msg.get("content", "").strip()
+            if not text:
+                text = msg.get("thinking", "").strip()
+            result = _parse_llm_response(text)
+            if result["фича"] != "—" or result["применение"] != "—":
+                print(f"  ✅ Ollama ({OLLAMA_MODEL}) OK")
+                return result
+            else:
+                print(f"  ⚠ Ollama: ответ не распознан → {text[:120]}")
+        else:
+            print(f"  ⚠ Ollama HTTP {resp.status_code}: {resp.text[:100]}")
+    except Exception as e:
+        print(f"  ⚠ Ollama error: {e}")
     return {"применение": "—", "проект": "—", "агент": "—"}
 
 
 def _parse_llm_response(text: str) -> dict:
-    result = {"применение": "—", "проект": "—", "агент": "—"}
+    result = {
+        "фича": "—", "оценка": "—", "план": "—",
+        "проект": "—", "агент": "—", "решение": "—",
+        # обратная совместимость со старым форматом
+        "применение": "—",
+    }
     for line in text.strip().splitlines():
-        if line.startswith("ПРИМЕНЕНИЕ:"):
-            result["применение"] = line.replace("ПРИМЕНЕНИЕ:", "").strip()
+        line = line.strip()
+        if line.startswith("ФИЧА:"):
+            result["фича"] = line.replace("ФИЧА:", "").strip()
+            result["применение"] = result["фича"]  # compat
+        elif line.startswith("ОЦЕНКА:"):
+            result["оценка"] = line.replace("ОЦЕНКА:", "").strip()
+        elif line.startswith("ПЛАН:"):
+            result["план"] = line.replace("ПЛАН:", "").strip()
         elif line.startswith("ПРОЕКТ:"):
             result["проект"] = line.replace("ПРОЕКТ:", "").strip()
         elif line.startswith("АГЕНТ:"):
             result["агент"] = line.replace("АГЕНТ:", "").strip()
+        elif line.startswith("РЕШЕНИЕ:"):
+            result["решение"] = line.replace("РЕШЕНИЕ:", "").strip()
+        # старый формат (fallback)
+        elif line.startswith("ПРИМЕНЕНИЕ:") and result["фича"] == "—":
+            result["применение"] = line.replace("ПРИМЕНЕНИЕ:", "").strip()
+            result["фича"] = result["применение"]
     return result
 
 
 def analyze_article(article: dict) -> dict:
-    """Каскад: сначала Gemini, потом OpenRouter."""
+    """Каскад: Gemini Direct → Ollama (local) → OpenRouter."""
     print(f"    🧠 LLM-анализ: {article['title'][:55]}...")
     result = analyze_with_gemini(article)
-    if result["применение"] == "—" and OPENROUTER_KEY:
+    if result["фича"] == "—":
+        print(f"    🔄 Gemini недоступен → Ollama (local)")
+        result = analyze_with_ollama(article)
+    if result["фича"] == "—" and OPENROUTER_KEY:
+        print(f"    🔄 Ollama недоступен → OpenRouter")
         result = analyze_with_openrouter(article)
     article["_llm"] = result
     return article
@@ -311,15 +409,23 @@ def format_digest(articles: list[dict]) -> str:
         stars = "⭐⭐⭐" if score >= 40 else ("⭐⭐" if score >= 20 else "⭐")
         kw_str = ", ".join(art["_keywords"][:3]) or art["hub"]
         llm = art.get("_llm", {})
-        применение = llm.get("применение", "—")
-        проект     = llm.get("проект", "—")
-        агент      = llm.get("агент", "—")
+        фича    = llm.get("фича", llm.get("применение", "—"))
+        оценка  = llm.get("оценка", "—")
+        план    = llm.get("план", "—")
+        проект  = llm.get("проект", "—")
+        агент   = llm.get("агент", "—")
+        решение = llm.get("решение", "—")
+        значок  = "🔥" if "СТАВИМ" in решение else "📌"
 
         lines.append(f"{i}. <a href=\"{art['link']}\">{art['title']}</a>")
         lines.append(f"   {stars} | {kw_str}")
-        if применение != "—":
-            lines.append(f"   💡 {применение}")
-            lines.append(f"   📂 {проект} · 🤖 {агент}")
+        if фича != "—":
+            lines.append(f"   {значок} <b>{фича}</b>")
+            if оценка != "—":
+                lines.append(f"   📊 {оценка}")
+            if план != "—":
+                lines.append(f"   📋 {план}")
+            lines.append(f"   📂 {проект} · 🤖 {агент} · {решение}")
         lines.append("")
 
     lines += ["─" * 20, "Antigravity · Habr Intelligence v2"]

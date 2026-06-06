@@ -1,11 +1,11 @@
-# 🌙 Ночной аудит кода — 2026-06-01
+# 🌙 Ночной аудит кода — 2026-06-02
 
 > **Проект:** AI-Eggs (Анжелочка)  
-> **Время:** 02:03:12  
+> **Время:** 02:04:29  
 > **Метод:** Cross-Model Peer Review  
 > **Режим:** 🔧 AUTO-FIX  
-> **Python файлов:** 197 (проверяем: 1)  
-> **Источник:** git diff HEAD~1 (1 файлов)
+> **Python файлов:** 197 (проверяем: 3)  
+> **Источник:** git diff HEAD~1 (3 файлов)
 
 ---
 
@@ -65,9 +65,9 @@ ai-eggs/agent/angelochka_core.py:510:89: E501 Line too long (89 > 88)
 ai-eggs/agent/angelochka_core.py:523:90: E501 Line too long (93 > 88)
 ```
 
-🔧 **ruff --fix:** 1 ошибок исправлено автоматически (ветка: \'auto-fix/night-audit-2026-06-01\')
+🔧 **ruff --fix:** 0 ошибок исправлено автоматически (ветка: \'auto-fix/night-audit-2026-06-02\')
 
-**Критических ошибок ruff (E,F,S,B):** 1657
+**Критических ошибок ruff (E,F,S,B):** 1656
 
 ### 🔐 Hardcoded секреты
 ```
@@ -83,10 +83,10 @@ ai-eggs/agent/angelochka_core.py:523:90: E501 Line too long (93 > 88)
  ok/2026-05-31_02/photo.png                       | Bin 1467173 -> 0 bytes
  reports/night_audit_ai-eggs_2026-05-30.md        | 161 +++++++++
  reports/night_audit_ai-eggs_2026-05-31.md        | 138 ++++++++
- reports/night_audit_ai-eggs_2026-06-01.md        |  79 +++++
+ reports/night_audit_ai-eggs_2026-06-01.md        | 139 ++++++++
  tools/habr_intelligence.py                       | 417 +++++++++++++++++++++++
  tools/ping_apis.sh                               |  32 ++
- 16 files changed, 1254 insertions(+), 39 deletions(-)
+ 16 files changed, 1314 insertions(+), 39 deletions(-)
 ```
 
 ---
@@ -110,11 +110,11 @@ ai-eggs/agent/angelochka_core.py:523:90: E501 Line too long (93 > 88)
 
 | Метрика | Значение |
 |---------|----------|
-| 📅 Дата | 2026-06-01 |
-| ⏰ Время | 02:03:12 → 02:03:22 |
+| 📅 Дата | 2026-06-02 |
+| ⏰ Время | 02:04:29 → 02:04:35 |
 | 📁 Python файлов | 197 |
 | 📝 Изменено за день | 16 |
-| ⚡ ruff ошибок (E,F,S,B) | 1657 |
+| ⚡ ruff ошибок (E,F,S,B) | 1656 |
 | 🔐 Hardcoded секретов | 1 |
 | 🔬 Gemini аудит | ⏭️ |
 | 🧠 Claude cross-review | ⏭️ |
