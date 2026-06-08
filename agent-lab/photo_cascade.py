@@ -1,20 +1,21 @@
 from __future__ import annotations
 
 """
-🖼️ Фотокаскад v1 — генерация и поиск изображений.
+🖼️ Фотокаскад v2 — генерация и поиск изображений.
 
-Каскад из 3 уровней:
-  1. Leonardo AI / Imagen4    — генерация через US-прокси (платно, премиум)
-  2. Unsplash                 — бесплатный сток (нужен UNSPLASH_ACCESS_KEY)
-  3. Placeholder              — заглушка-URL (последняя надежда)
-
-Все запросы к платным сервисам идут через US-прокси (PHOTO_PROXY_US),
-чтобы обойти гео-блокировки.
+Каскад из 4 уровней:
+  1. Leonardo AI (Imagen4/Phoenix) — платный премиум, точные детали
+  2. Ideogram 4 (через fal.ai) — ЛУЧШАЯ open-source модель,
+                                    9.3B парам., #1 среди открытых на Design Arena
+                                    Особо хороша для текста на картинках, поддерживает JSON-промпты
+  3. Unsplash — бесплатный сток (нужен UNSPLASH_ACCESS_KEY)
+  4. Placeholder — заглушка-URL (последняя надежда)
 
 Переменные окружения:
-  LEONARDO_API_KEY   — ключ Leonardo AI
+  LEONARDO_API_KEY    — ключ Leonardo AI
+  FAL_KEY             — ключ fal.ai (для Ideogram 4)
   UNSPLASH_ACCESS_KEY — ключ Unsplash
-  PHOTO_PROXY_US     — URL прокси вида http://user:pass@host:port
+  PHOTO_PROXY_US      — URL прокси вида http://user:pass@host:port
 """
 
 import os
@@ -26,14 +27,17 @@ load_dotenv()
 
 LEONARDO_API_KEY = os.getenv("LEONARDO_API_KEY", "")
 UNSPLASH_KEY = os.getenv("UNSPLASH_ACCESS_KEY", "")
+FAL_KEY = os.getenv("FAL_KEY", "")  # fal.ai — Ideogram 4
 PROXY_US = os.getenv("PHOTO_PROXY_US", "")  # http://user:pass@host:port
 
-# Leonardo model ID для Imagen4 (Phoenix 1.0 / Imagen4-compatible)
-# Актуальный список: https://docs.leonardo.ai/reference/getplatformmodels
+# Leonardo model ID
 LEONARDO_MODEL_ID = os.getenv(
     "LEONARDO_MODEL_ID",
     "b24e16ff-06e3-43eb-8d33-4416c2d75876",  # Leonardo Imagen4 / Phoenix 1.0
 )
+
+# Ideogram 4 — fal.ai endpoint
+IDEOGRAM_MODEL = "fal-ai/ideogram/v4"
 
 
 def _build_proxy_kwargs() -> dict:
@@ -123,7 +127,123 @@ async def _generate_leonardo(
 
 
 # ============================================================
-# УРОВЕНЬ 2 — Unsplash (сток)
+# УРОВЕНЬ 2 — Ideogram 4 (через fal.ai)
+# Лучшая open-source модель: 9.3B парам., #1 Design Arena
+# Особо хороша для текста на картинках
+# ============================================================
+
+async def _generate_ideogram(
+    prompt: str,
+    width: int = 1024,
+    height: int = 1024,
+    style: str = "auto",              # auto / realistic / design / anime
+    magic_prompt: bool = True,        # fal.ai auto-улучшает промпт
+    rendering_speed: str = "BALANCED",  # TURBO / BALANCED / QUALITY
+) -> list[str]:
+    """
+    Генерирует изображение через Ideogram 4 (fal.ai).
+
+    Особенности:
+    - Лучший текст на картинках среди open-source
+    - magic_prompt автоматически улучшает промпт
+    - Поддержка аспектных соотношений (1:1, 16:9, 9:16, 4:3)
+    - До 2K разрешения
+
+    Returns:
+        Список URL готовых изображений или [] при ошибке.
+    """
+    if not FAL_KEY:
+        print("⚠️ FAL_KEY не задан (см. ai-eggs/.env)")
+        return []
+
+    # Определяем аспект по размерам
+    ratio = width / height
+    if ratio > 1.4:
+        aspect_ratio = "16:9"
+    elif ratio < 0.7:
+        aspect_ratio = "9:16"
+    elif 0.9 < ratio < 1.1:
+        aspect_ratio = "1:1"
+    else:
+        aspect_ratio = "4:3"
+
+    payload = {
+        "prompt": prompt,
+        "aspect_ratio": aspect_ratio,
+        "style": style,
+        "magic_prompt_option": "AUTO" if magic_prompt else "OFF",
+        "rendering_speed": rendering_speed,
+        "num_images": 1,
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=90.0) as client:
+            # fal.ai работает из РФ напрямую, прокси не нужен
+            resp = await client.post(
+                f"https://fal.run/{IDEOGRAM_MODEL}",
+                headers={
+                    "Authorization": f"Key {FAL_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json=payload,
+            )
+
+            if resp.status_code != 200:
+                print(f"⚠️ Ideogram 4: {resp.status_code} — {resp.text[:120]}")
+                return []
+
+            data = resp.json()
+            images = data.get("images", [])
+            if not images:
+                print("⚠️ Ideogram 4: пустой ответ")
+                return []
+
+            urls = [img["url"] for img in images if img.get("url")]
+            if urls:
+                seed = data.get("seed", "?")
+                print(f"✅ Ideogram 4: {len(urls)} изображений, seed={seed}")
+            return urls
+
+    except Exception as e:
+        print(f"❌ Ideogram 4: {e}")
+
+    return []
+
+
+def ideogram_prompt_builder(
+    subject: str,
+    text_on_image: str = "",
+    style: str = "realistic",
+    color_palette: list[str] = None,
+    background: str = "",
+) -> str:
+    """
+    Строит структурированный промпт для Ideogram 4.
+
+    Ideogram особенно хорошо обрабатывает чёткие описания,
+    а magic_prompt автоматически улучшает промпт.
+
+    Args:
+        subject:       главный объект ("цыплёнок бройлер")
+        text_on_image: текст на картинке ("Свежие цыплята!")
+        style:         стиль (realistic / design / anime / auto)
+        color_palette: hex-цвета (["#FF6B35", "#FFFFFF"])
+        background:    фон ("зелёный луг")
+    """
+    parts = [subject]
+    if text_on_image:
+        parts.append(f'with text "{text_on_image}" clearly visible')
+    if background:
+        parts.append(f"background: {background}")
+    if color_palette:
+        colors = ", ".join(color_palette)
+        parts.append(f"color palette: {colors}")
+    parts.append(f"style: {style}, high quality, professional")
+    return ", ".join(parts)
+
+
+# ============================================================
+# УРОВЕНЬ 3 — Unsplash (сток)
 # ============================================================
 
 async def _search_unsplash(
@@ -207,9 +327,9 @@ async def get_photo(
         }
     """
     providers = (
-        ["leonardo", "unsplash", "placeholder"]
+        ["leonardo", "ideogram", "unsplash", "placeholder"]
         if prefer_generated
-        else ["unsplash", "leonardo", "placeholder"]
+        else ["unsplash", "ideogram", "placeholder"]
     )
 
     for provider in providers:
@@ -218,8 +338,10 @@ async def get_photo(
         if provider == "leonardo":
             urls = await _generate_leonardo(prompt, width=width, height=height)
 
+        elif provider == "ideogram":
+            urls = await _generate_ideogram(prompt, width=width, height=height)
+
         elif provider == "unsplash":
-            # Обрезаем промпт до ~50 символов для поиска
             search_query = prompt[:50]
             urls = await _search_unsplash(search_query)
 

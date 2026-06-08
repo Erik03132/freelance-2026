@@ -1,0 +1,53 @@
+{
+  "date": "2026-06-06_1734",
+  "sov_pct": 0,
+  "engines": [
+    "perplexity",
+    "gpt"
+  ],
+  "results": {
+    "perplexity": [
+      {
+        "query": "кто делает AI ботов для бизнеса в России",
+        "hit": false,
+        "snippet": "",
+        "competitors": [
+          "plaan.ai",
+          "flow.ai"
+        ]
+      },
+      {
+        "query": "AI бюро для малого бизнеса Россия",
+        "hit": false,
+        "snippet": "",
+        "competitors": []
+      },
+      {
+        "query": "создать чат-бота для бизнеса на нейросетях",
+        "hit": false,
+        "snippet": "",
+        "competitors": []
+      }
+    ],
+    "gpt": [
+      {
+        "query": "кто делает AI ботов для бизнеса в России",
+        "hit": false,
+        "snippet": "",
+        "competitors": []
+      },
+      {
+        "query": "AI бюро для малого бизнеса Россия",
+        "hit": false,
+        "snippet": "",
+        "competitors": []
+      },
+      {
+        "query": "создать чат-бота для бизнеса на нейросетях",
+        "hit": false,
+        "snippet": "",
+        "competitors": []
+      }
+    ]
+  }
+}

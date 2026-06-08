@@ -30,6 +30,30 @@
 
 ---
 
+## 🟢 P3 — По требованию (GEO/контент)
+
+> Задачи не срочные. Выполнять после деплоя или по запросу.
+
+### 4. GEO-видимость ai-bureau.pro
+- [ ] Опубликовать 2 кейса на **VC.ru** с триплетами «AI Bureau → делает → AI-агентов»
+- [ ] Добавить **Schema.org** (Organization + FAQPage) на ai-bureau.pro
+- [ ] Добавить **FAQ-блоки** на страницы услуг
+- [ ] Задеплоить **llms.txt** → `https://ai-bureau.pro/llms.txt` (файл создан в `public/`)
+
+### 5. GEO-видимость vezemcip.ru
+- [ ] Создать **llms.txt** в `vezemcip.ru/public/`
+- [ ] Добавить **Schema.org** (LocalBusiness + Product) на vezemcip.ru
+- [ ] FAQ-блоки: цены, породы, доставка
+- [ ] Зарегистрировать в Яндекс Бизнес + 2GIS (карточки = вес в AI-выдаче)
+
+### 6. GEO-монитор (инструмент готов)
+- [ ] `python3 tools/geo_monitor.py --site vezemcip --dry-run` — первый замер VezemCip
+- [ ] При запуске нового сайта → добавить в `SITES_CONFIG` в `tools/geo_monitor.py`
+  - Шаблон: `name, domain, brand_patterns, queries (10-25 шт.)`
+- [ ] **Правило Артемия**: каждый новый сайт → регистрация в GEO-мониторе ОБЯЗАТЕЛЬНА
+
+---
+
 ## 🏗️ Архитектура автоматизации
 
 ### VPS (72.56.38.19) — 24/7

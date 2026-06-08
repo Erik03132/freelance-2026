@@ -1,10 +1,10 @@
-# SESSION_LATEST — 2026-06-06
+# SESSION_LATEST — 2026-06-08
 
 ## Project
 ai-bureau
 
 ## Last Commit
-`2792e9b6 feat: habr_intelligence v2 — детектор фич + llms.txt ai-bureau`
+`5b029f90 chore: update ai-eggs submodule — content machine finalize`
 
 ## In Progress
 1. (none)
@@ -30,4 +30,4 @@ ai-bureau
 * **InteractiveNeuralGraph:** Force-directed Canvas с 24 узлами, mouse repulsion, edge glow, particle flows, pulsing nodes.
 
 ## Generated
-2026-06-06 17:42 by `save_session_state.sh`
+2026-06-08 11:54 by `save_session_state.sh`
