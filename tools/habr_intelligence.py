@@ -37,7 +37,7 @@ OPENROUTER_KEY  = os.getenv("OPENROUTER_API_KEY", "")
 GEMINI_KEY      = os.getenv("GEMINI_API_KEY", "")
 GEMINI_BACKUP   = os.getenv("GEMINI_BACKUP_KEY", "")
 OLLAMA_HOST     = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-OLLAMA_MODEL    = os.getenv("OLLAMA_MODEL", "gemma4:e2b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma4:e2b")
 
 STATE_FILE = os.path.join(BASE_DIR, "data", "habr_intelligence_state.json")
 
@@ -52,7 +52,7 @@ HABR_HUBS = [
     "artificial_intelligence",
     "machine_learning",
     "natural_language_processing",
-    "chatgpt",
+    # chatgpt → 404, хаб удалён с Хабра
     # Разработка
     "python",
     "api",
@@ -201,11 +201,9 @@ def _build_prompt(article: dict) -> str:
 
 def analyze_with_gemini(article: dict) -> dict:
     """LLM-анализ через Gemini REST API. Пробует основной, потом резервный ключ.
-    Gemini требует прокси (РФ заблокирована). Используем HTTP-прокси из HTTPS_PROXY.
+    Gemini доступен из РФ напрямую — прокси НЕ нужен.
+    (PROXY_URL используется только для Telegram)
     """
-    proxies = {}
-    if PROXY_URL:
-        proxies = {"https": PROXY_URL, "http": PROXY_URL}
     for key in filter(None, [GEMINI_KEY, GEMINI_BACKUP]):
         try:
             url = (
@@ -216,7 +214,8 @@ def analyze_with_gemini(article: dict) -> dict:
                 "contents": [{"parts": [{"text": _build_prompt(article)}]}],
                 "generationConfig": {"maxOutputTokens": 256, "temperature": 0.4},
             }
-            resp = requests.post(url, json=payload, timeout=20, proxies=proxies)
+            # NO_PROXY_SESSION: trust_env=False — игнорирует системный HTTPS_PROXY/SOCKS5
+            resp = NO_PROXY_SESSION.post(url, json=payload, timeout=20)
             if resp.status_code == 200:
                 print(f"  ✅ Gemini OK")
                 text = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
@@ -228,7 +227,7 @@ def analyze_with_gemini(article: dict) -> dict:
                 print(f"  ⚠ Gemini {resp.status_code}: {resp.text[:100]}")
         except Exception as e:
             print(f"  ⚠ Gemini error: {e}")
-    return {"фича": "—", "применение": "—", "проект": "—", "агент": "—", "решение": "—"}
+    return {"фича": "—", "оценка": "—", "план": "—", "применение": "—", "проект": "—", "агент": "—", "решение": "—"}
 
 
 def analyze_with_openrouter(article: dict) -> dict:
@@ -322,7 +321,7 @@ def analyze_with_ollama(article: dict) -> dict:
             print(f"  ⚠ Ollama HTTP {resp.status_code}: {resp.text[:100]}")
     except Exception as e:
         print(f"  ⚠ Ollama error: {e}")
-    return {"применение": "—", "проект": "—", "агент": "—"}
+    return {"фича": "—", "оценка": "—", "план": "—", "применение": "—", "проект": "—", "агент": "—", "решение": "—"}
 
 
 def _parse_llm_response(text: str) -> dict:
