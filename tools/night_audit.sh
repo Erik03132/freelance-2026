@@ -45,6 +45,10 @@ TG_PROXY=$(grep "TELEGRAM_PROXY" "${AI_EGGS_DIR}/.env" 2>/dev/null | cut -d= -f2
 # API ключи
 OPENROUTER_KEY=$(grep "OPENROUTER_API_KEY" "${AI_EGGS_DIR}/.env" 2>/dev/null | cut -d= -f2)
 
+# VPS инфраструктура
+VPS_HOST=$(grep "^VPS_HOST" "${AI_EGGS_DIR}/.env" 2>/dev/null | cut -d= -f2)
+VPS_SSH_KEY=$(grep "^VPS_SSH_KEY" "${AI_EGGS_DIR}/.env" 2>/dev/null | cut -d= -f2)
+
 # Модели
 GEMINI_CLI=$(which gemini 2>/dev/null || echo "")
 OLLAMA_MODEL="gemma4:e2b"  # Fallback только
@@ -610,11 +614,10 @@ log "📤 Telegram отправлен"
 LOCK_FILE="/tmp/night_audit_done_${DATE}.lock"
 touch "$LOCK_FILE"
 # Отправляем lock на VPS
-SSH_KEY="/Users/igorvasin/freelance-2026/.ssh_agent_key"
-if [ -f "$SSH_KEY" ]; then
-    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=5 \
-        root@72.56.38.19 "touch $LOCK_FILE" 2>/dev/null || true
-    log "🔒 Lock создан: локально + VPS"
+if [ -n "${VPS_SSH_KEY:-}" ] && [ -f "$VPS_SSH_KEY" ] && [ -n "${VPS_HOST:-}" ]; then
+    ssh -i "$VPS_SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=5 \
+        root@"${VPS_HOST}" "touch $LOCK_FILE" 2>/dev/null || true
+    log "🔒 Lock создан: локально + VPS (${VPS_HOST})"
 else
-    log "🔒 Lock создан: только локально (нет SSH ключа)"
+    log "🔒 Lock создан: только локально (нет VPS_HOST / VPS_SSH_KEY в .env)"
 fi
