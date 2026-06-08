@@ -373,18 +373,15 @@ def send_telegram(text: str) -> bool:
     if not TELEGRAM_TOKEN:
         print("⚠ ANGELOCHKA_BOT_TOKEN не задан")
         return False
-    proxies = {}
-    if PROXY_URL:
-        p = PROXY_URL.replace("socks5://", "socks5h://")
-        proxies = {"https": p, "http": p}
+    # Telegram доступен напрямую из РФ без прокси
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     try:
-        resp = requests.post(url, json={
+        resp = NO_PROXY_SESSION.post(url, json={
             "chat_id": OWNER_CHAT_ID,
             "text": text,
             "parse_mode": "HTML",
             "disable_web_page_preview": True,
-        }, proxies=proxies, timeout=30)
+        }, timeout=30)
         if resp.status_code == 200:
             print(f"✅ Отправлено в TG (chat_id={OWNER_CHAT_ID})")
             return True
