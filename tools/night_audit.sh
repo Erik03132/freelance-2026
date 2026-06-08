@@ -65,7 +65,7 @@ for arg in "$@"; do
         --phase1-only) PHASE1_ONLY=true ;;
         --no-tg) NO_TG=true ;;
         --fix) AUTO_FIX=true ;;
-        --sonnet) CLAUDE_MODEL="anthropic/claude-sonnet-4" ;;  # ручной downgrade
+        --sonnet) CLAUDE_MODEL="anthropic/claude-sonnet-4-5" ;;  # ручной downgrade до Sonnet
         --project=*) TARGET_PROJECT="${arg#*=}" ;;
         --project) ;; # следующий аргумент
     esac
@@ -220,15 +220,32 @@ else
     CHANGED_COUNT=$(echo "$CHANGED_PY" | wc -l | tr -d ' ')
 fi
 
-# Если нет диффа — берём ТОП-5 критических файлов
+# Если нет диффа — берём ТОП-5 критических файлов текущего проекта
 if [ "$CHANGED_COUNT" -eq 0 ] || [ -z "$CHANGED_PY" ]; then
-    CHANGED_PY="ai-eggs/agent/angelochka_core.py
+    case $TARGET_PROJECT in
+        ai-eggs|eggs)
+            CHANGED_PY="ai-eggs/agent/angelochka_core.py
 ai-eggs/agent/tg_bot.py
 ai-eggs/agent/bitrix_intelligence.py
 ai-eggs/agent/chat_listener.py
 ai-eggs/agent/bitrix_scanner.py"
-    CHANGED_COUNT=5
-    DIFF_SOURCE="ТОП-5 критических файлов (нет git diff)"
+            ;;
+        angel-backend)
+            CHANGED_PY="angel-backend/angelochka_core.py
+angel-backend/tg_bot.py
+angel-backend/server.py
+angel-backend/bitrix_crm.py
+angel-backend/content_agent.py"
+            ;;
+        *)
+            CHANGED_PY=$(find "$AUDIT_DIR" -name "*.py" \
+                -not -path "*/__pycache__/*" -not -path "*/venv/*" \
+                2>/dev/null | xargs ls -S 2>/dev/null | head -5 | \
+                sed "s|${PROJECT_ROOT}/||")
+            ;;
+    esac
+    CHANGED_COUNT=$(echo "$CHANGED_PY" | grep -c '.' 2>/dev/null || echo 5)
+    DIFF_SOURCE="ТОП-5 критических файлов проекта ${TARGET_PROJECT} (нет git diff)"
 else
     DIFF_SOURCE="git diff HEAD~1 (${CHANGED_COUNT} файлов)"
 fi
@@ -309,7 +326,7 @@ else
         if [ -n "$result" ]; then
             ((SYNTAX_ERRORS++)) || true
         fi
-    done < <(find "$AGENT_DIR" -name "*.py" -not -path "*/__pycache__/*")
+    done < <(find "$AUDIT_DIR" -name "*.py" -not -path "*/__pycache__/*")
     RUFF_ERRORS=$SYNTAX_ERRORS
 fi
 
@@ -413,10 +430,10 @@ $(echo "$CHANGED_PY" | tr '\n' ', ')
 $([ "$AUTO_FIX" = true ] && echo 'РЕЖИМ: Исправляй найденные баги прямо в файлах! Коммить каждое исправление.' || echo 'ПРАВИЛО: НЕ ИЗМЕНЯЙ файлы! Только читай и анализируй.')
 Запиши результат в конец файла ${REPORT_FILE} (append)."
 
-    GEMINI_MODE=$([ "$AUTO_FIX" = true ] && echo "yolo" || echo "auto_edit")
+    GEMINI_MODE=$([ "$AUTO_FIX" = true ] && echo "yolo" || echo "default")
     timeout 600 "$GEMINI_CLI" \
         --prompt "$GEMINI_PROMPT" \
-        --approval-mode "$GEMINI_MODE" \
+        $([ "$AUTO_FIX" = true ] && echo "--yolo" || true) \
         2>>"$LOG_FILE" && GEMINI_FOUND=1 || {
         log "  ⚠️ Gemini CLI: ошибка или таймаут"
         echo "⚠️ Gemini CLI недоступен — фаза пропущена" >> "$REPORT_FILE"
@@ -584,7 +601,7 @@ ${SEVERITY}
 • Claude: 🔴${CLAUDE_CRITICAL:-0} 🟡${CLAUDE_IMPORTANT:-0} 🟢${CLAUDE_MINOR:-0}
 • Файлов проверено: ${CHANGED_COUNT}
 
-📄 \`reports/night_audit_${DATE}.md\`"
+📄 \`reports/night_audit_${TARGET_PROJECT}_${DATE}.md\`"
 
 send_telegram "$TG_MSG"
 log "📤 Telegram отправлен"
