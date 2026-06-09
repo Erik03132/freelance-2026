@@ -55,6 +55,47 @@
 - **Backend:** `node server.js` — необходим для работы чата и лид-воронки.
 - **leads.json:** Сохраняет лиды.
 
+---
+
+## 08.06.2026 — Content Machine Finalize (ai-eggs)
+
+**Контент-машина «Своё Подворье»:** финальная доводка и тестирование.
+
+### Что сделано
+- **Контент-план июнь** (`month2_content_plan.md`): 23 поста на 8–30 июня, каждый 3-й — про цыплят/утят со ссылкой на vezemcip.ru
+- **`morning_post.py`**: загрузка темы из контент-плана (`_load_content_plan`), кнопки «📡 Только TG» / «📡 Только Дзен» / «📡 Только VK», прокси+resolve для РФ
+- **`fan_publish.py`**: Дзен — фото и текст раздельно (работает с автоимпортом), `--form-string` для `@` в chat_id, `--proxy`/`--resolve`
+- **Сайт**: `_is_poultry_post` — публикация только для постов про цыплят/утят. Сохраняет `.md` в `data/site_posts/`
+- **OK**: `data/ok_posts/podvorye/YYYY-MM-DD_HHMM/post.txt + photo.png` — для ручного копирования
+- **`photo_cascade.py`**: Leonardo prompt с no-american, VK API retry, убран `os.unlink` после VK (ломал последующие публикации)
+- **`tg_bot.py`**: PENDING_DIR fix, SOCKS5 прокси для бота
+
+### Тестирование (5/5 площадок)
+| Площадка | Результат |
+|----------|-----------|
+| TG @svoye_podvorye | ✅ |
+| VK (post_id: 149) | ✅ |
+| Дзен @podvorye_dzen → автоимпорт | ✅ |
+| Сайт `data/site_posts/` | ✅ |
+| OK `data/ok_posts/` | ✅ |
+
+### Архитектура
+```
+morning_post.py --brand podvorye
+  → _load_content_plan() → month2_content_plan.md
+  → generate_post_text() → OpenRouter (Gemini fallback)
+  → generate_photo() → Leonardo AI
+  → save_pending() + send_preview_to_admin() → TG кнопки
+  → fan_publish() → TG + VK + Дзен + OK + Сайт
+```
+
+### Ключевые решения
+- Дзен: фото отдельно, текст отдельно (автоимпорт не берёт caption у sendPhoto с HTML)
+- Бот только на VPS (Telegram conflict при локальном запуске)
+- Синк через SCP, не git (VPS без гит-репы ai-eggs)
+
+---
+
 ## Relevant Files
 - `/Users/igorvasin/freelance-2026/ai-bureau/.env.local` — свежие ключи (OpenRouter + Gemini).
 - `/Users/igorvasin/freelance-2026/ai-bureau/server.js` — Node.js сервер, гибридный поиск, лид-воронка, retry.
