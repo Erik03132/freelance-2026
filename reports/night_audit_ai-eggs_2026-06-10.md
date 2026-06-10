@@ -1,4 +1,4 @@
-# 🌙 Ночной аудит кода — 2026-06-09
+# 🌙 Ночной аудит кода — 2026-06-10
 
 > **Проект:** AI-Eggs (Анжелочка)  
 > **Время:** 02:00:05  
@@ -65,9 +65,9 @@ ai-eggs/agent/angelochka_core.py:509:89: E501 Line too long (110 > 88)
 ai-eggs/agent/angelochka_core.py:510:89: E501 Line too long (89 > 88)
 ```
 
-🔧 **ruff --fix:** 1 ошибок исправлено автоматически (ветка: \'auto-fix/night-audit-2026-06-09\')
+🔧 **ruff --fix:** 0 ошибок исправлено автоматически (ветка: \'auto-fix/night-audit-2026-06-10\')
 
-**Критических ошибок ruff (E,F,S,B):** 1663
+**Критических ошибок ruff (E,F,S,B):** 1662
 
 ### 🔐 Hardcoded секреты
 ```
@@ -77,16 +77,16 @@ ai-eggs/agent/angelochka_core.py:510:89: E501 Line too long (89 > 88)
 
 ### 📝 Изменения за день
 ```
- reports/geo_monitor_launchd.err           |   4 +
- reports/night_audit_ai-eggs_2026-06-07.md | 160 +++++++
- reports/night_audit_ai-eggs_2026-06-08.md | 125 ++++++
- reports/night_audit_ai-eggs_2026-06-09.md |  79 ++++
- reports/planner_2026-06-06_1809.md        |  62 +++
- reports/planner_2026-06-08_1139.md        | 174 ++++++++
- tools/cost_tracker.py                     | 225 ++++++++++
- tools/geo_monitor.py                      | 450 +++++++++++++++++++
- tools/model_router.py                     | 629 ++++++++++++++++++++++++++
- 26 files changed, 3984 insertions(+), 19 deletions(-)
+ ACTIVE_TASKS.md                           |  80 +++++++-
+ agent-lab/llm_planner.py                  | 315 +++++++++++++++++++++++++++++-
+ ai-bureau/CHRONICLE.md                    |  41 ++++
+ ai-eggs                                   |   0
+ angel-backend                             |   0
+ chp.md                                    | 157 ++++-----------
+ dreams/patterns.md                        |  26 +++
+ reports/night_audit_ai-eggs_2026-06-09.md |  70 +++++++
+ tools/model_router.py                     |  10 +-
+ 10 files changed, 724 insertions(+), 135 deletions(-)
 ```
 
 ---
@@ -107,11 +107,11 @@ ai-eggs/agent/angelochka_core.py:510:89: E501 Line too long (89 > 88)
 
 | Метрика | Значение |
 |---------|----------|
-| 📅 Дата | 2026-06-09 |
-| ⏰ Время | 02:00:05 → 02:00:40 |
+| 📅 Дата | 2026-06-10 |
+| ⏰ Время | 02:00:05 → 02:00:41 |
 | 📁 Python файлов | 197 |
-| 📝 Изменено за день | 26 |
-| ⚡ ruff ошибок (E,F,S,B) | 1663 |
+| 📝 Изменено за день | 10 |
+| ⚡ ruff ошибок (E,F,S,B) | 1662 |
 | 🔐 Hardcoded секретов | 1 |
 | 🔬 Gemini аудит | ⏭️ |
 | 🧠 Claude cross-review | ⏭️ |

@@ -1,5 +1,5 @@
 # ⚡ КАРТА ДВУХ АНЖЕЛ — ЕДИНСТВЕННЫЙ ИСТОЧНИК ПРАВДЫ
-# Обновлено: 07.05.2026 | ПРАВИЛО — каждая сессия читает это при буте!
+# Обновлено: 09.06.2026 | ПРАВИЛО — каждая сессия читает это при буте!
 
 ---
 
@@ -102,6 +102,170 @@
 
 ---
 
+## 🗺️ DAG-КАРТА ЗАВИСИМОСТЕЙ (задача #10, 09.06.2026)
+
+> Показывает: порядок деплоя → что от чего зависит → что ломается при падении
+
+### Уровни зависимостей (деплой снизу вверх)
+
+```
+УРОВЕНЬ 0 — ИНФРАСТРУКТУРА (основа всего)
+  ┌──────────────────────────────────────────────────────────┐
+  │  .env (API ключи)  │  Neon DB (PostgreSQL)  │  VPS nginx │
+  └──────────────────────────────────────────────────────────┘
+                              ↓
+УРОВЕНЬ 1 — ХРАНИЛИЩА ДАННЫХ
+  ┌─────────────────────────────────────────────────────────┐
+  │  rag_lite.py       │  hybrid_search.py                  │
+  │  (6195 чанков PDF) │  (BM25 + семантика)                │
+  │                    │                                    │
+  │  memory_graph.py   │  vector_memory.py                  │
+  │  (граф клиентов)   │  (векторный поиск)                 │
+  └─────────────────────────────────────────────────────────┘
+                              ↓
+УРОВЕНЬ 2 — БИЗНЕС-ЛОГИКА
+  ┌─────────────────────────────────────────────────────────┐
+  │  feed_calculator.py   │  sales_logic.py                 │
+  │  (расчёт кормов)      │  (Sales layer)                  │
+  │                       │                                 │
+  │  smart_handoff.py     │  debounce.py (NEW)              │
+  │  (эскалация к менедж) │  (защита от дублей)             │
+  │                       │                                 │
+  │  roles_config.json    │  LeadQualification (NEW)        │
+  │  (ролевая модель)     │  (Pydantic-квалификация)        │
+  └─────────────────────────────────────────────────────────┘
+                              ↓
+УРОВЕНЬ 3 — ЯДРО АНЖЕЛЫ
+  ┌─────────────────────────────────────────────────────────┐
+  │             angelochka_core.py                          │
+  │  Зависит от: rag_lite, hybrid_search, memory_graph,     │
+  │  vector_memory, feed_calculator, sales_logic,           │
+  │  LeadQualification, roles_config, .env (LLM keys)       │
+  └─────────────────────────────────────────────────────────┘
+                              ↓
+УРОВЕНЬ 4 — КАНАЛЫ (параллельно)
+  ┌──────────────────────────────────────────────────────────┐
+  │  tg_bot.py      │  server.py     │  bitrix_receiver.py  │
+  │  (Telegram)     │  (API сайта)   │  (вебхук Битрикс)    │
+  │                 │                │                       │
+  │  vk_bot.py      │  bitrix_bot.py │  ptenchikova_bot.py  │
+  │  (ВКонтакте)    │  (polling Bx)  │  (песочница)         │
+  └──────────────────────────────────────────────────────────┘
+```
+
+### Граф в Mermaid (для визуализации)
+
+```mermaid
+graph TD
+    ENV[".env / API Keys"]
+    DB["Neon DB (PostgreSQL)"]
+    NGINX["VPS nginx"]
+
+    RAG["rag_lite.py\n6195 чанков"]
+    HYB["hybrid_search.py\nBM25+семантика"]
+    MEM["memory_graph.py\nграф клиентов"]
+    VEC["vector_memory.py\nвектора"]
+
+    FC["feed_calculator.py"]
+    SL["sales_logic.py"]
+    SH["smart_handoff.py"]
+    DB2["debounce.py 🆕"]
+    LQ["LeadQualification 🆕"]
+    RC["roles_config.json"]
+
+    CORE["angelochka_core.py\n⭐ ЯДРО"]
+
+    TG["tg_bot.py\nTelegram"]
+    SRV["server.py\nAPI сайта"]
+    RCV["bitrix_receiver.py\nвебхук"]
+    VK["vk_bot.py\nВКонтакте"]
+    BX["bitrix_bot.py\npolling"]
+    PT["ptenchikova_bot.py\nпесочница"]
+
+    ENV --> RAG
+    ENV --> HYB
+    ENV --> CORE
+    DB --> RAG
+    DB --> MEM
+    DB --> VEC
+
+    RAG --> CORE
+    HYB --> CORE
+    MEM --> CORE
+    VEC --> CORE
+    FC --> CORE
+    SL --> CORE
+    SH --> CORE
+    LQ --> CORE
+    RC --> CORE
+
+    CORE --> TG
+    CORE --> SRV
+    CORE --> RCV
+    CORE --> VK
+    CORE --> BX
+    CORE --> PT
+
+    DB2 --> RCV
+    DB2 --> BX
+    NGINX --> SRV
+
+    style CORE fill:#ff6b6b,color:#fff
+    style ENV fill:#ffd93d,color:#000
+    style DB fill:#6bcb77,color:#fff
+    style LQ fill:#4d96ff,color:#fff
+    style DB2 fill:#4d96ff,color:#fff
+```
+
+### Таблица: что ломается при падении компонента
+
+| Упал компонент | Ломается | Продолжает работать | Критичность |
+|----------------|----------|---------------------|-------------|
+| `.env` | ВСЁ | ничего | 🔴 FATAL |
+| `Neon DB` | RAG, память клиентов, векторный поиск | базовые ответы LLM | 🔴 HIGH |
+| `angelochka_core.py` | ВСЕ КАНАЛЫ | ничего | 🔴 FATAL |
+| `rag_lite.py` | Ответы по породам/ценам/уходу | приветствие, FAQ | 🟠 HIGH |
+| `hybrid_search.py` | Точный поиск по базе | семантика | 🟡 MED |
+| `memory_graph.py` | Память клиентов (персонализация) | всё остальное | 🟡 MED |
+| `vector_memory.py` | Векторный поиск | BM25 поиск | 🟡 MED |
+| `debounce.py` | Защита от дублей → дубли вернутся | все каналы работают | 🟡 MED |
+| `LeadQualification` | Квалификация лидов, CRM-экспорт | ответы клиентам | 🟡 MED |
+| `smart_handoff.py` | Эскалация к менеджеру | ответы бота | 🟢 LOW |
+| `feed_calculator.py` | Расчёт кормов | всё остальное | 🟢 LOW |
+| `tg_bot.py` | Telegram | сайт, ВК, Битрикс | 🟠 HIGH |
+| `server.py` | API сайта + VK order | TG, Битрикс | 🟠 HIGH |
+| `vk_bot.py` | ВКонтакте | TG, сайт, Битрикс | 🟡 MED |
+| `bitrix_bot.py` | Polling Битрикс | сайт, TG, ВК | 🟡 MED |
+| `bitrix_receiver.py` | Вебхук Битрикс | сайт, TG, ВК | 🟡 MED |
+
+### Порядок деплоя при полном рестарте
+
+```
+1. Проверь .env              → все ключи на месте
+2. pm2 start rag_lite        → прогрей RAG-индекс
+3. pm2 start angela-server   → API сайта (порт 5000)
+4. pm2 start angela-bot      → Telegram
+5. pm2 start angela-vk-bot   → ВКонтакте
+6. pm2 start angela-listener → Битрикс CRM
+7. pm2 start ptenchikova-bot → Песочница (последний — не критично)
+8. Проверь nginx             → /api → port 5000
+```
+
+### Новые зависимости (добавлены 09.06.2026)
+
+| Модуль | Зависит от | Добавляет |
+|--------|-----------|-----------|
+| `debounce.py` | `.env` (REDIS_URL опц.), `logs/` | Защита от дублей в `bitrix_receiver.py` и `bitrix_bot.py` |
+| `LeadQualification` | `pydantic`, `angelochka_core` | Квалификация лидов, `to_crm_dict()` для Битрикса |
+
+### Новые зависимости (добавлены 10.06.2026)
+
+| Модуль | Зависит от | Добавляет |
+|--------|-----------|-----------|
+| `mem0_memory.py` | `.env` (OPENROUTER_API_KEY), `data/mem0_clients/` | Долгосрочная память клиентов: LLM-экстракция фактов → файловое хранение → recall в промпт |
+
+---
+
 ## КЛЮЧЕВЫЕ ФАЙЛЫ
 
 ### Заботкина (все каналы)
@@ -116,6 +280,7 @@
 | `vector_memory.py` | Векторный поиск | ✅ АКТИВЕН |
 | `tg_bot.py` | Telegram polling-бот | ✅ АКТИВЕН |
 | `server.py` | API для сайта (/api/chat, /api/vk-order) | ✅ АКТИВЕН |
+| `mem0_memory.py` 🆕 | Долгосрочная память клиентов (задача #11) | ✅ АКТИВЕН |
 | `bitrix_scanner.py` | Скан CRM (по запросу) | 🔧 по запросу |
 | `daily_report.py` | Генерация CRM-отчёта | 🔧 по запросу |
 | `call_quality_report.py` | Отчёт по качеству звонков | 🔧 по запросу |

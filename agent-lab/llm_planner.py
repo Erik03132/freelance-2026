@@ -638,6 +638,283 @@ class Planner:
         )
 
 
+# ─── Loop-паттерн (задача #9, из loops.elorm.xyz) ──────────────────────────────
+#
+# Агент крутит цикл до достижения качества (не фиксированный план).
+# Применения:
+#   - quality_loop: "Напиши пост" → оценка → "Улучши: ..." → loop до score >= 0.8
+#   - research_loop: "Найди данные" → "Нашёл новое?" → loop пока есть новое
+#   - binary_loop: "Исправь код" → "Тесты OK?" → loop пока 0
+# ─────────────────────────────────────────────────────────────────────────────────
+
+@dataclass
+class LoopIteration:
+    """Результат одной итерации цикла."""
+    index: int
+    output: str
+    score: float
+    critique: str = ""
+    converged: bool = False
+    duration_s: float = 0.0
+
+
+@dataclass
+class LoopResult:
+    """Итоговый результат loop-цикла."""
+    goal: str
+    iterations: list[LoopIteration]
+    best_output: str
+    best_score: float
+    converged: bool
+    total_time_s: float
+    model_used: str
+
+    @property
+    def iteration_count(self) -> int:
+        return len(self.iterations)
+
+    def summary(self) -> str:
+        status = "✅ Сошёлся" if self.converged else "⏱ Остановлен по лимиту"
+        return (
+            f"{status} за {self.iteration_count} итераций | "
+            f"score={self.best_score:.2f} | {self.total_time_s:.1f}s"
+        )
+
+
+class LoopPlanner:
+    """
+    Loop-паттерн: агент улучшает результат в цикле до достижения качества.
+
+    Алгоритм:
+      1. ACT    — выполнить задачу (или улучшить предыдущий + критика)
+      2. JUDGE  — LLM оценивает: score 0.0-1.0 + конкретная критика
+      3. CHECK  — score >= threshold? STOP. Иначе → шаг 1 с критикой
+      4. LIMIT  — max_iterations защищает от бесконечного цикла
+
+    Пример:
+        loop = LoopPlanner(threshold=0.8, max_iterations=4)
+        result = await loop.run(
+            goal="Напиши убедительный пост для VK про AI-агентов для бизнеса",
+            task_type="quality"
+        )
+        print(result.best_output)
+    """
+
+    INITIAL_PROMPT = """Выполни задачу. Дай полный, качественный результат.
+
+ЗАДАЧА: {goal}
+
+Результат:"""
+
+    REFINE_PROMPT = """Улучши результат на основе критики. Исправь ВСЕ указанные проблемы.
+
+ИСХОДНАЯ ЗАДАЧА: {goal}
+
+ТЕКУЩИЙ РЕЗУЛЬТАТ (итерация {iteration}):
+{current_output}
+
+КРИТИКА И ЧТО НАДО УЛУЧШИТЬ:
+{critique}
+
+Улучшенный результат (исправь каждый пункт критики):"""
+
+    JUDGE_PROMPT = """Ты — строгий эксперт-оценщик. Оцени результат по задаче.
+
+ЗАДАЧА: {goal}
+
+РЕЗУЛЬТАТ:
+{output}
+
+Оцени по шкале 0.0-1.0 и дай конкретную критику.
+
+Ответь СТРОГО в формате JSON:
+{{"score": 0.75, "critique": "1) ... 2) ...", "converged": false}}
+
+Правила:
+- score < 0.5: серьёзные проблемы
+- score 0.5-0.75: есть проблемы, можно улучшить
+- score >= {threshold}: отлично, converged=true"""
+
+    RESEARCH_JUDGE_PROMPT = """Сравни новый результат поиска с предыдущими.
+
+ПРЕДЫДУЩИЕ:
+{previous}
+
+НОВЫЙ:
+{current}
+
+Есть принципиально НОВАЯ информация?
+
+Ответь JSON:
+{{"score": 0.0, "critique": "Новые факты: ...", "converged": true}}
+(converged=true если новой информации нет)"""
+
+    def __init__(
+        self,
+        threshold: float = 0.80,
+        max_iterations: int = 5,
+        budget: str = "CHEAP",
+        verbose: bool = True,
+    ):
+        self.threshold = threshold
+        self.max_iterations = max_iterations
+        self.budget = budget
+        self.verbose = verbose
+        self.model = PLANNER_MODELS.get(budget, PLANNER_MODELS["CHEAP"])
+
+    def _log(self, msg: str):
+        if self.verbose:
+            print(msg)
+
+    async def _call(self, prompt: str, toolkit: ToolKit) -> str:
+        return await toolkit.llm(prompt, model=self.model)
+
+    async def _judge(
+        self,
+        goal: str,
+        output: str,
+        toolkit: ToolKit,
+        task_type: str = "quality",
+        previous_outputs: list | None = None,
+    ) -> tuple[float, str, bool]:
+        """Оценивает результат → (score, critique, converged)."""
+        if task_type == "research" and previous_outputs:
+            previous_text = "\n---\n".join(previous_outputs[-3:])
+            prompt = self.RESEARCH_JUDGE_PROMPT.format(
+                previous=previous_text,
+                current=output,
+            )
+        else:
+            prompt = self.JUDGE_PROMPT.format(
+                goal=goal,
+                output=output,
+                threshold=self.threshold,
+            )
+
+        raw = await self._call(prompt, toolkit)
+        try:
+            match = re.search(r'\{[\s\S]*"score"[\s\S]*\}', raw)
+            data = json.loads(match.group() if match else raw)
+            score = float(data.get("score", 0.5))
+            critique = str(data.get("critique", ""))
+            converged = bool(data.get("converged", score >= self.threshold))
+            return score, critique, converged
+        except Exception:
+            score = min(0.6, len(output) / 2000)
+            return score, "Не удалось распарсить оценку", score >= self.threshold
+
+    async def run(
+        self,
+        goal: str,
+        task_type: str = "quality",
+        initial_output: str = "",
+    ) -> LoopResult:
+        """
+        Запускает loop до сходимости или max_iterations.
+
+        Args:
+            goal:           Задача
+            task_type:      "quality" | "research" | "binary"
+            initial_output: Начальный результат (если есть)
+        """
+        t_start = time.time()
+
+        # Инициализируем toolkit с прокси
+        toolkit_obj = ToolKit(proxy=PROXY)
+        try:
+            async with httpx.AsyncClient(proxy=PROXY, timeout=4.0) as c:
+                await c.get("https://openrouter.ai")
+        except Exception:
+            toolkit_obj = ToolKit(proxy=PROXY_DIRECT)
+
+        self._log(f"\n{'='*62}")
+        self._log(f"🔁 LOOP PLANNER | budget={self.budget} | threshold={self.threshold}")
+        self._log(f"   max_iterations={self.max_iterations} | task_type={task_type}")
+        self._log(f"{'='*62}")
+        self._log(f"\n🎯 Цель: {goal}\n")
+
+        iterations: list[LoopIteration] = []
+        current_output = initial_output
+        critique = ""
+        previous_outputs: list[str] = []
+        best_score = 0.0
+        best_output = ""
+
+        for i in range(self.max_iterations):
+            t_iter = time.time()
+            self._log(f"{'─'*62}")
+            self._log(f"🔄 Итерация {i+1}/{self.max_iterations}")
+
+            # ACT: первая итерация или улучшение
+            if i == 0 and not current_output:
+                prompt = self.INITIAL_PROMPT.format(goal=goal)
+                self._log("   📝 Генерирую первый результат...")
+            else:
+                prompt = self.REFINE_PROMPT.format(
+                    goal=goal,
+                    iteration=i,
+                    current_output=current_output,
+                    critique=critique or "Улучши по своему усмотрению",
+                )
+                self._log("   ✏️  Улучшаю на основе критики...")
+
+            new_output = await self._call(prompt, toolkit_obj)
+            self._log(f"   📄 {new_output[:100].replace(chr(10), ' ')}...")
+
+            # JUDGE: оценить
+            self._log("   🔍 Оцениваю качество...")
+            score, critique, converged = await self._judge(
+                goal, new_output, toolkit_obj, task_type, previous_outputs
+            )
+            self._log(f"   📊 Score: {score:.2f} | Converged: {converged}")
+            if critique:
+                self._log(f"   💬 {critique[:100]}...")
+
+            iteration = LoopIteration(
+                index=i,
+                output=new_output,
+                score=score,
+                critique=critique,
+                converged=converged,
+                duration_s=time.time() - t_iter,
+            )
+            iterations.append(iteration)
+            previous_outputs.append(new_output)
+
+            if score > best_score:
+                best_score = score
+                best_output = new_output
+
+            current_output = new_output
+
+            # STOP?
+            if converged:
+                self._log(f"\n✅ Сошёлся на итерации {i+1}! score={score:.2f}")
+                break
+
+            if i < self.max_iterations - 1:
+                self._log(f"   ↻ Продолжаю (score={score:.2f} < {self.threshold})")
+
+        total_time = time.time() - t_start
+        converged_final = any(it.converged for it in iterations)
+
+        result = LoopResult(
+            goal=goal,
+            iterations=iterations,
+            best_output=best_output or current_output,
+            best_score=best_score,
+            converged=converged_final,
+            total_time_s=total_time,
+            model_used=self.model,
+        )
+
+        self._log(f"\n{'='*62}")
+        self._log(f"🏁 {result.summary()}")
+        self._log(f"{'='*62}\n")
+
+        return result
+
+
 # ─── CLI ──────────────────────────────────────────────────────────────────────
 
 DEMO_GOALS = [
@@ -654,6 +931,9 @@ async def main():
     parser.add_argument("goal", nargs="?", default="", help="Цель (задача)")
     parser.add_argument("--demo", action="store_true", help="Запустить демо-задачу")
     parser.add_argument("--demo-parallel", action="store_true", help="Демо Search as Code (параллельный поиск)")
+    parser.add_argument("--demo-loop", action="store_true", help="Демо Loop-паттерна (итеративное улучшение)")
+    parser.add_argument("--loop", action="store_true", help="Запустить goal через LoopPlanner вместо Planner")
+    parser.add_argument("--threshold", type=float, default=0.80, help="Порог качества для LoopPlanner (0.0-1.0)")
     parser.add_argument("--max-steps", type=int, default=5, help="Макс. шагов (дефолт 5)")
     parser.add_argument(
         "--budget",
@@ -681,6 +961,17 @@ async def main():
         print(result)
         return
 
+    if args.demo_loop:
+        demo_goal = "Напиши убедительный пост для VK про ценность AI-агентов для малого бизнеса (3-5 абзацев, с примерами)"
+        print(f"\n🔁 Loop Planner DEMO")
+        print(f"🎯 Цель: {demo_goal}\n")
+        loop = LoopPlanner(threshold=0.80, max_iterations=3, budget=args.budget)
+        loop_result = await loop.run(demo_goal, task_type="quality")
+        print(f"\n📊 ИТОГ: {loop_result.summary()}")
+        for it in loop_result.iterations:
+            print(f"  Итерация {it.index+1}: score={it.score:.2f} | {it.duration_s:.1f}s")
+        return
+
     if args.demo:
         goal = DEMO_GOALS[0]
         print(f"🎯 Демо-задача: {goal}\n")
@@ -688,18 +979,24 @@ async def main():
         goal = args.goal
     else:
         print("Укажи задачу: python3 llm_planner.py \"твоя задача\"")
-        print("Демо планировщик: python3 llm_planner.py --demo")
+        print("Демо планировщик:   python3 llm_planner.py --demo")
         print("Демо Search as Code: python3 llm_planner.py --demo-parallel")
+        print("Демо Loop-паттерн:  python3 llm_planner.py --demo-loop")
+        print("Loop для своей задачи: python3 llm_planner.py --loop \"задача\"")
         sys.exit(1)
 
-    planner = Planner(max_steps=args.max_steps, budget=args.budget)
-    result = await planner.run(goal)
-
-    print(f"\n📊 ИТОГ:")
-    for step in result.steps:
-        print(f"  {step}")
-    print(f"\n⏱  Общее время: {result.total_time_s:.1f}s")
-    print(f"🤖 Модель: {result.model_used}")
+    if args.loop:
+        loop = LoopPlanner(threshold=args.threshold, max_iterations=args.max_steps, budget=args.budget)
+        loop_result = await loop.run(goal)
+        print(f"\n📊 ИТОГ: {loop_result.summary()}")
+    else:
+        planner = Planner(max_steps=args.max_steps, budget=args.budget)
+        result = await planner.run(goal)
+        print(f"\n📊 ИТОГ:")
+        for step in result.steps:
+            print(f"  {step}")
+        print(f"\n⏱  Общее время: {result.total_time_s:.1f}s")
+        print(f"🤖 Модель: {result.model_used}")
 
 
 if __name__ == "__main__":

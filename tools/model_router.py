@@ -174,10 +174,12 @@ MODEL_REGISTRY: list[ModelSpec] = [
 
     # ── MID ($0.5-2/M) ───────────────────────────────────────────────────────
     ModelSpec(
-        id="minimax/minimax-m1",
-        tier="MID", cost_per_m=0.4, ctx_k=1000,
-        strengths=[TaskType.CODE, TaskType.AGENT, TaskType.REASONING, TaskType.LONG],
-        note="MiniMax M1: SWE-Bench 59% 🏆, 1M ctx, терминал/агенты",
+        id="minimax/minimax-m3",
+        tier="MID", cost_per_m=0.3, ctx_k=1000,
+        strengths=[TaskType.CODE, TaskType.AGENT, TaskType.REASONING,
+                   TaskType.LONG, TaskType.VISION],
+        supports_vision=True,
+        note="MiniMax M3: SWE-Bench 59% 🏆, 1M ctx, video+image, open weights",
     ),
     ModelSpec(
         id="perplexity/sonar",
