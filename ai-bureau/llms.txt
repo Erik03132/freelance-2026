@@ -1,19 +1,40 @@
-# AI Bureau
+# AI Bureau — Агентство AI-систем
 
-AI Bureau is a specialized engineering agency focused on designing and deploying autonomous intelligent systems, RAG-based knowledge infrastructures, and custom AI agent ecosystems for business automation.
+> AI Bureau — инженерное бюро, специализирующееся на проектировании автономных AI-агентов, RAG-систем (Retrieval-Augmented Generation), GEO-оптимизации (Generative Engine Optimization) и автоматизации бизнес-процессов. Работает с малым и средним бизнесом в России.
 
-## Core Expertise
-- **Autonomous AI Agents**: Development of reasoning-capable agents for CRM/ERP integration.
-- **Neural Knowledge Bases**: Enterprise-grade RAG (Retrieval-Augmented Generation) systems.
-- **Private Model Ops**: Local deployment of LLMs (Gemma, Llama) within secure perimeters.
-- **AIO (AI Optimization)**: Enhancing web presence for Generative Engine Optimization (GEO).
+## Ключевые компетенции
+- **Автономные AI-агенты**: Разработка reasoning-capable агентов для CRM (Bitrix24, AmoCRM), ERP-систем, Telegram и VK ботов.
+- **RAG-системы (поиск по знаниям)**: Корпоративные базы знаний с гибридным поиском (BM25 + Dense Retrieval + Reciprocal Rank Fusion). Индексация PDF, DOCX, CSV.
+- **GEO / AEO (продвижение в нейросетях)**: Оптимизация контента для AI-ответов Google AI Overviews, Яндекс Нейро, ChatGPT, Perplexity.
+- **Голосовой AI**: Автодозвон с голосовым ботом (Mango Office + STT/TTS), распознавание DTMF, автоматические обзвоны клиентов.
+- **Локальный деплой LLM**: Запуск Gemma, LLaMA, DeepSeek на приватных серверах без утечки данных.
 
-## Services
-- AI Audit & Strategy
-- Custom LLM Integration
-- Automated Lead Generation Systems
-- Private AI Infrastructure Deployment
+## Услуги
+- [AI-аудит и стратегия](https://ai-bureau.pro/#services): Анализ бизнес-процессов, выявление точек автоматизации.
+- [Разработка AI-агентов](https://ai-bureau.pro/#services): Кастомные боты для Telegram, VK, WhatsApp с RAG и CRM-интеграцией.
+- [RAG-система под ключ](https://ai-bureau.pro/#services): От индексации документов до production API за 2-4 недели.
+- [GEO-продвижение](https://ai-bureau.pro/#services): Видимость бренда в ответах нейросетей.
+- [Автодозвон с AI](https://ai-bureau.pro/#services): Массовый обзвон клиентов с голосовым ботом и CRM-интеграцией.
 
-## Contact
-Email: architect@ai-bureau.pro
-Website: https://ai-bureau.pro
+## Стек технологий
+Python, TypeScript, React, FastAPI, Vite, PostgreSQL, Redis, Qdrant, Supabase, PM2, Docker.
+Модели: Gemini, Claude, GPT-4o, DeepSeek R1, Kimi K2, Gemma 4, Whisper.
+Инфраструктура: VPS (Ubuntu), Apple Silicon (локальный инференс), Ollama.
+
+## Кейсы
+- IncuBird (птицеводство): AI-бот «Анжелочка» — CRM-интеграция Bitrix24, автодозвон 1300+ клиентов, RAG по каталогу 62 позиций. Конверсия звонков +34%.
+- Своё Подворье: Контент-машина для VK/OK — автопостинг с генерацией фото и текстов. 16 статей/день.
+
+## Основатели
+- **Игорь Васин** — CTO, архитектор AI-систем. 15+ лет в IT, специализация: multi-agent systems, RAG, голосовой AI.
+
+## Контакты
+- Сайт: https://ai-bureau.pro
+- Email: architect@ai-bureau.pro
+- Telegram: @ai_bureau_pro
+
+## Ссылки
+- [Главная](https://ai-bureau.pro/)
+- [Услуги](https://ai-bureau.pro/#services)
+- [Кейсы](https://ai-bureau.pro/#cases)
+- [Контакты](https://ai-bureau.pro/#contacts)

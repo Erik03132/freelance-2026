@@ -42,6 +42,64 @@
     }
     </script>
 
+    <!-- Schema.org JSON-LD for FAQPage (GEO: E-E-A-T boost) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Что такое AI-агент для бизнеса?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AI-агент — это автономная программа на основе LLM (Large Language Model), которая выполняет бизнес-задачи: отвечает клиентам в чатах, обрабатывает заявки из CRM, совершает обзвоны и генерирует отчёты. В отличие от простого чат-бота, агент умеет рассуждать, использовать инструменты и принимать решения."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Что такое RAG-система и зачем она нужна?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "RAG (Retrieval-Augmented Generation) — технология, при которой нейросеть ищет ответ не только в своей памяти, но и в ваших документах, базах данных и каталогах. Это устраняет галлюцинации и позволяет AI точно отвечать по вашим данным: прайс-листам, инструкциям, базам знаний."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Что такое GEO (Generative Engine Optimization)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "GEO — оптимизация контента для попадания в ответы нейросетей: Google AI Overviews, Яндекс Нейро, ChatGPT, Perplexity. Если SEO продвигает сайт в поисковой выдаче, то GEO продвигает бренд в ответах AI-ассистентов."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Сколько стоит разработка AI-агента?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Стоимость зависит от сложности: простой Telegram-бот с RAG — от 50 000₽, полноценный AI-агент с CRM-интеграцией и автодозвоном — от 150 000₽. Первый AI-аудит бесплатный."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD for Person (E-E-A-T: автор/эксперт) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Игорь Васин",
+      "jobTitle": "CTO & AI Architect",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "AI Bureau"
+      },
+      "knowsAbout": ["AI agents", "RAG systems", "LLM", "GEO", "Voice AI", "CRM automation"],
+      "url": "https://ai-bureau.pro"
+    }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">

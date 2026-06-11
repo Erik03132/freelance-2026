@@ -756,6 +756,11 @@ class LoopPlanner:
         budget: str = "CHEAP",
         verbose: bool = True,
     ):
+        # Bug #4: валидация параметров (ночной аудит 11.06)
+        if not 0.0 <= threshold <= 1.0:
+            raise ValueError(f"threshold must be between 0 and 1, got {threshold}")
+        if max_iterations < 1:
+            raise ValueError(f"max_iterations must be >= 1, got {max_iterations}")
         self.threshold = threshold
         self.max_iterations = max_iterations
         self.budget = budget
@@ -793,11 +798,19 @@ class LoopPlanner:
 
         raw = await self._call(prompt, toolkit)
         try:
-            match = re.search(r'\{[\s\S]*"score"[\s\S]*\}', raw)
+            # Bug #1: жёсткая regex — только первый JSON-блок (ночной аудит 11.06)
+            match = re.search(r'\{[^{}]*"score"[^{}]*\}', raw)
             data = json.loads(match.group() if match else raw)
             score = float(data.get("score", 0.5))
             critique = str(data.get("critique", ""))
-            converged = bool(data.get("converged", score >= self.threshold))
+            # Bug #2: bool("false") = True в Python! (ночной аудит 11.06)
+            raw_conv = data.get("converged", None)
+            if raw_conv is None:
+                converged = score >= self.threshold
+            elif isinstance(raw_conv, bool):
+                converged = raw_conv
+            else:
+                converged = str(raw_conv).lower() == "true"
             return score, critique, converged
         except Exception:
             score = min(0.6, len(output) / 2000)
@@ -819,13 +832,15 @@ class LoopPlanner:
         """
         t_start = time.time()
 
-        # Инициализируем toolkit с прокси
-        toolkit_obj = ToolKit(proxy=PROXY)
+        # Bug #5: один toolkit, логируем proxy ошибку (ночной аудит 11.06)
+        proxy = PROXY
         try:
             async with httpx.AsyncClient(proxy=PROXY, timeout=4.0) as c:
                 await c.get("https://openrouter.ai")
-        except Exception:
-            toolkit_obj = ToolKit(proxy=PROXY_DIRECT)
+        except Exception as e:
+            self._log(f"   ⚠️ Proxy {PROXY} failed: {e}, fallback to direct")
+            proxy = PROXY_DIRECT
+        toolkit_obj = ToolKit(proxy=proxy)
 
         self._log(f"\n{'='*62}")
         self._log(f"🔁 LOOP PLANNER | budget={self.budget} | threshold={self.threshold}")
@@ -859,7 +874,8 @@ class LoopPlanner:
                 self._log("   ✏️  Улучшаю на основе критики...")
 
             new_output = await self._call(prompt, toolkit_obj)
-            self._log(f"   📄 {new_output[:100].replace(chr(10), ' ')}...")
+            # Bug #6: chr(10) → '\n' для читаемости (ночной аудит 11.06)
+            self._log(f"   📄 {new_output[:100].replace(os.linesep, ' ')}...")
 
             # JUDGE: оценить
             self._log("   🔍 Оцениваю качество...")
@@ -879,7 +895,9 @@ class LoopPlanner:
                 duration_s=time.time() - t_iter,
             )
             iterations.append(iteration)
+            # Bug #3: ограничиваем previous_outputs (ночной аудит 11.06)
             previous_outputs.append(new_output)
+            previous_outputs = previous_outputs[-3:]
 
             if score > best_score:
                 best_score = score
