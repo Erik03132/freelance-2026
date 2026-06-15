@@ -1,11 +1,11 @@
-# 🌙 Ночной аудит кода — 2026-06-12
+# 🌙 Ночной аудит кода — 2026-06-13
 
 > **Проект:** AI-Eggs (Анжелочка)  
-> **Время:** 02:00:05  
+> **Время:** 02:01:20  
 > **Метод:** Cross-Model Peer Review  
 > **Режим:** 🔧 AUTO-FIX  
-> **Python файлов:** 200 (проверяем: 1)  
-> **Источник:** git diff HEAD~1 (1 файлов)
+> **Python файлов:** 200 (проверяем: 5)  
+> **Источник:** ТОП-5 критических файлов проекта ai-eggs (нет git diff)
 
 ---
 
@@ -65,9 +65,9 @@ ai-eggs/agent/angelochka_core.py:509:89: E501 Line too long (110 > 88)
 ai-eggs/agent/angelochka_core.py:510:89: E501 Line too long (89 > 88)
 ```
 
-🔧 **ruff --fix:** 4 ошибок исправлено автоматически (ветка: \'auto-fix/night-audit-2026-06-12\')
+🔧 **ruff --fix:** 0 ошибок исправлено автоматически (ветка: \'auto-fix/night-audit-2026-06-13\')
 
-**Критических ошибок ruff (E,F,S,B):** 1687
+**Критических ошибок ruff (E,F,S,B):** 1683
 
 ### 🔐 Hardcoded секреты
 ```
@@ -77,14 +77,16 @@ ai-eggs/agent/angelochka_core.py:510:89: E501 Line too long (89 > 88)
 
 ### 📝 Изменения за день
 ```
- ai-eggs                                   |  2 +-
- angel-backend                             |  0
- checkpoints/chp_20260611_132924.md        | 37 ++++++++++++
- checkpoints/chp_20260611_230005.md        | 66 +++++++++++++++++++++
- chp.md                                    | 97 ++++++++++++++++++++-----------
- chronicles/chronicle_2026-06-11.md        | 10 ++++
- reports/night_audit_ai-eggs_2026-06-12.md | 79 +++++++++++++++++++++++++
- 7 files changed, 256 insertions(+), 35 deletions(-)
+ ai-eggs                                   |   2 +-
+ angel-backend                             |   0
+ checkpoints/chp_20260611_132924.md        |  37 +++++++
+ checkpoints/chp_20260611_230005.md        |  66 ++++++++++++
+ chp.md                                    |  72 +++++++------
+ chronicles/chronicle_2026-06-11.md        |  10 ++
+ data/habr_intelligence_state.json         |   2 +-
+ dreams/patterns.md                        |  86 ++++++++++++++++
+ reports/night_audit_ai-eggs_2026-06-12.md | 166 ++++++++++++++++++++++++++++++
+ 9 files changed, 402 insertions(+), 39 deletions(-)
 ```
 
 ---
@@ -97,39 +99,7 @@ ai-eggs/agent/angelochka_core.py:510:89: E501 Line too long (89 > 88)
 
 ## 🧠 Фаза 3: Claude — Cross-Model Peer Review
 
-Дифф обрезан и содержит лишь шапку файла. В приведённом куске ошибок нет, но несколько потенциально опасных мест можно уже выделить:
-
-- **Файл:agent-lab/llm_planner.py:26**  
-```
-PROXY_DIRECT = os.getenv("ALL_PROXY", "socks5://Q3NeJXTY:dsBaWh2L@172.120.21.141:64469")
-```  
-**Критичность:** 🔴 Критично  
-**Исправление:** Убери логин/пароль из кода; задай дефолт без учётных данных или читай их из переменных окружения (`PROXY_DIRECT = os.getenv("ALL_PROXY", "")`).
-
-- **Файл:agent-lab/llm_planner.py:24**  
-```
-ENV_PATH = Path(__file__).parent.parent / "ai-eggs" / ".env"
-```  
-**Критичность:** 🟡 Важно  
-**Исправление:** Проверяй существование файла (если `.env` отсутствует, приложение промолчит и продолжит работу без конфигурации → потенциальны сбои дальше).  
-```python
-if not ENV_PATH.is_file():
-    log.warning("Не найден .env по пути %s", ENV_PATH)
-```
-
-- **Файл:agent-lab/llm_planner.py:31**  
-```
-OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "")
-```  
-**Критичность:** 🟡 Важно  
-**Исправление:** Проверь, что ключ не пуст перед запросами к OpenRouter, иначе уйдёшь в 401. Сделай early-exit или raise ConfigurationError.
-
-- **Файл:agent-lab/llm_planner.py:34-37**  
-Импорт «logging» и «sys» объявлены, но пока не используются.  
-**Критичность:** 🟢 Минорно  
-**Исправление:** Убрать неиспользуемые импорты или дождаться полной загрузки файла, чтобы понять, действительно ли они избыточны.
-
-✅ Код чист в смысле распространённых (и обнаружимых) логических/асинк-ошибок, но в рамках показанного фрагмента эти замечания нужно поправить до запуска.
+⚠️ Claude API недоступен: ❌ Ошибка Claude API: Expecting value: line 2 column 1 (char 1)
 
 ---
 
@@ -137,17 +107,17 @@ OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "")
 
 | Метрика | Значение |
 |---------|----------|
-| 📅 Дата | 2026-06-12 |
-| ⏰ Время | 02:00:05 → 02:00:32 |
+| 📅 Дата | 2026-06-13 |
+| ⏰ Время | 02:01:20 → 02:01:25 |
 | 📁 Python файлов | 200 |
-| 📝 Изменено за день | 7 |
-| ⚡ ruff ошибок (E,F,S,B) | 1687 |
+| 📝 Изменено за день | 9 |
+| ⚡ ruff ошибок (E,F,S,B) | 1683 |
 | 🔐 Hardcoded секретов | 1 |
 | 🔬 Gemini аудит | ⏭️ |
-| 🧠 Claude cross-review | ✅ |
-| 🔴 Критичных (Claude) | 1 |
-| 🟡 Важных (Claude) | 2 |
-| 🟢 Минорных (Claude) | 1 |
+| 🧠 Claude cross-review | ⏭️ |
+| 🔴 Критичных (Claude) | 0 |
+| 🟡 Важных (Claude) | 0 |
+| 🟢 Минорных (Claude) | 0 |
 
 ### Метод аудита
 ```

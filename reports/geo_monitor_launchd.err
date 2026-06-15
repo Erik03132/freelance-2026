@@ -2,3 +2,7 @@
     f"GEO\\-МОНИТОРИНГ {site_cfg['name'].replace('-', '\\-')}",
                                                                         ^
 SyntaxError: f-string expression part cannot include a backslash
+  File "/Users/igorvasin/freelance-2026/tools/geo_monitor.py", line 427
+    f"GEO\\-МОНИТОРИНГ {site_cfg['name'].replace('-', '\\-')}",
+                                                                        ^
+SyntaxError: f-string expression part cannot include a backslash

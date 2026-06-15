@@ -4,7 +4,39 @@
 
 ---
 
-## 🔴 P0 — Сегодня
+## 🔴 P0 — 16.06.2026 (завтра)
+
+### 14. 📞 Автодозвон «Доставка 18 июня» — УТРО 16.06
+> 24 заказа (39 уникальных номеров), маршрут Азовское-Керчь. WAV готов, CSV готов.
+
+- [ ] Загрузить `confirm_june18_8k.wav` в ЛК Mango → получить `audio_id`
+- [ ] Подменить WAV на VPS (`/tmp/mango_play.wav`) или прописать новый `audio_id`
+- [ ] Запустить обзвон: `python3 /opt/data/mango/run_batch.py /opt/data/mango/delivery_june18.csv`
+- [ ] При ДА/DTMF-1 → Битрикс: сделка «Новый заказ» → «Подтверждено» (уточнить `STAGE_ID`)
+- [ ] При НЕТ → ничего не меняем, менеджеры перезвонят вручную по списку
+- [ ] Отчёт: сводка по 39 номерам в TG
+
+### 15. 📞 Автодозвон «Доставка [ДАТА 2]» — 16.06
+> Вторая дата от заказчика — будет утром 16.06. Создать WAV + CSV + запуск.
+
+- [ ] Получить дату и список телефонов
+- [ ] Сгенерировать WAV с новой датой
+- [ ] Нарезать CSV + запуск обзвона
+
+### 16. 🧠 Улучшение STT-распознавания ответов — ВЕЧЕР 16.06
+> 335 «unclear» за день 15.06 — система не распознаёт «Ага», «Давай», «Ну да» как ДА. Нужен fuzzy-matching + расширение словаря.
+
+- [ ] Расширить словарь YES/NO в `dtmf_monitor.py` (добавить «ага», «давай», «конечно», «ладно», «угу»)
+- [ ] Добавить Levenshtein-расстояние для fuzzy-match (порог ≤ 2)
+- [ ] Тест на записях из `call_results.csv` — замер precision/recall
+
+### 13. 📞 Recall по потенциальным ДА — ВЕЧЕР 16.06
+> Из утренних пакетов #13–#16 (200 звонков) — 166 «unclear», среди них ~40-50 человек слышали скрипт целиком (звонок > 20 сек). Горячая аудитория!
+
+- [ ] Отфильтровать из `call_results.csv` все `unclear` где длительность звонка > 20 сек (через Mango CDR API или лог)
+- [ ] Нарезать recall-пакет: короткий WAV *«Вы не успели ответить — вам интересна доставка 24 июля? Нажмите 1 или скажите ДА»* (10-15 сек)
+- [ ] Запустить recall вечером 16.06 в 19:00 MSK (лучший слот по A/B тесту)
+- [ ] Ожидаемый результат: +15-25 подтверждений сверху
 
 ### 1. 📞 CSV-загрузка в TG → автодозвон Mango → отчёт в TG
 - [ ] **Telegram handler**: команда `/call_csv` или приём CSV-файла с телефонами
@@ -12,12 +44,16 @@
 - [ ] **Отчёт**: результат обзвона в TG (кто подтвердил/отказал/не дозвонились)
 - [ ] **Исходники**: `tg_bot.py` (новый handler) + `mango_autocall.py` (уже есть)
 
-### 2. 🔧 Баги ночного аудита (26.05) — из `reports/night_audit_ai-eggs_2026-05-26.md`
-- [ ] **`angelochka_core.py:78`** — `_CREATOR_TG_ID` без `.strip()` → 🔴 сброс прав владельца
-- [ ] **`angelochka_core.py:72-86`** — `_has_phone_in_history` не видит телефон-контакт
-- [ ] **`tg_bot.py:72`** — orphaned lock при SIGKILL → бот не стартует
-- [ ] **`bitrix_scanner.py:519`** — `CLOSED_STAGES` не frozenset → race condition
-- [ ] **`bitrix_intelligence.py:46`** — синхронный `requests` в асинхронном коде
+### 2. 🔧 Баги ночного аудита — ЗАКРЫТО ✅
+- [x] **14.06** `angelochka_core.py` — fail-closed при битом roles_config.json
+- [x] **14.06** `tg_bot.py` — race condition в is_silent_mode() (try/except OSError)
+- [x] **14.06** `angelochka_core.py` — path traversal (realpath + проверка границ)
+- [x] **14.06** `bitrix_intelligence.py` — SSL verify=True явно
+- [x] **14.06** `angelochka_core.py` — _CREATOR_TG_ID .strip()
+- [x] **15.06** `angelochka_core.py:4` — дублирующий `import re as _re_core` убран
+- [x] **15.06** `bitrix_intelligence.py:26` — EnvironmentError при пустом BITRIX_URL
+- [x] **15.06** `bitrix_intelligence.py:40-48` — bx_post: логирование HTTP 502/504 + API error
+- [x] **15.06** `bitrix_intelligence.py:59-62` — bx_get_all: защита от не-list при {"error":...}
 
 ---
 
