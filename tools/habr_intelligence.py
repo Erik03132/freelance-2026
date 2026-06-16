@@ -37,7 +37,7 @@ OPENROUTER_KEY  = os.getenv("OPENROUTER_API_KEY", "")
 GEMINI_KEY      = os.getenv("GEMINI_API_KEY", "")
 GEMINI_BACKUP   = os.getenv("GEMINI_BACKUP_KEY", "")
 OLLAMA_HOST     = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma4:e2b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:latest")
 
 STATE_FILE = os.path.join(BASE_DIR, "data", "habr_intelligence_state.json")
 
@@ -105,6 +105,13 @@ STOP_KEYWORDS = [
     "arduino", "raspberry", "электроника", "схема", "паяльник",
 ]
 
+TG_CHANNELS = [
+    "vibecoding_tg",
+    "dailyprompts",
+    "geekneural",
+    "neyroseti_dr",
+]
+
 # ── Карта агентов экосистемы ───────────────────────────────────────────────────
 ECOSYSTEM = """
 Наша AI-экосистема состоит из следующих компонентов:
@@ -151,12 +158,185 @@ def fetch_hub_rss(hub: str, max_items: int = 15) -> list[dict]:
             items.append({
                 "title": title, "link": link,
                 "description": desc_clean, "pub_date": pub_date,
-                "categories": categories, "hub": hub,
+                "categories": categories,                 "hub": hub, "source": "habr",
             })
         return items
     except Exception as e:
         print(f"  ⚠ {hub}: {e}")
         return []
+
+
+def fetch_vc_rss(max_items: int = 20) -> list[dict]:
+    url = "https://vc.ru/rss"
+    try:
+        resp = NO_PROXY_SESSION.get(url, timeout=15, headers={"User-Agent": "Antigravity-HabrIntelligence/2.0"})
+        if resp.status_code != 200:
+            print(f"  ⚠ VC.ru: HTTP {resp.status_code}")
+            return []
+        root = ET.fromstring(resp.content)
+        items = []
+        for item in root.findall(".//item")[:max_items]:
+            title       = item.findtext("title", "")
+            link        = item.findtext("link", "")
+            description = item.findtext("description", "")
+            pub_date    = item.findtext("pubDate", "")
+            categories  = [c.text for c in item.findall("category") if c.text]
+            desc_clean  = re.sub(r"<[^>]+>", "", unescape(description or ""))
+            desc_clean  = re.sub(r"\s+", " ", desc_clean).strip()[:400]
+            items.append({
+                "title": title, "link": link,
+                "description": desc_clean, "pub_date": pub_date,
+                "categories": categories, "hub": "vc", "source": "vc",
+            })
+        return items
+    except Exception as e:
+        print(f"  ⚠ VC.ru error: {e}")
+        return []
+
+
+def fetch_github_trending(max_items: int = 10) -> list[dict]:
+    url = "https://github.com/trending"
+    try:
+        resp = NO_PROXY_SESSION.get(url, timeout=15, headers={"User-Agent": "Antigravity-HabrIntelligence/2.0"})
+        if resp.status_code != 200:
+            print(f"  ⚠ GitHub Trending: HTTP {resp.status_code}")
+            return []
+        html = resp.text
+        articles = html.split('<article class=\"Box-row\"')
+        items = []
+        for art in articles[1:max_items+1]:
+            # Repo name
+            name_match = re.findall(r'href=\"/([^\"\s]+/[^\"\s]+?)\"', art)
+            repo_names = [n for n in name_match if '/' in n and 'sponsor' not in n and 'login' not in n]
+            seen = set()
+            unique = []
+            for rn in repo_names:
+                if rn not in seen:
+                    seen.add(rn)
+                    unique.append(rn)
+            repo = unique[0] if unique else "?"
+            # Description
+            desc_match = re.search(r'<p class=\"col-9[^\"]*\"[^>]*>(.*?)</p>', art, re.DOTALL)
+            desc = ""
+            if desc_match:
+                desc = re.sub(r"<[^>]+>", "", unescape(desc_match.group(1))).strip()[:300]
+            # Stars today
+            stars_today = ""
+            st = re.findall(r'([\d,.]+)\s*stars?\s*today', art, re.IGNORECASE)
+            if st:
+                stars_today = f"{st[0]} ★ today"
+            items.append({
+                "title": f"{repo}: {desc}" if desc else repo,
+                "link": f"https://github.com/{repo}",
+                "description": f"{desc} | {stars_today}" if stars_today else desc,
+                "pub_date": "",
+                "categories": ["github", repo.split("/")[0]],
+                "hub": "github", "source": "github",
+            })
+        return items
+    except Exception as e:
+        print(f"  ⚠ GitHub Trending error: {e}")
+        return []
+
+
+def fetch_telegram_posts(channel: str, max_items: int = 10) -> list[dict]:
+    url = f"https://t.me/s/{channel}"
+    try:
+        resp = NO_PROXY_SESSION.get(url, timeout=15, headers={"User-Agent": "Antigravity-HabrIntelligence/2.0"})
+        if resp.status_code != 200:
+            print(f"  ⚠ Telegram @{channel}: HTTP {resp.status_code}")
+            return []
+        html = resp.text
+        blocks = html.split('<div class=\"tgme_widget_message_wrap')
+        items = []
+        for block in blocks[1:max_items+1]:
+            text_match = re.search(r'tgme_widget_message_text[^>]*>(.*?)</div>', block, re.DOTALL)
+            text = ""
+            if text_match:
+                text = re.sub(r"<[^>]+>", "", unescape(text_match.group(1))).strip()[:400]
+            if not text:
+                continue
+            date_match = re.search(r'<time datetime=\"([^\"]+)\"', block)
+            pub_date = date_match.group(1) if date_match else ""
+            link_match = re.search(r'href=\"(https://t\.me/[^\"]+/\d+)\"', block)
+            link = link_match.group(1) if link_match else f"https://t.me/s/{channel}"
+            items.append({
+                "title": text[:100],
+                "link": link,
+                "description": text,
+                "pub_date": pub_date,
+                "categories": [f"@{channel}"],
+                "hub": f"tg/{channel}", "source": "telegram",
+            })
+        return items
+    except Exception as e:
+        print(f"  ⚠ Telegram @{channel} error: {e}")
+        return []
+
+
+def fetch_all_sources() -> list[dict]:
+    print("  📡 Habr...")
+    habr = []
+    for hub in HABR_HUBS:
+        items = fetch_hub_rss(hub)
+        habr.extend(items)
+    print(f"     → {len(habr)} статей")
+
+    print("  📡 VC.ru...")
+    vc = fetch_vc_rss()
+    print(f"     → {len(vc)} статей")
+
+    print("  📡 GitHub Trending...")
+    gh = fetch_github_trending()
+    print(f"     → {len(gh)} репозиториев")
+
+    print("  📡 Telegram...")
+    tg = []
+    for ch in TG_CHANNELS:
+        posts = fetch_telegram_posts(ch)
+        tg.extend(posts)
+    print(f"     → {len(tg)} постов")
+
+    return habr + vc + gh + tg
+
+
+def fetch_full_article(article: dict) -> dict:
+    if article.get("source") != "habr":
+        return article
+    try:
+        resp = NO_PROXY_SESSION.get(
+            article["link"], timeout=15,
+            headers={"User-Agent": "Antigravity-HabrIntelligence/2.0"}
+        )
+        if resp.status_code != 200:
+            return article
+        html = resp.text
+        match = re.search(
+            r'div class="article-formatted-body[^"]*"[^>]*>(.*?)</div>\s*<div class="article-formatted-body_version-',
+            html, re.DOTALL
+        )
+        if not match:
+            match = re.search(
+                r'article-formatted-body[^>]*>(.*?)(?:<footer|<div class="article__footer|</article)',
+                html, re.DOTALL
+            )
+        if match:
+            text = re.sub(r"<[^>]+>", "", unescape(match.group(1)))
+            text = re.sub(r"\s+", " ", text).strip()[:3000]
+            if len(text) > 200:
+                article["full_text"] = text
+        return article
+    except Exception as e:
+        print(f"    ⚠ fetch_full_article: {e}")
+        return article
+
+
+SOURCE_LABELS = {
+    "habr": "📡 Habr",
+    "vc": "📡 VC.ru",
+    "github": "📡 GitHub",
+    "telegram": "📡 Telegram",
+}
 
 
 # ── Скоринг ───────────────────────────────────────────────────────────────────
@@ -180,13 +360,14 @@ def score_article(article: dict) -> int:
 # ── LLM-анализ ────────────────────────────────────────────────────────────────
 
 def _build_prompt(article: dict) -> str:
+    content = article.get("full_text") or article["description"][:300]
     return f"""Ты — технический директор AI-экосистемы. Твоя задача: найти конкретную ФИЧУ или ТЕХНИКУ из статьи, оценить её полезность для наших проектов и предложить: ставить или пропустить.
 
 {ECOSYSTEM}
 
 СТАТЬЯ:
 Заголовок: {article['title']}
-Описание: {article['description'][:300]}
+Содержание: {content[:2500]}
 Теги: {', '.join(article['categories'][:5])}
 
 Ответь СТРОГО в формате (без маркдауна, без пояснений):
@@ -262,13 +443,11 @@ def analyze_with_openrouter(article: dict) -> dict:
 
 
 def _build_ollama_prompt(article: dict) -> str:
-    """Короткий промпт для локальной Ollama (2B модель, CPU).
-    Упрощённый формат: только самое важное — фича + оценка + решение.
-    """
+    content = article.get("full_text") or article["description"][:200]
     return f"""Ты — технический директор. Найди КОНКРЕТНУЮ ФИЧУ из статьи и реши: внедрять или нет.
 
 Статья: {article['title']}
-Описание: {article['description'][:200]}
+Содержание: {content[:1500]}
 
 Проекты: ai-eggs (птицеводство/CRM), ai-bureau (AI агентство), ai-scout (сбор контента), agent-lab (эксперименты)
 Агенты: Кулибин (DevOps), Маркетолог (SEO), Заботкина (CRM), Шерл (разведка), Шекспир (контент), Игорек (архитектор)
@@ -401,6 +580,7 @@ def format_digest(articles: list[dict]) -> str:
         "",
     ]
     for i, art in enumerate(articles, 1):
+        source_label = SOURCE_LABELS.get(art.get("source", ""), f"📡 {art.get('hub', '?')}")
         score = art["_score"]
         stars = "⭐⭐⭐" if score >= 40 else ("⭐⭐" if score >= 20 else "⭐")
         kw_str = ", ".join(art["_keywords"][:3]) or art["hub"]
@@ -413,6 +593,7 @@ def format_digest(articles: list[dict]) -> str:
         решение = llm.get("решение", "—")
         значок  = "🔥" if "СТАВИМ" in решение else "📌"
 
+        lines.append(f"{source_label}")
         lines.append(f"{i}. <a href=\"{art['link']}\">{art['title']}</a>")
         lines.append(f"   {stars} | {kw_str}")
         if фича != "—":
@@ -454,15 +635,11 @@ def run(dry_run: bool = False) -> None:
     print(f"{'='*55}\n")
 
     sent_links = load_sent_links()
-    all_articles: list[dict] = []
 
-    for hub in HABR_HUBS:
-        print(f"  📡 Хаб: {hub}")
-        items = fetch_hub_rss(hub)
-        all_articles.extend(items)
-        print(f"     → {len(items)} статей")
+    # Сбор со всех источников
+    all_articles = fetch_all_sources()
 
-    print(f"\nВсего: {len(all_articles)} статей")
+    print(f"\nВсего: {len(all_articles)} статей/постов")
 
     # Дедупликация
     seen: set[str] = set()
@@ -488,9 +665,15 @@ def run(dry_run: bool = False) -> None:
     top5 = relevant[:5]
     print("ТОП-5:")
     for art in top5:
-        print(f"  [{art['_score']:3d}] {art['title'][:65]}")
+        src = SOURCE_LABELS.get(art.get("source", ""), art.get("hub", "?"))
+        print(f"  [{src}] [{art['_score']:3d}] {art['title'][:60]}")
 
-    # LLM-анализ
+    # Полный текст для Habr-статей
+    print("\n📄 Полные тексты...")
+    for art in top5:
+        fetch_full_article(art)
+
+    # LLM-анализ (с полным текстом, если есть)
     print("\n🧠 LLM-анализ...")
     for art in top5:
         analyze_article(art)

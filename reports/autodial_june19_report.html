@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Отчёт: Автодозвон «Доставка 19 июня»</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #f8f9fa;
+      color: #1a1a2e;
+      padding: 40px;
+      font-size: 13px;
+    }
+
+    .page { max-width: 750px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: white;
+      padding: 36px 40px 28px;
+    }
+    .header-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .header h1 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+    .header-meta { color: rgba(255,255,255,0.65); font-size: 12px; margin-top: 10px; line-height: 1.8; }
+    .header-meta span { margin-right: 20px; }
+
+    /* SUMMARY CARDS */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+      border-bottom: 1px solid #eee;
+    }
+    .stat-card {
+      padding: 20px 16px;
+      text-align: center;
+      border-right: 1px solid #eee;
+    }
+    .stat-card:last-child { border-right: none; }
+    .stat-card .num { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+    .stat-card .pct { font-size: 11px; color: #888; margin-bottom: 4px; }
+    .stat-card .lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-da  .num { color: #16a34a; }
+    .stat-da  .lbl { color: #16a34a; }
+    .stat-net .num { color: #dc2626; }
+    .stat-net .lbl { color: #dc2626; }
+    .stat-tish .num { color: #6b7280; }
+    .stat-tish .lbl { color: #6b7280; }
+    .stat-unc .num { color: #d97706; }
+    .stat-unc .lbl { color: #d97706; }
+    .stat-tot .num { color: #302b63; }
+    .stat-tot .lbl { color: #302b63; }
+
+    /* METHOD */
+    .method-bar {
+      background: #f1f5f9;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 40px;
+      font-size: 11px;
+      color: #64748b;
+    }
+    .method-bar b { color: #334155; }
+
+    /* SECTIONS */
+    .section { padding: 24px 40px; border-bottom: 1px solid #f0f0f0; }
+    .section:last-child { border-bottom: none; }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title.green { color: #16a34a; }
+    .section-title.red   { color: #dc2626; }
+    .section-title.gray  { color: #6b7280; }
+    .section-title.amber { color: #d97706; }
+    .section-title.skip  { color: #9ca3af; }
+
+    /* CONFIRMED TABLE */
+    .conf-table { width: 100%; border-collapse: collapse; }
+    .conf-table td { padding: 8px 12px; vertical-align: top; }
+    .conf-table tr { border-bottom: 1px solid #f3f4f6; }
+    .conf-table tr:last-child { border-bottom: none; }
+    .conf-table tr:hover { background: #f9fafb; }
+    .phone { font-family: 'Courier New', monospace; font-size: 13px; font-weight: 600; color: #1e293b; white-space: nowrap; }
+    .stt-text { color: #475569; font-style: italic; font-size: 12px; }
+    .badge {
+      display: inline-block;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-da   { background: #dcfce7; color: #15803d; }
+    .badge-net  { background: #fee2e2; color: #b91c1c; }
+    .badge-warn { background: #fef3c7; color: #92400e; }
+    .badge-skip { background: #f1f5f9; color: #64748b; }
+
+    /* PHONE LIST */
+    .phone-list { columns: 2; column-gap: 24px; }
+    .phone-item {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 4px 0;
+      break-inside: avoid;
+    }
+    .phone-item .ph { font-family: 'Courier New', monospace; font-size: 12.5px; font-weight: 600; color: #334155; }
+    .phone-item .note { font-size: 11px; color: #94a3b8; }
+
+    /* PHONE LIST single column */
+    .phone-list-1col .phone-item { padding: 3px 0; }
+
+    /* NOTE BOX */
+    .note-box {
+      background: #fef9ec;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #78350f;
+      margin-top: 12px;
+    }
+    .note-box b { color: #92400e; }
+
+    /* FOOTER */
+    .footer {
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      padding: 16px 40px;
+      font-size: 11px;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge">📞 Автодозвон</div>
+    <h1>Доставка 19 июня 2026</h1>
+    <div class="header-meta">
+      <span>📅 16.06.2026</span>
+      <span>🕐 13:30–14:10 MSK</span>
+      <span>📱 58 номеров</span>
+      <span>🔁 пауза 40 сек</span>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="summary">
+    <div class="stat-card stat-da">
+      <div class="num">4</div>
+      <div class="pct">6.9%</div>
+      <div class="lbl">✅ ДА</div>
+    </div>
+    <div class="stat-card stat-net">
+      <div class="num">2</div>
+      <div class="pct">3.4%</div>
+      <div class="lbl">❌ НЕТ</div>
+    </div>
+    <div class="stat-card stat-tish">
+      <div class="num">37</div>
+      <div class="pct">63.8%</div>
+      <div class="lbl">🔇 Тишина</div>
+    </div>
+    <div class="stat-card stat-unc">
+      <div class="num">14</div>
+      <div class="pct">24.1%</div>
+      <div class="lbl">❓ Неясно</div>
+    </div>
+    <div class="stat-card stat-tot">
+      <div class="num">58</div>
+      <div class="pct">100%</div>
+      <div class="lbl">📊 Всего</div>
+    </div>
+  </div>
+
+  <!-- METHOD -->
+  <div class="method-bar">
+    Метод: <b>Whisper small</b> · полная запись · <b>VAD-фильтр</b> · DTMF + STT двойная проверка
+  </div>
+
+  <!-- CONFIRMED -->
+  <div class="section">
+    <div class="section-title green">✅ Подтвердили — сказали ДА</div>
+    <table class="conf-table">
+      <tr>
+        <td><span class="phone">+79781078039</span></td>
+        <td><span class="badge badge-da">ДА</span></td>
+        <td><span class="stt-text">«Да, алло!»</span></td>
+      </tr>
+      <tr>
+        <td><span class="phone">+79785166521</span></td>
+        <td><span class="badge badge-da">ДА</span></td>
+        <td><span class="stt-text">«А, да, да...»</span></td>
+      </tr>
+      <tr>
+        <td><span class="phone">+79787809458</span></td>
+        <td><span class="badge badge-da">ДА</span></td>
+        <td><span class="stt-text">«Да-да.»</span></td>
+      </tr>
+      <tr>
+        <td><span class="phone">+79788127465</span></td>
+        <td><span class="badge badge-da">ДА</span></td>
+        <td><span class="stt-text">«Ну да.»</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- REFUSED -->
+  <div class="section">
+    <div class="section-title red">❌ Отказались</div>
+    <table class="conf-table">
+      <tr>
+        <td><span class="phone">+79782892263</span></td>
+        <td><span class="badge badge-net">НЕТ</span></td>
+        <td><span class="stt-text">«Алло! Нет! Нет!»</span></td>
+      </tr>
+      <tr>
+        <td><span class="phone">+79785562911</span></td>
+        <td><span class="badge badge-warn">⚠️ DTMF 0</span></td>
+        <td><span class="stt-text">«Алло, да? Конечно...» — но нажал кнопку 0 (отказ)</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- SILENCE -->
+  <div class="section">
+    <div class="section-title gray">🔇 Тишина — не взяли / автоответчик (37)</div>
+    <div class="phone-list">
+      <div class="phone-item"><span class="ph">+79859234644</span></div>
+      <div class="phone-item"><span class="ph">+79189595753</span></div>
+      <div class="phone-item"><span class="ph">+79780474836</span></div>
+      <div class="phone-item"><span class="ph">+79780835222</span></div>
+      <div class="phone-item"><span class="ph">+79781145281</span></div>
+      <div class="phone-item"><span class="ph">+79781247581</span></div>
+      <div class="phone-item"><span class="ph">+79781782657</span></div>
+      <div class="phone-item"><span class="ph">+79781782658</span></div>
+      <div class="phone-item"><span class="ph">+79782310883</span></div>
+      <div class="phone-item"><span class="ph">+79782346169</span></div>
+      <div class="phone-item"><span class="ph">+79782363646</span></div>
+      <div class="phone-item"><span class="ph">+79782504240</span></div>
+      <div class="phone-item"><span class="ph">+79782794514</span></div>
+      <div class="phone-item"><span class="ph">+79784565918</span></div>
+      <div class="phone-item"><span class="ph">+79785096070</span></div>
+      <div class="phone-item"><span class="ph">+79785435477</span></div>
+      <div class="phone-item"><span class="ph">+79785487699</span></div>
+      <div class="phone-item"><span class="ph">+79785600786</span></div>
+      <div class="phone-item"><span class="ph">+79785747911</span></div>
+      <div class="phone-item"><span class="ph">+79785886088</span></div>
+      <div class="phone-item"><span class="ph">+79785887078</span></div>
+      <div class="phone-item"><span class="ph">+79786085101</span></div>
+      <div class="phone-item"><span class="ph">+79786273700</span></div>
+      <div class="phone-item"><span class="ph">+79786647122</span></div>
+      <div class="phone-item"><span class="ph">+79786834956</span></div>
+      <div class="phone-item"><span class="ph">+79786871540</span></div>
+      <div class="phone-item"><span class="ph">+79787139226</span></div>
+      <div class="phone-item"><span class="ph">+79787144885</span></div>
+      <div class="phone-item"><span class="ph">+79787525256</span></div>
+      <div class="phone-item"><span class="ph">+79787550301</span></div>
+      <div class="phone-item"><span class="ph">+79787613547</span></div>
+      <div class="phone-item"><span class="ph">+79787757837</span></div>
+      <div class="phone-item"><span class="ph">+79787919899</span></div>
+      <div class="phone-item"><span class="ph">+79788804527</span></div>
+      <div class="phone-item"><span class="ph">+79789297817</span></div>
+      <div class="phone-item"><span class="ph">+79787546618</span></div>
+      <div class="phone-item"><span class="ph">+79787546627</span></div>
+    </div>
+  </div>
+
+  <!-- UNCLEAR -->
+  <div class="section">
+    <div class="section-title amber">❓ Неразборчиво — перезвонить вручную (14)</div>
+    <table class="conf-table phone-list-1col">
+      <tr><td><span class="phone">+79780095061</span></td><td><span class="stt-text">«Алло?»</span></td></tr>
+      <tr><td><span class="phone">+79780220909</span></td><td><span class="stt-text">«Алло!»</span></td></tr>
+      <tr><td><span class="phone">+79787159261</span></td><td><span class="stt-text">Абонент не зарегистрирован в сети</span></td></tr>
+      <tr><td><span class="phone">+79787160588</span></td><td><span class="stt-text">Абонент не зарегистрирован в сети</span></td></tr>
+      <tr><td><span class="phone">+79787934449</span></td><td><span class="stt-text">Телефон выключен или вне зоны</span></td></tr>
+      <tr><td><span class="phone">+79787939804</span></td><td><span class="stt-text">Абонент временно недоступен</span></td></tr>
+      <tr><td><span class="phone">+79788139482</span></td><td><span class="stt-text">«Алло? Алло!»</span></td></tr>
+      <tr><td><span class="phone">+79788246260</span></td><td><span class="stt-text">«Ого!» (шум)</span></td></tr>
+      <tr><td><span class="phone">+79788343810</span></td><td><span class="stt-text">«Браво!» (шум)</span></td></tr>
+      <tr><td><span class="phone">+79788563115</span></td><td><span class="stt-text">«Алло.»</span></td></tr>
+      <tr><td><span class="phone">+79788912272</span></td><td><span class="stt-text">«Алло? Алло?»</span></td></tr>
+      <tr><td><span class="phone">+79789180191</span></td><td><span class="stt-text">«Бежим.» (шум)</span></td></tr>
+      <tr><td><span class="phone">+79787409335</span></td><td><span class="stt-text">«Алло.»</span></td></tr>
+      <tr><td><span class="phone">+79788912272</span></td><td><span class="stt-text">«Алло? Алло?»</span></td></tr>
+    </table>
+    <div class="note-box">
+      ⚠️ <b>Рекомендация:</b> «Браво!», «Ого!», «Бежим.» — галлюцинации Whisper на фоновом шуме.
+      Эти номера взяли трубку, но не ответили чётко. Приоритет для ручного перезвона.
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>IncuBird · Автодозвон · Доставка 19.06.2026</span>
+    <span>Сформирован: 16.06.2026 · Whisper small + VAD</span>
+  </div>
+
+</div>
+</body>
+</html>

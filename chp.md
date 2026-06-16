@@ -1,53 +1,69 @@
-# SESSION CHECKPOINT — 15.06.2026 (воскресенье)
+# Чекпоинт: 16.06.2026
 
-## 🎯 Главные результаты дня
+## 🔥 Главное событие дня
+Создана **Voice Angela** — голосовой ассистент для входящих звонков на базе Анжелы (ai-eggs). Голос Kore (Gemini TTS). Готовится к тесту завтра 09:00 MSK.
 
-### 📞 Автодозвон — 400 клиентов за день
-- Пакеты #13–#20 (по 51 звонку) — **все завершены без ошибок**
-- **12 подтверждений** (3.2%), **32 отказа**, **335 unclear**
-- Полная автоматизация: цепочки запускаются автоматически через `run_batch.py`
+## Архитектура Voice Angela
+```
+Клиент → Mango → baresip (SIP) → sndfile → dec.wav
+                                         ↓
+           voice_bridge.py: VAD → Whisper STT → Angela (OpenRouter)
+                                         ↓
+           TTS Kore (Gemini через прокси) → upload → Mango play/start
+                                         ↓
+                                    Loop
+```
 
-### 🤖 IVR для входящих — код готов, настройка ВАТС отложена
-- Два WAV: `incoming_known` (индюшата) + `incoming_unknown` (автоответчик)
-- `incoming_unknown.wav` загружен в ЛК Mango (audio_id: `1000553991`)
-- Webhook пропатчен: определяет known/unknown по базе 1334 номера
-- **⏸️ ОТЛОЖЕНО**: переадресация на доб. 22 — проблема с Контакт-центром Mango
+## Что сделано
 
-### 🧹 Очистка VPS — 826 МБ → 4.9 ГБ свободно
-- Удалены: pip cache (2.9G), npm cache (1.1G), ai-senat (242M), логи, дампы
-- Создан **swap 2 ГБ** (`/swapfile`)
-- Whisper **small** загружен вместо base (точность распознавания ×2)
+### Код (локально + VPS)
+- `voice_bridge.py` — PM2 процесс `voice-angela` на VPS
+- `test_voice_call.py` — скрипт тестового звонка
+- `test_angela_kore.py` — локальный текстовый тест (Mac)
+- `mango_webhook_vps.py` — расширен: пишет события звонков в `/var/log/voice-angela/events.jsonl`
+- `start_voice_test.sh` — быстрый запуск теста
 
-### 📞 Обзвон «Доставка 18 июня» — подготовлен
-- WAV `confirm_june18_8k.wav` сгенерирован и протестирован
-- CSV: 39 уникальных номеров (24 заказа, маршрут Азовское-Керчь)
-- Готово к запуску завтра утром
+### Конфиги VPS
+- `/root/.baresip/config` — добавлены `sndfile.so`, `ctrl_tcp.so`, удалён `dtmfio.so` (нет модуля)
+- `/root/.baresip/accounts` — SIP-аккаунт `user4@vpbx400161137.mangosip.ru`
+- PM2: `voice-angela` (id 21), `mango-webhook` (id 8)
 
-## 📋 ACTIVE_TASKS на завтра (16.06)
+### Зависимости VPS
+- `edge-tts` (установлен, но не используется — используем Kore)
+- `faster-whisper` (base model, CPU int8)
+- `ffmpeg` (конвертация 24kHz→8kHz)
+- Прокси SOCKS5 для Gemini TTS (`_TTS_PROXY` в voice_bridge.py)
 
-### P0 — утро:
-- **#14** 📞 Автодозвон «Доставка 18 июня» — 39 номеров, WAV + CSV готовы
-  - Загрузить WAV в ЛК Mango → подменить на VPS → запустить
-  - ДА → Битрикс «Подтверждено», НЕТ → ничего не меняем
-- **#15** 📞 Автодозвон «Доставка [ДАТА 2]» — дата и список от заказчика утром
+## Тесты
+- **Angela (OpenRouter DeepSeek):** ✅ Знает цены, породы, доставку
+- **Kore TTS (через прокси):** ✅ HTTP 200, ~0.4-1с генерация
+- **Whisper STT:** ✅ Установлен
+- **VAD (энергетический):** ✅
+- **Mango API (commands/callback):** result: 1000 — **но звонки не доходят ночью**
+- **Mango play/start:** ✅ (проверен в автодозвоне)
+- **baresip регистрация:** ⚠ Не посылает REGISTER на Mango SIP — нужна диагностика
 
-### P0 — вечер:
-- **#16** 🧠 Улучшение STT — расширить словарь YES/NO + fuzzy-match
-- **#13** 📞 Recall unclear > 20 сек — повторный обзвон горячих
+## Заблокировано до завтра 09:00 MSK
+Тестовый звонок через Mango API не проходит ночью. Рабочий автодозвон работает только в 09:00 MSK (см. scheduler.log).
 
-## 🔧 Техническое состояние VPS
+## Как запустить тест завтра
+```bash
+ssh root@72.56.38.19
+cd /root/antigravity/ai-eggs
+bash agent/start_voice_test.sh
+# Или:
+python3 agent/test_voice_call.py --phone "+79687896924"
+```
 
-| Компонент | Статус |
-|-----------|--------|
-| PM2 (12 процессов) | ✅ all online |
-| Whisper | **small** (int8, CPU) |
-| Swap | 2 GB (/swapfile) |
-| Диск | 24/29 GB (83%) |
-| RAM | 1.9 GB + 2 GB swap |
-| mango-webhook | ✅ IVR-код готов |
-| dtmf-monitor | ✅ small model |
+## Файлы сессии
+- `tools/habr_intelligence.py` — v2: VC.ru, GitHub, Telegram @vibecoding_tg и др.
+- `ACTIVE_TASKS.md` — P1 RAG & Eval (#17 LLM as judge, #18 RAGAS, #19 Recall@K)
+- `voice_bridge.py` — голосовая Анжела
+- `docs/superpowers/specs/2026-06-16-realtime-voice-angela.md` — спецификация
+- `agent-lab/test_angela_kore.py` — локальный тест Angela
 
-## ⚠️ Незакрытые вопросы
-1. **IVR переадресация** — Контакт-центр Mango блокирует доб. 22. Нужно разобраться в ЛК.
-2. **Битрикс STAGE_ID** — уточнить какой `STAGE_ID` = «Подтверждено» в воронке заказчика
-3. **Вторая дата обзвона** — получить от заказчика утром 16.06
+## Важные заметки
+- Gemini TTS (Kore) на VPS работает ТОЛЬКО через SOCKS5 прокси
+- На Mac Gemini TTS не работает — User location not supported (ограничение API-ключа РФ)
+- baresip `dtmfio.so` отсутствует в модулях — удалён из конфига (DTMF работает через Mango webhook)
+- `auto_confirm_call.py` — эталон реализации Mango callback API (включает поле `sip` в `from`)

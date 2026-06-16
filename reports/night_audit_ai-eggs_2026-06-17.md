@@ -1,11 +1,11 @@
-# 🌙 Ночной аудит кода — 2026-06-16
+# 🌙 Ночной аудит кода — 2026-06-17
 
 > **Проект:** AI-Eggs (Анжелочка)  
-> **Время:** 02:00:05  
+> **Время:** 02:05:02  
 > **Метод:** Cross-Model Peer Review  
 > **Режим:** 🔧 AUTO-FIX  
-> **Python файлов:** 201 (проверяем: 5)  
-> **Источник:** ТОП-5 критических файлов проекта ai-eggs (нет git diff)
+> **Python файлов:** 205 (проверяем: 1)  
+> **Источник:** git diff HEAD~1 (1 файлов)
 
 ---
 
@@ -64,73 +64,3 @@ ai-eggs/agent/angelochka_core.py:497:89: E501 Line too long (133 > 88)
 ai-eggs/agent/angelochka_core.py:514:89: E501 Line too long (110 > 88)
 ai-eggs/agent/angelochka_core.py:515:89: E501 Line too long (89 > 88)
 ```
-
-🔧 **ruff --fix:** 2 ошибок исправлено автоматически (ветка: \'auto-fix/night-audit-2026-06-16\')
-
-**Критических ошибок ruff (E,F,S,B):** 1690
-
-### 🔐 Hardcoded секреты
-```
-⚠️ _vk_get_token.py: 26:client_secret = "hHbZxrka2uZ6jB1inYsH"
-
-```
-
-### 📝 Изменения за день
-```
- dreams/dream_2026-06-14.md                |  98 +++++++++++
- dreams/dream_2026-06-15.md                |  96 ++++++++++
- dreams/patterns.md                        | 280 ++++++++++++++++++++++++++++++
- reports/geo_monitor_launchd.err           |   4 +
- reports/night_audit_ai-eggs_2026-06-12.md | 100 +++++++++++
- reports/night_audit_ai-eggs_2026-06-13.md | 136 +++++++++++++++
- reports/night_audit_ai-eggs_2026-06-14.md | 206 ++++++++++++++++++++++
- reports/night_audit_ai-eggs_2026-06-15.md | 206 ++++++++++++++++++++++
- reports/night_audit_ai-eggs_2026-06-16.md |  79 +++++++++
- 24 files changed, 1674 insertions(+), 63 deletions(-)
-```
-
----
-
-## 🔬 Фаза 2: Gemini 2.5 Pro — Глубокий аудит
-
-⚠️ Gemini CLI недоступен — фаза пропущена
-
----
-
-## 🧠 Фаза 3: Claude — Cross-Model Peer Review
-
-⚠️ Claude API недоступен: ❌ Ошибка Claude API: Expecting value: line 2 column 1 (char 1)
-
----
-
-## 📋 Итоговая сводка
-
-| Метрика | Значение |
-|---------|----------|
-| 📅 Дата | 2026-06-16 |
-| ⏰ Время | 02:00:05 → 02:00:41 |
-| 📁 Python файлов | 201 |
-| 📝 Изменено за день | 24 |
-| ⚡ ruff ошибок (E,F,S,B) | 1690 |
-| 🔐 Hardcoded секретов | 1 |
-| 🔬 Gemini аудит | ⏭️ |
-| 🧠 Claude cross-review | ⏭️ |
-| 🔴 Критичных (Claude) | 0 |
-| 🟡 Важных (Claude) | 0 |
-| 🟢 Минорных (Claude) | 0 |
-
-### Метод аудита
-```
-Код писали: Gemini 2.5 Pro + Claude Opus (через Antigravity)
-Проверяли:
-  Фаза 1: ruff 0.15 (машина, 100% точность)
-  Фаза 2: Gemini CLI 2.5 Pro (глубокий анализ, бесплатно)
-  Фаза 3: moonshotai/kimi-k2 (cross-model review, OpenRouter)
-  
-Cross-Model Peer Review: два профессора из разных школ
-проверяют код друг друга → максимум найденных багов
-```
-
----
-
-> 🤖 Сгенерировано: `tools/night_audit.sh v2` — Cross-Model Peer Review
