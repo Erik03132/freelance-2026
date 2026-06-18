@@ -416,7 +416,7 @@ def analyze_with_openrouter(article: dict) -> dict:
     if not OPENROUTER_KEY:
         return {"применение": "—", "проект": "—", "агент": "—"}
     # deepseek первым — gemini-OR даёт 404, deepseek стабилен и бесплатен
-    for model in ["deepseek/deepseek-chat", "qwen/qwen-turbo", "google/gemini-2.0-flash-001"]:
+    for model in ["deepseek/deepseek-chat", "qwen/qwen-2.5-7b-instruct"]:
         try:
             resp = NO_PROXY_SESSION.post(
                 "https://openrouter.ai/api/v1/chat/completions",
