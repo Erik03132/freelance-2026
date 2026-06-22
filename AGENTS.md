@@ -21,13 +21,28 @@ freelance-2026/
 └── docs/ + chronicles/      # Глобальная документация и хроника
 ```
 
-### Скрипты-генераторы
+### G0 — универсальный оркестратор
+
+```bash
+./tools/go.sh new project <name>      # Создать новый проект
+./tools/go.sh new skill <domain> <n>   # Создать foundation-скилл
+./tools/go.sh new agent <id>           # Создать foundation-агента
+./tools/go.sh boot                     # Boot: пинг API, проверка агентов
+```
+
+### Скрипты-генераторы (вызываются напрямую)
 
 | Скрипт | Назначение | Пример |
 |--------|------------|--------|
 | `tools/new-project.sh` | Создать каркас нового проекта | `./tools/new-project.sh ai-sales-assistant` |
 | `tools/new-skill.sh` | Создать foundation-скилл | `./tools/new-skill.sh code generate-tests` |
 | `tools/new-agent.sh` | Создать foundation-агента | `./tools/new-agent.sh security-auditor` |
+
+### Документация
+
+| Файл | Назначение |
+|------|------------|
+| `foundation/docs/IDE_GUIDE.md` | Как работать в разных IDE со старыми и новыми проектами |
 
 ### Правила размещения
 

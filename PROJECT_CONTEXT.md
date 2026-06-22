@@ -47,13 +47,15 @@
 ## Быстрые команды
 
 ```bash
-# Новый проект
+# G0 — универсальный оркестратор (рекомендуемый способ)
+./tools/go.sh new project <name>
+./tools/go.sh new skill <domain> <name>
+./tools/go.sh new agent <id>
+./tools/go.sh boot
+
+# Или напрямую:
 ./tools/new-project.sh <project-name>
-
-# Новый foundation-скилл
 ./tools/new-skill.sh <domain> <skill-name>
-
-# Новый foundation-агент
 ./tools/new-agent.sh <agent-id>
 ```
 
