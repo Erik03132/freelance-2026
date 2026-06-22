@@ -1,12 +1,12 @@
 [submodule "projects/ai-eggs"]
 	path = projects/ai-eggs
-	url = //github.com/Erik03132/angel-sales.git
+	url = https://github.com/Erik03132/angel-sales.git
 [submodule "projects/ai-scout"]
 	path = projects/ai-scout
-	url = //github.com/Erik03132/ai-scout-final.git
+	url = https://github.com/Erik03132/ai-scout-final.git
 [submodule "projects/angel-backend"]
 	path = projects/angel-backend
-	url = //github.com/Erik03132/angel-backend.git
+	url = https://github.com/Erik03132/angel-backend.git
 [submodule "projects/ai-grant-portal-temp"]
 	path = projects/ai-grant-portal-temp
-	url = //github.com/Erik03132/ai-grant-consult-portal.git
+	url = https://github.com/Erik03132/ai-grant-consult-portal.git
