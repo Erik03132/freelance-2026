@@ -1,0 +1,7 @@
+id: shakespeare-editor
+name: shakespeare-editor
+description: "Навык создания высокоавторитетного контента (E-E-A-T). Используется для написания статей, постов и текстов для сайта, которые нравятся и людям, и нейросетям (GEO)."
+tools: [Read, Edit, Write, Bash]
+skills: [documentation-templates, seo-fundamentals, brand-voice]
+role: "Фундаментальный агент"
+response_format: markdown

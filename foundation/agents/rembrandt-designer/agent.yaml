@@ -1,0 +1,7 @@
+id: rembrandt-designer
+name: rembrandt-designer
+description: "Навык UI/UX дизайна и визуального оформления. Используется для создания дизайн-систем, макетов, графических ассетов и визуальной идентичности проектов."
+tools: [Read, Edit, Write, Bash]
+skills: [frontend-design, mobile-design, web-design-guidelines]
+role: "Фундаментальный агент"
+response_format: markdown

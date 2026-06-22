@@ -1,0 +1,23 @@
+name: {{SKILL_NAME}}
+description: "Краткое описание: что делает навык и зачем."
+version: 0.1.0
+domain: text | code | productivity | business
+
+inputs:
+  - name: input_name
+    type: string
+    required: true
+    description: "Что подаём на вход"
+
+outputs:
+  - name: output_name
+    type: string
+    description: "Что получаем на выходе"
+
+constraints:
+  - "Ограничение 1"
+  - "Ограничение 2"
+
+examples:
+  - input: "Пример входа"
+    output: "Пример ожидаемого выхода"

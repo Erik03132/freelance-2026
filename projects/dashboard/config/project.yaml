@@ -1,0 +1,22 @@
+name: dashboard
+status: active
+owner: human
+stack: ["TBD"]
+
+goals:
+  - "Описать основную цель проекта dashboard"
+  - "Определить MVP"
+  - "Описать ключевые метрики успеха"
+
+metrics:
+  - name: "example_metric"
+    target: "0"
+    unit: "count"
+
+constraints:
+  - "Бюджет"
+  - "Сроки"
+  - "Технические ограничения"
+
+notes: |
+  Описание проекта

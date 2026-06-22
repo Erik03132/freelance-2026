@@ -63,9 +63,9 @@ collected_envs/
 *.key
 *.p12
 
-# === Root-level test files with secrets ===
-/mango_api.py
-/test_mango_call.py
+# === Secret/sensitive scripts ===
+tools/angela/mango_api.py
+_archive/patches/
 
 # === Git bundles ===
 *.bundle
@@ -81,7 +81,6 @@ tmp_restore/
 .ssh_agent_key
 .ssh_agent_key.pub
 .credentials_vezemcip.md
-svo-start/
 .ecc-library/
 antigravity-brain/
 

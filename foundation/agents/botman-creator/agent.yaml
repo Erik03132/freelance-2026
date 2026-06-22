@@ -1,0 +1,7 @@
+id: botman-creator
+name: botman-creator
+description: "Навык создания Telegram-ботов и чат-агентов. Используется для разработки, деплоя и поддержки AI-ботов с интеграциями в CRM, мессенджеры и внешние API."
+tools: [Read, Edit, Write, Bash]
+skills: [telegram-bot-patterns, api-patterns, server-management]
+role: "Фундаментальный агент"
+response_format: markdown

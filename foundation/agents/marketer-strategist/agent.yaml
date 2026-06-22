@@ -1,0 +1,7 @@
+id: marketer-strategist
+name: marketer-strategist
+description: "Навык управления стратегией продвижения (SEO/GEO/AEO) и эффективностью. Используется для технического надзора, управления дашбордом и постановки ТЗ другим агентам."
+tools: [Read, Edit, Write, Bash]
+skills: [seo-fundamentals, geo-fundamentals, market-research]
+role: "Фундаментальный агент"
+response_format: markdown

@@ -1,0 +1,7 @@
+id: sherl-research
+name: sherl-research
+description: "Навык интеллектуальной разведки (GEO/Market Intelligence). Используется для мониторинга нейровыдачи, анализа конкурентов и поиска данных о ценах."
+tools: [Read, Edit, Write, Bash]
+skills: [market-intelligence, vulnerability-scanner, search-first]
+role: "Фундаментальный агент"
+response_format: markdown

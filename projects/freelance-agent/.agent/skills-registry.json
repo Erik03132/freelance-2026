@@ -1,0 +1,160 @@
+{
+  "version": "2.1.0",
+  "updated": "2026-06-22",
+  "description": "Реестр скиллов freelance-2026. Foundation-скиллы живут в /foundation/skills/, проектные — в projects/<name>/project-skills/.",
+
+  "external_skills": {
+    "description": "Глобальные скиллы IDE (не в репозитории)",
+    "opencode": "~/.config/opencode/skills/",
+    "antigravity": "~/.gemini/antigravity/skills/"
+  },
+
+  "foundation_skills": {
+    "description": "Универсальные скиллы в /foundation/skills/",
+    "location": "foundation/skills/",
+    "skills": [
+      {
+        "name": "angelochka-sales",
+        "description": "Протокол продаж Анжелочки: phone-first, скрипты, дожим",
+        "domain": "business",
+        "path": "foundation/skills/business/angelochka-sales/",
+        "projects": ["ai-eggs", "angel-backend"],
+        "status": "active"
+      },
+      {
+        "name": "bitrix-integration",
+        "description": "Интеграция AI-агентов с Bitrix24 CRM",
+        "domain": "business",
+        "path": "foundation/skills/business/bitrix-integration/",
+        "projects": ["ai-eggs", "ai-grant-consalt"],
+        "status": "active"
+      },
+      {
+        "name": "brand-voice",
+        "description": "Голос бренда для контента",
+        "domain": "business",
+        "path": "foundation/skills/business/brand-voice/",
+        "projects": ["all"],
+        "status": "active"
+      },
+      {
+        "name": "deployment-procedures",
+        "description": "Процедуры деплоя на Timeweb VDS",
+        "domain": "business",
+        "path": "foundation/skills/business/deployment-procedures/",
+        "projects": ["all"],
+        "status": "active"
+      },
+      {
+        "name": "geo-fundamentals",
+        "description": "GEO/AEO основы для продвижения",
+        "domain": "business",
+        "path": "foundation/skills/business/geo-fundamentals/",
+        "projects": ["ai-eggs", "ai-grant-consalt"],
+        "status": "active"
+      },
+      {
+        "name": "telegram-bot-patterns",
+        "description": "Паттерны разработки Telegram ботов",
+        "domain": "business",
+        "path": "foundation/skills/business/telegram-bot-patterns/",
+        "projects": ["ai-eggs", "ai-grant-consalt"],
+        "status": "active"
+      },
+      {
+        "name": "react-patterns",
+        "description": "React компоненты и паттерны",
+        "domain": "code",
+        "path": "foundation/skills/code/react-patterns/",
+        "projects": ["all-frontend"],
+        "status": "active"
+      }
+    ]
+  },
+
+  "project_skills": {
+    "description": "Проектные скиллы в projects/<name>/project-skills/",
+    "skills": [
+      {
+        "name": "extruct-api",
+        "project": "ai-scout",
+        "path": "projects/ai-scout/project-skills/extruct-api/",
+        "status": "active"
+      },
+      {
+        "name": "incubird-expert",
+        "project": "ai-eggs",
+        "path": "projects/ai-eggs/project-skills/incubird-expert/",
+        "status": "active"
+      },
+      {
+        "name": "bitrix-local",
+        "project": "ai-eggs",
+        "path": "projects/ai-eggs/project-skills/bitrix-local/",
+        "status": "active"
+      },
+      {
+        "name": "angelochka-sales-incubird",
+        "project": "ai-eggs",
+        "path": "projects/ai-eggs/project-skills/angelochka-sales/",
+        "note": "Проектный override с деталями Азовского Инкубатора",
+        "status": "active"
+      },
+      {
+        "name": "vk-integration",
+        "project": "freelance-agent",
+        "path": "projects/freelance-agent/project-skills/vk-integration/",
+        "status": "active"
+      },
+      {
+        "name": "svo-veteran-support",
+        "project": "svo-start",
+        "path": "projects/svo-start/project-skills/svo-veteran-support/",
+        "status": "active"
+      },
+      {
+        "name": "svo-skills-bundle",
+        "project": "svo-start",
+        "path": "projects/svo-start/project-skills/",
+        "skills": [
+          "adaptation-psychologist",
+          "compliance-military-law",
+          "military-course-designer",
+          "military-legal-consultant",
+          "military-merch-manager",
+          "seo-veteran-content",
+          "veteran-business-architect",
+          "veteran-grant-writer"
+        ],
+        "status": "active"
+      },
+      {
+        "name": "legal-graph-rag",
+        "project": "ai-grant-consalt",
+        "path": "archive/ai-grant-consalt/project-skills/legal-graph-rag/",
+        "status": "archived"
+      },
+      {
+        "name": "marina-consult",
+        "project": "ai-grant-consalt",
+        "path": "archive/ai-grant-consalt/project-skills/marina-consult/",
+        "status": "archived"
+      }
+    ]
+  },
+
+  "agent_personas": {
+    "description": "Агенты-роли (не скиллы). Хранятся в foundation/agents/",
+    "location": "foundation/agents/",
+    "personas": [
+      "igorek-core",
+      "kulibin-engineer",
+      "marketer-strategist",
+      "rembrandt-designer",
+      "shakespeare-editor",
+      "artemiy-frontend",
+      "sherl-research",
+      "botman-creator"
+    ]
+  }
+}

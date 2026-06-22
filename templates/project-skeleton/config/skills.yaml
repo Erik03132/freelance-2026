@@ -1,0 +1,9 @@
+foundation_skills:
+  # Универсальные скиллы из /foundation/skills/
+  # Примеры:
+  # - text/summarization
+  # - code/refactor
+  # - productivity/planner
+
+project_skills:
+  # Специфичные для проекта скиллы из /projects/{{PROJECT_NAME}}/project-skills/

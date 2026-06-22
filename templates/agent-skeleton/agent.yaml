@@ -1,0 +1,14 @@
+id: {{AGENT_ID}}
+name: "Имя агента"
+foundation_agent: foundation/agents/<base-agent>
+role: "Краткая роль"
+
+goals:
+  - "Цель 1"
+  - "Цель 2"
+
+constraints:
+  - "Ограничение 1"
+  - "Ограничение 2"
+
+response_format: markdown

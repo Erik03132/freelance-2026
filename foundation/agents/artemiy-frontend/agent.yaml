@@ -1,0 +1,7 @@
+id: artemiy-frontend
+name: artemiy-frontend
+description: "Навык фронтенд-разработки. Используется для создания сайтов, веб-приложений, компонентов и интерактивных UI."
+tools: [Read, Edit, Write, Bash]
+skills: [react-patterns, tailwind-patterns, web-design-guidelines]
+role: "Фундаментальный агент"
+response_format: markdown

@@ -37,21 +37,34 @@
 /Users/igorvasin/freelance-2026/           ← Корень всех проектов
 ├── .agent/rules/                          ← Фундаментальные правила (этот файл)
 ├── .ssh_agent_key                         ← SSH-ключ для VPS
+├── PROJECT_CONTEXT.md                     ← Карта репозитория для IDE
+├── AGENTS.md                              ← Карта проектов и роадмап
 ├── chp.md                                 ← Чекпоинт текущего состояния
 ├── ACTIVE_TASKS.md                        ← Дорожная карта задач
+├── foundation/                            ← Универсальные скиллы и агенты
+│   ├── skills/<domain>/<skill>/
+│   └── agents/<agent>/
+├── projects/                              ← Активные проекты
+│   └── <project-name>/
+│       ├── config/{project,agents,skills}.yaml
+│       ├── project-skills/
+│       ├── src/
+│       └── docs/
+├── archive/                               ← Закрытые проекты
+├── templates/                             ← Шаблоны проектов, скиллов, агентов
+├── tools/                                 ← Общие скрипты
 ├── reports/                               ← Дневные отчёты сессий
 ├── chronicles/                            ← Хроники дней (автозапись)
 ├── dreams/                                ← 🌙 Dreaming: паттерны из хроник
 │   ├── patterns.md                        ← Кумулятивная память (читать при boot)
 │   └── dream_YYYY-MM-DD.md               ← Ежедневные dream-отчёты
-├── tools/                                 ← Общие скрипты
-├── ai-eggs/                               ← Проект AI-EGGS (Заботкина + Птенчикова)
-├── freelance-agent/                       ← Навыки агента, SKILL.md
-└── [другие проекты]/                      ← Каждый проект — отдельная папка
+└── [другие глобальные папки]/
 ```
 
-**Правило:** проектные знания (каскад моделей, PM2 конфиг, расписание) лежат
-в `.md` файлах **внутри папки проекта**, а НЕ здесь.
+**Правило:**
+- Foundation-скиллы и агенты лежат в `foundation/`.
+- Проектные знания лежат в `projects/<name>/config/` и `projects/<name>/project-skills/`.
+- При старте сессии читай `PROJECT_CONTEXT.md`, затем `projects/<name>/AGENTS.md`.
 
 ---
 
@@ -118,8 +131,9 @@ python3 ~/freelance-2026/tools/content_grader.py -f draft.md --rubric all
 ### Где искать скиллы:
 | Тип | Путь |
 |-----|------|
-| Глобальные | `/Users/igorvasin/.gemini/antigravity/skills/*/SKILL.md` |
-| Проектные | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/*/SKILL.md` |
+| Foundation | `/Users/igorvasin/freelance-2026/foundation/skills/<domain>/<skill>/SKILL.md` |
+| Проектные | `/Users/igorvasin/freelance-2026/projects/<project-name>/project-skills/<skill>/SKILL.md` |
+| OpenCode global | `~/.config/opencode/skills/` |
 | Knowledge Items | `/Users/igorvasin/.gemini/antigravity/knowledge/*/` |
 | Brain (артефакты прошлых сессий) | `/Users/igorvasin/.gemini/antigravity/brain/*/artifacts/` |
 
@@ -134,7 +148,7 @@ python3 ~/freelance-2026/tools/content_grader.py -f draft.md --rubric all
 2. Прочитать `chp.md` — текущий чекпоинт
 3. Прочитать `ACTIVE_TASKS.md` — активные задачи
 4. Прочитать `dreams/patterns.md` — кумулятивные паттерны из Dreaming (если есть)
-5. Прочитать `~/.gemini/antigravity/skills/MANIFEST.md` — **лёгкий каталог скиллов** (Progressive Disclosure)
+5. Прочитать `foundation/skills/MANIFEST.md` — **лёгкий каталог скиллов** (Progressive Disclosure)
 6. Если работа с конкретным проектом — прочитать его `PROJECT.md` / `README.md`
 7. НЕ пересказывать содержимое пользователю, просто работать
 8. **🔌 ПИНГ ВСЕХ API** — выполнить `bash ~/freelance-2026/tools/ping_apis.sh` и вывести таблицу статусов
@@ -205,50 +219,54 @@ python3 ~/freelance-2026/tools/skills_manifest.py
 **При буте проверяй наличие `MANIFEST.md`** — если нет, регенерируй.
 Полная проверка всех SKILL.md — только по запросу или при подозрении на проблемы.
 
-### 7.1. Фундаментальные (Global) скиллы — 8 агентов
+### 7.1. Foundation агенты — 8 ролей
 
-| # | Агент | Global SKILL.md (абсолютный путь) | ECC-скиллы (встроены в SKILL.md) |
-|---|-------|----------------------------------|----------------------------------|
-| 1 | **Игорёк** (igorek-core) | `/Users/igorvasin/.gemini/antigravity/skills/igorek-core/SKILL.md` | agentic-engineering, search-first, ADR, parallel execution, model routing, hooks |
-| 2 | **Кулибин** (kulibin-engineer) | `/Users/igorvasin/.gemini/antigravity/skills/kulibin-engineer/SKILL.md` | deployment-patterns, security-review, cost-aware-llm, search-first, coding-style, patterns, git-workflow, testing |
-| 3 | **Артемий** (artemiy-frontend) | `/Users/igorvasin/.gemini/antigravity/skills/artemiy-frontend/SKILL.md` | frontend-patterns, AI website cloning |
-| 4 | **Ботмэн** (botman-creator) | `/Users/igorvasin/.gemini/antigravity/skills/botman-creator/SKILL.md` | security, cost-aware-ai, deployment-checklist |
-| 5 | **Рембрандт** (rembrandt-designer) | `/Users/igorvasin/.gemini/antigravity/skills/rembrandt-designer/SKILL.md` | design-system, SVG→3D WebGL |
-| 6 | **Шекспир** (shakespeare-editor) | `/Users/igorvasin/.gemini/antigravity/skills/shakespeare-editor/SKILL.md` | content-engine, brand-voice, article-writing, human-first writing |
-| 7 | **Шерл** (sherl-research) | `/Users/igorvasin/.gemini/antigravity/skills/sherl-research/SKILL.md` | market-research, search-first, deep-research |
-| 8 | **Маркетолог** (marketer-strategist) | `/Users/igorvasin/.gemini/antigravity/skills/marketer-strategist/SKILL.md` | technical-seo, dashboard-builder, CMO-framework, AI-ORM |
+| # | Агент | Путь | Назначение |
+|---|-------|------|------------|
+| 1 | **Игорёк** (igorek-core) | `foundation/agents/igorek-core/` | Оркестратор |
+| 2 | **Кулибин** (kulibin-engineer) | `foundation/agents/kulibin-engineer/` | Инженер-оптимизатор |
+| 3 | **Артемий** (artemiy-frontend) | `foundation/agents/artemiy-frontend/` | Фронтенд |
+| 4 | **Ботмэн** (botman-creator) | `foundation/agents/botman-creator/` | Боты |
+| 5 | **Рембрандт** (rembrandt-designer) | `foundation/agents/rembrandt-designer/` | Дизайн |
+| 6 | **Шекспир** (shakespeare-editor) | `foundation/agents/shakespeare-editor/` | Контент |
+| 7 | **Шерл** (sherl-research) | `foundation/agents/sherl-research/` | Ресёрч |
+| 8 | **Маркетолог** (marketer-strategist) | `foundation/agents/marketer-strategist/` | Маркетинг |
 
-### 7.2. Проектные скиллы (абсолютные пути)
+Каждый агент:
+- `agent.yaml` — роль, инструменты, навыки
+- `prompt.md` — системный промпт
+- `skills.json` — подключённые foundation/project-скиллы
 
-| # | Скилл | Абсолютный путь | Назначение |
-|---|-------|-----------------|------------|
-| 1 | bitrix-integration | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/bitrix-integration/SKILL.md` | CRM Битрикс24 |
-| 2 | brand-voice | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/brand-voice/SKILL.md` | Голос бренда |
-| 3 | deployment-procedures | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/deployment-procedures/SKILL.md` | Процедуры деплоя |
-| 4 | geo-fundamentals | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/geo-fundamentals/SKILL.md` | GEO-оптимизация |
-| 5 | react-patterns | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/react-patterns/SKILL.md` | React-паттерны |
-| 6 | telegram-bot-patterns | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/telegram-bot-patterns/SKILL.md` | Telegram-боты |
-| 7 | svo-veteran-support | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/svo-veteran-support/SKILL.md` | Гранты для ветеранов |
-| 8 | **vk-integration** | `/Users/igorvasin/freelance-2026/freelance-agent/.agent/skills/vk-integration/SKILL.md` | VK API, постинг, фото, токены |
-| 9 | **ok-social** | `/Users/igorvasin/.gemini/antigravity/skills/ok-social/SKILL.md` | OK.ru API, автопостинг |
+### 7.2. Foundation скиллы (основные)
 
-### 7.3. Реестр скиллов
+| # | Скилл | Путь | Назначение |
+|---|-------|------|------------|
+| 1 | angelochka-sales | `foundation/skills/business/angelochka-sales/` | Протокол продаж |
+| 2 | bitrix-integration | `foundation/skills/business/bitrix-integration/` | Битрикс24 |
+| 3 | brand-voice | `foundation/skills/business/brand-voice/` | Голос бренда |
+| 4 | deployment-procedures | `foundation/skills/business/deployment-procedures/` | Деплой |
+| 5 | geo-fundamentals | `foundation/skills/business/geo-fundamentals/` | GEO/AEO |
+| 6 | telegram-bot-patterns | `foundation/skills/business/telegram-bot-patterns/` | Telegram-боты |
+| 7 | react-patterns | `foundation/skills/code/react-patterns/` | React |
 
-Полный реестр с версиями и маршрутизацией:
-`/Users/igorvasin/.gemini/antigravity/skills/skills-registry.json`
+### 7.3. Проектные скиллы
+
+Каждый проект хранит свои скиллы в `projects/<project-name>/project-skills/<skill>/`.
+Реестр: `projects/freelance-agent/.agent/skills-registry.json`
 
 ### 7.4. Формат вывода при буте
 
 ```
 === AGENT READINESS ===
-✅ igorek-core        — ARMED (global + 6 ECC)
-✅ kulibin-engineer    — ARMED (global + 8 ECC + 1 project)
-✅ artemiy-frontend    — ARMED (global + 2 ECC + 2 project)
-✅ botman-creator      — ARMED (global + 3 ECC + 1 project)
-✅ rembrandt-designer  — ARMED (global + 2 ECC)
-✅ shakespeare-editor  — ARMED (global + 4 ECC + 1 project)
-✅ sherl-research      — ARMED (global + 3 ECC)
-✅ marketer-strategist — ARMED (global + 4 ECC + 1 project)
-PROJECT SKILLS: 7/7 ✅
+✅ igorek-core        — ARMED (foundation/agents/igorek-core)
+✅ kulibin-engineer    — ARMED (foundation/agents/kulibin-engineer)
+✅ artemiy-frontend    — ARMED (foundation/agents/artemiy-frontend)
+✅ botman-creator      — ARMED (foundation/agents/botman-creator)
+✅ rembrandt-designer  — ARMED (foundation/agents/rembrandt-designer)
+✅ shakespeare-editor  — ARMED (foundation/agents/shakespeare-editor)
+✅ sherl-research      — ARMED (foundation/agents/sherl-research)
+✅ marketer-strategist — ARMED (foundation/agents/marketer-strategist)
+FOUNDATION SKILLS: ✅
+PROJECT SKILLS: по projects/<name>/config/skills.yaml
 SESSION: ✅ SAFE
 ```

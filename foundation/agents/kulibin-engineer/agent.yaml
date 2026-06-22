@@ -1,0 +1,7 @@
+id: kulibin-engineer
+name: kulibin-engineer
+description: "Навык инженерной оптимизации и интеграции передовых технологий. Используется для повышения производительности, внедрения новых библиотек и архитектурных решений."
+tools: [Read, Edit, Write, Bash]
+skills: [server-management, deployment-procedures, python-patterns]
+role: "Фундаментальный агент"
+response_format: markdown

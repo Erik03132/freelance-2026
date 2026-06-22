@@ -1,0 +1,10 @@
+{
+  "agent_id": "{{AGENT_ID}}",
+  "foundation_skills": [
+    "foundation/skills/text/summarization",
+    "foundation/skills/code/refactor"
+  ],
+  "project_skills": [
+    "projects/<project-name>/project-skills/<skill-name>"
+  ]
+}
