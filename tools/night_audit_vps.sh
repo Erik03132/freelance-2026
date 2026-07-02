@@ -131,18 +131,25 @@ fi
 # ============ ФАЗА 1b: СЕКРЕТЫ ============
 
 SECRET_HITS=0
+SECRET_FILES=""
 while IFS= read -r pyfile; do
     [ -z "$pyfile" ] && continue
-    hits=$(grep -nE "(api_key|secret|password|token)\s*=\s*['\"][a-zA-Z0-9]{20,}" "$pyfile" 2>/dev/null | \
-           grep -v "os\.getenv\|os\.environ\|\.env\|#\s*\|example\|test\|mock" || true)
+    hits=$(grep -nE "(api_key|secret|password|token|key)\s*=\s*['\"][a-zA-Z0-9]{15,}" "$pyfile" 2>/dev/null | \
+           grep -v "os\.getenv\|os\.environ\|\.env\|#\s*\|example\|test\|mock\|test_\|TEMPLATE\|SAMPLE" || true)
     if [ -n "$hits" ]; then
         ((SECRET_HITS++)) || true
+        SECRET_FILES="${SECRET_FILES}
+$pyfile:
+$hits"
     fi
 done < <(find "$AGENT_DIR" -name "*.py" \
     -not -path "*/venv/*" -not -path "*/.venv/*" \
     -not -path "*/node_modules/*" -not -path "*/__pycache__/*")
 
 log "  Секреты: ${SECRET_HITS}"
+if [ "$SECRET_HITS" -gt 0 ]; then
+    log "  Файлы с секретами:${SECRET_FILES}"
+fi
 
 # ============ ФАЗА 1.5: Обучение Заботкиной ============
 log "📚 Фаза 1.5: call_learner (обучение на звонках)..."
