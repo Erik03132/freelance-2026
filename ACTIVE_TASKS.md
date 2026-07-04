@@ -1,4 +1,4 @@
-# Текущий статус проекта (обновлено 02.07.2026)
+# Текущий статус проекта (обновлено 02.07.2026 - 14:00)
 
 ---
 
@@ -62,6 +62,11 @@
 - [x] **Prompt caching** добавлен (`cache_control: ephemeral`)
 - [x] Развернуто на VPS (angelochka_core.py)
 - [x] Закоммичено и запушено в GitHub
+- [x] **Мультиагентная архитектура** для Angela: Router + KnowledgeBase + Generator
+- [x] **Анализ статьи 1054436**: 70/30 workflow/autonomy, 3 агента > 1 универсал
+- [x] **Pexels интеграция** для ContentCombine визуалов
+- [x] **Sherl-research** оптимизация system prompt
+- [x] **ai-scout** чипсы вместо select в форме добавления
 
 ### 📋 План на неделю 1 (02.07 - 09.07.2026)
 - [ ] **A1.** Замерить реальную экономию Angela после prompt caching (log usage)
