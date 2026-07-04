@@ -54,66 +54,38 @@ USE_MULTI_AGENT=true
 
 ---
 
-## 📚 ПРИМЕНЕНИЕ: Claude Code Prompt Library
+## 📚 ПРИМЕНЕНИЕ: Claude Code Prompt Library + Matt Pocock Skills
 
-> Источник: https://code.claude.com/docs/en/prompt-library
+> Источники:
+> - https://code.claude.com/docs/en/prompt-library
+> - https://github.com/mattpocock/skills (156k stars)
 > Статус: ✅ Проанализировано, применяется
 
-### Ключевые инсайты
+### Ключевые паттерны
 
-#### 1. Behavior-based search (Discover)
-```
-ПЛОХО: "Прочитай src/auth/login.ts"
-ХОРОШО: "Где мы валидируем загруженные файлы?"
-```
-**Применение:** Искать по поведению, а не по файлам.
+#### 1. CONTEXT.md — Shared Language
+Создать CONTEXT.md для каждого проекта с доменными терминами.
+**Применено:** `ai-eggs/CONTEXT.md`, `ai-scout/CONTEXT.md`
 
-#### 2. Plan before code (Design)
-```
-"Спланируй рефакторинг {target} для {goal}.
-Перечисли файлы, но НЕ редактируй ничего."
-```
-**Применение:** Всегда планировать перед кодом.
+#### 2. ADR — Architecture Decision Records
+Фиксировать архитектурные решения с контекстом и последствиями.
+**Применено:** `ai-eggs/docs/adr/001-multi-agent-architecture.md`
 
-#### 3. Follow existing patterns (Build)
-```
-"Посмотри как реализован {example}, пойми паттерн,
-и построй {new} так же."
-```
-**Применение:** Копировать паттерны из кодовой базы.
+#### 3. Grill Session — Interview Before Building
+Интервью перед построением для уточнения требований.
+**Применение:** Перед каждым крупным изменением проводить grill session.
 
-#### 4. Turn corrections into rules (Steer)
-```
-"Ты постоянно {mistake}.
-Добавь правило в CLAUDE.md чтобы это прекратилось."
-```
-**Применение:** Фиксировать ошибки в правилах.
+#### 4. Vertical Slices — Independent Issues
+Разбивать план на независимые задачи.
+**Применение:** ACTIVE_TASKS.md разбит на горизонтальные слайсы.
 
-#### 5. Review before commit (Review)
-```
-"Просмотри мои незакоммиченные изменения
-и отметь всё рискованное перед коммитом."
-```
-**Применение:** Всегда ревью перед коммитом.
+#### 5. Two-axis Code Review — Standards + Spec
+Двухосевой обзор: стандарты + спецификация.
+**Применение:** Добавить в CLAUDE.md для каждого проекта.
 
-#### 6. Use subagents for heavy tasks
-```
-"Используй subagent для обзора {path}
-на проблемы безопасности."
-```
-**Применение:** Тяжёлые задачи — в subagent.
-
-### Паттерны по фазам SDLC
-
-| Фаза | Паттерн | Пример |
-|------|---------|--------|
-| **Discover** | Behavior search | "Где мы X?" |
-| **Design** | Plan first | "Спланируй, не трогай код" |
-| **Build** | Pattern matching | "Сделай как существующий" |
-| **Build** | Test-driven | "Напиши тесты, потом реализуй" |
-| **Review** | Pre-commit check | "Просмотри перед коммитом" |
-| **Steer** | Rule creation | "Добавь в CLAUDE.md" |
-| **Operate** | Symptom-based debug | "Тест X падает, найди и почини" |
+#### 6. TDD — Red-Green-Refactor
+Тест-Driven Development с циклом красный-зелёный-рефакторинг.
+**Применение:** Добавить в CLAUDE.md для Angela.
 
 ---
 
