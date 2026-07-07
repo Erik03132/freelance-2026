@@ -4,6 +4,7 @@ sip_trans_def		tcp
 call_local_timeout	120
 call_max_calls		4
 call_accept		yes
+answermode		early
 audio_player		aufile,/dev/null
 audio_source		aufile,/Users/igorvasin/freelance-2026/projects/levitan/scripts/tts_cache/globalfields_greeting_default.wav
 audio_level		no

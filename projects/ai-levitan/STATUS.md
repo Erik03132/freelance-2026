@@ -43,7 +43,7 @@ VPS (72.56.38.19):
 
 ### Что сделано
 1. **Новый Telegram бот** — `@levitan_dialer_bot` (старый `@Angella26bot` чужой)
-   - Токен: `8776258870:AAEvEAQNRL4N8sLmn0eUnARQ8-6BOl6rEM8`
+   - Токен: см. `.env` (TELEGRAM_BOT_TOKEN)
    - Chat ID: `176203333`
 2. **SIP-телефон** — переключились с Telephone.app на **Zoiper**
    - Пользователь: `user4`
@@ -95,7 +95,7 @@ VPS (72.56.38.19):
 ### Greeting Bridge (baresip)
 - ✅ Baresip установлен локально (brew, v4.9.0)
 - ✅ Extension 23 (user1) регистрируется: `sip:user1@vpbx400374818.mangosip.ru`
-- ✅ SIP password: `25!vsnzQ6m6H`
+- ✅ SIP password: см. `.env` (BARESIP_PASSWORD)
 - ⚠️ Конфиг: `greeting_bridge/config` + `accounts`
 - ⚠️ Баг: ctrl_tcp не загружается в daemon-режиме — нужно починить модуль
 - ⏳ Контроллер: `greeting_bridge/controller.py` — написан, не протестирован
@@ -105,7 +105,7 @@ VPS (72.56.38.19):
 | Параметр | Значение |
 |----------|----------|
 | Baresip ext | 23 (SIP: user1@vpbx400374818.mangosip.ru) |
-| SIP password | `25!vsnzQ6m6H` |
+| SIP password | см. `.env` |
 | ctrl_tcp port | 4446 |
 | SIP listen port | 5081 |
 | Greeting WAV | `scripts/tts_cache/globalfields_greeting_default.wav` |
@@ -141,11 +141,11 @@ python3 scripts/dialer_bot.py
 
 | Сервис | Данные |
 |--------|--------|
-| Mango API Key | `k0ockrwsafuf7tfpuk7fkqtps4nl77o8` |
-| Mango Salt | `9g1go1lj1zxkyc0v9j9c7fsyy12erqcw` |
+| Mango API Key | см. `.env` (MANGO_VPBX_API_KEY) |
+| Mango Salt | см. `.env` (MANGO_VPBX_API_SALT) |
 | SIP User | `v1000` |
 | SIP Domain | `vpbx400374818.mangosip.ru` |
-| SIP Password | `p?BJq78tmDk2` |
+| SIP Password | см. `.env` (ZOIPER_PASSWORD) |
 | Telegram Bot | `@levitan_dialer_bot` |
 | Telegram Chat ID | `176203333` |
 | OpenRouter Model | `deepseek/deepseek-chat-v3-0324` |

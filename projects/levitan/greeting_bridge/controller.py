@@ -16,7 +16,7 @@ log = logging.getLogger("greeting-bridge")
 BASE_DIR = Path(__file__).resolve().parent
 BARESIP_DIR = BASE_DIR
 GREETING_WAV = BASE_DIR.parent / "scripts" / "tts_cache" / "globalfields_greeting_default.wav"
-CTRL_PORT = 4445
+CTRL_PORT = 4444
 TRANSFER_TARGET = "sip:22@vpbx400374818.mangosip.ru"
 
 

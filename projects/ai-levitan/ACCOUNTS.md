@@ -4,8 +4,8 @@
 
 | Параметр | Значение |
 |----------|----------|
-| API Key | `k0ockrwsafuf7tfpuk7fkqtps4nl77o8` |
-| API Salt | `9g1go1lj1zxkyc0v9j9c7fsyy12erqcw` |
+| API Key | см. `.env` (MANGO_VPBX_API_KEY) |
+| API Salt | см. `.env` (MANGO_VPBX_API_SALT) |
 | API URL | `https://app.mango-office.ru/vpbx/` |
 | PBX Domain | `vpbx400374818.mangosip.ru` |
 | PBX IP (SIP) | `81.88.86.35:5060` |
@@ -15,8 +15,8 @@
 
 | Сотрудник | Ext | SIP | Пароль | Назначение |
 |-----------|-----|-----|--------|------------|
-| v1000 | 22 | `v1000@vpbx400374818.mangosip.ru` | `p?BJq78tmDk2` | Zoiper (оператор) |
-| user1 | 23 | `user1@vpbx400374818.mangosip.ru` | `25!vsnzQ6m6H` | baresip (робот-приветствие) |
+| v1000 | 22 | `v1000@vpbx400374818.mangosip.ru` | см. `.env` (ZOIPER_PASSWORD) | Zoiper (оператор) |
+| user1 | 23 | `user1@vpbx400374818.mangosip.ru` | см. `.env` (BARESIP_PASSWORD) | baresip (робот-приветствие) |
 
 ### Медиафайлы
 
@@ -29,7 +29,7 @@
 | Параметр | Значение |
 |----------|----------|
 | Бот | `@levitan_dialer_bot` |
-| Bot Token | `8776258870:AAEvEAQNRL4N8sLmn0eUnARQ8-6BOl6rEM8` |
+| Bot Token | см. `.env` (TELEGRAM_BOT_TOKEN) |
 | Chat ID | `176203333` |
 | Команды | `начать обзвон`, `конец обзвона`, `пропустить`, `следующий`, `статус` |
 
@@ -37,7 +37,7 @@
 
 | Параметр | Значение |
 |----------|----------|
-| API Key | `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` |
+| API Key | см. `.env` (OPENROUTER_API_KEY) |
 | Основная модель | `deepseek/deepseek-chat-v3-0324` |
 | Fallback модель | `qwen/qwen-2.5-7b-instruct` |
 
@@ -47,7 +47,7 @@
 |----------|----------|
 | SIP User | `v1000` |
 | Domain | `vpbx400374818.mangosip.ru` |
-| Password | `p?BJq78tmDk2` |
+| Password | см. `.env` (ZOIPER_PASSWORD) |
 | Transport | TCP |
 | Port | 5060 |
 

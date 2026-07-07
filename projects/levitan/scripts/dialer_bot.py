@@ -54,7 +54,7 @@ except ImportError:
 # === PATHS ===
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
-CSV_PATH = DATA_DIR / "campaigns" / "csv" / "all_contacts_2026.csv"
+CSV_PATH = DATA_DIR / "campaigns" / "csv" / "adygea_grain_filtered.csv"
 RESULTS_DIR = DATA_DIR / "call_results"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -640,6 +640,8 @@ def load_contacts(weekend_only: bool = False, csv_path: Optional[str] = None) ->
 
 def load_already_called() -> set:
     called = set()
+
+    # Локальные файлы результатов
     for f in RESULTS_DIR.glob("results_*.csv"):
         try:
             with open(f, "r", encoding="utf-8") as fh:
@@ -658,6 +660,18 @@ def load_already_called() -> set:
                         called.add(phone)
         except Exception:
             pass
+
+    # CRM API — номера из CRM (уже обзвоненные ранее)
+    try:
+        r = requests.get("http://127.0.0.1:8088/api/contacts", timeout=3)
+        if r.ok:
+            for c in r.json():
+                phone = c.get("phone", "")
+                if phone:
+                    called.add(phone)
+    except Exception:
+        pass
+
     return called
 
 
@@ -672,7 +686,7 @@ def save_already_called(phone: str):
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     st = get_state(update.effective_chat.id)
-    keyboard = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True)
+    keyboard = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True, is_persistent=True)
     await update.message.reply_text(
         "🎙 <b>Levitan Dialer Bot</b>\n\n"
         "Нажми <b>▶ Начать обзвон</b> для запуска.\n"
@@ -1109,7 +1123,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         pass
 
-    keyboard = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True)
+    keyboard = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True, is_persistent=True)
     await update.message.reply_text(
         f"✅ Загружено: <b>{doc.file_name}</b>\n"
         f"Контактов: ~{count}\n\n"
@@ -1137,7 +1151,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             st.waiting_for_next = False
             if st.next_event:
                 st.next_event.set()
-            kb = ReplyKeyboardMarkup(CAROUSEL_BUTTONS, resize_keyboard=True)
+            kb = ReplyKeyboardMarkup(CAROUSEL_BUTTONS, resize_keyboard=True, is_persistent=True)
             await update.message.reply_text("🎠 Режим карусели включён", reply_markup=kb)
         else:
             await start_dialing(update, context, st, carousel=True)
@@ -1155,7 +1169,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             WAIT_BUTTONS if st.waiting_for_next else
             DIALING_BUTTONS if st.active else
             IDLE_BUTTONS,
-            resize_keyboard=True,
+            resize_keyboard=True, is_persistent=True,
         )
         await update.message.reply_text(
             "Используй кнопки или команды: начать обзвон / карусель / стоп / пропустить / следующий / статус",
@@ -1190,7 +1204,7 @@ async def start_dialing(update: Update, context: ContextTypes.DEFAULT_TYPE, st: 
     src_label = f"📁 {Path(csv_path).name}" if st.csv_path else "📁 общая база"
 
     mode_label = "🎠 Карусель" if carousel else "🔄 Ручной"
-    keyboard = ReplyKeyboardMarkup(CAROUSEL_BUTTONS if carousel else DIALING_BUTTONS, resize_keyboard=True)
+    keyboard = ReplyKeyboardMarkup(CAROUSEL_BUTTONS if carousel else DIALING_BUTTONS, resize_keyboard=True, is_persistent=True)
     await update.message.reply_text(
         f"🚀 <b>Обзвон запущен!</b>\n"
         f"Режим: {mode_label}\n"
@@ -1206,6 +1220,11 @@ async def start_dialing(update: Update, context: ContextTypes.DEFAULT_TYPE, st: 
     asyncio.create_task(dialing_loop(context, st))
 
 
+async def cmd_stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Команда /stop — остановить обзвон."""
+    st = get_state(update.effective_chat.id)
+    await stop_dialing(update, context, st)
+
 async def stop_dialing(update: Update, context: ContextTypes.DEFAULT_TYPE, st: DialerState):
     """Остановить обзвон."""
     if not st.active:
@@ -1219,7 +1238,7 @@ async def stop_dialing(update: Update, context: ContextTypes.DEFAULT_TYPE, st: D
     total = sum(st.stats.values())
     conv_line = f"\n📈 Конверсия: {st.stats['lead']/total*100:.1f}%" if total else ""
 
-    keyboard = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True)
+    keyboard = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True, is_persistent=True)
     await update.message.reply_text(
         f"🏁 <b>Обзвон завершён!</b>\n\n"
         f"📊 Итого: {total} звонков\n"
@@ -1349,7 +1368,7 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
         st.current_contact = contact
 
         # Уведомляем о следующем звонке
-        kb = ReplyKeyboardMarkup(CAROUSEL_BUTTONS if st.carousel else DIALING_BUTTONS, resize_keyboard=True)
+        kb = ReplyKeyboardMarkup(CAROUSEL_BUTTONS if st.carousel else DIALING_BUTTONS, resize_keyboard=True, is_persistent=True)
         await context.bot.send_message(
             chat_id=chat_id,
             text=(
@@ -1393,12 +1412,15 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
         # Сразу переходим к следующему контакту
         st.current_idx += 1
 
-        # Ждём команду «следующий» (или переходим сразу в карусели)
+        # Сразу переходим к следующему контакту
+        st.current_idx += 1
+
+        # Ждём команду «следующий» (в карусели — авто 5 сек)
         if st.active and st.current_idx < len(st.contacts):
             st.next_event = asyncio.Event()
             st.waiting_for_next = True
             if st.carousel:
-                keyboard = ReplyKeyboardMarkup(CAROUSEL_BUTTONS, resize_keyboard=True)
+                keyboard = ReplyKeyboardMarkup(CAROUSEL_BUTTONS, resize_keyboard=True, is_persistent=True)
                 await context.bot.send_message(
                     chat_id=chat_id,
                     text="⏸ Карусель: следующий через 5 сек",
@@ -1410,7 +1432,7 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
                 except asyncio.TimeoutError:
                     pass
             else:
-                keyboard = ReplyKeyboardMarkup(WAIT_BUTTONS, resize_keyboard=True)
+                keyboard = ReplyKeyboardMarkup(WAIT_BUTTONS, resize_keyboard=True, is_persistent=True)
                 await context.bot.send_message(
                     chat_id=chat_id,
                     text="⏸ Нажми <b>⏭ Следующий</b> для продолжения",
@@ -1425,7 +1447,7 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
     if st.active:
         st.active = False
         total = sum(st.stats.values())
-        keyboard = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True)
+        keyboard = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True, is_persistent=True)
         await context.bot.send_message(
             chat_id=chat_id,
             text=f"✅ <b>Все контакты обзвонены!</b>\nВсего: {total} звонков",
@@ -1508,6 +1530,7 @@ def main():
     app.add_handler(CommandHandler("summary", cmd_summary))
     app.add_handler(CommandHandler("crm", cmd_crm))
     app.add_handler(CommandHandler("remind", cmd_remind))
+    app.add_handler(CommandHandler("stop", cmd_stop))
     app.add_handler(MessageHandler(filters.Document.ALL, handle_document))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
@@ -1526,7 +1549,7 @@ def main():
             if Path(default_csv).exists():
                 st.csv_path = default_csv
             from telegram import ReplyKeyboardMarkup
-            kb = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True)
+            kb = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True, is_persistent=True)
             await app.bot.send_message(
                 chat_id=chat_id,
                 text="🎙 <b>Levitan Dialer Bot готов</b>\n▶ Начать обзвон — ручной режим\n🎠 Карусель — автодозвон",

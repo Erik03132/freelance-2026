@@ -418,15 +418,14 @@ def main():
             if res.get("error"):
                 log.warning(f"  ⚠️ {res['error']}")
 
-    if quick:
-        bucket_status = "ok" if status == "alive" else "unreachable"
-        labels = {
-            "alive": "🟢 Доступен",
-            "no_answer": "🔴 Недоступен (нет ответа за 3с)",
-            "unreachable": "🔴 Недоступен",
-            "unknown": "🔴 Недоступен (нет ответа за 3с)",
-        }
-                log.info(f"  {labels.get(status, '❓')}")
+            if quick:
+                bucket_status = "ok" if status == "alive" else "unreachable"
+                labels = {
+                    "alive": "🟢 Доступен",
+                    "no_answer": "🔴 Недоступен (нет ответа за 3с)",
+                    "unreachable": "🔴 Недоступен",
+                    "unknown": "🔴 Недоступен (нет ответа за 3с)",
+                }
             else:
                 bucket_status = status
                 labels = {
@@ -435,7 +434,7 @@ def main():
                     "unreachable": "🔴 Недоступен",
                     "unknown": "⚪ Неизвестно",
                 }
-                log.info(f"  {labels.get(status, '❓')} ({status})")
+            log.info(f"  {labels.get(status, '❓')} ({status})")
             buckets[bucket_status].append(contact)
 
             if idx < len(contacts) and not stopped:
