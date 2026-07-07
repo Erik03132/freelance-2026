@@ -55,12 +55,15 @@ tmp/
 
 # === Secrets ===
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+!.env.sample
 collected_envs/
 *.pem
 *.key
 *.p12
+*.env.local
+*.env.*.local
 
 # === Git bundles ===
 *.bundle
