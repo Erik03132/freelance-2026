@@ -29,7 +29,7 @@
         "All 25+ tests pass"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Base de contacts CSV has phones in multiple formats"
     },
     {

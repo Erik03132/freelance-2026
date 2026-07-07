@@ -10,3 +10,11 @@ Started: 2026-07-07
 - All tests pass, ruff clean
 - Files: pyproject.toml, requirements.txt, tests/*, src/levitan/* (all 13 files trimmed)
 ---
+
+## 2026-07-07 - US-002
+- Created utils.py with normalize_phone() function
+- Supports all common formats: +7, 8, 7XX, brackets/dashes/spaces
+- 10 tests covering all cases
+- All 35 tests pass, ruff clean
+- Files: src/levitan/utils.py, tests/test_utils.py
+---
