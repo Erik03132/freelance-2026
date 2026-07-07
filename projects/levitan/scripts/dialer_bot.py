@@ -601,10 +601,18 @@ def extract_crm_data(transcript: str, contact: Optional[dict] = None) -> dict:
 # CRM
 # ============================================================
 
-def save_to_crm(contact: dict, extracted: dict, transcript: str, recording_id: str) -> dict:
+def save_to_crm(
+    contact: dict,
+    extracted: dict,
+    transcript: str,
+    recording_id: str,
+    call_start: float | None = None,
+    operator: str = "",
+) -> dict:
     """Сохранить в CRM."""
     product = extracted.get("product", "") or contact.get("description", "")
     contact_name = extracted.get("contact_name", "") or contact.get("contact_name", "")
+    duration = round(time.time() - call_start) if call_start else 0
     result = {
         "timestamp": datetime.now().isoformat(),
         "phone": contact["phone"],
@@ -621,6 +629,8 @@ def save_to_crm(contact: dict, extracted: dict, transcript: str, recording_id: s
         "status": extracted.get("status", "other"),
         "notes": extracted.get("notes", ""),
         "recording_id": recording_id,
+        "duration_sec": duration,
+        "operator": operator,
     }
 
     # CSV
@@ -1605,7 +1615,11 @@ async def process_call_background(
             crm_notes = f"🎙 Запись: {recording_link}"
         extracted["notes"] = crm_notes
 
-    saved = save_to_crm(contact, extracted, transcript or "", recording_id or "")
+    operator_ext = st.ext or os.getenv("MANGO_FROM_EXTENSION", "22")
+    saved = save_to_crm(
+        contact, extracted, transcript or "", recording_id or "",
+        call_start=call_start, operator=operator_ext,
+    )
     st.stats[extracted.get("status", "no_contact")] += 1
     st.results.append(saved)
 

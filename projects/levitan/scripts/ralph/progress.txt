@@ -27,3 +27,12 @@ Started: 2026-07-07
 - All 40 tests pass, ruff clean
 - Files: src/levitan/crm_enricher.py, tests/test_crm_enricher.py
 ---
+
+## 2026-07-07 - US-004
+- Integrated CrmEnricher into dialer_bot.py dialing_loop
+- Enriched contact data (name, company, position) shown before each call
+- Also integrated into _process_summary handler for manual summary entry
+- _enrich_contact() helper with graceful error handling
+- All 40 tests pass, ruff clean
+- Files: scripts/dialer_bot.py
+---

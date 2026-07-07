@@ -59,7 +59,7 @@
         "All tests pass"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Update the dialer flow to enrich card before triggering Mango callback"
     },
     {
