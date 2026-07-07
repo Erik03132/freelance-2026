@@ -204,6 +204,9 @@ EXTRACTION_PROMPT = """Проанализируй транскрипт теле�
 - status=rejected если категорически отказал
 - Заполняй только то что реально прозвучало в разговоре
 
+ДАННЫЕ ИЗ БАЗЫ КОНТАКТОВ:
+{contact_context}
+
 ТРАНСКРИПТ:
 {transcript}"""
 
@@ -277,6 +280,127 @@ def is_valid_phone(num: str) -> bool:
     return len(n) == 11 and n.startswith("7")
 
 
+def contact_from_row(row: dict, phone: str) -> dict:
+    return {
+        "name": row.get("Название", row.get("company_name", row.get("company", ""))).strip(),
+        "description": row.get("Описание", row.get("description", "")).strip(),
+        "region": row.get("Регион", row.get("region", "")).strip(),
+        "city": row.get("Город", row.get("city", "")).strip(),
+        "address": row.get("Адрес", row.get("address", "")).strip(),
+        "contact_name": row.get("Имя", row.get("contact_name", "")).strip(),
+        "phone": norm_phone(phone),
+    }
+
+
+def contact_context(contact: dict) -> str:
+    if not contact:
+        return "нет данных"
+    fields = [
+        ("Компания", contact.get("name", "")),
+        ("Контакт", contact.get("contact_name", "")),
+        ("Регион", contact.get("region", "")),
+        ("Район/город", contact.get("city", "")),
+        ("Адрес", contact.get("address", "")),
+        ("Культуры из базы", contact.get("description", "")),
+        ("Телефон", contact.get("phone", "")),
+    ]
+    return "\n".join(f"{k}: {v}" for k, v in fields if v) or "нет данных"
+
+
+_CONTACT_LOOKUP_CACHE: Optional[dict[str, dict]] = None
+
+
+def load_contact_lookup() -> dict[str, dict]:
+    global _CONTACT_LOOKUP_CACHE
+    if _CONTACT_LOOKUP_CACHE is not None:
+        return _CONTACT_LOOKUP_CACHE
+
+    lookup: dict[str, dict] = {}
+    csv_dir = DATA_DIR / "campaigns" / "csv"
+    for path in sorted(csv_dir.glob("*.csv")):
+        try:
+            with open(path, "r", encoding="utf-8-sig") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    phones = row.get("Телефоны", row.get("phone", "")) or ""
+                    for raw_phone in re.findall(r"[\d\-\(\)\+\s]{7,}", phones):
+                        phone = norm_phone(raw_phone)
+                        if is_valid_phone(phone) and phone not in lookup:
+                            lookup[phone] = contact_from_row(row, phone)
+        except Exception:
+            continue
+    _CONTACT_LOOKUP_CACHE = lookup
+    return lookup
+
+
+def find_contact_by_phone(phone: str) -> Optional[dict]:
+    normalized = norm_phone(phone)
+    if not is_valid_phone(normalized):
+        return None
+    return load_contact_lookup().get(normalized)
+
+
+# === СТОП-ЛИСТ (ФЗ-152: право на отзыв согласия на обработку/обзвон) ===
+
+STOPLIST_PATH = RESULTS_DIR / "stoplist.txt"
+
+
+def _normalize_stop_phone(raw: str) -> str:
+    return norm_phone(raw)
+
+
+def load_stoplist() -> set:
+    """Загрузить стоп-лист (номера, кому звонить запрещено).
+
+    Поддерживаются:
+    - RESULTS_DIR/stoplist.txt (по одному номеру на строку)
+    - записи CRM со status='blocked'
+    """
+    blocked: set = set()
+
+    if STOPLIST_PATH.exists():
+        try:
+            for line in STOPLIST_PATH.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                blocked.add(_normalize_stop_phone(line))
+        except Exception:
+            pass
+
+    # CRM API
+    try:
+        for c in crm_get_contacts(status="blocked"):
+            phone = c.get("phone", "")
+            if phone:
+                blocked.add(_normalize_stop_phone(phone))
+    except Exception:
+        pass
+
+    return blocked
+
+
+def add_to_stoplist(phone: str) -> bool:
+    """Добавить номер в стоп-лист. Возвращает True если добавлен."""
+    normalized = _normalize_stop_phone(phone)
+    if not is_valid_phone(normalized):
+        return False
+    blocked = load_stoplist()
+    if normalized in blocked:
+        return False
+    try:
+        with open(STOPLIST_PATH, "a", encoding="utf-8") as f:
+            f.write(normalized + "\n")
+        blocked.add(normalized)
+        return True
+    except Exception:
+        return False
+
+
+def is_blocked(phone: str) -> bool:
+    return _normalize_stop_phone(phone) in load_stoplist()
+
+
 # ============================================================
 # MANGO API
 # ============================================================
@@ -328,36 +452,15 @@ def check_vps() -> bool:
 
 
 def find_recording_mango(phone: str, after_ts: float) -> Optional[str]:
-    """Найти recording_id через статистику Mango API."""
-    from datetime import datetime, timedelta
-    start = datetime.fromtimestamp(after_ts - 120).strftime("%Y-%m-%d %H:%M:%S")
-    end = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    payload = {"date_from": start, "date_to": end}
-    j = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
-    sign = hashlib.sha256((MANGO_API_KEY + j + MANGO_API_SALT).encode()).hexdigest()
+    """Найти recording_id через расширенную статистику Mango API."""
     try:
-        r = requests.post(
-            f"{MANGO_API_BASE}stats/request",
-            data={"vpbx_api_key": MANGO_API_KEY, "json": j, "sign": sign},
-            timeout=30,
-        )
-        data = r.json()
-        calls = data.get("calls", [])
-        target = norm_phone(phone)
-        for call in reversed(calls):
-            if norm_phone(call.get("to", "")) == target:
-                ct = call.get("call_start", "")
-                if ct:
-                    try:
-                        ct_ts = datetime.strptime(ct[:19], "%Y-%m-%d %H:%M:%S").timestamp()
-                        if ct_ts >= after_ts:
-                            return call.get("recording_id", "")
-                    except ValueError:
-                        pass
-        return None
+        from mango_s2t import find_recording_via_stats
+        found = find_recording_via_stats(phone, after_ts, timeout=30)
+        if found:
+            return found["recording_id"]
     except Exception as e:
-        log.error(f"Mango stats: {e}")
-        return None
+        log.error("find_recording_mango: %s", e)
+    return None
 
 
 def wait_for_recording(phone: str, call_start: float, timeout: int = 90) -> Optional[str]:
@@ -447,9 +550,9 @@ print(" ".join(s.text for s in segs).strip())
         return None
 
 
-def extract_crm_data(transcript: str) -> dict:
+def extract_crm_data(transcript: str, contact: Optional[dict] = None) -> dict:
     """LLM извлечение CRM-данных."""
-    prompt = EXTRACTION_PROMPT.format(transcript=transcript)
+    prompt = EXTRACTION_PROMPT.format(transcript=transcript, contact_context=contact_context(contact or {}))
     try:
         r = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -479,13 +582,18 @@ def extract_crm_data(transcript: str) -> dict:
 
 def save_to_crm(contact: dict, extracted: dict, transcript: str, recording_id: str) -> dict:
     """Сохранить в CRM."""
+    product = extracted.get("product", "") or contact.get("description", "")
+    contact_name = extracted.get("contact_name", "") or contact.get("contact_name", "")
     result = {
         "timestamp": datetime.now().isoformat(),
         "phone": contact["phone"],
         "company_name": contact.get("name", ""),
         "region": contact.get("region", ""),
-        "contact_name": extracted.get("contact_name", ""),
-        "product": extracted.get("product", ""),
+        "city": contact.get("city", ""),
+        "address": contact.get("address", ""),
+        "contact_name": contact_name,
+        "product": product,
+        "base_product": contact.get("description", ""),
         "volume": extracted.get("volume", ""),
         "ready_date": extracted.get("ready_date", ""),
         "price_info": extracted.get("price_info", ""),
@@ -554,6 +662,21 @@ def crm_save_contact(result: dict, transcript: str) -> Optional[dict]:
     """Сохранить контакт в CRM через API."""
     payload = {**result, "transcript": transcript}
     return _crm_api("POST", "/api/contacts", payload)
+
+
+def crm_find_by_phone(phone: str) -> Optional[dict]:
+    """Найти контакт в CRM по телефону."""
+    data = _crm_api("GET", f"/api/contacts?search={phone}")
+    if isinstance(data, list):
+        for c in data:
+            if norm_phone(c.get("phone", "")) == norm_phone(phone):
+                return c
+    return None
+
+
+def crm_update_contact(contact_id: int, updates: dict) -> Optional[dict]:
+    """Обновить контакт в CRM."""
+    return _crm_api("PUT", f"/api/contacts/{contact_id}", updates)
 
 
 def crm_get_contacts(search: str = "", status: str = "") -> list[dict]:
@@ -626,14 +749,7 @@ def load_contacts(weekend_only: bool = False, csv_path: Optional[str] = None) ->
             for phone in phone_list:
                 normalized = norm_phone(phone)
                 if is_valid_phone(normalized):
-                    contacts.append({
-                        "name": name,
-                        "description": row.get("Описание", "").strip(),
-                        "region": row.get("Регион", "").strip(),
-                        "city": row.get("Город", "").strip(),
-                        "contact_name": row.get("Имя", "").strip(),
-                        "phone": normalized,
-                    })
+                    contacts.append(contact_from_row(row, normalized))
                     break
     return contacts
 
@@ -784,13 +900,19 @@ async def _process_summary(update: Update, context: ContextTypes.DEFAULT_TYPE, t
         if m:
             phone = m.group(1)
 
+    db_contact = find_contact_by_phone(phone) if phone else None
     result = {
+        **data,
         "timestamp": datetime.now().isoformat(),
         "phone": norm_phone(phone) if phone else "",
-        "company_name": data.get("company", ""),
+        "company_name": data.get("company", "") or (db_contact or {}).get("name", ""),
+        "region": (db_contact or {}).get("region", ""),
+        "city": (db_contact or {}).get("city", ""),
+        "address": (db_contact or {}).get("address", ""),
+        "contact_name": data.get("contact_name", "") or (db_contact or {}).get("contact_name", ""),
+        "base_product": (db_contact or {}).get("description", ""),
         "transcript": transcript[:300],
         "source": "manual_summary",
-        **data,
     }
 
     # Save to results (JSONL)
@@ -805,9 +927,13 @@ async def _process_summary(update: Update, context: ContextTypes.DEFAULT_TYPE, t
     try:
         crm_payload = {
             "phone": result.get("phone", ""),
-            "company_name": result.get("company", ""),
-            "contact_name": data.get("contact_name", ""),
-            "product": data.get("product", ""),
+            "company_name": result.get("company_name", ""),
+            "region": result.get("region", ""),
+            "city": result.get("city", ""),
+            "address": result.get("address", ""),
+            "contact_name": result.get("contact_name", ""),
+            "product": data.get("product", "") or result.get("base_product", ""),
+            "base_product": result.get("base_product", ""),
             "volume": data.get("volume", ""),
             "ready_date": data.get("ready_date", ""),
             "price_info": data.get("price_info", ""),
@@ -826,10 +952,12 @@ async def _process_summary(update: Update, context: ContextTypes.DEFAULT_TYPE, t
 
     text = (
         f"{emoji} <b>Результат анализа</b>\n"
-        f"Клиент: {data.get('contact_name', '?')}\n"
-        f"Хозяйство: {data.get('company', '?')}\n"
+        f"Клиент: {result.get('contact_name', '?')}\n"
+        f"Хозяйство: {result.get('company_name', '?')}\n"
         f"Телефон: {phone}\n"
-        f"Продукт: {data.get('product', '?')}\n"
+        f"Регион: {result.get('region', '—')} {result.get('city', '')}\n"
+        f"Адрес: {result.get('address', '—') or '—'}\n"
+        f"Продукт: {data.get('product', '') or result.get('base_product', '?')}\n"
         f"Объём: {data.get('volume', '?')}\n"
         f"Цена: {data.get('price_info', '?')}\n"
         f"Готовность: {data.get('ready_date', '?')}\n"
@@ -1133,6 +1261,29 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+async def cmd_stoplist(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Команда /stoplist — просмотр и добавление номеров в стоп-лист (ФЗ-152)."""
+    args = context.args
+    if args:
+        phone = " ".join(args)
+        if add_to_stoplist(phone):
+            await update.message.reply_text(f"🛑 {norm_phone(phone)} добавлен в стоп-лист")
+        else:
+            await update.message.reply_text(
+                f"⚠️ Не удалось добавить {phone} (неверный формат или уже в стоп-листе)"
+            )
+        return
+
+    blocked = load_stoplist()
+    if not blocked:
+        await update.message.reply_text("🛑 Стоп-лист пуст")
+        return
+    lines = [f"🛑 <b>Стоп-лист ({len(blocked)})</b>:"]
+    for p in sorted(blocked):
+        lines.append(f"  • +{p}")
+    await update.message.reply_text("\n".join(lines), parse_mode="HTML")
+
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     st = get_state(update.effective_chat.id)
     text = (update.message.text or "").strip()
@@ -1188,6 +1339,14 @@ async def start_dialing(update: Update, context: ContextTypes.DEFAULT_TYPE, st: 
     contacts = load_contacts(weekend_only=is_weekend, csv_path=csv_path)
     already_called = load_already_called()
     contacts = [c for c in contacts if c["phone"] not in already_called]
+
+    # Стоп-лист (ФЗ-152: право на отзыв согласия)
+    blocked = load_stoplist()
+    if blocked:
+        before = len(contacts)
+        contacts = [c for c in contacts if c["phone"] not in blocked]
+        if before != len(contacts):
+            log.info("Стоп-лист: исключено %d номеров", before - len(contacts))
 
     if not contacts:
         await update.message.reply_text("✅ Все контакты обзвонены!")
@@ -1252,6 +1411,58 @@ async def stop_dialing(update: Update, context: ContextTypes.DEFAULT_TYPE, st: D
     )
 
 
+async def cmd_backfill(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Команда /backfill — подтянуть конспекты из Mango для существующих контактов."""
+    msg = await update.message.reply_text("🔄 Загружаю конспекты из Mango S2T...")
+    try:
+        from mango_s2t import fetch_summary_by_phone
+    except ImportError:
+        await msg.edit_text("❌ mango_s2t.py не найден")
+        return
+
+    contacts = crm_get_contacts()
+    if not contacts:
+        await msg.edit_text("Нет контактов в CRM")
+        return
+
+    done = 0
+    skipped = 0
+    errors = 0
+    for c in contacts:
+        phone = c.get("phone", "")
+        existing_transcript = c.get("transcript", "")
+        if existing_transcript and len(existing_transcript) > 20:
+            skipped += 1
+            continue
+        try:
+            ts = c.get("timestamp", "")
+            after_ts = 0
+            if ts:
+                try:
+                    after_ts = datetime.fromisoformat(ts).timestamp()
+                except Exception:
+                    after_ts = 0
+            if not after_ts:
+                continue
+
+            summary = fetch_summary_by_phone(phone, after_ts, timeout=45)
+            if summary:
+                crm_update_contact(c["id"], {"transcript": summary})
+                done += 1
+                if done % 3 == 0:
+                    await msg.edit_text(f"🔄 Обработано: {done}/{len(contacts)}, пропущено: {skipped}")
+        except Exception as e:
+            log.error("Backfill %s: %s", phone, e)
+            errors += 1
+
+    await msg.edit_text(
+        f"✅ Готово!\n"
+        f"📥 Загружено конспектов: {done}\n"
+        f"⏭ Пропущено (уже есть): {skipped}\n"
+        f"❌ Ошибок: {errors}"
+    )
+
+
 async def skip_contact(update: Update, context: ContextTypes.DEFAULT_TYPE, st: DialerState):
     """Пропустить текущий контакт."""
     if not st.active:
@@ -1306,52 +1517,99 @@ async def show_status(update: Update, context: ContextTypes.DEFAULT_TYPE, st: Di
 async def process_call_background(
     bot, chat_id: str, contact: dict, call_start: float, st: DialerState
 ):
-    """Обработка звонка в фоне: ожидание записи → STT → LLM → CRM → Telegram."""
+    """Обработка звонка в фоне: запись → Mango S2T конспект → LLM → CRM → Telegram."""
     recording_id = await asyncio.to_thread(
         wait_for_disconnect_and_recording, contact["phone"], call_start
     )
-    if not recording_id:
-        st.stats["no_answer"] += 1
-        return
 
+    # 1. Пробуем Mango Speech2Text (расшифровка из Речевой аналитики)
+    mango_transcript = None
     try:
-        transcript = await asyncio.to_thread(process_recording, recording_id)
-        if not transcript:
-            await bot.send_message(chat_id=chat_id, text="⚠️ STT не удался")
-            st.stats["other"] += 1
-            return
-
-        extracted = await asyncio.to_thread(extract_crm_data, transcript)
-        saved = save_to_crm(contact, extracted, transcript, recording_id)
-        st.stats[extracted.get("status", "other")] += 1
-        st.results.append(saved)
-
-        status_emoji = {
-            "lead": "🟢", "callback": "🟡", "rejected": "🔴",
-            "no_interest": "⚪", "no_answer": "⚫", "other": "⚫",
-        }
-        emoji = status_emoji.get(saved["status"], "⚫")
-
-        crm_card = (
-            f"{emoji} <b>Результат</b>\n\n"
-            f"🏢 {saved['company_name']}\n"
-            f"📱 +{saved['phone']}\n"
-            f"👤 {saved['contact_name'] or '—'}\n"
-            f"🌾 {saved['product'] or '—'}\n"
-            f"📦 {saved['volume'] or '—'}\n"
-            f"📅 {saved['ready_date'] or '—'}\n"
-            f"💰 {saved['price_info'] or '—'}\n"
-            f"📝 {saved['notes'] or '—'}\n"
-            f"\n📊 Лиды: {st.stats['lead']}"
+        from mango_s2t import fetch_summary
+        mango_transcript = await asyncio.to_thread(
+            fetch_summary, contact["phone"], call_start, 60
         )
+    except Exception:
+        pass
 
+    if mango_transcript:
+        transcript = mango_transcript
+        st.stats["s2t_mango"] = st.stats.get("s2t_mango", 0) + 1
+        log.info("Mango S2T transcript for %s: %d chars", contact["phone"], len(transcript))
+    elif recording_id:
+        # 2. Fallback: Whisper STT через MP3
+        try:
+            transcript = await asyncio.to_thread(process_recording, recording_id)
+        except Exception:
+            transcript = None
+    else:
+        transcript = None
+
+    if transcript:
+        extracted = await asyncio.to_thread(extract_crm_data, transcript, contact)
+    else:
+        extracted = {
+            "status": "no_contact",
+            "contact_name": contact.get("contact_name", ""),
+            "product": contact.get("description", ""),
+            "volume": "",
+            "ready_date": "",
+            "price_info": "",
+            "notes": "Не ответил" if not recording_id else "STT не удался",
+        }
+
+    # Добавляем ссылку на запись в заметки
+    if recording_id:
+        recording_link = f"https://app.mango-office.ru/vpbx/queries/recording/post?action=download&recording_id={recording_id}"
+        crm_notes = extracted.get("notes", "")
+        if crm_notes:
+            crm_notes += f"\n🎙 Запись: {recording_link}"
+        else:
+            crm_notes = f"🎙 Запись: {recording_link}"
+        extracted["notes"] = crm_notes
+
+    saved = save_to_crm(contact, extracted, transcript or "", recording_id or "")
+    st.stats[extracted.get("status", "no_contact")] += 1
+    st.results.append(saved)
+
+    # Авто-стоп-лист: если клиент попросил не звонить (ФЗ-152)
+    STOP_WORDS = [
+        "не звоните", "вычеркните", "больше не беспокойте", "не беспокойте",
+        "не надо звонить", "перестаньте звонить", "уберите из базы",
+        "не звони", "вычеркни", "не буду с вами",
+    ]
+    haystack = f"{transcript or ''}\n{extracted.get('notes', '')}\n{extracted.get('contact_name', '')}".lower()
+    if any(w in haystack for w in STOP_WORDS):
+        if add_to_stoplist(contact["phone"]):
+            log.info("Стоп-лист: добавлен %s (клиент попросил не звонить)", contact["phone"])
+            saved["status"] = "blocked"
+            saved["notes"] = (saved.get("notes", "") + "\n🛑 Клиент попросил не звонить — в стоп-листе").strip()
+
+    status_emoji = {
+        "lead": "🟢", "callback": "🟡", "rejected": "🔴",
+        "no_interest": "⚪", "no_contact": "⚫", "no_answer": "⚫", "other": "⚫",
+        "blocked": "🛑",
+    }
+    emoji = status_emoji.get(saved["status"], "⚫")
+
+    crm_card = (
+        f"{emoji} <b>Результат</b>\n\n"
+        f"🏢 {saved['company_name']}\n"
+        f"📍 {saved.get('region', '')} {saved.get('city', '')}\n"
+        f"🏠 {saved.get('address', '') or '—'}\n"
+        f"📱 +{saved['phone']}\n"
+        f"👤 {saved['contact_name'] or '—'}\n"
+        f"🌾 {saved['product'] or '—'}\n"
+        f"📦 {saved['volume'] or '—'}\n"
+        f"📅 {saved['ready_date'] or '—'}\n"
+        f"💰 {saved['price_info'] or '—'}\n"
+        f"📝 {saved['notes'] or '—'}\n"
+        f"\n📊 Лиды: {st.stats['lead']}"
+    )
+    try:
         await bot.send_message(chat_id=chat_id, text=crm_card, parse_mode="HTML")
     except Exception as e:
-        log.error(f"Background processing error: {e}")
-        try:
-            await bot.send_message(chat_id=chat_id, text=f"⚠️ Ошибка обработки: {e}")
-        except Exception:
-            pass
+        log.error(f"Send result error: {e}")
 
 
 # ============================================================
@@ -1369,15 +1627,18 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
 
         # Уведомляем о следующем звонке
         kb = ReplyKeyboardMarkup(CAROUSEL_BUTTONS if st.carousel else DIALING_BUTTONS, resize_keyboard=True, is_persistent=True)
+        address_line = f"🏠 {contact.get('address', '')[:60]}\n" if contact.get("address") else ""
+        contact_line = f"👤 {contact['contact_name']}" if contact.get("contact_name") else ""
         await context.bot.send_message(
             chat_id=chat_id,
             text=(
                 f"📞 <b>Звоню #{st.current_idx + 1}</b>\n"
                 f"🏢 {contact['name'][:40]}\n"
                 f"📍 {contact['region']}, {contact['city']}\n"
+                f"{address_line}"
                 f"🌾 {contact['description'][:40]}\n"
                 f"📱 +{contact['phone']}\n"
-                f"{'👤 ' + contact['contact_name'] if contact['contact_name'] else ''}"
+                f"{contact_line}"
             ),
             parse_mode="HTML",
             reply_markup=kb,
@@ -1531,6 +1792,8 @@ def main():
     app.add_handler(CommandHandler("crm", cmd_crm))
     app.add_handler(CommandHandler("remind", cmd_remind))
     app.add_handler(CommandHandler("stop", cmd_stop))
+    app.add_handler(CommandHandler("stoplist", cmd_stoplist))
+    app.add_handler(CommandHandler("backfill", cmd_backfill))
     app.add_handler(MessageHandler(filters.Document.ALL, handle_document))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
