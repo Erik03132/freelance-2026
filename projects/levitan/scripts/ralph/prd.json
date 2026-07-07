@@ -89,7 +89,7 @@
         "All 25+ tests pass"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Warnings: PydanticDeprecatedSince20 - Support for class-based `config` is deprecated, use ConfigDict instead"
     },
     {

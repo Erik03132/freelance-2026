@@ -45,3 +45,10 @@ Started: 2026-07-07
 - All 40 tests pass, ruff clean
 - Files: scripts/dialer_bot.py
 ---
+
+## 2026-07-07 - US-006
+- Replaced all class Config with model_config = ConfigDict(...) in 8 settings classes
+- Zero pydantic deprecation warnings (verified with -W error::pydantic.PydanticDeprecatedSince20)
+- All 40 tests pass, ruff clean
+- Files: src/levitan/config.py
+---
