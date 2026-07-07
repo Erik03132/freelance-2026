@@ -1,3 +1,12 @@
 # Ralph Progress Log
 Started: 2026-07-07
 ---
+
+## 2026-07-07 - US-001
+- Set up ruff linting config in pyproject.toml
+- Auto-fixed 392 violations (W293, UP045, I001, F401, UP015, UP032, UP041)
+- Manually fixed 3 E501 line-too-long issues in config.py, lead_storage.py, prompts.py
+- Created 25 smoke tests for prompts, config, knowledge_base, call_session
+- All tests pass, ruff clean
+- Files: pyproject.toml, requirements.txt, tests/*, src/levitan/* (all 13 files trimmed)
+---
