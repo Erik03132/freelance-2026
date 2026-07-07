@@ -36,3 +36,12 @@ Started: 2026-07-07
 - All 40 tests pass, ruff clean
 - Files: scripts/dialer_bot.py
 ---
+
+## 2026-07-07 - US-005
+- Added duration_sec and operator fields to save_to_crm
+- save_to_crm now accepts call_start and operator params
+- Duration computed from call_start to save time
+- Operator extension passed from dialer state/env
+- All 40 tests pass, ruff clean
+- Files: scripts/dialer_bot.py
+---

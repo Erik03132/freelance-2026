@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -22,10 +22,7 @@ class MangoSettings(BaseSettings):
     sip_password: str = Field(default="", alias="MANGO_SIP_PASSWORD")
     sip_host: str = Field(default="", alias="MANGO_SIP_HOST")
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 class OpenRouterSettings(BaseSettings):
@@ -35,20 +32,14 @@ class OpenRouterSettings(BaseSettings):
         default="qwen/qwen-2.5-7b-instruct", alias="OPENROUTER_FALLBACK_MODEL"
     )
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 class TelegramSettings(BaseSettings):
     bot_token: str = Field(default="", alias="TELEGRAM_BOT_TOKEN")
     chat_id: str = Field(default="", alias="TELEGRAM_CHAT_ID")
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 class STTSettings(BaseSettings):
@@ -56,10 +47,7 @@ class STTSettings(BaseSettings):
     language: str = Field(default="ru", alias="STT_LANGUAGE")
     device: str = Field(default="cpu", alias="STT_DEVICE")
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 class TTSSettings(BaseSettings):
@@ -67,10 +55,7 @@ class TTSSettings(BaseSettings):
     rate: str = Field(default="+0%", alias="TTS_RATE")
     cache_dir: Path = VOICE_CACHE_DIR
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 class DialogSettings(BaseSettings):
@@ -79,10 +64,7 @@ class DialogSettings(BaseSettings):
     min_speech: float = Field(default=0.3, alias="DIALOG_MIN_SPEECH")
     vad_threshold: float = Field(default=0.5, alias="DIALOG_VAD_THRESHOLD")
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 class CampaignSettings(BaseSettings):
@@ -92,10 +74,7 @@ class CampaignSettings(BaseSettings):
     call_hours_end: int = Field(default=18, alias="CAMPAIGN_CALL_HOURS_END")
     max_retries: int = Field(default=3, alias="CAMPAIGN_MAX_RETRIES")
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 class Settings(BaseSettings):
@@ -107,10 +86,7 @@ class Settings(BaseSettings):
     dialog: DialogSettings = DialogSettings()
     campaign: CampaignSettings = CampaignSettings()
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        extra = "ignore"
+    model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
 
 settings = Settings()
