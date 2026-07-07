@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""Greeting Bridge — управляет baresip для приветствия и перевода звонка."""
+"""Greeting Bridge — управляет baresip для мгновенного подключения оператора.
+
+Поток:
+1. Mango callback ext 23 → baresip отвечает
+2. Mango звонит клиенту
+3. Клиент ответил → baresip переводит на ext 22 (оператор)
+4. Оператор поднимает трубку → сразу говорит с клиентом
+
+Без приветствия. Оператор НЕ слышит гудков.
+"""
 import asyncio
 import json
 import logging
-import os
-import signal
 import subprocess
-import sys
-import time
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(message)s")
@@ -15,7 +20,6 @@ log = logging.getLogger("greeting-bridge")
 
 BASE_DIR = Path(__file__).resolve().parent
 BARESIP_DIR = BASE_DIR
-GREETING_WAV = BASE_DIR.parent / "scripts" / "tts_cache" / "globalfields_greeting_default.wav"
 CTRL_PORT = 4444
 TRANSFER_TARGET = "sip:22@vpbx400374818.mangosip.ru"
 
@@ -26,12 +30,6 @@ class GreetingBridge:
         self.reader: asyncio.StreamReader | None = None
         self.writer: asyncio.StreamWriter | None = None
         self.active_call_id: str | None = None
-
-    def ensure_wav(self) -> bool:
-        if not GREETING_WAV.exists():
-            log.error(f"WAV не найден: {GREETING_WAV}")
-            return False
-        return True
 
     async def start_baresip(self):
         log.info("Запуск baresip...")
@@ -60,7 +58,7 @@ class GreetingBridge:
             "type": "command",
             "command": command,
             "params": params,
-            "token": str(int(time.time() * 1000)),
+            "token": str(int(asyncio.get_event_loop().time() * 1000)),
         })
         self.writer.write((msg + "\n").encode())
         await self.writer.drain()
@@ -93,18 +91,15 @@ class GreetingBridge:
     async def handle_incoming(self, data: dict):
         call_id = data.get("id", "")
         self.active_call_id = call_id
-        log.info(f"Входящий звонок: {call_id}")
+        log.info(f"Входящий звонок от Mango: {call_id}")
         await self.send_command("/call/answer", call_id)
-        log.info(f"Отвечаю на звонок {call_id}")
+        log.info(f"Отвечаю на звонок {call_id} (клиенту ещё не звоним)")
 
     async def handle_established(self, data: dict):
         call_id = data.get("id", "") or self.active_call_id
         log.info(f"Звонок установлен: {call_id}")
-        log.info(f"Запускаю приветствие: {GREETING_WAV}")
-        await self.send_command("aufile_play", str(GREETING_WAV))
-
-        log.info(f"Переведу звонок на {TRANSFER_TARGET} через 6 сек...")
-        await asyncio.sleep(6)
+        log.info(f"Перевожу на оператора {TRANSFER_TARGET}...")
+        # Мгновенный перевод — без приветствия
         await self.send_command("/call/transfer", TRANSFER_TARGET)
         log.info(f"Команда перевода отправлена")
 
@@ -113,9 +108,6 @@ class GreetingBridge:
         self.active_call_id = None
 
     async def run(self):
-        if not self.ensure_wav():
-            return
-
         # Kill any existing baresip
         subprocess.run(["pkill", "-f", "baresip.*greeting_bridge"], capture_output=True)
         await asyncio.sleep(1)
@@ -125,7 +117,7 @@ class GreetingBridge:
         if not connected:
             return
 
-        log.info("Greeting Bridge готов")
+        log.info("Bridge готов (режим: мгновенное подключение без приветствия)")
         await self.read_events()
 
         # Cleanup
