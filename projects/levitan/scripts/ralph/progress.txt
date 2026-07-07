@@ -18,3 +18,12 @@ Started: 2026-07-07
 - All 35 tests pass, ruff clean
 - Files: src/levitan/utils.py, tests/test_utils.py
 ---
+
+## 2026-07-07 - US-003
+- Created crm_enricher.py with CrmProvider ABC, MockCrmProvider, CrmEnricher
+- Created ContactInfo dataclass with is_empty property
+- Provider pattern — easy to swap for real CRM API later
+- 5 tests covering found, not found, default provider, empty/non-empty contact
+- All 40 tests pass, ruff clean
+- Files: src/levitan/crm_enricher.py, tests/test_crm_enricher.py
+---

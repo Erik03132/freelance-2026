@@ -45,7 +45,7 @@
         "All tests pass"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "CSV at data/campaigns/csv/all_contacts_2026.csv. Columns: phone, company, contact, region, crops"
     },
     {

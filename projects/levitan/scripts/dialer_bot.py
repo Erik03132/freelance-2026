@@ -64,6 +64,27 @@ RESULTS_JSON = RESULTS_DIR / f"results_{TODAY}.json"
 ALREADY_CALLED_CSV = RESULTS_DIR / "already_called.csv"
 REMINDERS_PATH = RESULTS_DIR / "reminders.json"
 
+# === CRM ENRICHER ===
+from levitan.crm_enricher import CrmEnricher
+
+_crm_enricher = CrmEnricher()
+
+
+async def _enrich_contact(contact: dict) -> dict:
+    """Обогатить контакт данными из CRM."""
+    try:
+        enriched = await _crm_enricher.enrich(contact["phone"])
+        if enriched.name and not contact.get("contact_name"):
+            contact["contact_name"] = enriched.name
+        if enriched.company and not contact.get("name"):
+            contact["name"] = enriched.company
+        contact["position"] = enriched.position
+        contact["crm_email"] = enriched.email
+    except Exception as e:
+        log.debug("CRM enrich error: %s", e)
+    return contact
+
+
 # === LOAD .env ===
 ENV_FILE = BASE_DIR / ".env"
 if ENV_FILE.exists():
@@ -901,6 +922,22 @@ async def _process_summary(update: Update, context: ContextTypes.DEFAULT_TYPE, t
             phone = m.group(1)
 
     db_contact = find_contact_by_phone(phone) if phone else None
+
+    # CRM enrichment
+    if phone:
+        try:
+            enriched = await _crm_enricher.enrich(phone)
+            if not db_contact:
+                db_contact = {}
+            if enriched.name and not db_contact.get("contact_name"):
+                db_contact["contact_name"] = enriched.name
+            if enriched.company and not db_contact.get("name"):
+                db_contact["name"] = enriched.company
+            if enriched.position:
+                db_contact["position"] = enriched.position
+        except Exception:
+            pass
+
     result = {
         **data,
         "timestamp": datetime.now().isoformat(),
@@ -1625,10 +1662,14 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
         contact = st.contacts[st.current_idx]
         st.current_contact = contact
 
+        # CRM enrichment
+        contact = await _enrich_contact(contact)
+
         # Уведомляем о следующем звонке
         kb = ReplyKeyboardMarkup(CAROUSEL_BUTTONS if st.carousel else DIALING_BUTTONS, resize_keyboard=True, is_persistent=True)
         address_line = f"🏠 {contact.get('address', '')[:60]}\n" if contact.get("address") else ""
         contact_line = f"👤 {contact['contact_name']}" if contact.get("contact_name") else ""
+        enrich_line = f"💼 {contact['position']}" if contact.get("position") else ""
         await context.bot.send_message(
             chat_id=chat_id,
             text=(
@@ -1639,6 +1680,7 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
                 f"🌾 {contact['description'][:40]}\n"
                 f"📱 +{contact['phone']}\n"
                 f"{contact_line}"
+                f"{enrich_line}"
             ),
             parse_mode="HTML",
             reply_markup=kb,
