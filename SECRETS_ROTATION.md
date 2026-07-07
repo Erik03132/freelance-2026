@@ -5,22 +5,19 @@
 
 ---
 
-## 1. OpenRouter API Keys
+## 1. OpenRouter API Keys ✅ ОБНОВЛЕНО
 
 | Где используется | Старый ключ | Действие |
 |------------------|-------------|----------|
-| ai-levitan | `sk-or-v1-1dd83e5b...` | Удалить → создать новый |
-| ai-eggs | `sk-or-v1-1dd83e5b...` | Тот же ключ |
-| ai-bureau | `sk-or-v1-1dd83e5b...` | Тот же ключ |
-| ai-grant-consalt | `sk-or-v1-6100c265...` | Удалить → создать новый |
-| ai-senat (archive) | `sk-or-v1-7979a446...` | Удалить → создать новый |
-| angel-backend | `sk-or-v1-7979a446...` | Тот же ключ |
-
-**Как заменить:**
-1. https://openrouter.ai/settings/keys
-2. Удалить ВСЕ старые ключи
-3. Создать 1-2 новых ключа
-4. Обновить `.env` файлы
+| ai-levitan | `sk-or-v1-1dd83e5b...` | ✅ Заменён |
+| ai-eggs | `sk-or-v1-1dd83e5b...` | ✅ Заменён |
+| ai-bureau | `sk-or-v1-1dd83e5b...` | ✅ Заменён |
+| ai-grant-consalt | `sk-or-v1-6100c265...` | ✅ Заменён |
+| ai-senat (archive) | `sk-or-v1-7979a446...` | ✅ Заменён |
+| angel-backend | `sk-or-v1-7979a446...` | ✅ Заменён |
+| agent-lab | `sk-or-v1-1dd83e5b...` | ✅ Заменён |
+| ai-scout | `sk-or-v1-1dd83e5b...` | ✅ Заменён |
+| dashboard | `sk-or-v1-6100c265...` | ✅ Заменён |
 
 ---
 
