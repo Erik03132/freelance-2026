@@ -1,0 +1,72 @@
+# Levitan .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# Virtual environments
+.venv/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Data - track call_results but not campaign bulk data
+data/*.db
+data/*.sqlite
+data/.gitkeep
+data/campaigns/csv/all_contacts_2026.csv
+data/campaigns/csv/*.csv
+!data/call_results/*.csv
+!data/call_results/*.json
+!data/call_results/*.jsonl
+
+# Cache
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Project specific
+scratch/
+temp_voices/
+tts_cache/
+
+# Large data files
+data/campaigns/2026/*.xlsx
+data/voice_cache/
+data/turkey_audio/

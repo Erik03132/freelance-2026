@@ -1,0 +1,44 @@
+{
+  "comment": "ПРИМЕР КОНФИГУРАЦИИ - скопируйте в config.json и отредактируйте",
+  
+  "habr": {
+    "enabled": true,
+    "comment": "Habr не требует credentials - парсим HTML напрямую"
+  },
+  
+  "medium": {
+    "enabled": false,
+    "comment": "Включите когда будете готовы отслеживать Medium авторов",
+    "usernames": [
+      "medium_username1",
+      "medium_username2"
+    ]
+  },
+  
+  "twitter": {
+    "enabled": false,
+    "comment": "Получить Bearer Token на https://developer.twitter.com",
+    "bearer_token": "YOUR_BEARER_TOKEN_HERE",
+    "query": "AI OR machine learning OR python"
+  },
+  
+  "telegram": {
+    "enabled": false,
+    "comment": "Парсить сообщения из Telegram канала",
+    "bot_token": "YOUR_BOT_TOKEN_HERE",
+    "channel_id": "@channel_username_or_id"
+  },
+  
+  "telegram_bot_token": "YOUR_BOT_TOKEN_HERE",
+  "telegram_chat_id": "YOUR_CHAT_ID_HERE",
+  "comment_telegram": "Получить от @BotFather (token) и из канала (chat_id начинается с -)",
+  
+  "min_score": 40,
+  "comment_min_score": "Минимальный score для включения в digest (0-100)",
+  
+  "max_items": 100,
+  "comment_max_items": "Максимум статей за один run",
+  
+  "dedup_threshold": 0.85,
+  "comment_dedup": "Порог дедупликации (0.0-1.0)"
+}

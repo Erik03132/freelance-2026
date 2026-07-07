@@ -1,0 +1,29 @@
+{
+  "project": "Levitan — голосовой агент обзвона Global Fields Export",
+  "task": "Завершение сессии 2026-07-06. Продолжить завтра.",
+  "context": "Сессия 2026-07-06:\n\n🔥 ЛИДЫ:\n- Белый А.Н. +79184296652 — 50т пшеницы, 11-13 руб, нат 600. Ждёт звонка менеджера. callback конец июля.\n- Виктор +79611061981 — заинтересован, объём маленький.\n- «Георгиевское» ООО +79284749787 — заинтересованы, уточнить.\n\n🤖 БОТ @levitan_dialer_bot:\n- Добавлены команды: /summary, /crm, /remind\n- /summary — вставить конспект Mango → LLM извлекает данные\n- /crm — сводка CRM, поиск\n- /remind — напоминания с автоуведомлением\n- Напоминания: Белый 27.07, Виктор 10.07, Георгиевское 15.07\n- Авто-напоминания проверяются каждый час\n\n📡 WEBHOOK SERVER:\n- scripts/webhook_server.py (FastAPI, порт 8088)\n- deploy/deploy_webhook.sh — деплой на VPS\n- VPS оба недоступны (72.56.38.19, 185.39.206.145)\n\n🗄️ CRM:\n- Временная: data/call_results/results_*.json (JSON-файлы)\n- Запроектирована своя CRM: FastAPI + SQLite + веб-интерфейс\n- Структура crm/ создана, код не написан\n\n🐛 ПРОБЛЕМЫ:\n- Whisper STT плохой из-за hold music в записях\n- Mango API speech-analytics не отдаёт текст (только веб/вебхук)\n- VPS недоступен\n- localtunnel нестабилен для продакшна",
+  "files": [
+    "scripts/dialer_bot.py",
+    "scripts/webhook_server.py",
+    "scripts/ping_checker.py",
+    "deploy/deploy_webhook.sh",
+    "data/call_results/results_2026-07-06_batch.json",
+    "data/call_results/reminders.json",
+    "STATUS.md"
+  ],
+  "skills": [
+    "bot-development",
+    "deployment"
+  ],
+  "next_steps": [
+    "1. Реализовать CRM: FastAPI + SQLite + Jinja2 шаблоны (crm/ директория)",
+    "2. Интегрировать бота с CRM API вместо JSON",
+    "3. Восстановить VPS или развернуть на новом хостинге",
+    "4. Настроить Mango webhook → конспекты летят автоматом на webhook_server",
+    "5. Продолжить обзвон — карусель по оставшимся контактам",
+    "6. Перенести webhook на VPS и настроить Mango отправлять summary",
+    "7. Greeting Bridge (baresip) — после стабилизации Phase 1"
+  ],
+  "escalation": false,
+  "deadline": "2026-07-07T23:00:00"
+}

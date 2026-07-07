@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %} — {{ c.phone }}{% endblock %}
+{% block content %}
+<div class="detail-header">
+    <a href="/contacts" class="btn-back">← Все контакты</a>
+    <h1>{{ c.company_name or c.phone }}</h1>
+    <span class="status-badge status-{{ c.status }} status-lg">{{ status_labels.get(c.status, c.status) }}</span>
+</div>
+
+<div class="grid-3">
+    <div class="card">
+        <h3>Контакт</h3>
+        <table class="info-table">
+            <tr><td>Телефон</td><td><strong>{{ c.phone }}</strong></td></tr>
+            <tr><td>Контакт</td><td>{{ c.contact_name or "—" }}</td></tr>
+            <tr><td>Компания</td><td>{{ c.company_name or "—" }}</td></tr>
+            <tr><td>Регион</td><td>{{ c.region or "—" }}</td></tr>
+            <tr><td>Дата звонка</td><td>{{ c.created_at[:19] }}</td></tr>
+        </table>
+    </div>
+    <div class="card">
+        <h3>Продукт</h3>
+        <table class="info-table">
+            <tr><td>Культура</td><td><strong>{{ c.product or "—" }}</strong></td></tr>
+            <tr><td>Объём</td><td>{{ c.volume or "—" }}</td></tr>
+            <tr><td>Готовность</td><td>{{ c.ready_date or "—" }}</td></tr>
+            <tr><td>Цена</td><td>{{ c.price_info or "—" }}</td></tr>
+        </table>
+    </div>
+    <div class="card">
+        <h3>Детали</h3>
+        <div class="detail-notes">
+            <strong>Заметки:</strong>
+            <p>{{ c.notes or "—" }}</p>
+        </div>
+        {% if c.transcript %}
+        <details>
+            <summary>Транскрипт разговора</summary>
+            <pre class="transcript">{{ c.transcript }}</pre>
+        </details>
+        {% endif %}
+        {% if c.recording_id %}
+        <p class="muted" style="margin-top:0.5rem">Recording ID: {{ c.recording_id }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card" style="margin-top:1.25rem">
+    <h3>Действия</h3>
+    <div class="action-bar">
+        <button class="btn" onclick="addToToday('{{ c.phone }}', '{{ c.company_name|e }}', '{{ c.contact_name|e }}')">📞 На сегодня</button>
+        <button class="btn" onclick="copyPhone('{{ c.phone }}')">📋 Копировать телефон</button>
+        <button class="btn" onclick="toggleStatus({{ c.id }}, 'lead')">🔥 В лиды</button>
+        <button class="btn" onclick="toggleStatus({{ c.id }}, 'callback')">📞 На callback</button>
+        <button class="btn" onclick="toggleStatus({{ c.id }}, 'no_interest')">❌ Не интересно</button>
+    </div>
+</div>
+
+<script>
+function copyPhone(phone) {
+    navigator.clipboard.writeText(phone).then(() => alert('Телефон скопирован: ' + phone));
+}
+function toggleStatus(id, status) {
+    fetch('/api/contacts/' + id, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({status: status})
+    }).then(r => {
+        if (r.ok) location.reload();
+        else alert('Ошибка');
+    });
+}
+function addToToday(phone, company, contact) {
+    const today = new Date().toISOString().slice(0, 10);
+    const note = prompt('Заметка (необязательно):');
+    fetch('/api/reminders', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            phone: phone,
+            due_date: today,
+            note: (contact ? contact + ': ' : '') + (note || 'Перезвонить')
+        })
+    }).then(r => {
+        if (r.ok) alert('✅ Добавлен на сегодня');
+        else alert('Ошибка');
+    });
+}
+</script>
+{% endblock %}

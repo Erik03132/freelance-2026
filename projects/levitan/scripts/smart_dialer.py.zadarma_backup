@@ -1,0 +1,1070 @@
+#!/usr/bin/env python3
+"""
+Levitan Smart Dialer — Автодозвон + автоCRM через запись.
+=========================================================
+
+Поддерживает две телефонии: Zadarma (рекомендуется) и Mango (legacy).
+Управляется через TELEPHONY=zadarma|mango в .env.
+
+Ты звонишь, говоришь с клиентом, кладёшь трубку.
+Система автоматически:
+1. Скачивает запись (Zadarma: прямой URL из webhook; Mango: API)
+2. Транскрибирует на VPS (faster-whisper)
+3. LLM извлекает: статус, культуры, объём, возражения...
+4. Заполняет CRM (CSV + JSON)
+5. Отправляет саммари в Telegram
+
+Запуск: python3 scripts/smart_dialer.py
+Тест:   python3 scripts/smart_dialer.py --test
+
+Зависимости (локально): requests
+Зависимости (VPS): faster-whisper, ffmpeg
+"""
+
+import csv
+import hashlib
+import json
+import os
+import re
+import sys
+import time
+import uuid
+from collections import Counter
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+try:
+    import requests
+except ImportError:
+    print("pip install requests")
+    sys.exit(1)
+
+# === PATHS ===
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+CSV_PATH = DATA_DIR / "campaigns" / "csv" / "all_contacts_2026.csv"
+RESULTS_DIR = DATA_DIR / "call_results"
+RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+TRANSCRIPTS_DIR = DATA_DIR / "transcripts"
+TRANSCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
+
+TODAY = datetime.now().strftime("%Y-%m-%d")
+RESULTS_CSV = RESULTS_DIR / f"results_{TODAY}.csv"
+RESULTS_JSON = RESULTS_DIR / f"results_{TODAY}.json"
+
+# === LOAD .env ===
+ENV_FILE = BASE_DIR / ".env"
+if ENV_FILE.exists():
+    with open(ENV_FILE) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, _, value = line.partition("=")
+                os.environ.setdefault(key.strip(), value.strip())
+
+# === CONFIG ===
+TELEPHONY = os.getenv("TELEPHONY", "zadarma").lower()  # zadarma | mango
+
+# Zadarma
+ZADARMA_KEY    = os.getenv("ZADARMA_KEY", "")
+ZADARMA_SECRET = os.getenv("ZADARMA_SECRET", "")
+ZADARMA_SIP    = os.getenv("ZADARMA_SIP", "")        # ваш SIP-номер в Zadarma, напр. 100
+ZADARMA_CALLER_ID = os.getenv("ZADARMA_CALLER_ID", "") # купленный номер для CallerID
+ZADARMA_API_BASE = "https://api.zadarma.com/v1"
+
+# Mango (legacy)
+MANGO_API_KEY  = os.getenv("MANGO_VPBX_API_KEY", "") or os.getenv("MANGO_API_KEY", "")
+MANGO_API_SALT = os.getenv("MANGO_VPBX_API_SALT", "") or os.getenv("MANGO_SALT", "")
+MANGO_API_BASE = "https://app.mango-office.ru/vpbx/"
+MANGO_FROM_EXTENSION = os.getenv("MANGO_FROM_EXTENSION", "22")
+
+# Общее
+OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "")
+TELEGRAM_BOT_TOKEN = os.getenv("LEVITAN_TELEGRAM_BOT_TOKEN", "") or os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("LEVITAN_TELEGRAM_CHAT_ID", "") or os.getenv("TELEGRAM_CHAT_ID", "")
+
+# VPS для STT
+VPS_HOST = os.getenv("LEVITAN_VPS_HOST", "72.56.38.19")
+VPS_USER = os.getenv("LEVITAN_VPS_USER", "root")
+
+# Zadarma: записи приходят через webhook → хранятся локально на VPS
+ZADARMA_RECORDS_DIR = Path(os.getenv("ZADARMA_RECORDS_DIR", "/var/log/levitan/zadarma_records"))
+ZADARMA_EVENTS_PATH = Path(os.getenv("ZADARMA_EVENTS_PATH", "/var/log/levitan/zadarma_events.jsonl"))
+
+# === ФИЛЬТР КУЛЬТУР ===
+TARGET_KEYWORDS = [
+    "зерновые", "пшеница", "ячмень", "кукуруза",
+    "подсолнечник", "рапс", "соя",
+    "горох", "нут", "чечевица",
+    "масличные", "бобовые", "озимая", "яровая",
+    "зерно", "закупка зерновых",
+]
+
+EXCLUDE_ONLY = [
+    "крс", "молочный", "мясной", "овцы", "свиньи",
+    "птица", "рыба", "овощи", "картофель", "сахарная",
+    "хранение", "сооружений", "техника", "ремонт",
+    "торговля", "производство молочной",
+]
+
+# === LLM EXTRACTION PROMPT ===
+EXTRACTION_PROMPT_TEMPLATE = """Проанализируй транскрипт телефонного разговора между менеджером (Иван, компания «Глобал Филдс Экспорт») и клиентом (сельхозпроизводитель).
+
+Извлеки информацию и верни ТОЛЬКО JSON (без markdown, без ```):
+
+{{
+  "status": "lead|callback|rejected|no_interest|wrong_number|other",
+  "interest_level": "high|medium|low|none",
+  "contact_name": "имя если назвал",
+  "crops": ["список культур"],
+  "volume": "объём если назвал",
+  "region": "регион если упомянул",
+  "basis": "CPT|FOB|DAP если обсуждали",
+  "delivery_time": "сроки если назвал",
+  "preferred_contact": "телефон/whatsapp/telegram/email",
+  "callback_time": "когда перезвонить если просил",
+  "objections": ["список возражений"],
+  "key_info": "главная информация из разговора (1-2 предложения)",
+  "next_action": "что делать дальше (1 предложение)"
+}}
+
+Правила:
+- status=lead если клиент проявил интерес к продаже
+- status=callback если просит перезвонить
+- status=rejected если категорически отказал
+- status=no_interest если вежливо отказал
+- Если транскрипт пустой или неразборчивый — status=other
+
+ТРАНСКРИПТ:
+{transcript}"""
+
+
+# ============================================================
+# PHONE UTILS
+# ============================================================
+
+def norm_phone(num: str) -> str:
+    d = re.sub(r"\D", "", num or "")
+    if len(d) == 11 and d.startswith("8"):
+        d = "7" + d[1:]
+    elif len(d) == 10:
+        d = "7" + d
+    return d
+
+
+def is_valid_phone(num: str) -> bool:
+    n = norm_phone(num)
+    return len(n) == 11 and n.startswith("7")
+
+
+# ============================================================
+# ZADARMA API
+# ============================================================
+
+def _zadarma_sign(method: str, params: dict) -> str:
+    """
+    Подпись Zadarma: base64(hmac-sha1(method + query + md5(query), secret))
+    """
+    import base64
+    import hmac
+    sorted_params = sorted(params.items())
+    query = "&".join(f"{k}={v}" for k, v in sorted_params)
+    sign_str = method + query + hashlib.md5(query.encode()).hexdigest()
+    raw = hmac.new(ZADARMA_SECRET.encode(), sign_str.encode(), "sha1").digest()
+    return base64.b64encode(raw).decode()
+
+
+def zadarma_request(method: str, params: dict = None, http_method: str = "GET") -> dict:
+    """Выполнить запрос к Zadarma API."""
+    params = params or {}
+    sign = _zadarma_sign(method, params)
+    headers = {
+        "Authorization": f"{ZADARMA_KEY}:{sign}",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    url = f"{ZADARMA_API_BASE}{method}"
+    try:
+        if http_method == "GET":
+            r = requests.get(url, params=params, headers=headers, timeout=20)
+        else:
+            r = requests.post(url, data=params, headers=headers, timeout=20)
+        return r.json()
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+def zadarma_callback(phone: str) -> dict:
+    """
+    Инициировать callback через Zadarma.
+    from = ваш SIP (100) или номер сценария АТС
+    to   = номер клиента
+    sip  = SIP через который звонить (для CallerID)
+    """
+    params = {
+        "from": ZADARMA_SIP or ZADARMA_CALLER_ID,
+        "to": norm_phone(phone),
+    }
+    if ZADARMA_SIP:
+        params["sip"] = ZADARMA_SIP
+
+    result = zadarma_request("/request/callback/", params)
+    return result
+
+
+def zadarma_download_recording(record_url: str) -> Optional[bytes]:
+    """
+    Скачать запись Zadarma по прямому URL из webhook notify_record.
+    URL вида: https://pbx.zadarma.com/...
+    """
+    import base64
+    import hmac
+
+    # Zadarma отдаёт записи с авторизацией через тот же механизм
+    # Но обычно URL уже содержит токен — просто GET
+    try:
+        r = requests.get(record_url, timeout=60)
+        if r.status_code == 200 and len(r.content) > 1000:
+            return r.content
+        # Если 401 — пробуем с авторизацией
+        if r.status_code == 401:
+            method = "/" + "/".join(record_url.split("/")[3:]).split("?")[0]
+            sign = _zadarma_sign(method, {})
+            headers = {"Authorization": f"{ZADARMA_KEY}:{sign}"}
+            r = requests.get(record_url, headers=headers, timeout=60)
+            if r.status_code == 200 and len(r.content) > 1000:
+                return r.content
+        return None
+    except Exception as e:
+        print(f"  Zadarma download error: {e}")
+        return None
+
+
+def zadarma_get_last_record(phone: str, after_ts: float) -> Optional[str]:
+    """
+    Получить URL последней записи для номера через статистику АТС.
+    Используется как fallback если webhook не пришёл.
+    """
+    from datetime import datetime, timedelta
+    start = datetime.fromtimestamp(after_ts).strftime("%Y-%m-%d %H:%M:%S")
+    end = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    result = zadarma_request("/statistics/pbx/", {
+        "start": start,
+        "end": end,
+        "type": "answered",
+    })
+
+    if result.get("status") != "success":
+        return None
+
+    for call in reversed(result.get("stats", [])):
+        if norm_phone(str(call.get("destination", ""))) == norm_phone(phone):
+            return call.get("record", "")
+
+    return None
+
+
+# ============================================================
+# MANGO API (legacy)
+# ============================================================
+
+def _mango_sign(payload: dict) -> str:
+    j = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256((MANGO_API_KEY + j + MANGO_API_SALT).encode()).hexdigest()
+
+
+def mango_callback(phone: str) -> dict:
+    """Инициировать callback через Mango."""
+    command_id = f"smart_{uuid.uuid4().hex[:8]}"
+    payload = {
+        "command_id": command_id,
+        "from": {"extension": MANGO_FROM_EXTENSION},
+        "to_number": norm_phone(phone),
+    }
+    j = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
+    sign = hashlib.sha256((MANGO_API_KEY + j + MANGO_API_SALT).encode()).hexdigest()
+    try:
+        r = requests.post(
+            f"{MANGO_API_BASE}commands/callback",
+            data={"vpbx_api_key": MANGO_API_KEY, "json": j, "sign": sign},
+            timeout=20,
+        )
+        return {"command_id": command_id, **r.json()}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+def mango_download_recording(recording_id: str) -> Optional[bytes]:
+    """Скачать запись из Mango API."""
+    payload = {"recording_id": recording_id, "action": "download"}
+    j = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
+    sign = hashlib.sha256((MANGO_API_KEY + j + MANGO_API_SALT).encode()).hexdigest()
+    try:
+        r = requests.post(
+            f"{MANGO_API_BASE}queries/recording/post",
+            data={"vpbx_api_key": MANGO_API_KEY, "json": j, "sign": sign},
+            timeout=60,
+        )
+        if r.status_code == 200 and "audio" in r.headers.get("content-type", ""):
+            return r.content
+        return None
+    except Exception as e:
+        print(f"  Mango download error: {e}")
+        return None
+
+
+# ============================================================
+# UNIFIED TELEPHONY INTERFACE
+# ============================================================
+
+def do_callback(phone: str) -> dict:
+    """Инициировать callback через выбранную телефонию."""
+    if TELEPHONY == "zadarma":
+        result = zadarma_callback(phone)
+        ok = result.get("status") == "success"
+    else:
+        result = mango_callback(phone)
+        ok = result.get("result") in (1000, "1000")
+    return {"ok": ok, "raw": result}
+
+
+def wait_for_record(phone: str, call_start: float, timeout: int = 90) -> Optional[str]:
+    """
+    Ждать запись разговора.
+    Zadarma: ищем в zadarma_events.jsonl (webhook notify_record)
+    Mango:   ищем в voice-angela/events.jsonl
+    Возвращает: URL (Zadarma) или recording_id (Mango)
+    """
+    import subprocess
+
+    print(f"  Ожидаю запись (до {timeout} сек)...", end="", flush=True)
+    start = time.time()
+
+    while time.time() - start < timeout:
+        time.sleep(5)
+        print(".", end="", flush=True)
+
+        try:
+            if TELEPHONY == "zadarma":
+                events_file = str(ZADARMA_EVENTS_PATH)
+                grep_cmd = f"grep 'notify_record' {events_file} 2>/dev/null | tail -10"
+            else:
+                events_file = "/var/log/voice-angela/events.jsonl"
+                grep_cmd = f"grep 'recording_added' {events_file} 2>/dev/null | tail -5"
+
+            result = subprocess.run(
+                ["ssh", f"{VPS_USER}@{VPS_HOST}", grep_cmd],
+                capture_output=True, text=True, timeout=10,
+            )
+
+            for line in result.stdout.strip().split("\n"):
+                if not line:
+                    continue
+                try:
+                    event = json.loads(line)
+                    ts = event.get("timestamp", "")
+                    if not ts:
+                        continue
+                    event_time = datetime.fromisoformat(ts).timestamp()
+                    if event_time <= call_start:
+                        continue
+
+                    if TELEPHONY == "zadarma":
+                        # Проверяем что звонок на нужный номер
+                        dest = norm_phone(str(event.get("destination", "")))
+                        if dest and dest != norm_phone(phone):
+                            continue
+                        record_url = event.get("record_url", "")
+                        if record_url:
+                            print(f"\n  Запись найдена: {record_url[-30:]}")
+                            return record_url
+                    else:
+                        rec_id = event.get("recording_id", "")
+                        if rec_id:
+                            print(f"\n  Запись найдена: {rec_id[:20]}...")
+                            return rec_id
+                except (json.JSONDecodeError, ValueError):
+                    continue
+        except Exception:
+            pass
+
+    print("\n  Запись не найдена (timeout)")
+    return None
+
+
+def get_last_record(phone: str, call_start: float) -> Optional[str]:
+    """Fallback: последняя запись без ожидания."""
+    import subprocess
+    try:
+        if TELEPHONY == "zadarma":
+            grep_cmd = f"grep 'notify_record' {ZADARMA_EVENTS_PATH} 2>/dev/null | tail -1"
+        else:
+            grep_cmd = "grep 'recording_added' /var/log/voice-angela/events.jsonl 2>/dev/null | tail -1"
+
+        result = subprocess.run(
+            ["ssh", f"{VPS_USER}@{VPS_HOST}", grep_cmd],
+            capture_output=True, text=True, timeout=10,
+        )
+        line = result.stdout.strip()
+        if line:
+            event = json.loads(line)
+            if TELEPHONY == "zadarma":
+                return event.get("record_url", "")
+            else:
+                return event.get("recording_id", "")
+    except Exception:
+        pass
+    return None
+
+
+def download_record(record_ref: str) -> Optional[bytes]:
+    """Скачать запись по ссылке или ID."""
+    if TELEPHONY == "zadarma":
+        return zadarma_download_recording(record_ref)
+    else:
+        return mango_download_recording(record_ref)
+
+
+# ============================================================
+# RECORDING PROCESSING (через VPS по SSH)
+# ============================================================
+
+def process_recording_on_vps(record_ref: str) -> Optional[str]:
+    """
+    Скачать и транскрибировать запись на VPS.
+    record_ref: URL (Zadarma) или recording_id (Mango)
+    """
+    import subprocess
+
+    if TELEPHONY == "zadarma":
+        # Zadarma: скачиваем по URL прямо на VPS
+        script = f'''
+import requests, sys
+from faster_whisper import WhisperModel
+r = requests.get("{record_ref}", timeout=60)
+if r.status_code != 200 or len(r.content) < 1000:
+    print("DOWNLOAD_FAILED"); sys.exit(1)
+mp3_path = "/tmp/levitan_rec_zd_{int(time.time())}.mp3"
+with open(mp3_path, "wb") as f: f.write(r.content)
+model = WhisperModel("base", device="cpu", compute_type="int8")
+segments, _ = model.transcribe(mp3_path, language="ru", beam_size=5, vad_filter=True)
+print(" ".join(s.text for s in segments).strip())
+'''
+    else:
+        # Mango: скачиваем через API
+        script = f'''
+import os, hashlib, json, requests, sys, time
+from dotenv import load_dotenv
+load_dotenv("/opt/.env")
+API_KEY = os.getenv("MANGO_VPBX_API_KEY")
+API_SALT = os.getenv("MANGO_VPBX_API_SALT")
+rec_id = "{record_ref}"
+payload = {{"recording_id": rec_id, "action": "download"}}
+j = json.dumps(payload, separators=(",",":"))
+sign = hashlib.sha256((API_KEY+j+API_SALT).encode()).hexdigest()
+r = requests.post("https://app.mango-office.ru/vpbx/queries/recording/post",
+    data={{"vpbx_api_key":API_KEY,"json":j,"sign":sign}}, timeout=60)
+if r.status_code != 200 or "audio" not in r.headers.get("content-type",""):
+    print("DOWNLOAD_FAILED"); sys.exit(1)
+mp3_path = f"/tmp/levitan_rec_mn_{{int(time.time())}}.mp3"
+with open(mp3_path, "wb") as f: f.write(r.content)
+from faster_whisper import WhisperModel
+model = WhisperModel("base", device="cpu", compute_type="int8")
+segments, _ = model.transcribe(mp3_path, language="ru", beam_size=5, vad_filter=True)
+print(" ".join(s.text for s in segments).strip())
+'''
+
+    try:
+        result = subprocess.run(
+            ["ssh", f"{VPS_USER}@{VPS_HOST}", f"python3 -c '{script}'"],
+            capture_output=True, text=True, timeout=180,
+        )
+        output = result.stdout.strip()
+        if not output or output == "DOWNLOAD_FAILED":
+            return None
+        return output
+    except Exception as e:
+        print(f"  VPS processing error: {e}")
+        return None
+
+
+def process_recording_locally(recording_id: str) -> Optional[str]:
+    """
+    Скачать запись и транскрибировать локально.
+    Fallback если VPS недоступен.
+    """
+    audio_data = mango_download_recording(recording_id)
+    if not audio_data:
+        return None
+
+    # Сохраняем MP3
+    mp3_path = TRANSCRIPTS_DIR / f"rec_{recording_id[-12:]}.mp3"
+    with open(mp3_path, "wb") as f:
+        f.write(audio_data)
+
+    # Транскрибируем (нужен faster-whisper локально)
+    try:
+        from faster_whisper import WhisperModel
+        model = WhisperModel("base", device="cpu", compute_type="int8")
+        segments, info = model.transcribe(str(mp3_path), language="ru", beam_size=5, vad_filter=True)
+        text = " ".join(s.text for s in segments).strip()
+        return text
+    except ImportError:
+        print("  faster-whisper не установлен локально, используем VPS")
+        return None
+
+
+# ============================================================
+# LLM EXTRACTION
+# ============================================================
+
+def extract_call_data(transcript: str) -> dict:
+    """Извлечь структурированные данные из транскрипта через LLM."""
+    prompt = EXTRACTION_PROMPT_TEMPLATE.format(transcript=transcript)
+
+    try:
+        r = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_KEY}",
+                "HTTP-Referer": "https://levitan.app",
+            },
+            json={
+                "model": "deepseek/deepseek-chat-v3-0324",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 500,
+                "temperature": 0.1,
+            },
+            timeout=30,
+        )
+        content = r.json()["choices"][0]["message"]["content"].strip()
+
+        # Парсим JSON из ответа
+        # Убираем markdown-обёртку если есть
+        if "```" in content:
+            content = content.split("```")[1]
+            if content.startswith("json"):
+                content = content[4:]
+
+        data = json.loads(content)
+        return data
+    except (json.JSONDecodeError, KeyError, IndexError) as e:
+        print(f"  LLM extraction parse error: {e}")
+        return {"status": "other", "key_info": "Ошибка парсинга LLM ответа"}
+    except Exception as e:
+        print(f"  LLM error: {e}")
+        return {"status": "other", "key_info": f"LLM недоступен: {e}"}
+
+
+# ============================================================
+# TELEGRAM
+# ============================================================
+
+def notify_telegram(text: str):
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        return
+    try:
+        requests.post(
+            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+            json={"chat_id": TELEGRAM_CHAT_ID, "text": text, "parse_mode": "HTML"},
+            timeout=10,
+        )
+    except Exception:
+        pass
+
+
+# ============================================================
+# CRM STORAGE
+# ============================================================
+
+def save_result(contact: dict, extracted: dict, transcript: str, recording_id: str):
+    """Сохранить результат в CRM."""
+    result = {
+        "timestamp": datetime.now().isoformat(),
+        "phone": contact["phone"],
+        "name": contact.get("name", ""),
+        "region": contact.get("region", ""),
+        "description": contact.get("description", ""),
+        "status": extracted.get("status", "other"),
+        "interest_level": extracted.get("interest_level", ""),
+        "contact_name": extracted.get("contact_name", ""),
+        "crops": ", ".join(extracted.get("crops", [])) if isinstance(extracted.get("crops"), list) else str(extracted.get("crops", "")),
+        "volume": extracted.get("volume", ""),
+        "basis": extracted.get("basis", ""),
+        "delivery_time": extracted.get("delivery_time", ""),
+        "preferred_contact": extracted.get("preferred_contact", ""),
+        "callback_time": extracted.get("callback_time", ""),
+        "objections": ", ".join(extracted.get("objections", [])) if isinstance(extracted.get("objections"), list) else str(extracted.get("objections", "")),
+        "key_info": extracted.get("key_info", ""),
+        "next_action": extracted.get("next_action", ""),
+        "recording_id": recording_id,
+        "transcript_short": transcript[:200] if transcript else "",
+    }
+
+    # CSV
+    file_exists = RESULTS_CSV.exists()
+    with open(RESULTS_CSV, "a", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=list(result.keys()))
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow(result)
+
+    # JSON (полный)
+    full_result = {**result, "transcript_full": transcript}
+    results = []
+    if RESULTS_JSON.exists():
+        try:
+            results = json.loads(RESULTS_JSON.read_text())
+        except Exception:
+            results = []
+    results.append(full_result)
+    RESULTS_JSON.write_text(json.dumps(results, ensure_ascii=False, indent=2))
+
+    return result
+
+
+# ============================================================
+# CONTACTS
+# ============================================================
+
+def load_contacts() -> list[dict]:
+    """Загрузить и отфильтровать контакты."""
+    contacts = []
+    with open(CSV_PATH, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            desc = (row.get("Описание", "") or "").lower()
+            phones = row.get("Телефоны", "") or ""
+
+            has_target = any(kw in desc for kw in TARGET_KEYWORDS)
+            is_excluded = any(kw in desc for kw in EXCLUDE_ONLY) and not has_target
+
+            if not has_target or is_excluded:
+                continue
+
+            phone_list = re.findall(r"[\d\-\(\)\+\s]{7,}", phones)
+            for phone in phone_list:
+                normalized = norm_phone(phone)
+                if is_valid_phone(normalized):
+                    contacts.append({
+                        "name": row.get("Название", "").strip(),
+                        "description": row.get("Описание", "").strip(),
+                        "region": row.get("Регион", "").strip(),
+                        "city": row.get("Город", "").strip(),
+                        "contact_name": row.get("Имя", "").strip(),
+                        "phone": normalized,
+                        "phone_display": phone.strip(),
+                    })
+                    break
+
+    return contacts
+
+
+def load_already_called() -> set:
+    """Загрузить уже обзвоненные номера."""
+    called = set()
+    for f in RESULTS_DIR.glob("results_*.csv"):
+        try:
+            with open(f, "r", encoding="utf-8") as fh:
+                reader = csv.DictReader(fh)
+                for row in reader:
+                    if row.get("phone"):
+                        called.add(row["phone"])
+        except Exception:
+            pass
+    return called
+
+
+# ============================================================
+# RECORDING ID FINDER
+# ============================================================
+
+def wait_for_recording_id(phone: str, call_start_time: float, timeout: int = 90) -> Optional[str]:
+    """
+    Ждать появления recording_id для звонка.
+    Мониторим events.jsonl на VPS через SSH.
+    """
+    import subprocess
+
+    print(f"  Ожидаю запись (до {timeout} сек)...", end="", flush=True)
+    start = time.time()
+
+    while time.time() - start < timeout:
+        time.sleep(5)
+        print(".", end="", flush=True)
+
+        try:
+            # Проверяем последние записи на VPS
+            result = subprocess.run(
+                ["ssh", f"{VPS_USER}@{VPS_HOST}",
+                 f"grep 'recording_added' /var/log/voice-angela/events.jsonl | tail -5"],
+                capture_output=True, text=True, timeout=10,
+            )
+
+            for line in result.stdout.strip().split("\n"):
+                if not line:
+                    continue
+                try:
+                    event = json.loads(line)
+                    ts = event.get("timestamp", "")
+                    if ts:
+                        event_time = datetime.fromisoformat(ts).timestamp()
+                        # Запись должна быть после начала звонка
+                        if event_time > call_start_time:
+                            rec_id = event.get("recording_id", "")
+                            if rec_id:
+                                print(f"\n  Запись найдена: {rec_id[:20]}...")
+                                return rec_id
+                except (json.JSONDecodeError, ValueError):
+                    continue
+        except Exception:
+            pass
+
+    print("\n  Запись не найдена (timeout)")
+    return None
+
+
+def get_latest_recording_id_from_vps() -> Optional[str]:
+    """Получить последний recording_id с VPS."""
+    import subprocess
+    try:
+        result = subprocess.run(
+            ["ssh", f"{VPS_USER}@{VPS_HOST}",
+             "grep 'recording_added' /var/log/voice-angela/events.jsonl | tail -1"],
+            capture_output=True, text=True, timeout=10,
+        )
+        line = result.stdout.strip()
+        if line:
+            event = json.loads(line)
+            return event.get("recording_id")
+    except Exception:
+        pass
+    return None
+
+
+# ============================================================
+# UI HELPERS
+# ============================================================
+
+def print_header():
+    print("\n" + "=" * 60)
+    print("  LEVITAN SMART DIALER")
+    tel = "Zadarma" if TELEPHONY == "zadarma" else "Mango"
+    print(f"  Телефония: {tel} | Звони → Запись → STT → LLM → CRM")
+    print("=" * 60)
+
+
+def print_script():
+    print("""
+┌─────────────────────────────────────────────────────────┐
+│ ПРИВЕТСТВИЕ:                                            │
+│ «Здравствуйте! Иван, Глобал Филдс Экспорт.             │
+│  Закупаем зерновые, масличные, бобовые.                 │
+│  Выращиваете что-то на продажу?»                        │
+├─────────────────────────────────────────────────────────┤
+│ ВОПРОСЫ: культуры → объём → базис → сроки → контакт     │
+│ БАЗИСЫ: CPT(забираем) | FOB(порт) | DAP(граница)        │
+│ КОНТАКТЫ: +7(918)639-30-30 | info@globalfields.ru       │
+└─────────────────────────────────────────────────────────┘""")
+
+
+def print_contact(idx: int, total: int, contact: dict):
+    print(f"\n{'─' * 60}")
+    print(f"  [{idx}/{total}]  {contact['name'][:40]}")
+    print(f"  Описание:  {contact['description'][:50]}")
+    print(f"  Регион:    {contact['region']}, {contact['city']}")
+    if contact['contact_name']:
+        print(f"  Контакт:   {contact['contact_name']}")
+    print(f"  Телефон:   {contact['phone_display']}  →  +{contact['phone']}")
+    print(f"{'─' * 60}")
+
+
+def print_result(result: dict):
+    """Красиво показать результат обработки."""
+    status_emoji = {
+        "lead": "🟢", "callback": "🟡", "rejected": "🔴",
+        "no_interest": "⚪", "wrong_number": "❌", "other": "⚫",
+    }
+    emoji = status_emoji.get(result["status"], "⚫")
+
+    print(f"\n  {emoji} Статус: {result['status'].upper()}")
+    if result.get("crops"):
+        print(f"  🌾 Культуры: {result['crops']}")
+    if result.get("volume"):
+        print(f"  📦 Объём: {result['volume']}")
+    if result.get("key_info"):
+        print(f"  💡 Инфо: {result['key_info']}")
+    if result.get("next_action"):
+        print(f"  ➡️  Действие: {result['next_action']}")
+    if result.get("objections"):
+        print(f"  ⚠️  Возражения: {result['objections']}")
+
+
+# ============================================================
+# MAIN LOOP
+# ============================================================
+
+def main():
+    print_header()
+
+    # Проверки
+    if TELEPHONY == "zadarma":
+        if not ZADARMA_KEY or not ZADARMA_SECRET:
+            print("\n  ⚠️  Zadarma ключи не найдены!")
+            print("  Добавь в .env: ZADARMA_KEY и ZADARMA_SECRET")
+            print("  (Личный кабинет Zadarma → Настройки → API)")
+            return
+        if not ZADARMA_SIP:
+            print("\n  ⚠️  ZADARMA_SIP не задан!")
+            print("  Добавь в .env: ZADARMA_SIP=100 (внутренний номер АТС)")
+            return
+        print(f"  ✓ Zadarma API (SIP: {ZADARMA_SIP})")
+    else:
+        if not MANGO_API_KEY or not MANGO_API_SALT:
+            print("\n  ⚠️  Mango ключи не найдены!")
+            return
+        print(f"  ✓ Mango API (ext: {MANGO_FROM_EXTENSION})")
+
+    # Загрузка контактов
+    print("\n  Загрузка базы...")
+    contacts = load_contacts()
+    already_called = load_already_called()
+    contacts = [c for c in contacts if c["phone"] not in already_called]
+
+    print(f"  База: {len(contacts)} контактов (обзвонено ранее: {len(already_called)})")
+
+    if not contacts:
+        print("\n  Все контакты обзвонены!")
+        return
+
+    # Выбор региона
+    regions = Counter(c["region"] for c in contacts)
+    print("\n  Регионы:")
+    for i, (region, cnt) in enumerate(regions.most_common(), 1):
+        print(f"    {i}. {region} ({cnt})")
+    print(f"    0. Все ({len(contacts)})")
+
+    region_choice = input("\n  Регион [0=все]: ").strip()
+    if region_choice and region_choice != "0":
+        try:
+            idx_r = int(region_choice) - 1
+            selected_region = regions.most_common()[idx_r][0]
+            contacts = [c for c in contacts if c["region"] == selected_region]
+            print(f"  → {selected_region} ({len(contacts)})")
+        except (ValueError, IndexError):
+            pass
+
+    print_script()
+    print("\n  Команды: Enter=звонить | s=skip | q=quit | h=скрипт | m=ручной ввод")
+
+    # Статистика
+    stats = Counter()
+    idx = 0
+
+    while idx < len(contacts):
+        contact = contacts[idx]
+        print_contact(idx + 1, len(contacts), contact)
+
+        cmd = input("\n  [Enter/s/q/h/m]: ").strip().lower()
+
+        if cmd == "q":
+            break
+        elif cmd == "s":
+            idx += 1
+            continue
+        elif cmd == "h":
+            print_script()
+            continue
+        elif cmd == "m":
+            # Ручной ввод результата (без записи)
+            result = manual_input(contact)
+            save_result(contact, result, "", "manual")
+            stats[result["status"]] += 1
+            print_result({"status": result["status"], **result})
+            idx += 1
+            continue
+
+        # === ЗВОНИМ ===
+        print(f"\n  📞 Набираю +{contact['phone']}...")
+        call_start = time.time()
+        cb = do_callback(contact["phone"])
+
+        if cb["ok"]:
+            print("  ✓ Callback инициирован. Говори с клиентом!")
+        else:
+            print(f"  ⚠️  Ошибка: {cb['raw']}")
+            choice = input("  Продолжить? [y/n]: ").strip().lower()
+            if choice != "y":
+                idx += 1
+                continue
+
+        # Ждём завершения разговора
+        print("\n  🎙  Разговор идёт... Нажми Enter когда закончишь.")
+        input("  [Enter — разговор завершён]")
+        call_end = time.time()
+        call_duration = call_end - call_start
+
+        print(f"\n  Длительность: {call_duration:.0f} сек")
+
+        if call_duration < 5:
+            # Слишком короткий — не взял трубку
+            print("  → Слишком короткий звонок, пропускаю обработку")
+            result_data = {"status": "no_answer", "key_info": "Не взял трубку"}
+            save_result(contact, result_data, "", "")
+            stats["no_answer"] += 1
+            idx += 1
+            continue
+
+        # === ИЩЕМ ЗАПИСЬ ===
+        print("\n  🔍 Ищу запись разговора...")
+        record_ref = wait_for_record(contact["phone"], call_start, timeout=60)
+
+        if not record_ref:
+            print("  Пробую последнюю запись...")
+            record_ref = get_last_record(contact["phone"], call_start)
+
+        if not record_ref:
+            print("  ❌ Запись не найдена. Ручной ввод:")
+            result_data = manual_input(contact)
+            save_result(contact, result_data, "", "no_recording")
+            stats[result_data["status"]] += 1
+            idx += 1
+            continue
+
+        # === ТРАНСКРИБИРУЕМ ===
+        print(f"  📝 Транскрибирую на VPS...")
+        transcript = process_recording_on_vps(record_ref)
+
+        if not transcript:
+            # Fallback: локально
+            print("  VPS недоступен, пробую локально...")
+            transcript = process_recording_locally(recording_id)
+
+        if not transcript:
+            print("  ❌ Транскрибация не удалась. Ручной ввод:")
+            result_data = manual_input(contact)
+            save_result(contact, result_data, "", record_ref)
+            stats[result_data["status"]] += 1
+            idx += 1
+            continue
+
+        print(f"\n  📄 Транскрипт ({len(transcript)} символов):")
+        print(f"  «{transcript[:200]}{'...' if len(transcript) > 200 else ''}»")
+
+        # === LLM ИЗВЛЕЧЕНИЕ ===
+        print("\n  🤖 Извлекаю данные через LLM...")
+        extracted = extract_call_data(transcript)
+
+        # Сохраняем
+        saved = save_result(contact, extracted, transcript, record_ref)
+        stats[extracted.get("status", "other")] += 1
+
+        # Показываем результат
+        print_result(saved)
+
+        # Telegram
+        if TELEGRAM_BOT_TOKEN:
+            status_emoji = {"lead": "🟢", "callback": "🟡", "rejected": "🔴"}.get(
+                extracted.get("status", ""), "⚫"
+            )
+            notify_telegram(
+                f"{status_emoji} <b>{contact['name'][:30]}</b>\n"
+                f"📞 {contact['phone']}\n"
+                f"Статус: {extracted.get('status', '?')}\n"
+                f"{'🌾 ' + saved.get('crops', '') if saved.get('crops') else ''}\n"
+                f"{'📦 ' + saved.get('volume', '') if saved.get('volume') else ''}\n"
+                f"💡 {extracted.get('key_info', '')[:100]}"
+            )
+
+        # Статистика
+        total = sum(stats.values())
+        print(f"\n  📊 [{total} звонков] "
+              f"Лиды:{stats['lead']} "
+              f"Перезвон:{stats['callback']} "
+              f"Отказ:{stats['rejected']+stats['no_interest']} "
+              f"Не взял:{stats['no_answer']}")
+        if stats["lead"]:
+            print(f"  Конверсия: {stats['lead']/total*100:.1f}%")
+
+        idx += 1
+
+    # === ИТОГ ===
+    total = sum(stats.values())
+    print(f"\n{'=' * 60}")
+    print(f"  ИТОГ ДНЯ: {total} звонков")
+    print(f"{'=' * 60}")
+    for status, count in stats.most_common():
+        print(f"  {status:15s}: {count}")
+    if total and stats["lead"]:
+        print(f"  {'Конверсия':15s}: {stats['lead']/total*100:.1f}%")
+    print(f"\n  Результаты: {RESULTS_CSV}")
+    print(f"  Полные данные: {RESULTS_JSON}")
+    print(f"{'=' * 60}\n")
+
+    # Telegram итог
+    if TELEGRAM_BOT_TOKEN and total > 0:
+        notify_telegram(
+            f"📊 <b>Итог дня</b>\n"
+            f"Звонков: {total}\n"
+            f"Лиды: {stats['lead']}\n"
+            f"Перезвон: {stats['callback']}\n"
+            f"Отказ: {stats['rejected']+stats['no_interest']}\n"
+            f"Конверсия: {stats['lead']/total*100:.1f}%"
+        )
+
+
+def manual_input(contact: dict) -> dict:
+    """Ручной ввод результата (fallback)."""
+    print("    1=лид 2=перезвон 3=отказ 4=не взял 5=неверный 6=другое")
+    choice = input("    Статус [1-6]: ").strip()
+    status_map = {
+        "1": "lead", "2": "callback", "3": "rejected",
+        "4": "no_answer", "5": "wrong_number", "6": "other",
+    }
+    status = status_map.get(choice, "other")
+
+    crops = ""
+    volume = ""
+    key_info = ""
+
+    if status == "lead":
+        crops = input("    Культуры: ").strip()
+        volume = input("    Объём: ").strip()
+    key_info = input("    Заметки: ").strip()
+
+    return {
+        "status": status,
+        "interest_level": "high" if status == "lead" else "low",
+        "crops": crops.split(",") if crops else [],
+        "volume": volume,
+        "key_info": key_info,
+        "next_action": "",
+        "objections": [],
+        "contact_name": "",
+        "basis": "",
+        "delivery_time": "",
+        "preferred_contact": "",
+        "callback_time": "",
+    }
+
+
+if __name__ == "__main__":
+    if "--test" in sys.argv:
+        print(f"  Тест пайплайна (телефония: {TELEPHONY})")
+        print("  Берём последнюю запись с VPS...")
+        rec_ref = get_last_record("", 0)
+        if rec_ref:
+            print(f"  Запись: {rec_ref[:60]}")
+            transcript = process_recording_on_vps(rec_ref)
+            if transcript:
+                print(f"  Транскрипт: {transcript[:300]}")
+                extracted = extract_call_data(transcript)
+                print(f"  Извлечено:")
+                print(json.dumps(extracted, ensure_ascii=False, indent=4))
+            else:
+                print("  Транскрибация не удалась")
+        else:
+            print("  Записи не найдены")
+    else:
+        main()

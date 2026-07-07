@@ -1,0 +1,24 @@
+{
+  "habr": {
+    "enabled": true
+  },
+  "medium": {
+    "enabled": false,
+    "usernames": []
+  },
+  "twitter": {
+    "enabled": false,
+    "bearer_token": "",
+    "query": "AI"
+  },
+  "telegram": {
+    "enabled": false,
+    "bot_token": "",
+    "channel_id": ""
+  },
+  "telegram_bot_token": "",
+  "telegram_chat_id": "",
+  "min_score": 50,
+  "max_items": 100,
+  "dedup_threshold": 0.85
+}

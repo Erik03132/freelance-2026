@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//OpenCode//ai-levitan//EN
+BEGIN:VEVENT
+DTSTART:20260712T100000
+DTEND:20260712T110000
+SUMMARY:ai-levitan: Mango Analytics — дедлайн демо-режима
+DESCRIPTION:Демо-режим Mango Речевой аналитики истекает!\n\nРешение: платный тариф (~$500/мес) или свой пайплайн\n\nДокумент: ai-levitan/docs/MANGO_SPEECH_ANALYTICS_RECOMMENDATIONS.md\nЗадачи: ai-levitan/ACTIVE_TASKS.md (M1-M6)
+LOCATION:OpenCode
+STATUS:CONFIRMED
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Завтра истекает демо Mango Analytics!
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT1H
+ACTION:DISPLAY
+DESCRIPTION:Через 1 час: решение по Mango Analytics
+END:VALARM
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,102 @@
+name: Support Agent
+description: Агент технической поддержки с тикет-системой
+
+prompt: |
+  Ты — агент технической поддержки компании {company_name}.
+  
+  Твоя задача:
+  1. Понять проблему клиента
+  2. Найти решение в базе знаний
+  3. Если не можешь помочь — создать тикет и передать специалисту
+  
+  Правила:
+  - Будь терпеливым и эмпатичным
+  - Задавай уточняющие вопросы для диагностики
+  - Предлагай пошаговые решения
+  - Если проблема сложная — создай тикет и передай специалисту
+  - Всегда подтверждай, что проблема решена или тикет создан
+
+functions:
+  - name: get_ticket_history
+    description: Получить историю тикетов клиента
+    parameters:
+      customer_id:
+        type: string
+        description: ID клиента
+    returns:
+      type: array
+      description: Список тикетов
+      items:
+        type: object
+        properties:
+          ticket_id: string
+          issue: string
+          status: string
+          created_at: string
+
+  - name: search_knowledge_base
+    description: Поиск решения в базе знаний
+    parameters:
+      query:
+        type: string
+        description: Описание проблемы
+    returns:
+      type: array
+      description: Список статей с решениями
+      items:
+        type: object
+        properties:
+          title: string
+          solution: string
+          relevance: number
+
+  - name: create_ticket
+    description: Создать тикет поддержки
+    parameters:
+      customer_id:
+        type: string
+        description: ID клиента
+      issue:
+        type: string
+        description: Описание проблемы
+      priority:
+        type: string
+        enum: [low, medium, high, urgent]
+        description: Приоритет проблемы
+    returns:
+      type: object
+      description: Созданный тикет
+      properties:
+        ticket_id: string
+        estimated_response_time: string
+
+  - name: transfer_to_specialist
+    description: Передать специалисту
+    parameters:
+      ticket_id:
+        type: string
+        description: ID тикета
+    returns:
+      type: void
+
+voice: female_2
+language: ru
+response_readiness: 0.6
+interruption_sensitivity: 0.3
+
+test_scenarios:
+  - name: Простая проблема
+    input: "Не могу войти в личный кабинет"
+    expected: "Пошаговое решение из базы знаний"
+
+  - name: Сложная проблема
+    input: "Система выдаёт ошибку 500 при оформлении заказа"
+    expected: "Создание тикета + передача специалисту"
+
+  - name: Повторное обращение
+    input: "Я уже обращался по этой проблеме неделю назад"
+    expected: "Проверка истории тикетов + продолжение работы"
+
+  - name: Проблема решена
+    input: "Спасибо, помогло!"
+    expected: "Подтверждение + предложение дальнейшей помощи"

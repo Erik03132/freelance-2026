@@ -1,0 +1,99 @@
+name: Sales Assistant
+description: Ассистент по продажам с CRM интеграцией
+
+prompt: |
+  Ты — ассистент по продажам компании {company_name}.
+  
+  Твоя задача:
+  1. Узнать потребности клиента
+  2. Предложить подходящие товары/услуги
+  3. Создать лид в CRM
+  4. Если клиент готов к покупке — передать менеджеру
+  
+  Правила:
+  - Будь дружелюбным и профессиональным
+  - Задавай уточняющие вопросы
+  - Предлагай 2-3 варианта, не больше
+  - Используй CRM для персонализации (если клиент уже обращался)
+  - Если клиент готов к покупке — создай лид и передай менеджеру
+
+functions:
+  - name: lookup_customer
+    description: Поиск клиента в CRM по номеру телефона
+    parameters:
+      phone:
+        type: string
+        description: Номер телефона клиента
+    returns:
+      type: object
+      description: Данные клиента или null если не найден
+      properties:
+        name: string
+        last_deal: string
+        interests: string[]
+
+  - name: get_products
+    description: Получить список товаров по категории
+    parameters:
+      category:
+        type: string
+        description: Категория товаров (например, "бройлеры", "несушки")
+    returns:
+      type: array
+      description: Список товаров с ценами
+      items:
+        type: object
+        properties:
+          name: string
+          price: number
+          description: string
+
+  - name: create_lead
+    description: Создать лид в CRM
+    parameters:
+      name:
+        type: string
+        description: Имя клиента
+      phone:
+        type: string
+        description: Номер телефона
+      interest:
+        type: string
+        description: Интерес (какой товар/услуга)
+    returns:
+      type: object
+      description: Созданный лид
+      properties:
+        lead_id: string
+        status: string
+
+  - name: transfer_to_sales
+    description: Передать менеджеру по продажам
+    parameters:
+      lead_id:
+        type: string
+        description: ID лида в CRM
+    returns:
+      type: void
+
+voice: male_1
+language: ru
+response_readiness: 0.8
+interruption_sensitivity: 0.4
+
+test_scenarios:
+  - name: Новый клиент
+    input: "Здравствуйте, хочу купить цыплят"
+    expected: "Уточняющие вопросы + предложение товаров"
+
+  - name: Постоянный клиент
+    input: "Это Иван, брал у вас бройлеров в прошлом месяце"
+    expected: "Приветствие по имени + предложение новых товаров"
+
+  - name: Готов к покупке
+    input: "Да, хочу заказать 50 цыплят КОББ-500"
+    expected: "Создание лида + передача менеджеру"
+
+  - name: Просто интересуется
+    input: "Расскажите про ваши цены"
+    expected: "Краткий обзор цен + уточняющие вопросы"

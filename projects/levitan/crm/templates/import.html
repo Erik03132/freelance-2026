@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %} — Импорт{% endblock %}
+{% block content %}
+<h1>Импорт данных</h1>
+
+{% if message %}
+<div class="alert alert-success">{{ message }}</div>
+{% endif %}
+
+<div class="card">
+    <h2>Импорт из JSON</h2>
+    <p class="muted">Выбери файл из data/call_results/ для импорта в CRM:</p>
+    <form method="post" action="/api/import" id="import-form" style="margin-top:1rem">
+        <select name="filename" required style="width:100%;padding:0.6rem 0.9rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:0.9rem;background:var(--cream-light);color:var(--charcoal);margin-bottom:0.75rem">
+            <option value="">— выбери файл —</option>
+            {% for f in files %}
+            <option value="{{ f }}">{{ f }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn">📥 Импортировать</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('import-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    const filename = fd.get('filename');
+    if (!filename) return;
+    const resp = await fetch('/api/import?filename=' + encodeURIComponent(filename), {method: 'POST'});
+    const data = await resp.json();
+    if (resp.ok) {
+        window.location = '/import?message=Импортировано ' + data.imported + ' контактов из ' + data.file;
+    } else {
+        alert('Ошибка: ' + (data.detail || 'неизвестная'));
+    }
+});
+</script>
+{% endblock %}

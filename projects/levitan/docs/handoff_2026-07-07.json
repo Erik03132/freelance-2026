@@ -1,0 +1,29 @@
+{
+  "project": "Levitan — голосовой агент обзвона Global Fields Export",
+  "task": "Завершение сессии 2026-07-07. CRM готова.",
+  "context": "Сессия 2026-07-07:\n\n✅ CRM ПОСТРОЕНА:\n- FastAPI + SQLite (aiosqlite) + Jinja2 веб\n- Путь: crm/app.py (21 route: 10 web + 11 API)\n- Дашборд: / (статистика), /contacts (список+поиск), /contacts/<id> (детали)\n- Напоминания: /reminders (активные/выполненные)\n- Импорт: /import (из data/call_results/*.json)\n- API: /api/contacts, /api/reminders, /api/stats, /api/import\n- Порт: 8088, запуск: python3 -m uvicorn crm.app:app --host 0.0.0.0 --port 8088\n- Импортировано 30 контактов + 3 напоминания\n\n✅ БОТ ИНТЕГРИРОВАН С CRM API:\n- save_to_crm() дублирует в CRM через POST /api/contacts\n- /crm читает через API (fallback на локальный JSON)\n- /remind list/del через API (fallback)\n- _check_reminders через API\n- CRM_API_BASE=http://127.0.0.1:8088\n\n🔥 ЛИДЫ (из CRM):\n- Белый А.Н. +79184296652 — 50т пшеницы\n- Виктор +79611061981 — заинтересован\n- «Георгиевское» ООО +79284749787 — уточнить\n\n⏰ НАПОМИНАНИЯ:\n- Белый 27.07 (id:1)\n- Виктор 10.07 (id:2)\n- Георгиевское 15.07 (id:3)\n\n📡 VPS: оба недоступны\n- CRM локально на 8088\n- Webhook сервер: scripts/webhook_server.py\n\n🐛 ИЗВЕСТНЫЕ ПРОБЛЕМЫ:\n- Whisper STT плохой из-за hold music\n- Mango API speech-analytics не отдаёт текст\n- VPS недоступен\n- localtunnel нестабилен",
+  "files": [
+    "crm/app.py",
+    "crm/database.py",
+    "crm/static/style.css",
+    "crm/templates/base.html",
+    "crm/templates/dashboard.html",
+    "crm/templates/contacts.html",
+    "crm/templates/contact_detail.html",
+    "crm/templates/reminders.html",
+    "crm/templates/import.html",
+    "scripts/dialer_bot.py",
+    "scripts/webhook_server.py",
+    "STATUS.md"
+  ],
+  "skills": ["bot-development", "deployment", "web-standards"],
+  "next_steps": [
+    "1. Развернуть CRM на VPS",
+    "2. Настроить Mango webhook → конспекты на CRM API",
+    "3. Продолжить обзвон — 🎠 Карусель (@levitan_dialer_bot)",
+    "4. Greeting Bridge (baresip) — приветствие перед соединением",
+    "5. Улучшить веб-интерфейс (редактирование, удаление контактов)"
+  ],
+  "escalation": false,
+  "deadline": "2026-07-08T23:00:00"
+}

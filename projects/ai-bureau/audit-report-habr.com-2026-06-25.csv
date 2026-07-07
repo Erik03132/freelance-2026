@@ -1,0 +1,11 @@
+Pattern,PageType,Count,AvgScore,Status
+/ru/articles,blog,232476,80,strong
+/ru/companies,other,140735,80,strong
+/ru/news,other,64758,80,strong
+/ru/posts,other,14232,80,strong
+/en/articles,blog,1786,80,strong
+/en/companies,other,1186,80,strong
+/ru/specials,other,690,80,strong
+/ru/hubs,other,439,63,medium
+/en/posts,other,66,80,strong
+/en/news,other,23,80,strong
