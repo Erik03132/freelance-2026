@@ -1,10 +1,9 @@
 """Настройки проекта Levitan."""
 
-import os
 from pathlib import Path
-from pydantic_settings import BaseSettings
-from pydantic import Field
 
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DATA_DIR = BASE_DIR / "data"
@@ -32,7 +31,9 @@ class MangoSettings(BaseSettings):
 class OpenRouterSettings(BaseSettings):
     api_key: str = Field(default="", alias="OPENROUTER_API_KEY")
     model: str = Field(default="deepseek/deepseek-chat-v3-0324", alias="OPENROUTER_MODEL")
-    fallback_model: str = Field(default="qwen/qwen-2.5-7b-instruct", alias="OPENROUTER_FALLBACK_MODEL")
+    fallback_model: str = Field(
+        default="qwen/qwen-2.5-7b-instruct", alias="OPENROUTER_FALLBACK_MODEL"
+    )
 
     class Config:
         env_file = ".env"

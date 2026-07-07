@@ -1,0 +1,111 @@
+{
+  "project": "Levitan AI Voice Agent",
+  "branchName": "ralph/phase-1-production",
+  "description": "Phase 1 production readiness: CRM enrichment, 100-call baseline, metrics",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Set up ruff linting and fix existing violations",
+      "description": "As a developer, I need ruff linting to enforce code quality across the project.",
+      "acceptanceCriteria": [
+        "ruff is configured in pyproject.toml (already done)",
+        "Run 'source .venv/bin/activate && ruff check src/' passes without errors",
+        "Fix all existing lint violations in src/levitan/",
+        "All 25 tests still pass"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Existing violations: pydantic class-based config deprecation, import ordering"
+    },
+    {
+      "id": "US-002",
+      "title": "Phone normalization for CRM enrichment",
+      "description": "As a system, I need to normalize phone numbers (+7, 8, brackets, dashes) to a single format before CRM lookup.",
+      "acceptanceCriteria": [
+        "Create phone normalization function in src/levitan/ or a new utils module",
+        "Handles formats: +7XXX, 8XXX, +7 (XXX) XXX-XX-XX, 8-XXX-XXX-XX-XX, 7XXX",
+        "Returns unified format: 7XXXXXXXXXX (11 digits without +)",
+        "Unit tests for 5+ phone format variants pass",
+        "All 25+ tests pass"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Base de contacts CSV has phones in multiple formats"
+    },
+    {
+      "id": "US-003",
+      "title": "CRM enrichment: look up contact data by phone before call",
+      "description": "As an operator, I want contact info (name, region, crops) from the CSV database shown before the call starts.",
+      "acceptanceCriteria": [
+        "Load all_contacts_2026.csv into a lookup structure (dict by phone)",
+        "Normalize phone before lookup",
+        "Return company name, contact person, region, crops if found",
+        "Return None/empty if phone not in database",
+        "Unit tests for lookup with 3+ test contacts pass",
+        "All tests pass"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "CSV at data/campaigns/csv/all_contacts_2026.csv. Columns: phone, company, contact, region, crops"
+    },
+    {
+      "id": "US-004",
+      "title": "Integrate CRM enrichment into dialer_bot.py",
+      "description": "As an operator, the Telegram bot should show enriched contact info before each call.",
+      "acceptanceCriteria": [
+        "dialer_bot.py imports and uses the CRM enrichment module",
+        "Before each call, bot shows: company, contact name, region, crops",
+        "If contact not found, bot still proceeds with call (graceful fallback)",
+        "All tests pass"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Update the dialer flow to enrich card before triggering Mango callback"
+    },
+    {
+      "id": "US-005",
+      "title": "Add CRM saving: store enriched data + call results",
+      "description": "As a system, CRM should store both database lookups and new data from the call.",
+      "acceptanceCriteria": [
+        "After call, save: pre-call lookup data + operator notes + call recording info",
+        "Output to data/call_results/ in JSON and CSV formats",
+        "Include call timestamp, duration, operator, status",
+        "Handle missing fields gracefully (save what we have)",
+        "All tests pass"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Follow existing data/call_results/ format"
+    },
+    {
+      "id": "US-006",
+      "title": "Fix pydantic-settings deprecation warnings in config.py",
+      "description": "As a developer, I want to remove pydantic v2 deprecation warnings for class-based config.",
+      "acceptanceCriteria": [
+        "Replace class Config with model_config = ConfigDict(...) in all settings classes",
+        "All 7 settings classes updated (Mango, OpenRouter, Telegram, STT, TTS, Dialog, Campaign)",
+        "Main Settings class also updated",
+        "No deprecation warnings in test output",
+        "All 25+ tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Warnings: PydanticDeprecatedSince20 - Support for class-based `config` is deprecated, use ConfigDict instead"
+    },
+    {
+      "id": "US-007",
+      "title": "Create 100-call campaign script and metrics baseline",
+      "description": "As a project, I need to automate the 100-call baseline campaign with metrics logging.",
+      "acceptanceCriteria": [
+        "Create campaign runner script that dials N contacts from CSV with operator pauses",
+        "Log: call_id, phone, duration, answer status, result status",
+        "After 100 calls, output summary: connect_rate, lead_percent, avg_duration, calls_per_hour",
+        "Summary saved to data/call_results/campaign_summary.csv",
+        "All tests pass"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Use existing dialer_bot.py patterns. Metrics from ROADMAP table."
+    }
+  ]
+}
