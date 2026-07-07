@@ -52,3 +52,19 @@ Started: 2026-07-07
 - All 40 tests pass, ruff clean
 - Files: src/levitan/config.py
 ---
+
+## 2026-07-07 - US-007
+- Created scripts/campaign_runner.py — standalone campaign runner
+- Makes up to N calls (default 100) with configurable interval
+- Logs: call_id, phone, duration, answer_status, mango_result
+- After completion, outputs metrics: connect_rate, avg_duration, calls_per_hour
+- Summary saved to data/call_results/campaign_summary.csv
+- Test for summary metric structure
+- All 41 tests pass, ruff clean
+- Files: scripts/campaign_runner.py, tests/test_campaign_runner.py
+---
+- Replaced all class Config with model_config = ConfigDict(...) in 8 settings classes
+- Zero pydantic deprecation warnings (verified with -W error::pydantic.PydanticDeprecatedSince20)
+- All 40 tests pass, ruff clean
+- Files: src/levitan/config.py
+---
