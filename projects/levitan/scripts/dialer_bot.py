@@ -54,7 +54,7 @@ except ImportError:
 # === PATHS ===
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
-CSV_PATH = DATA_DIR / "campaigns" / "csv" / "adygea_grain_filtered.csv"
+CSV_PATH = DATA_DIR / "campaigns" / "csv" / "_for_evening_dial_2026-07-07.csv"
 RESULTS_DIR = DATA_DIR / "call_results"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
