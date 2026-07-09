@@ -96,3 +96,33 @@
 - Angela: eval для Generator (LLM-as-judge, HD5)
 - LLM Wiki: перестроить KB Angela по паттерну Карпатого (HD1)
 - Agent Ecosystem: протестировать model routing с реальным ключом, кросс-агентный recall
+
+---
+
+## 🌞 2026-07-09 (2-я сессия) — Levitan Realtime Migration + Global Commands
+
+**Статус:** Сессия завершена.
+
+### Сделано
+
+**Levitan — Real-time миграция (планирование + DRAFT)**
+- Habr-кейс 1057176: Яндекс Realtime побеждает для РФ (330мс, родной русский, без VPN, рубли).
+- ADR-001 (`docs/adr/ADR-001-yandex-realtime.md`): архитектура прокси (baresip→FastAPI WS→Яндекс Realtime WS), 5 этапов миграции, риски.
+- `deploy/levitan_turnbased.py`: класс `RealtimeDialog` (DRAFT, GA-форма сессии, `gpt-realtime-2.1-mini`).
+- `docs/active_tasks.md` — обновлено с блокомером Яндекс Cloud ключа.
+- `docs/adr/ADR-001-yandex-realtime.md` + `checkpoints/chp_20260709_1006.md`.
+
+**Global AGENTS.md — новые команды**
+- `/goal` — декларативный цикл до измеримого результата (метрика+target→baseline→итерировать TDD→стоп/эскалация→`memory_add kind=decision`).
+- `/code-review` — выделенный Two-axis Review: `git status/diff`→полное чтение файлов+вызовы→Standards+Spec→список рисков→не коммитить без подтверждения→`memory_add kind=bugfix` при блокере.
+
+### Блокеры
+- **Яндекс Cloud аккаунт/ключ** — сервисный аккаунт с 4 ролями (`ai.speechkit-stt.user`, `ai.speechkit-tts.user`, `ai.languageModels.user`, `ai.models.user`) + `YC_API_KEY`/`YC_FOLDER_ID`. Нет аккаунта — задача на след. сессию.
+
+### План на завтра
+1. Создать Яндекс Cloud аккаунт + сервисный аккаунт с 4 ролями → выдать ключ → в `.env`.
+2. `deploy/levitan_realtime.py` (FastAPI WS-прокси, TDD) + `tests/test_realtime_proxy.py`.
+3. `greeting_bridge` baresip: PCM FIFO + `auresamp` 8k↔24k + `echoCancellation`.
+4. `SYSTEM_PROMPT` под голос (убрать JSON, роль/факты/цены/запреты, tool `save_lead`).
+5. Function calling `save_lead` → CRM API.
+6. Тест: latency <500мс, barge-in, эхо, лид в CRM. Трёхзвенка — fallback.
