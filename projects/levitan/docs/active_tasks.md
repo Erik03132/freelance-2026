@@ -43,10 +43,10 @@
 - Запуск: `python3 levitan_turnbased.py realtime <phone>`.
 
 ### Что осталось довести (блокеры до теста)
-1. `OPENAI_API_KEY` в `.env` (Realtime API отдельный от OpenRouter/DeepSeek).
-2. `pip install websockets` в venv.
-3. **baresip audio-мост** — playback через `aufile` из FIFO, capture через `record`
-   в FIFO; конверсия 8k↔24k через `auresamp.so`. Единственный нетривиальный кусок.
+1. **Яндекс Cloud API-ключ** — сервисный аккаунт с ролями `ai.speechkit-stt.user`, `ai.speechkit-tts.user`, `ai.languageModels.user`, `ai.models.user` + `YC_API_KEY`, `YC_FOLDER_ID` в `.env`. **БЛОКЕР: аккаунта пока нет, задача на следующую сессию**.
+2. `OPENAI_API_KEY` в `.env` (Realtime API отдельный от OpenRouter/DeepSeek).
+3. `pip install websockets` в venv.
+4. **baresip audio-мост** — playback через `aufile` из FIFO, capture через `record` в FIFO; конверсия 8k↔24k через `auresamp.so`. Единственный нетривиальный кусок.
 
 ### Риски
 - Зависимость от baresip/VPS (текущие блокеры проекта) реал-тайм не убирает.
