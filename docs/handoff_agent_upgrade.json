@@ -1,0 +1,26 @@
+{
+  "project": "freelance-2026 / freelance-agent",
+  "task": "Прокачка агентов Артемий, Кулибин, Шерлок до LLM-CLI уровня (паттерн Rembrandt) + перенос Рембрандта в глобальную папку",
+  "context": "Завершено. Все 4 агента реализованы как self-contained пакеты в freelance-agent/.agent/agents/{artemiy,kulibin,sherl,rembrandt}/ с CLI (python3 -m <agent>) и Python API. Рембрандт вытащен из ai-eggs (оставлен shim для совместимости). ADR-001 создан. Тесты Рембрандта проходят (11 passed).",
+  "files": [
+    "freelance-agent/.agent/agents/artemiy/{__init__,cli,llm_client,frontend_config,component_gen,page_gen,audit}.py",
+    "freelance-agent/.agent/agents/kulibin/{__init__,cli,llm_client,perf_config,code_analyzer,lib_scout,proto}.py",
+    "freelance-agent/.agent/agents/sherl/{__init__,cli,llm_client,research_config,searcher,geo_scan,report}.py",
+    "freelance-agent/.agent/agents/rembrandt/{__init__,cli,designer,brand_system,component_generator,design_generator,image_generator}.py",
+    "freelance-agent/.agent/agents/rembrandt/tests/test_*.py",
+    "freelance-agent/.agent/agents/{artemiy,kulibin,sherl}-frontend|-engineer|-research.md (профили обновлены)",
+    "freelance-agent/.agent/agents/rembrandt-designer.md (обновлён)",
+    "projects/ai-eggs/agent/rembrandt.py (shim)",
+    "freelance-agent/.agent/docs/adr/ADR-001-agent-llm-cli-architecture.md"
+  ],
+  "skills": ["frontend-design", "web-standards", "market-intelligence", "python-patterns", "deployment-procedures"],
+  "next_steps": [
+    "1. Добавить реальные ключи SERPER_API_KEY / PERPLEXITY_API_KEY в .env для live-поиска Шерлока",
+    "2. Написать тесты для artemiy/kulibin/sherl (сейчас покрыты только rembrandt)",
+    "3. Запустить реальные LLM-генерации с OPENROUTER_API_KEY и проверить качество выхлопа",
+    "4. Зарегистрировать агентов в skills-registry.json при необходимости",
+    "5. Рассмотреть Refero MCP интеграцию для Рембрандта (из chp.md)"
+  ],
+  "escalation": false,
+  "deadline": "2026-07-10T18:00:00"
+}

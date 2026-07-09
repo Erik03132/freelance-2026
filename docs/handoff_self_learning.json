@@ -1,0 +1,22 @@
+{
+  "project": "freelance-2026 / freelance-agent",
+  "task": "Self-Learning Loop для агентов (по концепции Atai Barkai 'Self Learning for Agents')",
+  "context": "Завершено. Добавлен общий пакет agents/learning/ (signal.py + learner.py + __init__.py), подключён ко всем 4 агентам (artemiy/kulibin/sherl/rembrandt). При каждой LLM-генерации логируется сигнал (capture_start), в промпт внедряется build_learned_context() (авто-применение). CLI всех агентов получили флаг --feedback <sid> accepted|edited|rejected. Создан ADR-002. Сигналы пишутся в agents/learning/signals.jsonl (append-only).",
+  "files": [
+    "freelance-agent/.agent/agents/learning/{__init__,signal,learner}.py",
+    "freelance-agent/.agent/agents/learning/signals.jsonl",
+    "freelance-agent/.agent/agents/{artemiy,kulibin,sherl,rembrandt}/{cli,component_gen,page_gen,lib_scout,proto,code_analyzer,searcher,geo_scan,design_generator}.py (интеграция)",
+    "freelance-agent/.agent/agents/{artemiy,kulibin,sherl}-frontend|-engineer|-research.md (секция Self-Learning)",
+    "freelance-agent/.agent/agents/rembrandt-designer.md (секция Self-Learning)",
+    "freelance-agent/.agent/docs/adr/ADR-002-self-learning-loop.md"
+  ],
+  "skills": ["market-intelligence", "python-patterns", "frontend-design", "deployment-procedures"],
+  "next_steps": [
+    "1. Набрать ≥3 оценённых сигнала на агента, проверить что build_learned_context начинает влиять на промпты",
+    "2. (опц) Добавить CLI-дашборд: python3 -m learning report — сводка по сигналам/acceptance rate",
+    "3. (опц) Расширить улучшения на дефолты (framework) и приоритеты аудита Кулибина",
+    "4. Зарегистрировать learning в skills-registry при необходимости"
+  ],
+  "escalation": false,
+  "deadline": "2026-07-11T18:00:00"
+}

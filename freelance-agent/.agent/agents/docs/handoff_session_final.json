@@ -1,0 +1,42 @@
+{
+  "project": "freelance-agent/.agent/ — Agent Ecosystem Upgrade",
+  "task": "Session Final: Agent ecosystem fully upgraded with Memory Tree + Model Routing + Self-Learning + Security + unified llm_client + tests",
+  "context": "Full upgrade of all 4 agents (Artemiy, Kulibin, Sherl, Rembrandt) to the unified architecture. All agents now have: llm_client.py with model routing (simple→deepseek, complex→sonnet), memory.enrich_context() integration in CLI, graceful fallbacks for all shared packages (memory/learning/security), clean tests (40 total, all passing).",
+  "files": [
+    "agents/artemiy/component_gen.py",
+    "agents/artemiy/page_gen.py",
+    "agents/artemiy/cli.py",
+    "agents/artemiy/llm_client.py",
+    "agents/artemiy/tests/test_component_gen.py",
+    "agents/kulibin/cli.py",
+    "agents/kulibin/llm_client.py",
+    "agents/kulibin/tests/test_basic.py",
+    "agents/sherl/cli.py",
+    "agents/sherl/llm_client.py",
+    "agents/sherl/tests/test_sherl.py",
+    "agents/rembrandt/component_generator.py",
+    "agents/rembrandt/design_generator.py",
+    "agents/rembrandt/cli.py",
+    "agents/rembrandt/llm_client.py",
+    "agents/memory/__init__.py",
+    "agents/memory/store.py",
+    "agents/artemiy-frontend.md",
+    "agents/kulibin-engineer.md",
+    "agents/sherl-research.md",
+    "agents/rembrandt-designer.md",
+    "agents/docs/adr/ADR-001.md",
+    "agents/docs/adr/ADR-002.md",
+    "agents/docs/adr/ADR-003.md",
+    "agents/docs/adr/ADR-004.md"
+  ],
+  "skills": ["bot-development", "workflow", "governance"],
+  "next_steps": [
+    "1. Протестировать ручной запуск python3 -m artemiy --component hero с реальным OPENROUTER_API_KEY (проверить model routing на complex-задачах)",
+    "2. Проверить ./ralph/cycle.sh на интеграцию с обновлёнными агентами",
+    "3. Обновить shared memory между агентами (сейчас каждый пишет в свой store, нет кросс-агентного recall)",
+    "4. Фичевые тесты для model routing (complex→sonnet) — нужен реальный ключ",
+    "5. Рассмотреть вынесение общего llm_client.py в agents/shared/ (сейчас 4 копии)"
+  ],
+  "escalation": false,
+  "deadline": null
+}

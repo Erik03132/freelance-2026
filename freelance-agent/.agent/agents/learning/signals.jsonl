@@ -1,0 +1,11 @@
+{"sid": "0375e5afe4be", "ts": 1783571067.5284019, "phase": "start", "agent": "artemiy", "action": "generate_component", "spec": "primary", "meta": {"framework": "react"}, "result_ref": "", "outcome": null}
+{"sid": "0375e5afe4be", "ts": 1783571084.125112, "phase": "outcome", "outcome": "accepted", "note": ""}
+{"sid": "928465828f5c", "ts": 1783571342.7281752, "phase": "start", "agent": "artemiy", "action": "generate_component", "spec": "x", "meta": {"framework": "astro"}, "result_ref": "", "outcome": null}
+{"sid": "7c0f569fd5d9", "ts": 1783571361.446292, "phase": "start", "agent": "kulibin", "action": "scout", "spec": "rate limiter", "meta": {}, "result_ref": "", "outcome": null}
+{"sid": "7a325bce3b85", "ts": 1783571400.4712808, "phase": "start", "agent": "sherl", "action": "geo_scan", "spec": "X y", "meta": {}, "result_ref": "", "outcome": null}
+{"sid": "7c0f569fd5d9", "ts": 1783571401.7348428, "phase": "outcome", "outcome": "rejected", "note": ""}
+{"sid": "0957999a9abf", "ts": 1783571894.124338, "phase": "start", "agent": "kulibin", "action": "security_audit", "spec": "/tmp/leak.js", "meta": {}, "result_ref": "", "outcome": null}
+{"sid": "65e7da54b67d", "ts": 1783571894.810325, "phase": "start", "agent": "artemiy", "action": "generate_component", "spec": "x", "meta": {"framework": "react"}, "result_ref": "", "outcome": null}
+{"sid": "08c4b0bf444b", "ts": 1783571930.2155352, "phase": "start", "agent": "rembrandt", "action": "generate_component", "spec": "Generate a button component in IncuBird style", "meta": {"style": "incubird"}, "result_ref": "", "outcome": null}
+{"sid": "d4b9f1872910", "ts": 1783572010.237342, "phase": "start", "agent": "kulibin", "action": "security_audit", "spec": "/tmp/leak.js", "meta": {}, "result_ref": "", "outcome": null}
+{"sid": "cf9b5539069e", "ts": 1783572023.5815501, "phase": "start", "agent": "artemiy", "action": "leak_detected", "spec": "signal test123", "meta": {"issues": ["hardcoded_secret", "secret_in_log"]}, "result_ref": "", "outcome": null}

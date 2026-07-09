@@ -1,0 +1,24 @@
+{
+  "project": "freelance-2026 / freelance-agent",
+  "task": "Security layer для агентов (по чеклисту t.me/vibecoding_tg/3376)",
+  "context": "Завершено. Выбраны 2 фичи: (1) Security-lint сгенерированного кода — Кулибин получил security_audit.py (static через agents/security + LLM OWASP), CLI --sec-audit/--owasp; (2) Guardrail генераторов — Артемий и Рембрандт после генерации прогоняют scan_leaks и предупреждают + логируют signal leak_detected. Создан общий agents/security/ пакет (scan.py) и ADR-003. Интегрировано с learning (capture/feedback).",
+  "files": [
+    "freelance-agent/.agent/agents/security/{__init__,scan}.py",
+    "freelance-agent/.agent/agents/kulibin/security_audit.py",
+    "freelance-agent/.agent/agents/kulibin/__init__.py (exports security_audit, owasp_audit)",
+    "freelance-agent/.agent/agents/kulibin/cli.py (--sec-audit/--owasp + guard import)",
+    "freelance-agent/.agent/agents/artemiy/cli.py (_guard + security import)",
+    "freelance-agent/.agent/agents/rembrandt/cli.py (_guard + security import)",
+    "freelance-agent/.agent/agents/{kulibin,artemiy}-engineer|-frontend.md + rembrandt-designer.md (Security секции)",
+    "freelance-agent/.agent/docs/adr/ADR-003-security-layer.md"
+  ],
+  "skills": ["python-patterns", "deployment-procedures", "frontend-design"],
+  "next_steps": [
+    "1. Расширить SECURITY_SMELLS (CSRF, open redirect, unsafe deserialization)",
+    "2. Добавить pre-commit hook, прогоняющий security.scan по agents output/",
+    "3. (опц) Guardrail в Кулибина generate_prototype (не генерить код с секретами)",
+    "4. Зарегистрировать security в skills-registry"
+  ],
+  "escalation": false,
+  "deadline": "2026-07-12T18:00:00"
+}
