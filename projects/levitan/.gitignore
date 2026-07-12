@@ -35,6 +35,7 @@ logs/
 *.log
 
 # Data - track call_results but not campaign bulk data
+data/adygea_leads/
 data/*.db
 data/*.sqlite
 data/.gitkeep

@@ -126,3 +126,52 @@
 4. `SYSTEM_PROMPT` под голос (убрать JSON, роль/факты/цены/запреты, tool `save_lead`).
 5. Function calling `save_lead` → CRM API.
 6. Тест: latency <500мс, barge-in, эхо, лид в CRM. Трёхзвенка — fallback.
+
+---
+
+## 🌞 2026-07-09 (3-я сессия) — Habr Digests + Evals + GPT-Live vs Realtime
+
+**Статус:** Сессия завершена.
+
+### Сделано
+
+**1. Обработка дайджестов**
+- 🔑 **TG токен @Angella26bot**: найден заблокированный (401), заменён на рабочий в 6 файлах (`~/.env`, `watchdog.py`, `send_report_today.py`, `projects/ai-eggs/.env`, `projects/agent-lab/.env`, `projects/angel-backend/.env`). Бот ожил.
+- 📡 **ABR INTELLIGENCE 02.07**: SkillSpector (NVIDIA, 12K stars) — `uv tool install skillspector`. Просканированы 14 скиллов — 0 находок. Добавлен в архитектурные заметки ACTIVE_TASKS.md.
+- 📖 **HABR DIGEST 01.07**: LLM Wiki (Карпатый) — перестроить KB Angela по паттерну raw/wiki/index/ingest/query/lint. Добавлен в план (HD1).
+- 📖 **Статья "Claude-агент без LangChain"** — сравнить с архитектурой Angela (ABR4).
+
+**2. Статья "RAG на кончиках пальцев" (22.06 → `angela_agents.py`)**
+- `faq_synonyms.json` — 27 negative synonyms (бройлеры ↔ утки, корм ↔ аптечка, москва ↔ краснодар и др.)
+- `faq_aliases.json` — 40 записей морфологических алиасов (утка/уток/уточки, справка/справки и др.)
+- `lookup_faq()` переписан: fingerprint + aliases + negative synonyms с penalty 2x при score ≥ 0.83
+- Починены Router keywords: `опрос`→pro, `пород`→breeds, `налич`→availability, `функционал`→dev, `сколько сто`→pricing
+- Шумовые слова: `расскажи`, `привезите` добавлены в noise filter
+
+**3. Статья "Evals" (23.06 → глобальный CI-слой)**
+- `tests/eval_angela.py` — 47 тестов: Router regression (9) + capability (11) + FAQ точность (7) + aliases (12) + negative (3) + nomatch (4). 100% pass.
+- Pre-commit hook — авто-прогон при изменении `angela_agents.py` или `faq_*`
+- `scripts/install-eval-hook.sh` — универсальный установщик для любого проекта
+- `AGENTS.md` (глобальный): пункт 9 — Eval-driven development (каждый проект → eval suite, прогон перед изменениями)
+- AGENTS.md ai-eggs: добавлена строка про eval suite в блок LLM каскада
+
+**4. Сравнение GPT-Live vs Яндекс Realtime для Levitan**
+- GPT-Live (gpt-realtime-2.1): $4/мин audio → ~$240/час. Из РФ — через VPN. Качество диалога выше.
+- Яндекс Realtime: бесплатные кредиты, РФ без прокси, <500ms, родной русский.
+- **Вердикт:** Яндекс Realtime — единственный реалистичный вариант для Levitan сейчас. GPT-Live рассматривать только после починки VPS и стабильной инфраструктуры.
+
+### Архитектурные решения
+- Eval-driven development — для всех проектов, текущих и будущих
+- FAQ matching: fingerprint + aliases + negative synonyms (статья IgMamont)
+- Eval suite как CI-слой AI-систем (статья artarasov)
+
+### Блокеры
+- VPS 185.39.206.145 — не отвечает (100% packet loss)
+- SIP audio на Mac — тишина (Mango employee 22 timeout ~0 сек)
+- Яндекс Cloud ключ — нет аккаунта для Realtime
+
+### План на завтра
+1. Создать Яндекс Cloud аккаунт + сервисный аккаунт с ролями STT/TTS/LLM → ключ в `.env`
+2. `deploy/levitan_realtime.py` (FastAPI WS-прокси, TDD)
+3. Angela: eval для Generator (LLM-as-judge, HD5)
+4. LLM Wiki: перестроить KB Angela по паттерну Карпатого (HD1)
