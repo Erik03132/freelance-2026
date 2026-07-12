@@ -175,3 +175,51 @@
 2. `deploy/levitan_realtime.py` (FastAPI WS-прокси, TDD)
 3. Angela: eval для Generator (LLM-as-judge, HD5)
 4. LLM Wiki: перестроить KB Angela по паттерну Карпатого (HD1)
+
+---
+
+## 🔧 2026-07-12 — P1 cleanup + GeekNeural token-dedup
+
+**Статус:** Сессия завершена.
+
+### Сделано
+
+**1. P1 — приведение кода в порядок (4 сабмодуля + root)**
+- `ai-grant-portal-temp` (`685aad3`): AGENTS.md, config, лендинг.
+- `ai-scout` (`133ab1e`): скилл `extruct-api` → `project-skills/`, +content-pipeline, video_clipper.
+- `ai-eggs` (`76f828a`): удалены 4 генератора + тесты; +eval suite (**47/47 passed**).
+- `angel-backend` (`72d35f8`): agentic RAG, mem0, autodial, call-quality monitor; `.gitignore` пополнен артефактами.
+- root (`4aa79c7e`,`a3415565`,`5387c294`): bump указателей, chp.md 07-09, extract/enrich adygea leads, gitignore PII.
+- Безопасность: секреты не попали (`.env` игнорируются; `adygea_leads/` PII → gitignore). Дубликат-чекпоинт удалён.
+
+**2. GeekNeural — движок дедупликации контекста (4 уровня)**
+- Одно и то же содержимое в сессии передаётся модели **один раз**; повтор → короткая ссылка `gn:<hash>`.
+- Единое ядро `tools/geekneural/core/dedup.py` (чистый stdlib, без зависимостей).
+- Уровни:
+  - 1. shell-hook `shell/hook.sh` (`gn read|cat|stats|clear`, bash+zsh) — **работает**;
+  - 2. MCP-сервер `mcp_server/server.py` (stdio JSON-RPC, чистый stdlib) — **зарегистрирован в `opencode.jsonc`**;
+  - 3. браузерное расширение MV3 `browser/extension/` (дедуп вставок в ChatGPT/Claude/Gemini);
+  - 4. IDE-плагин VS Code `ide/vscode/` (команда «копировать файл в чат (дедуп)»).
+- volatile/real-time (`*.log`, `/tmp/`, runtime-JSON) сознательно **не дедуплицируются**.
+- Тесты: unit (6) + MCP-интеграция — оба green.
+- Коммит: `5b4d3273`. ADR-001 + README.
+
+### Демо (реальные цифры)
+- 5 чтений 11 КБ-файла → **79.9%** экономии (~11 059 токенов).
+- Сценарий агента (3 файла проекта + 2 перечитывания): 257 630 байт → 132 024, **48.8%** (~31 401 токенов).
+- На стабильном контексте — до **~92%**.
+
+### Архитектурные решения
+- MCP на чистом stdlib JSON-RPC (без `mcp` SDK) — переносимо, без сети/установки.
+- Кеш сессии в `~/.geekneural/cache.db` (локально, **без телеметрии**).
+- Дедуп через content-addressed sha256; статистика персистентна в БД между процессами.
+
+### Блокеры (ждут пользователя)
+- VPS `185.39.206.145` лежит (100% packet loss) → боты оффлайн.
+- Ключ SSH отвергнут на `72.56.38.19` → добавить `id_ed25519.pub` в `authorized_keys`.
+
+### План на завтра
+1. **Перезапустить OpenCode** → подхватит MCP `geekneural` (`cached_read`).
+2. Восстановить VPS / сменить хостинг; добавить SSH-ключ на `72.56.38.19`.
+3. Задеплоить накопленные изменения сабмодулей на живой VPS.
+4. (опц.) Загрузить браузерное расширение и VS Code-плагин.
