@@ -1,0 +1,29 @@
+{
+  "name": "geekneural",
+  "displayName": "GeekNeural Token Dedup",
+  "version": "0.1.0",
+  "description": "Дедупликация контекста для ИИ-чатов в IDE: повторное чтение файла не дублирует токены. Без телеметрии.",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "activationEvents": [],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "geekneural.readToChat",
+        "title": "GeekNeural: Скопировать файл в чат (дедуп)"
+      },
+      {
+        "command": "geekneural.stats",
+        "title": "GeekNeural: Статистика экономии"
+      },
+      {
+        "command": "geekneural.clear",
+        "title": "GeekNeural: Сбросить сессию"
+      }
+    ]
+  },
+  "scripts": {
+    "test": "node ./test/runTest.js"
+  }
+}
