@@ -96,3 +96,9 @@ dashboard/node_modules/
 dashboard/.next/
 *.so
 *.node
+
+# PII / large artifacts — do NOT commit (lead phone numbers, coordination plans)
+projects/levitan/data/campaigns/csv/PING_PARTITION.json
+projects/levitan/speaker.wav
+projects/levitan/data/campaigns/csv/adygea_grain_*.csv
+projects/levitan/data/adygea_leads/
