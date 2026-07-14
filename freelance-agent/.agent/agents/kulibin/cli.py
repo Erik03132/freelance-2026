@@ -36,7 +36,7 @@ except ImportError:
         return None
 
 try:
-    from memory import enrich_context, recall, remember
+    from memory import compact as mem_compact, enrich_context, recall, remember
 except ImportError:
     def enrich_context(agent, query, ctx="", top_k=2):
         return ctx
@@ -44,6 +44,29 @@ except ImportError:
         return []
     def remember(agent, fact, kind):
         pass
+    def mem_compact(agent, keep=500):
+        return {"before": 0, "after": 0, "removed": 0}
+
+try:
+    from soul import ensure_soul, evolve_soul, soul_context
+except ImportError:
+    def ensure_soul(agent, name="", role=""):
+        return ""
+    def evolve_soul(agent, lessons):
+        return False
+    def soul_context(agent, max_chars=1500):
+        return ""
+
+AGENT = "kulibin"
+_base_learned = build_learned_context
+
+
+def build_learned_context(agent, min_samples=3):  # noqa: F811 — wrap to inject soul
+    base = _base_learned(agent, min_samples)
+    s = soul_context(agent)
+    if s:
+        return s + ("\n\n" + base if base else "")
+    return base
 
 from . import (
     EVAL_CRITERIA,
@@ -103,10 +126,19 @@ def main():
 
     args = parser.parse_args()
 
+    ensure_soul(AGENT, "Кулибин", "Engineer — Performance & Innovation")
+
     if args.feedback:
         sid, outcome = args.feedback
         ok = capture_outcome(sid, outcome)
         print(f"{'✅' if ok else '❌'} Feedback '{outcome}' recorded for {sid}")
+        if ok:
+            lessons = _base_learned(AGENT)
+            if lessons and evolve_soul(AGENT, lessons):
+                print(f"🧬 Soul evolved: folded fresh lessons into {AGENT}.soul.md")
+        _stats = mem_compact(AGENT)
+        if _stats["removed"]:
+            print(f"🗜️  Memory compacted: {_stats['before']}→{_stats['after']} (-{_stats['removed']})")
         return
 
     if args.sec_audit:

@@ -79,7 +79,7 @@ def call_llm(
     api_key: str | None = None,
     complexity: str = "simple",
 ) -> str | None:
-    key = api_key or load_openrouter_key()
+    key = api_key if api_key is not None else load_openrouter_key()
     if not key:
         return None
     model = model or ROUTE.get(complexity, DEFAULT_MODEL)

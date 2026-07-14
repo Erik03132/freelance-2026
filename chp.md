@@ -1,3 +1,81 @@
+## 🧬 2026-07-14 — soul.md: самоуправляемая конституция агентов (Chen pattern)
+
+**Статус:** Сессия завершена.
+
+### Источник
+Видео Шен Шон Чена (@vibecoding_tg/3475) о self-improving агентах. 5 механик: soul.md · smart RAG · self-terminating loop · self-healing prompt · memory compaction. Выбрана к внедрению **soul.md**.
+
+### Сделано
+**Новый модуль `soul/` (freelance-agent/.agent/agents/soul/)** — pure stdlib, graceful fallback:
+- `store.py`: read/write/scaffold/replace_auto_zone. Формат soul.md = 2 зоны: `## Constitution` (human-owned) + `## Evolving Lessons` с маркерами `<!-- SOUL:AUTO:BEGIN/END -->` (machine-owned).
+- `__init__.py`: `load_soul` · `soul_context(max_chars)` · `ensure_soul` (идемпотентно) · `evolve_soul(lessons)` (self-edit только AUTO-зоны).
+- `tests/test_soul.py` — **10 тестов, 100% pass** (TDD): scaffold, идемпотентность, evolve замыкается только на AUTO-зону, замена прошлых lessons, no-op на пустое, max_chars.
+
+**4 soul.md с распиленными конституциями:** artemiy · kulibin · sherl · rembrandt (Role + Hard rules из профилей).
+
+**Проводка в CLI (4 агента):** wrapper над `build_learned_context` инжектит `soul_context` во ВСЕ call-sites без правки каждого; `ensure_soul` на старте; при `--feedback` accepted/edited/rejected → `evolve_soul` сворачивает свежие learned-lessons в soul.md (замкнут self-improving цикл: signals → learning → soul).
+
+### Проверка
+- soul: 10/10 · sherl: 10/10 · все 4 CLI smoke OK (`--list-*`).
+- ⚠️ artemiy/kulibin/rembrandt tests виснут на pre-existing тесте `*_empty_api_key` (реальный сетевой вызов без таймаута) — НЕ связано с soul.
+
+### Архитектурные решения
+- soul.md = единый живой файл governance: статичная конституция (человек) + эволюционирующие уроки (машина). Заменяет разрозненность profile.md / memory.jsonl / learning.
+- evolve_soul трогает только AUTO-зону — конституция человека неприкосновенна.
+
+### Продолжение (та же сессия) — механики Чена #4, #5 + фикс тестов
+
+**1. Фикс pre-existing сетевого хэнга в тестах**
+- Корень: `key = api_key or load_openrouter_key()` — пустая строка `""` (тестовый «нет ключа») falsy → подхватывался реальный ключ из `.env` → реальный сетевой вызов 60с.
+- Фикс во всех 4 llm_client.py: `key = api_key if api_key is not None else load_openrouter_key()` — `None` = взять из env, `""` = явно без ключа. Тесты стали герметичны.
+
+**2. Механика #4 — self-healing prompt (`healing/`)**
+- `run_with_healing(prompt, generate, validate, max_retries)` — detect error → patch prompt корректирующими директивами → re-run → self-terminate на чистой валидации ИЛИ по исчерпании бюджета (совмещает #4 + #3 self-terminating loop).
+- `heal_prompt(prompt, issues)` + dataclass `HealResult(output, ok, attempts, issues)`. Валидатор-исключения контейнеризованы (не роняют цикл).
+- Проводка в artemiy: `_validate_frontend` (пусто/лики/наличие markup) оборачивает генерацию компонента, max_retries=1.
+- `tests/test_healing.py` — **7 тестов, 100% pass**.
+
+**3. Механика #5 — memory compaction (`memory.compact`)**
+- Дедуп идентичных фактов (norm-текст, хранит новейший ts) + обрезка до `keep` новейших; атомарная перезапись jsonl. Возвращает `{before, after, removed}`.
+- Авто-триггер в feedback-хендлере всех 4 CLI (момент самооптимизации) с выводом `🗜️ Memory compacted`.
+- `memory/tests/test_compact.py` — **5 тестов, 100% pass**.
+
+### Итог по тестам
+Полный прогон: **62 passed за 33s, без хэнга** (было 50). soul 10 + healing 7 + memory compact 5 + прежние 40.
+
+**4. Механика #2 — smart RAG top-K (`memory.recall_scored`)**
+- Найден баг: `enrich_context` вызывал `recall()` (возвращает строку), но итерировал как список dict'ов → память **никогда** не инжектилась.
+- `recall_scored(agent, query, top_k, min_score)` — ранжированные dict'ы {fact, score, ...} по Jaccard-overlap, порог + top-K. `recall()` переписан поверх (backward-compat строка).
+- `enrich_context` починен: реально инжектит top-K релевантных фактов.
+- `memory/tests/test_smart_rag.py` — **8 тестов, 100% pass** (ранжирование, top-K, min_score, реальная инъекция в enrich_context).
+
+### Самоулучшающийся цикл (замкнут)
+generate → **validate/heal** (#4) → **smart-RAG recall** (#2) → signals → learning → **soul.md evolve** (#1) → **memory compact** (#5). Из 5 механик Чена внедрены **все**: #1, #2, #3 (внутри #4), #4, #5.
+
+### Итог по тестам (финал)
+Полный прогон: **70 passed за 27s, без хэнга** (было 50). +soul 10 +healing 7 +compact 5 +smart_rag 8.
+
+---
+
+## 🌞 2026-07-12 — VPS диагностика + обновление credentials
+
+**Статус:** Сессия в процессе.
+
+**Сделано:**
+1. Диагностика VPS: 72.56.38.19 — пинг есть, SSH не пускает (host key changed, пароль не подходит). 185.39.206.145 — мёртв
+2. Выяснена причина молчания @Angella26bot — VPS переустановлен, все PM2 процессы удалены
+3. Найдены Timeweb credentials в .env (ai-eggs)
+4. Обновлены Timeweb логин/пароль во всех проектах: ai-eggs, ai-levitan, levitan, angel-backend, agent-lab
+5. Новые данные: лог `Vezemcip@yandex.com`, пасс `Azamat123`
+
+**Блокеры:** ❌ VPS недоступен (ждём сброс пароля от Timeweb панели)
+
+**План:**
+- Зайти в my.timeweb.ru → сбросить root-пароль
+- SSH → восстановить сервисы (Angela, боты, VezemCip)
+
+---
+
 ## 🏁 2026-07-07 — CRM доработки (Levitan)
 
 **Статус:** Сессия завершена. Исправлена логика «Сегодня» и счётчик звонков.

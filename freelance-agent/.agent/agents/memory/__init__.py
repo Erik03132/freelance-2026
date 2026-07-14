@@ -1,15 +1,13 @@
 """Memory Tree package. Importable: `from memory import remember, recall`."""
 
-from .store import recall, remember
+from .store import compact, recall, recall_scored, remember
 
 
 def enrich_context(agent: str, query: str, ctx: str = "", top_k: int = 2) -> str:
-    """Merge memory recall into the learned context string."""
+    """Merge smart-RAG memory recall (top-K) into the learned context string."""
     try:
-        mem = recall(agent, query, top_k=top_k)
-        mem_ctx = ""
-        if mem:
-            mem_ctx = "\n".join(f"- {m['fact']}" for m in mem if isinstance(m, dict))
+        hits = recall_scored(agent, query, top_k=top_k)
+        mem_ctx = "\n".join(f"- {h.get('fact', '')}" for h in hits if h.get("fact"))
         if mem_ctx and ctx:
             return "Previous patterns:\n" + mem_ctx + "\n" + ctx
         if mem_ctx:
@@ -19,4 +17,4 @@ def enrich_context(agent: str, query: str, ctx: str = "", top_k: int = 2) -> str
     return ctx
 
 
-__all__ = ["remember", "recall", "enrich_context"]
+__all__ = ["remember", "recall", "recall_scored", "enrich_context", "compact"]

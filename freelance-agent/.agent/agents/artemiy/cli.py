@@ -29,7 +29,7 @@ except ImportError:
         return []
 
 try:
-    from memory import enrich_context, recall, remember
+    from memory import compact as mem_compact, enrich_context, recall, remember
 except ImportError:
     def enrich_context(agent, query, ctx="", top_k=2):
         return ctx
@@ -37,6 +37,51 @@ except ImportError:
         return []
     def remember(agent, fact, kind):
         pass
+    def mem_compact(agent, keep=500):
+        return {"before": 0, "after": 0, "removed": 0}
+
+try:
+    from soul import ensure_soul, evolve_soul, soul_context
+except ImportError:
+    def ensure_soul(agent, name="", role=""):
+        return ""
+    def evolve_soul(agent, lessons):
+        return False
+    def soul_context(agent, max_chars=1500):
+        return ""
+
+try:
+    from healing import run_with_healing
+except ImportError:
+    run_with_healing = None
+
+
+AGENT = "artemiy"
+
+
+def _ctx(query: str) -> str:
+    """Soul constitution + learned context + memory recall, merged for the prompt."""
+    base = build_learned_context(AGENT)
+    soul = soul_context(AGENT)
+    if soul:
+        base = soul + ("\n\n" + base if base else "")
+    return enrich_context(AGENT, query, base)
+
+
+def _validate_frontend(out) -> list:
+    """Deterministic quality gate for generated frontend output."""
+    issues = []
+    if not out or not str(out).strip():
+        return ["output is empty"]
+    low = str(out).lower()
+    if "llm unavailable" in low:
+        return []  # offline fallback template is acceptable, don't loop
+    leaks = scan_leaks(str(out))
+    if leaks:
+        issues.append(f"remove leaked secrets: {', '.join(leaks)}")
+    if "<" not in str(out):
+        issues.append("output must contain markup (no HTML/JSX tags found)")
+    return issues
 
 from . import (
     COMPONENT_TYPES,
@@ -109,10 +154,19 @@ def main():
 
     args = parser.parse_args()
 
+    ensure_soul(AGENT, "Артемий", "Frontend Agent — сайты мирового уровня")
+
     if args.feedback:
         sid, outcome = args.feedback
         ok = capture_outcome(sid, outcome)
         print(f"{'✅' if ok else '❌'} Feedback '{outcome}' recorded for {sid}")
+        if ok:
+            lessons = build_learned_context(AGENT)
+            if lessons and evolve_soul(AGENT, lessons):
+                print(f"🧬 Soul evolved: folded fresh lessons into {AGENT}.soul.md")
+        _stats = mem_compact(AGENT)
+        if _stats["removed"]:
+            print(f"🗜️  Memory compacted: {_stats['before']}→{_stats['after']} (-{_stats['removed']})")
         return
 
     if args.list_components:
@@ -129,9 +183,20 @@ def main():
 
     if args.component:
         print(f"🔨 Generating {args.framework} component: {args.component}")
-        ctx = enrich_context("artemiy", args.spec, build_learned_context("artemiy"))
+        ctx = _ctx(args.spec)
         sid = capture_start("artemiy", "generate_component", args.spec, {"framework": args.framework})
-        result = generate_component(args.component, args.spec, args.framework, learned_context=ctx)
+        if run_with_healing:
+            res = run_with_healing(
+                ctx,
+                lambda p: generate_component(args.component, args.spec, args.framework, learned_context=p),
+                _validate_frontend,
+                max_retries=1,
+            )
+            result = res.output
+            if res.attempts > 1:
+                print(f"🩹 Self-healing: {res.attempts} attempts, {'clean' if res.ok else 'still had issues'}")
+        else:
+            result = generate_component(args.component, args.spec, args.framework, learned_context=ctx)
         if result:
             path = _save(f"{args.component}.{_ext(args.framework)}", result)
             print(f"✅ Saved to {path}")
@@ -145,7 +210,7 @@ def main():
 
     if args.page:
         print(f"🔨 Generating {args.framework} page from brief")
-        ctx = enrich_context("artemiy", args.page, build_learned_context("artemiy"))
+        ctx = _ctx(args.page)
         sid = capture_start("artemiy", "generate_page", args.page, {"framework": args.framework})
         result = generate_page(args.page, args.framework, learned_context=ctx)
         if result:

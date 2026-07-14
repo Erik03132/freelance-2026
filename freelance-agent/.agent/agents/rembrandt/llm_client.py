@@ -46,7 +46,7 @@ def call_llm(
 
     complexity: "simple" -> deepseek, "complex" -> sonnet (model routing).
     """
-    key = api_key or load_openrouter_key()
+    key = api_key if api_key is not None else load_openrouter_key()
     if not key:
         return None
     model = model or ROUTE.get(complexity, DEFAULT_MODEL)
