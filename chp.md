@@ -1,3 +1,36 @@
+## 🌞 2026-07-15 — PII cleanup (Levitan) + ADR-002 latency budget
+
+**Статус:** Сессия завершена.
+
+### Сделано
+**1. Чистка PII в Levitan (вариант 1)**
+- `git rm --cached` для **26 PII-CSV** в `projects/levitan/data/campaigns/csv/` (колонки `Имя` + `Телефоны` реальных лидов). Файлы остаются на диске (47 шт.), удалены только из индекса.
+- Подводный камень: `git diff --name-only` оборачивает non-ASCII пути в кавычки → `git rm` с `--ignore-unmatch` молча «успешно» не удалял. Фикс через `git ls-files -z | xargs -0`.
+- В `projects/levitan/.gitignore` (line 43) добавлен комментарий: `PII: campaign CSVs contain real lead names + phones -> NEVER track`.
+- Проверка: `git add -A --dry-run` по папке → пусто (gitignore корректно блокирует повторное добавление).
+- Коммит `17d4a731` (fix levitan PII) → запушен в `main`.
+- ⚠️ Старая PII остаётся в git-истории. Полная чистка (вариант 3, `git filter-repo` + force-push) — отдельная, более инвазивная задача, не делалась.
+
+**2. ADR-002: бюджет задержки голосового агента**
+- Синтез видео «I Made My AI Voice Agent 2x Faster» + свежий (2026) консенсус по voice latency (LiveKit/ElevenLabs/Vapi/OnCallClerk).
+- Записан `projects/levitan/docs/adr/ADR-002-latency-budget.md` (Proposed): для realtime-архитектуры (Яндекс Realtime) ~60% pipeline-оптимизаций уже делает модель; рычаги на нашей стороне — byte-стабильный system prompt + prefix caching, SIP/кодек (ulaw_8000, колокация с Mango POP, тёплый пул WS), VAD ~300ms, filler + greeting pre-buffer вокруг `save_lead`, замеры p95 по стадиям.
+- Коммит `dd49ef8c` → запушен в `main`.
+
+### Архитектурные решения
+- PII bulk-data не коммитим; трекаем только `call_results` (gitignore exception).
+- Latency budget для Levitan целимся в p95 < 500 мс; динамику промпта — в конец (не ломать prefix cache).
+
+### Продолжение (не закоммичено, WIP вне сессии)
+- Сабмодули `ai-eggs`/`ai-scout`/`angel-backend`/`hh-ai-agent` — чужой/несвязанный WIP.
+- `projects/levitan/scripts/extract_adygea_leads.py`, `ping_checker.py`, `reports/geo_monitor_launchd.err` (volatile лог) — не трогали.
+
+### Следующие шаги (по желанию)
+1. Реализовать ADR-002 в `deploy/levitan_realtime.py` + `greeting_bridge` (когда будет Яндекс Cloud ключ).
+2. (опц) Полная очистка PII из истории — `git filter-repo` + force-push (обсудить отдельно).
+3. Восстановить VPS / SSH-ключи (блокер ботов).
+
+---
+
 ## 🧬 2026-07-14 — soul.md: самоуправляемая конституция агентов (Chen pattern)
 
 **Статус:** Сессия завершена.
