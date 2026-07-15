@@ -40,6 +40,7 @@ data/*.db
 data/*.sqlite
 data/.gitkeep
 data/campaigns/csv/all_contacts_2026.csv
+# PII: campaign CSVs contain real lead names + phones -> NEVER track (removed from index 2026-07-15)
 data/campaigns/csv/*.csv
 !data/call_results/*.csv
 !data/call_results/*.json
