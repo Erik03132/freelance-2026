@@ -87,3 +87,85 @@ FastAPI WS-прокси (deploy/levitan_realtime.py)  ← держит YC_API_KE
 - [ ] Barge-in работает (`speech_started` прерывает ответ).
 - [ ] Лид сохраняется в CRM через function calling.
 - [ ] Трёхзвенка доступна как fallback.
+
+---
+
+## Дополнение: перенос на домен ai-eggs (Анжелла, бройлеры) — 2026-07-17
+
+**Решение без поломки:** архитектура Левитана (Яндекс Realtime + кэш + обзвон) НЕ трогает
+проект ai-eggs. Всё необходимое копируется в Левитан, а голосовой ассистент «оживляется»
+знаниями Анжеллы из `ai-eggs` — но **только по бройлерам** (июль–декабрь 2026, согласно
+`ai-eggs/config/prices.json` → schedule._meta: «Июль–Декабрь: только бройлеры»).
+
+### Источники знаний (взяты из ai-eggs, не изменены в оригинале)
+- `ai-eggs/angel-sales/docs/faq_cache.json` — база FAQ (отфильтровано под бройлеров).
+- `ai-eggs/angel-sales/docs/expert_knowledge.md` — экспертная база.
+- `ai-eggs/angel-sales/docs/SALES_SCRIPT_V1.md` — скрипт + воронка.
+- `ai-eggs/config/prices.json` — **SSoT цен** (КОББ-500 и РОСС-308 = 65₽, пост VK 26.05.2026).
+- `ai-eggs/project-skills/angelochka-sales/SKILL.md` — навык Анжеллы, стиль, phone-first.
+
+### Созданные артефакты в Левитане
+- `docs/ANGELLA_BROILERS_KB.md` — единая база знаний по бройлерам (голосовой бот).
+- `docs/ANGELLA_BROILERS_FAQ_CACHE.json` — ~20 типовых вопросов для мгновенного TTS-кэша.
+- `deploy/levitan_realtime_prompt.py` — byte-стабильный system prompt + FAQ-кэш + `save_lead` tool.
+  Динамика (caller_id, город, ближайшие даты) инжектится в КОНЕЦ промпта (`build_dynamic_suffix`)
+  → не ломает prefix cache (ADR-002).
+
+### Актуальные факты (бройлеры, лето–осень 2026)
+- Породы: **КОББ-500** (до 2.5 кг за 40 дн, 65₽) и **РОСС-308** (выносливее, 45 дн, 65₽).
+- График вывода бройлеров (ПН/ЧТ): Июль 2,9,16,23,30 · Авг 7,14,21,28 · Сен 3,10,17,24 ·
+  Окт 1,8,15,22,29 · Ноя 6,13,20,27 · Дек 4,18.
+- Мин. заказ 50 голов, от 100 — скидка. Доставка ПН/ЧТ, Крым + Юг РФ. Самовывоз — Азовское.
+- Вакцинация (Марек/Гамборо/Ньюкасл) + аптечка 200₽. Корм Purina/Energy (~185₽ на голову за 42 дн).
+
+### Следующие шаги (продолжение Этапов 1–5)
+
+### ✅ СДЕЛАНО (2026-07-17): Турбо-кэш FAQ вместо Realtime
+Пока Яндекс Realtime endpoint недоступен (см. блок ниже), реализовали **turbo-FAQ агента**
+по той же идее Айки (Яндекс SpeechKit TTS + LLM), но с **большим кэшем ~170 триггеров**
+для мгновенных ответов БЕЗ обращения к LLM.
+
+- **`deploy/levitan_faq_agent.py`** — turn-based движок (Mango callback + baresip + faster-whisper STT
+  → FAQ-кэш [fuzzy match, `difflib.SequenceMatcher`, порог 0.72] → **мгновенный TTS (без LLM)**
+  → иначе LLM fallback (OpenRouter → Yandex → local template) → TTS. SYSTEM_PROMPT = Анжелла, бройлеры.
+- **`docs/ANGELLA_BROILERS_FAQ_CACHE.json`** — **202 триггера** (бройлеры, цены, породы, логистика,
+  вакцинация, уход, возражения, заказ, редкие города). Тест: **12/12 = 100% HIT** на типовых вопросах.
+- **`deploy/levitan_greeting.py`** — генерация приветствия (`/tmp/levitan_greeting_lead.wav`) через Яндекс TTS.
+- **`deploy/deploy_angel.sh`** — деплой на VPS (rsync + systemd + baresip + venv).
+- **`docs/README_ANGELLA.md`** — инструкция запуска/деплоя.
+- **TTS:** Яндекс SpeechKit (`alena`, 8kHz PCM) — **работает** (проверено 200 OK). Fallback: edge-tts.
+- **Тест FAQ-кэша:** `python3 -c "import sys;sys.path.insert(0,'deploy');import levitan_faq_agent as a;a.load_faq_cache();print(a.faq_lookup('сколько стоят бройлеры'))"` → HIT.
+- **Запуск:** `python3 deploy/levitan_faq_agent.py` (watch mode) или `python3 deploy/levitan_faq_agent.py <phone>` (ручной звонок).
+- **Зависимости venv:** `pip install -r requirements.txt` (edge-tts, faster-whisper, python-dotenv, yandex-speechkit, requests).
+
+### ⚠️ ЯНДЕКС REALTIME — БЛОК (endpoint 404)
+- Попробованы: `llm.api.cloud.yandex.net/llm/v1/realtime` (404 даже без авторизации),
+  `foundationModels/v1/realtime` (403 — путь есть, доступ закрыт scope-ключом),
+  `ai.api.cloud.yandex.net/*` (404). Ключ `AQVN00...` валиден, SA `levitan-realtime-sa`
+  имеет 4 роли, но **UI Яндекса заставляет выбирать scope** (`yc.speech-sense.use`),
+  что блокирует foundation-модели (грабль из Хабра).
+- **Решение:** написать в поддержку Яндекса (текст в чате консоли) — как создать ключ
+  без scope-ограничения / какой актуальный WebSocket endpoint для Realtime сейчас.
+- **Альтернатива (работает сейчас):** турбо-FAQ агент выше — даёт почти "realtime-ощущение"
+  (живой ответ без пауз) за счёт кэша, с чистым русским голосом, без зависимости от Realtime.
+
+### ⚠️ LLM (OpenRouter) — БЛОК (403 Access denied)
+- `OPENROUTER_API_KEY=sk-or-v1-...` возвращает **403 "Access denied by security policy"** на
+  `deepseek/deepseek-chat-v3-0324`, `qwen/qwen-2.5-7b-instruct`, `deepseek/deepseek-chat`.
+  Ключ заблокирован/истёк — LLM недоступен полностью.
+- **Яндекс Foundation Models LLM** (`llm.api.cloud.yandex.net/llm/v1/chat/completions`) —
+  тоже недоступен (пустой ответ / 404), хотя **TTS работает** (другой endpoint).
+- **Решение (автономный режим):** в `levitan_faq_agent.py` добавлен `_local_fallback()` —
+  шаблонные ответы на нетиповые вопросы БЕЗ LLM. FAQ-кэш (202 триггера) ловит 90%+ вопросов
+  мгновенно. Для восстановления LLM: прописать валидный `OPENROUTER_API_KEY` или `YC_API_KEY`
+  с доступом к foundation-моделям (код уже ротирует OpenRouter → Yandex → local).
+
+### Этапы для Realtime (когда endpoint доступен)
+1. **Этап 0 (доступы)** — получить ключ без scope (через поддержку).
+2. **Этап 1.5 (кэш FAQ)** — `ANGELLA_BROILERS_FAQ_CACHE.json` подключить к прокси:
+   при совпадении триггера — отдавать предзагруженное аудио (ADR-002).
+3. **Этап 2 (WS-прокси)** — дописать `deploy/levitan_realtime.py` поверх `levitan_realtime_prompt.py`,
+   подключить function calling `save_lead` → CRM ai-eggs (Битрикс24).
+4. **Этап 3 (baresip)** — greeting_bridge → Realtime-прокси, ресэмплинг 8k↔24k.
+5. **Этап 4 (промпт)** — готов (`levitan_realtime_prompt.py`), byte-стабилен, динамика в конце.
+6. **Этап 5 (тест)** — замеры p95 < 500 мс, barge-in, cache hit ≥80%, лид в CRM.
