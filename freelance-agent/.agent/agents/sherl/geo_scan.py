@@ -7,10 +7,10 @@ from .research_config import COMPETITOR_FACTORS, GEO_MODELS
 from .searcher import research
 
 
-def geo_scan(brand: str, query: str) -> dict:
+def geo_scan(brand: str, query: str, api_key: str | None = None) -> dict:
     """Check brand presence in AI/web results for a query."""
     full = f"{brand} {query}"
-    res = research(full)
+    res = research(full, api_key=api_key)
     answer = res.get("answer", "")
     mentioned = brand.lower() in answer.lower()
     return {
@@ -26,7 +26,7 @@ def geo_scan(brand: str, query: str) -> dict:
 
 def competitor_audit(name: str, api_key: str | None = None, learned_context: str = "") -> dict:
     """Structured competitor analysis from open sources."""
-    res = research(f"{name} product features pricing reviews")
+    res = research(f"{name} product features pricing reviews", api_key=api_key)
     answer = res.get("answer", "")
     # LLM structuration of raw findings
     structured = call_llm(
@@ -54,7 +54,7 @@ Research:
 
 
 def market_research(question: str, api_key: str | None = None, learned_context: str = "") -> dict:
-    res = research(question)
+    res = research(question, api_key=api_key)
     structured = call_llm(
         f"""From the research, produce a market brief for: "{question}"
 - Key facts (with source hints)

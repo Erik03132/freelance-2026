@@ -14,6 +14,6 @@ def test_generate_component_no_key(monkeypatch):
     assert "button" in result.lower()
 
 def test_generate_component_returns_html():
-    result = generate_component("card", "Feature card with icon, title, description", INCUBIRD_DEFAULT)
+    result = generate_component("card", "Feature card with icon, title, description", INCUBIRD_DEFAULT, api_key="")
     assert result is not None
     assert isinstance(result, str)

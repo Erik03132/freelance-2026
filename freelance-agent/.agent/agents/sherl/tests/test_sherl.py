@@ -19,7 +19,7 @@ def test_competitor_factors():
 
 
 def test_research_no_key():
-    result = research("AI SEO trends 2026")
+    result = research("AI SEO trends 2026", api_key="")
     assert result is not None
     assert "answer" in result
     assert "provider" in result
@@ -30,7 +30,7 @@ def test_research_no_key():
 
 
 def test_geo_scan():
-    result = geo_scan("TestBrand", "CRM")
+    result = geo_scan("TestBrand", "CRM", api_key="")
     assert result is not None
     # geo_scan returns a dict with brand/query results
     assert isinstance(result, dict)

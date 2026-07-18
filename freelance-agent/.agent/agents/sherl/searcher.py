@@ -16,7 +16,7 @@ from .llm_client import (
 
 def search_serper(query: str, api_key: str | None = None) -> dict | None:
     """Google search via Serper.dev. Returns raw JSON or None."""
-    key = api_key or load_serper_key()
+    key = api_key if api_key is not None else load_serper_key()
     if not key:
         return None
     try:
@@ -34,7 +34,7 @@ def search_serper(query: str, api_key: str | None = None) -> dict | None:
 
 def search_perplexity(query: str, api_key: str | None = None) -> str | None:
     """Perplexity online search. Returns answer text or None."""
-    key = api_key or load_perplexity_key()
+    key = api_key if api_key is not None else load_perplexity_key()
     if not key:
         return None
     try:
