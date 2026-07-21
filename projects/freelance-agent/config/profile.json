@@ -1,0 +1,94 @@
+{
+  "user": {
+    "name": "Игорь",
+    "nickname": "igor_dev",
+    "timezone": "Europe/Moscow",
+    "portfolio": {
+      "github": "",
+      "website": ""
+    }
+  },
+  "skills": {
+    "Python": 0.95,
+    "FastAPI": 0.9,
+    "LLM API": 0.9,
+    "RAG": 0.85,
+    "PostgreSQL": 0.8,
+    "Bitrix24": 0.8,
+    "Mango": 0.75,
+    "Telegram Bots": 0.85,
+    "React": 0.6,
+    "TypeScript": 0.6,
+    "Playwright": 0.7,
+    "ChromaDB": 0.8,
+    "CrewAI": 0.7,
+    "SQL": 0.8,
+    "Redis": 0.7,
+    "Docker": 0.8
+  },
+  "skill_synonyms": {
+    "Python": [
+      "python3",
+      "python 3",
+      "django",
+      "fastapi"
+    ],
+    "LLM API": [
+      "openai",
+      "claude",
+      "gemini",
+      "gpt",
+      "llm",
+      "ai api"
+    ],
+    "RAG": [
+      "rag",
+      "retrieval augmented",
+      "vector search",
+      "embeddings"
+    ],
+    "Bitrix24": [
+      "bitrix",
+      "b24",
+      "bitrix24 api"
+    ],
+    "Mango": [
+      "mango office",
+      "mango api",
+      "телефония"
+    ],
+    "Docker": [
+      "docker compose",
+      "container"
+    ],
+    "FastAPI": [
+      "fast api",
+      "fastapi",
+      "uvicorn"
+    ],
+    "PostgreSQL": [
+      "postgres",
+      "psql",
+      "postgresql"
+    ],
+    "Telegram Bots": [
+      "telegram bot",
+      "aiogram",
+      "tg bot"
+    ],
+    "Playwright": [
+      "playwright",
+      "browser automation"
+    ],
+    "ChromaDB": [
+      "chroma",
+      "vector db",
+      "vector database"
+    ],
+    "CrewAI": [
+      "crew ai",
+      "multi-agent",
+      "agent orchestration"
+    ]
+  }
+}
