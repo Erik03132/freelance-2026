@@ -3,16 +3,20 @@
 from .audit import audit_code, audit_file, audit_with_llm
 from .component_gen import COMPONENT_TYPES, generate_component
 from .frontend_config import DEFAULTS, FRAMEWORKS
+from .brand_md import fetch_brand_design
 from .page_gen import generate_page, generate_scaffold
+from .slide_gen import generate_slides
 
 __all__ = [
-    "generate_component",
     "COMPONENT_TYPES",
-    "generate_page",
-    "generate_scaffold",
+    "DEFAULTS",
+    "FRAMEWORKS",
     "audit_code",
     "audit_file",
     "audit_with_llm",
-    "FRAMEWORKS",
-    "DEFAULTS",
+    "fetch_brand_design",
+    "generate_component",
+    "generate_page",
+    "generate_scaffold",
+    "generate_slides",
 ]

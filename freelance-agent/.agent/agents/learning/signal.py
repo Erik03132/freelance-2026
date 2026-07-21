@@ -48,15 +48,20 @@ def capture_start(
 
 
 def capture_outcome(sid: str, outcome: str, note: str = "") -> bool:
-    """Record the user's verdict on a previously captured signal."""
+    """Record the user's verdict on a previously captured signal.
+
+    Looks up the matching start record to preserve the agent field.
+    """
     _ensure_store()
     outcome = outcome.lower()
     if outcome not in ("accepted", "edited", "rejected"):
         return False
+    agent = _find_agent_by_sid(sid)
     rec = {
         "sid": sid,
         "ts": time.time(),
         "phase": "outcome",
+        "agent": agent,
         "outcome": outcome,
         "note": note,
     }
@@ -65,10 +70,45 @@ def capture_outcome(sid: str, outcome: str, note: str = "") -> bool:
     return True
 
 
+def _find_agent_by_sid(sid: str) -> str:
+    """Search the signal store for a start record with the given sid."""
+    if not os.path.exists(SIGNAL_FILE):
+        return ""
+    with open(SIGNAL_FILE, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except Exception:
+                continue
+            if rec.get("sid") == sid and rec.get("phase") == "start":
+                return rec.get("agent", "")
+    return ""
+
+
 def read_signals(agent: str | None = None) -> list[dict]:
-    """Return all signal records, optionally filtered by agent."""
+    """Return all signal records, optionally filtered by agent.
+
+    Outcome records (which don't store agent directly) are matched via
+    their corresponding start record by sid.
+    """
     if not os.path.exists(SIGNAL_FILE):
         return []
+    starts: dict[str, str] = {}
+    with open(SIGNAL_FILE, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except Exception:
+                continue
+            if rec.get("phase") == "start" and rec.get("sid"):
+                starts[rec["sid"]] = rec.get("agent", "")
+
     out = []
     with open(SIGNAL_FILE, encoding="utf-8") as f:
         for line in f:
@@ -79,6 +119,12 @@ def read_signals(agent: str | None = None) -> list[dict]:
                 rec = json.loads(line)
             except Exception:
                 continue
-            if agent is None or rec.get("agent") == agent:
+            if agent is None:
                 out.append(rec)
+            elif rec.get("agent") == agent:
+                out.append(rec)
+            elif rec.get("phase") == "outcome":
+                start_agent = starts.get(rec.get("sid", ""), "")
+                if start_agent == agent:
+                    out.append(rec)
     return out

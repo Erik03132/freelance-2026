@@ -59,12 +59,16 @@ except ImportError:
 AGENT = "artemiy"
 
 
-def _ctx(query: str) -> str:
-    """Soul constitution + learned context + memory recall, merged for the prompt."""
+def _ctx(query: str, brand_url: str = "") -> str:
+    """Soul constitution + learned context + memory recall + brand tokens."""
     base = build_learned_context(AGENT)
     soul = soul_context(AGENT)
     if soul:
         base = soul + ("\n\n" + base if base else "")
+    if brand_url:
+        brand = fetch_brand_design(brand_url)
+        if brand:
+            base = brand + ("\n\n" + base if base else "")
     return enrich_context(AGENT, query, base)
 
 
@@ -90,9 +94,11 @@ from . import (
     audit_code,
     audit_file,
     audit_with_llm,
+    fetch_brand_design,
     generate_component,
     generate_page,
     generate_scaffold,
+    generate_slides,
 )
 
 
@@ -125,6 +131,8 @@ def main():
         epilog="Examples:\n"
         "  python3 -m artemiy --component hero --framework astro --spec 'Gradient hero with CTA'\n"
         "  python3 -m artemiy --page 'Landing for eco-farm'\n"
+        "  python3 -m artemiy --slides 'AI Trends 2026' --audience investors\n"
+        "  python3 -m artemiy --page 'Redesign landing' --brand-url stripe.com\n"
         "  python3 -m artemiy --audit index.html\n",
     )
 
@@ -135,6 +143,12 @@ def main():
                         help="Generate a full page from a brief")
     parser.add_argument("--scaffold", "-s", type=str, default=None,
                         help="Generate a project scaffold by name")
+    parser.add_argument("--slides", type=str, default=None,
+                        help="Generate an interactive slide deck by topic")
+    parser.add_argument("--audience", type=str, default="general",
+                        help="Target audience for slides (investors, team, clients)")
+    parser.add_argument("--brand-url", type=str, default=None,
+                        help="Domain/URL to fetch design tokens (DESIGN.md via designmd.supply)")
     parser.add_argument("--audit", "-a", type=str, default=None,
                         help="Audit a file (HTML/JSX) for SEO/CWV")
     parser.add_argument("--spec", type=str, default="",
@@ -183,7 +197,7 @@ def main():
 
     if args.component:
         print(f"🔨 Generating {args.framework} component: {args.component}")
-        ctx = _ctx(args.spec)
+        ctx = _ctx(args.spec, args.brand_url or "")
         sid = capture_start("artemiy", "generate_component", args.spec, {"framework": args.framework})
         if run_with_healing:
             res = run_with_healing(
@@ -210,7 +224,7 @@ def main():
 
     if args.page:
         print(f"🔨 Generating {args.framework} page from brief")
-        ctx = _ctx(args.page)
+        ctx = _ctx(args.page, args.brand_url or "")
         sid = capture_start("artemiy", "generate_page", args.page, {"framework": args.framework})
         result = generate_page(args.page, args.framework, learned_context=ctx)
         if result:
@@ -230,6 +244,22 @@ def main():
         if result:
             path = _save("scaffold.md", result)
             print(f"✅ Saved to {path}")
+        else:
+            print("❌ Failed")
+            sys.exit(1)
+        return
+
+    if args.slides:
+        print(f"🎨 Generating interactive slides: {args.slides}")
+        ctx = _ctx(args.slides, args.brand_url or "")
+        sid = capture_start("artemiy", "generate_slides", args.slides, {"audience": args.audience})
+        result = generate_slides(args.slides, args.audience, learned_context=ctx)
+        if result:
+            path = _save("slides.html", result)
+            print(f"✅ Saved to {path}")
+            _guard(result, sid)
+            remember("artemiy", f"generated slides: {args.slides}", kind="generation")
+            print(f"📡 Signal {sid} logged — later: python3 -m artemiy --feedback {sid} accepted|edited|rejected")
         else:
             print("❌ Failed")
             sys.exit(1)
