@@ -36,6 +36,12 @@ DISTRICT_FILES = {
     "Гиагинский": "data/campaigns/csv/adygea_grain_Гиагинский_район.csv",
     "Кошехабльский": "data/campaigns/csv/adygea_grain_Кошехабльский_2025.csv",
     "Красногвардейский": "data/campaigns/csv/adygea_grain_Красногвардейский_2025.csv",
+    "Тахтамукайский": "data/campaigns/csv/adygea_grain_Тахтамукайский_район.csv",
+    "Теучежский": "data/campaigns/csv/adygea_grain_Теучежский_район.csv",
+    "Майкопский": "data/campaigns/csv/adygea_grain_Майкопский_район.csv",
+    "Шовгеновский": "data/campaigns/csv/adygea_grain_Шовгеновский_район.csv",
+    "Майкоп": "data/campaigns/csv/adygea_grain_Майкоп_г.csv",
+    "Адыгейск": "data/campaigns/csv/adygea_grain_Адыгейск_г.csv",
 }
 START = "05.07.2026 00:00:00"
 END = "10.07.2026 23:59:59"

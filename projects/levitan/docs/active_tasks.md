@@ -48,8 +48,14 @@
 3. `pip install websockets` в venv.
 4. **baresip audio-мост** — playback через `aufile` из FIFO, capture через `record` в FIFO; конверсия 8k↔24k через `auresamp.so`. Единственный нетривиальный кусок.
 
+### Статус VPS (2026-07-21)
+- **Новая VPS:** 217.149.23.113 (Timeweb, 1 vCPU/2GB/30GB, Ubuntu 22.04)
+- **baresip 1.0.0** установлен, ждёт настройки Mango SIP аккаунта
+- **9 PM2-процессов** запущены: все боты + Astro-сайт
+- **UFW:** порты 22/5060/4321/5000/8085/8086/16384-32768 открыты
+
 ### Риски
-- Зависимость от baresip/VPS (текущие блокеры проекта) реал-тайм не убирает.
+- Зависимость от baresip/VPS — VPS жива, baresip ждёт Mango SIP настройки
 - STT на плохих линиях/hold music — в Realtime API транскрипция своя (whisper-1/gpt-4o-transcribe).
 
 ---

@@ -248,12 +248,12 @@ class PingBridge:
         self.reset_flags()
         result = {"phone": phone, "status": "unknown", "error": None}
 
+        # call_start ДО mango_callback — иначе start_ts < after_ts скипает все записи
+        call_start = time.time()
         cb_resp = mango_callback(phone)
         if cb_resp.get("result") != 1000:
             result["error"] = f"callback result={cb_resp.get('result')}"
             return result
-
-        call_start = time.time()
 
         # Ждём, пока baresip примет звонок (оператор)
         deadline = call_start + PING_OPERATOR_WAIT
