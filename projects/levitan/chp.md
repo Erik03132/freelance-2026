@@ -1,5 +1,27 @@
 # Levitan — Session Log
 
+## 2026-07-21 — baresip auto-answer debug: root cause found
+
+### Сделано
+- **Регистрация работает**: baresip REGISTER → 200 OK (чистый конфиг без ctrl_tcp/aubridge)
+- **Исследован механизм auto-answer**: логика в `ua.c:379-398` → `CALL_EVENT_INCOMING` → `ANSWERMODE_AUTO` → `call_answer(200)`. В `ua.c` v1.0.0 код есть
+- **`answermode_decode`** вызывается в `account.c:421` с `&acc->laddr.params` — корректно
+- **menu.so** использует `answermode` ТОЛЬКО для рингтона (НЕ для auto-answer) — `menu.c:850`
+- **aubridge.so** загружается как `auplay` + `ausrc` — не помогает (180 Ringing, нет 200 OK)
+- **Вероятная причина**: `answermode=auto` НЕ парсится из account params, аккаунт остаётся `ANSWERMODE_MANUAL`, поэтому `call_event_handler` шлёт `UA_EVENT_CALL_INCOMING` вместо `call_answer()`
+- **План**: написать custom auto-answer модуль baresip (недоступны dev-хидеры, нужно скачать с GitHub)
+
+### Issues / Blockers
+- **answermode=auto не работает** — 180 Ringing есть, 200 OK нет
+- **baresip-dev** не установлен — нет `baresip.h`, компиляция модуля невозможна
+- **claude-mem 401** — не исправлен
+- **OpenRouter 403** — LLM заблокирован
+
+### Next Steps
+1. Скачать хидеры baresip с GitHub → скомпилировать `autoanswer.so`
+2. Загрузить модуль на VPS → протестировать auto-answer
+3. После соединения звонка — протестировать RTP-захват
+
 ## 2026-07-21 — VPS baresip настроен, FAQ-кэш расширен до 230+ триггеров
 
 ### Сделано
