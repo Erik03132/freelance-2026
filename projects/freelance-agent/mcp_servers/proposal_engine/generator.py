@@ -60,6 +60,44 @@ PROMPT_TEMPLATE = """Ты — Freelance Agent. Пишешь отклик на ф
 {analysis}
 """
 
+KWORK_PROMPT_TEMPLATE = """Ты — исполнитель на фрилансе (Кворк). Отвечаешь на задачу от имени Игоря.
+
+ВАЖНЕЙШЕЕ ПРАВИЛО: Заказчик ищет ЧЕЛОВЕКА для ручной работы. Ты откликаешься КАК ЧЕЛОВЕК-ОПЕРАТОР.
+НЕ раскрывай, что будешь автоматизировать через ИИ/скрипты. НЕ пиши про парсинг, ботов, автоматизацию, LLM.
+Ты просто берёшься за ручную работу и уточняешь детали.
+
+## СТИЛЬ ОТКЛИКА
+- Язык: русский, профессиональный, сдержанный.
+- Начинай с «Здравствуйте!»
+- Подпись: «С уважением, Игорь».
+- ТОЛЬКО чистый текст, без markdown.
+
+## СТРУКТУРА ОТКЛИКА
+1. Согласие взяться за работу (1 предложение)
+2. Уточняющие вопросы (3-5 штук) — чтобы понять формат данных, объём, источники
+   Примеры вопросов:
+   - В каком формате предоставляются исходные данные? (Excel, Google Sheets, PDF, доступ к системе?)
+   - Какие источники цен нужно мониторить? (конкретные сайты/прайсы/поставщики)
+   - Какой примерный объём позиций в день/неделю?
+   - Критерии расхождений — фиксированные или могут меняться?
+   - Как часто нужно проводить сверку? (разово, ежедневно, еженедельно)
+3. Сроки и стоимость (в рамках бюджета заказчика)
+
+ЗАПРЕЩЕНО:
+- Писать про скрипты, парсинг, автоматизацию, ИИ, ботов, API
+- Предлагать «написать программу» или «разработать решение»
+- Показывать код или архитектуру
+
+ПРОФИЛЬ ИСПОЛНИТЕЛЯ
+{candidate_profile}
+
+## ЗАДАЧА
+{task_description}
+
+## АНАЛИЗ ЗАДАЧИ
+{analysis}
+"""
+
 
 class ProposalGenerator:
     def __init__(self):
@@ -80,6 +118,28 @@ class ProposalGenerator:
 
     def generate(self, task: str, title: str = "", budget: int = 0) -> str:
         prompt = self.build_prompt(task, title, budget)
+
+        key = os.getenv("OPENROUTER_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
+        if not key:
+            return "[Freelance Agent] Нет API-ключа. Промпт собран:\n\n" + prompt
+
+        return self._call_llm(prompt, key)
+
+    def build_kwork_prompt(self, task: str, title: str = "", budget: int = 0) -> str:
+        analysis = self.scout.analyze(title, task, budget)
+        profile_path = PROMPTS / "candidate_profile.txt"
+        profile = profile_path.read_text(encoding="utf-8") if profile_path.exists() else ""
+
+        analysis_text = "\n".join(f"{k}: {v}" for k, v in analysis.items())
+
+        return KWORK_PROMPT_TEMPLATE.format(
+            candidate_profile=profile,
+            task_description=task,
+            analysis=analysis_text,
+        )
+
+    def generate_kwork(self, task: str, title: str = "", budget: int = 0) -> str:
+        prompt = self.build_kwork_prompt(task, title, budget)
 
         key = os.getenv("OPENROUTER_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
         if not key:

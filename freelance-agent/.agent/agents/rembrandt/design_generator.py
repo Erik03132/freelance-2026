@@ -6,7 +6,46 @@ from .brand_system import BrandSystem, DesignToken
 from .llm_client import call_llm
 
 
+APPLE_DESIGN_RULES = """
+## Apple Design Rules (apply to ALL generated output)
+
+### Motion & Springs
+- Default UI spring: damping 1.0, response 0.3-0.4 (critically damped, no overshoot)
+- Momentum/flick spring: damping ~0.8, response 0.3-0.4 (slight bounce only for physical gestures)
+- CSS motion: animate ONLY `transform` and `opacity`, hint with `will-change`
+- Interruptibility: never lock input during transition, animate from current value not target
+- Use `requestAnimationFrame` as display-synced clock
+
+### Materials & Depth
+- Translucent chrome: `backdrop-filter: blur(20px) saturate(180%)` with semi-transparent bg
+- Material weight encodes hierarchy (darker = structural, lighter = interactive)
+- Never stack light translucent on another surface
+- Scroll edge effects instead of hard dividers
+- Materialize: animate blur + scale together on enter/exit
+
+### Typography
+- Default: `font: 100%/1.5 system-ui, sans-serif; font-optical-sizing: auto;`
+- Display text: `font-size: clamp(2rem, 5vw, 4rem); line-height: 1.05; letter-spacing: -0.02em;`
+- Tracking (letter-spacing) is size-specific: negative for large text, near 0 for body
+- Leading inversely tracks size: tight on headings, loose on body
+- Spacing in rem/em, not px (respect user's text-size setting)
+
+### Accessibility (MANDATORY)
+- prefers-reduced-motion: replace slides/springs with opacity cross-fade
+- prefers-reduced-transparency: solid backgrounds, drop blur
+- prefers-contrast: near-solid backgrounds with defined border
+
+### Design Principles
+1. Purpose — every element earns its place
+2. Agency — keep people in control, easy undo
+3. Familiarity — consistent, predictable interactions
+4. Simplicity — strip unnecessary, be concise and clear
+5. Craft — every spacing/timing/alignment is deliberate
+"""
+
 DESIGN_SYSTEM_PROMPT = """You are a design system expert. Given a design brief, generate a complete brand system in JSON format.
+
+{apple_rules}
 
 Respond ONLY with valid JSON matching this schema:
 {{
@@ -54,7 +93,7 @@ def generate_design_md(brief: str, api_key: str | None = None, learned_context: 
     Returns:
         DESIGN.md content as string, or None if generation fails
     """
-    prompt = DESIGN_SYSTEM_PROMPT.format(brief=brief, learned_context=learned_context or "")
+    prompt = DESIGN_SYSTEM_PROMPT.format(apple_rules=APPLE_DESIGN_RULES, brief=brief, learned_context=learned_context or "")
     content = call_llm(prompt, complexity="complex", max_tokens=2000, temperature=0.3, api_key=api_key)
     if not content:
         return None
@@ -88,6 +127,8 @@ def render_design_md(brand: BrandSystem) -> str:
     lines = []
     lines.append(f"# {brand.name} — Design System")
     lines.append(f"> **Theme:** {brand.theme}")
+    lines.append("")
+    lines.append("> **Apple Design Reference:** `apple-design.md` — WWDC 2018-2026 fluid interface rules applied")
     lines.append("")
 
     lines.append("## Tokens — Colors")

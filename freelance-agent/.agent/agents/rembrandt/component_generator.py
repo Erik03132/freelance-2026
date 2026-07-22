@@ -29,7 +29,17 @@ Requirements:
 - Use CSS custom properties from the design system
 - No placeholder images
 - Production-grade styling
-- Return ONLY the HTML code, no explanation."""
+- Return ONLY the HTML code, no explanation.
+
+Apple Design rules (apply to ALL output):
+- **Translucent chrome**: use `backdrop-filter: blur(20px) saturate(180%)` for nav/toolbar/sheets
+- **Spring defaults**: critically damped (no bounce) for UI; under-damped (~0.8) only for gestures
+- **Typography**: `font: 100%/1.5 system-ui, sans-serif` default; system font stack first
+- **Accessibility**: ALWAYS include `@media (prefers-reduced-motion: reduce)`, `@media (prefers-reduced-transparency: reduce)`, `@media (prefers-contrast: more)`
+- **Motion**: animate only `transform` and `opacity` with `will-change` hint
+- **Feedback**: on `:active` (pointer-down), not on release — `transform: scale(0.97)` with `transition: transform 100ms ease-out`
+- **Touch targets**: minimum 44x44px, ~10px hysteresis/hit padding
+- **Type**: tightening letter-spacing for large text (negative), body near 0"""
 
 
 def _format_colors(brand: BrandSystem) -> str:
