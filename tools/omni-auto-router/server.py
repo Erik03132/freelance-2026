@@ -39,26 +39,124 @@ ARCHITECTURE_RX = re.compile(
 )
 TOOL_PAT = re.compile(r"\"function\"\s*:|tool_calls|\"tools\"\s*:")
 
+# Все платные модели временно недоступны (OpenRouter: 402 Insufficient credits).
+# Работают только :free модели. После пополнения OpenRouter — вернуть платные.
+SHORT_NAME_MAP = {
+    "auto": None,  # trigger classification
+
+    "ds-chat": "openrouter/deepseek/deepseek-chat",
+    "ds-v31": "openrouter/deepseek/deepseek-chat-v3.1",
+    "ds-v32": "openrouter/deepseek/deepseek-v3.2",
+    "ds-r1": "openrouter/deepseek/deepseek-r1",
+    "ds-r10528": "openrouter/deepseek/deepseek-r1-0528",
+    "ds-v4flash": "openrouter/deepseek/deepseek-v4-flash",
+    "ds-v4pro": "openrouter/deepseek/deepseek-v4-pro",
+
+    "claude-haiku45": "openrouter/anthropic/claude-haiku-4.5",
+    "claude-sonnet46": "openrouter/anthropic/claude-sonnet-4.6",
+    "claude-sonnet5": "openrouter/anthropic/claude-sonnet-5",
+    "claude-opus47": "openrouter/anthropic/claude-opus-4.7",
+    "claude-opus48": "openrouter/anthropic/claude-opus-4.8",
+    "claude-fable5": "openrouter/anthropic/claude-fable-5",
+
+    "gpt4o": "openrouter/openai/gpt-4o",
+    "gpt4o-mini": "openrouter/openai/gpt-4o-mini",
+    "gpt5": "openrouter/openai/gpt-5",
+    "gpt5-chat": "openrouter/openai/gpt-5-chat",
+    "gpt5-pro": "openrouter/openai/gpt-5-pro",
+    "gpt5-mini": "openrouter/openai/gpt-5-mini",
+    "gpt5-nano": "openrouter/openai/gpt-5-nano",
+    "gpt51": "openrouter/openai/gpt-5.1",
+    "gpt51-codex": "openrouter/openai/gpt-5.1-codex",
+    "gpt51-codexmax": "openrouter/openai/gpt-5.1-codex-max",
+    "gpt52": "openrouter/openai/gpt-5.2",
+    "gpt52-codex": "openrouter/openai/gpt-5.2-codex",
+    "gpt52-pro": "openrouter/openai/gpt-5.2-pro",
+    "gpt54": "openrouter/openai/gpt-5.4",
+    "gpt54-pro": "openrouter/openai/gpt-5.4-pro",
+
+    "o1-pro": "openrouter/openai/o1-pro",
+    "o3": "openrouter/openai/o3",
+    "o3-mini": "openrouter/openai/o3-mini",
+    "o3-pro": "openrouter/openai/o3-pro",
+    "o4-mini": "openrouter/openai/o4-mini",
+    "o4-mini-high": "openrouter/openai/o4-mini-high",
+
+    "gemini25flash": "openrouter/google/gemini-2.5-flash",
+    "gemini25pro": "openrouter/google/gemini-2.5-pro",
+    "gemini3flash": "openrouter/google/gemini-3-flash-preview",
+    "gemini31flash": "openrouter/google/gemini-3.1-flash-lite",
+    "gemini35flash": "openrouter/google/gemini-3.5-flash",
+    "gemini36flash": "openrouter/google/gemini-3.6-flash",
+
+    "grok43": "openrouter/x-ai/grok-4.3",
+    "grok45": "openrouter/x-ai/grok-4.5",
+    "grok420": "openrouter/x-ai/grok-4.20",
+
+    "kimi-k2": "openrouter/moonshotai/kimi-k2",
+    "kimi-k2think": "openrouter/moonshotai/kimi-k2-thinking",
+    "kimi-k25": "openrouter/moonshotai/kimi-k2.5",
+    "kimi-k26": "openrouter/moonshotai/kimi-k2.6",
+    "kimi-k27code": "openrouter/moonshotai/kimi-k2.7-code",
+    "kimi-k3": "openrouter/moonshotai/kimi-k3",
+
+    "qwen3max": "openrouter/qwen/qwen3-max",
+    "qwen3maxthink": "openrouter/qwen/qwen3-max-thinking",
+    "qwen3coder+": "openrouter/qwen/qwen3-coder-plus",
+    "qwen35-397b": "openrouter/qwen/qwen3.5-397b-a17b",
+    "qwen36flash": "openrouter/qwen/qwen3.6-flash",
+    "qwen36plus": "openrouter/qwen/qwen3.6-plus",
+    "qwen37max": "openrouter/qwen/qwen3.7-max",
+    "qwen37plus": "openrouter/qwen/qwen3.7-plus",
+
+    "llama4-mav": "openrouter/meta-llama/llama-4-maverick",
+    "llama4-scout": "openrouter/meta-llama/llama-4-scout",
+    "mistral-large": "openrouter/mistralai/mistral-large-2512",
+    "mistral-medium": "openrouter/mistralai/mistral-medium-3-5",
+    "mistral-small": "openrouter/mistralai/mistral-small-3.2-24b-instruct",
+    "codestral": "openrouter/mistralai/codestral-2508",
+    "command-a": "openrouter/cohere/command-a",
+    "sonar-pro": "openrouter/perplexity/sonar-pro",
+    "sonar-reason": "openrouter/perplexity/sonar-reasoning-pro",
+    "nova-pro": "openrouter/amazon/nova-pro-v1",
+    "nova-lite": "openrouter/amazon/nova-lite-v1",
+    "glm5": "openrouter/z-ai/glm-5",
+    "glm47": "openrouter/z-ai/glm-4.7",
+    "minimax-m3": "openrouter/minimax/minimax-m3",
+
+    "nemotron-ultra": "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+    "nemotron-super": "openrouter/nvidia/nemotron-3-super-120b-a12b:free",
+    "nemotron-nano": "openrouter/nvidia/nemotron-nano-9b-v2:free",
+    "gemma4-31b": "openrouter/google/gemma-4-31b-it:free",
+    "gemma4-26b": "openrouter/google/gemma-4-26b-a4b-it:free",
+    "gemma3-27b": "openrouter/google/gemma-3-27b-it:free",
+    "gptoss-20b": "openrouter/openai/gpt-oss-20b:free",
+    "gptoss-120b": "openrouter/openai/gpt-oss-120b:free",
+    "north-mini": "openrouter/cohere/north-mini-code:free",
+    "ling3": "openrouter/inclusionai/ling-3.0-flash:free",
+    "laguna-m1": "openrouter/poolside/laguna-m.1:free",
+}
+
+# Fallback AI models for auto-classification
 FREE_MODELS = [
     "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
     "openrouter/openai/gpt-oss-20b:free",
     "openrouter/google/gemma-4-31b-it:free",
 ]
 CHEAP_MODELS = [
-    "openrouter/deepseek/deepseek-chat",
-    "openrouter/openai/gpt-4o-mini",
+    "openrouter/nvidia/nemotron-3-super-120b-a12b:free",
+    "openrouter/openai/gpt-oss-20b:free",
+    "openrouter/google/gemma-3-27b-it:free",
 ]
 SMART_MODELS = [
-    "openrouter/anthropic/claude-sonnet-4.6",
-    "openrouter/openai/gpt-4o",
+    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+    "openrouter/inclusionai/ling-3.0-flash:free",
+    "openrouter/nvidia/nemotron-3-nano-30b-a3b:free",
 ]
 PRO_MODELS = [
-    "openrouter/anthropic/claude-fable-5",
-    "openrouter/anthropic/claude-opus-4.8",
-    "openrouter/moonshotai/kimi-k3",
-    "openrouter/openai/gpt-5.2-pro",
-    "openrouter/openai/o3-pro",
-    "openrouter/z-ai/glm-5",
+    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+    "openrouter/openai/gpt-oss-120b:free",
+    "openrouter/google/gemma-4-31b-it:free",
 ]
 
 TIER_CHAINS = {
@@ -70,9 +168,9 @@ TIER_CHAINS = {
 TIER_LABELS = {0: "Free", 1: "Cheap", 2: "Smart", 3: "Pro"}
 TIER_COST_PER_M = {
     0: {"in": 0, "out": 0},
-    1: {"in": 0.0005, "out": 0.002},
-    2: {"in": 0.003, "out": 0.015},
-    3: {"in": 0.015, "out": 0.075},
+    1: {"in": 0, "out": 0},
+    2: {"in": 0, "out": 0},
+    3: {"in": 0, "out": 0},
 }
 
 stats_lock = threading.Lock()
@@ -279,35 +377,50 @@ class Handler(BaseHTTPRequestHandler):
         messages = body.get("messages", [])
         stream = body.get("stream", False)
         auth = self.headers.get("Authorization")
+        model_name = body.get("model", "auto")
 
-        tier, reason = classify(messages)
-        chain = TIER_CHAINS[tier]
-        used_model = chain[0]
-        fallback_used = False
-        errors = []
+        # Resolve short name or use classification
+        if model_name == "auto" or model_name not in SHORT_NAME_MAP:
+            tier, reason = classify(messages)
+            chain = TIER_CHAINS[tier]
+            used_model = chain[0]
+            fallback_used = False
+            errors = []
 
-        for model in chain:
-            resp, used_model, err = call_omni(model, body, auth, retries=1)
-            if resp is not None:
-                break
-            errors.append(f"{model}: {err[:100]}")
-            fallback_used = True
-            with stats_lock:
-                stats["fallbacks"] += 1
+            for model in chain:
+                resp, used_model, err = call_omni(model, body, auth, retries=1)
+                if resp is not None:
+                    break
+                errors.append(f"{model}: {err[:100]}")
+                fallback_used = True
+                with stats_lock:
+                    stats["fallbacks"] += 1
 
-        if resp is None:
-            with stats_lock:
-                stats["errors"] += 1
-            return self.send_json(
-                {"error": f"All models failed: {'; '.join(errors)}"},
-                502,
-            )
+            if resp is None:
+                with stats_lock:
+                    stats["errors"] += 1
+                return self.send_json(
+                    {"error": f"All models failed: {'; '.join(errors)}"},
+                    502,
+                )
 
-        in_tokens = sum(len(m.get("content", "") or "") for m in messages) // 2
-        label = f"T{tier}→{used_model}"
-        if fallback_used:
-            label += f" [FB: {'→'.join(e.split(':')[0] for e in errors)}]"
-        print(f"[omni-auto] {label} ({reason})")
+            full_model = used_model
+            label = f"T{tier}→{used_model}"
+            if fallback_used:
+                label += f" [FB: {'→'.join(e.split(':')[0] for e in errors)}]"
+            print(f"[omni-auto] {label} ({reason})")
+        else:
+            # Direct model mapping
+            full_model = SHORT_NAME_MAP[model_name]
+            resp, full_model, err = call_omni(full_model, body, auth, retries=2)
+            if resp is None:
+                with stats_lock:
+                    stats["errors"] += 1
+                return self.send_json(
+                    {"error": f"Model {model_name} ({full_model}) failed: {err}"},
+                    502,
+                )
+            print(f"[omni-auto] {model_name} → {full_model}")
 
         if stream:
             self.send_response(200)
@@ -327,15 +440,13 @@ class Handler(BaseHTTPRequestHandler):
             resp_body = json.loads(resp.read())
         except Exception:
             resp_body = {"error": "bad upstream response"}
-        resp_body["model"] = used_model
-        self._log_stats(tier, used_model, in_tokens, resp_body)
+        resp_body["model"] = full_model
+        self._log_stats(full_model, in_tokens=sum(len(m.get("content", "") or "") for m in messages) // 2, resp_body=resp_body)
         self.send_json(resp_body)
 
-    def _log_stats(self, tier: int, model: str, in_tokens: int, resp_body: dict):
-        out_tokens = (
-            resp_body.get("usage", {}).get("completion_tokens", 0)
-            or 0
-        )
+    def _log_stats(self, model: str, in_tokens: int, resp_body: dict):
+        tier = 0
+        out_tokens = (resp_body.get("usage", {}).get("completion_tokens", 0) or 0)
         c = TIER_COST_PER_M.get(tier, {"in": 0, "out": 0})
         cost = in_tokens / 1e6 * c["in"] + out_tokens / 1e6 * c["out"]
         with stats_lock:
