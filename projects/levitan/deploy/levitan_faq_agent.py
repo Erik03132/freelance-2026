@@ -95,9 +95,10 @@ SYSTEM_PROMPT = """Ты — Анжелла, голосовой менеджер 
 Оплата: наличные при получении, перевод на карту, по реквизитам. Предоплата 50%.
 
 АССОРТИМЕНТ (июль–декабрь 2026 — ТОЛЬКО бройлеры):
-— КОББ-500: от 65₽/шт. Самый быстрорастущий, до 2.5 кг за 40 дней, мощная грудка. Для бизнеса/откорма.
-— РОСС-308: от 65₽/шт. Выносливее, крепче здоровьем. Для дома и новичков — рекомендуем его.
-Минимальный заказ — от 50 голов одной породы. От 100 голов — индивидуальная скидка.
+— КОББ-500: до 2.5 кг за 40 дней, мощная грудка. Для бизнеса/откорма.
+— РОСС-308: выносливее, крепче здоровьем. Для дома и новичков — рекомендуем его.
+Минимальный заказ — от 50 голов одной породы.
+ЦЕНЫ (tiered): до 100 голов — 90₽/шт, 101-300 — 85₽/шт, 301-999 — 80₽/шт, от 1000 — 75₽/шт.
 График вывода: каждый ПН и ЧТ. Дата вывода ≠ дата доставки (вывод 24-го = доставка 25-го).
 Вывод: Июль 2,9,16,23,30 · Авг 7,14,21,28 · Сен 3,10,17,24 · Окт 1,8,15,22,29 · Ноя 6,13,20,27 · Дек 4,18.
 
@@ -337,7 +338,7 @@ def _local_fallback(text: str) -> str:
     if any(w in t for w in ["москв", "питер", "спб", "санкт"]):
         return "В Москву и Питер пока не доставляем — только Крым и Юг России. Если есть знакомые на юге — подскажите им!"
     if "почему" in t and ("дорог" in t or "цена" in t):
-        return "Цена от 65 рублей — это с гарантией стопроцентной выживаемости и вакцинацией. Дешевле только сомнительные поставки. Берите качество!"
+        return "Цена от 75 рублей с гарантией выживаемости и вакцинацией — это выгодно. Дешевле — риск потерять половину. А при объёме от тысячи цена падает до 75!"
     if any(w in t for w in ["когда", "сколько врем", "срок"]):
         return "Вывод каждый понедельник и четверг. Доставка на следующий день спецтранспортом."
     if any(w in t for w in ["оплат", "перевод", "карт"]):
@@ -486,6 +487,52 @@ def is_rejection(text: str) -> bool:
     t = text.lower()
     return any(p in t for p in REJECTION_PHRASES)
 
+INTEREST_PHRASES = [
+    "да", "ага", "угу", "интересно", "расскажите", "расскажи",
+    "давай", "давайте", "хорошо", "конечно", "слушаю",
+    "да интересно", "очень интересно", "подробнее", "продолжайте",
+    "я слушаю", "давайте послушаем",
+]
+def is_interest(text: str) -> bool:
+    t = text.lower().strip()
+    if t in ("да", "ага", "угу", "ну", "ок", "ok"):
+        return True
+    return any(p in t for p in INTEREST_PHRASES)
+
+UNCLEAR_RETRY = "Извините, я не расслышала. Вам интересно наше предложение по бройлерам?"
+UNCLEAR_CLOSE = "Хорошо, я поняла. Наш менеджер перезвонит в удобное время, чтобы уточнить все детали. Спасибо за звонок, до свидания!"
+
+VOLUME_RE = re.compile(r"(\d+)\s*(голов|штук|шт|гол|тысяч|тыс)")
+def extract_volume(text: str) -> Optional[int]:
+    m = VOLUME_RE.search(text.lower())
+    if m:
+        return int(m.group(1))
+    nums = re.findall(r"\b(\d{2,4})\b", text)
+    if nums:
+        return int(nums[0])
+    return None
+
+def extract_breed(text: str) -> Optional[str]:
+    t = text.lower()
+    if re.search(r"кобб|cobb|500", t):
+        return "Кобб-500"
+    if re.search(r"росс|ross|308", t):
+        return "Росс-308"
+    if any(w in t for w in ["оба", "любая", "всё равно", "без разницы", "на ваш вкус"]):
+        return "Любая"
+    return None
+
+QUALIFY_PROMPTS = {
+    "start": "Отлично! Сколько голов бройлеров вам нужно?",
+    "volume": "Сколько именно голов бройлеров вам нужно?",
+    "breed": "Какую породу предпочитаете — Кобб-500 или Росс-308?",
+    "breed_retry": "Не расслышала породу. Кобб-500 растёт быстрее, Росс-308 выносливее. Какая больше подходит?",
+    "city": "В какой город вам доставить?",
+    "city_retry": "Подскажите город доставки — Крым, Краснодар, Ростов, Волгоград, Ставрополь?",
+    "phone": "Оставьте, пожалуйста, ваш номер телефона — менеджер перезвонит подтвердить заказ.",
+    "phone_retry": "Не расслышала номер. Скажите, пожалуйста, ваш телефон — мы перезвоним для подтверждения.",
+}
+
 def is_complete(text: str, turn: int = 0, got_phone: bool = False) -> bool:
     if turn < 4 or not got_phone:
         return False
@@ -506,6 +553,12 @@ class FAQDialog:
         self.started_at = datetime.now()
         self.last_call_time: float = 0
         self.got_phone = False
+        self.qualify_state: Optional[str] = None
+        self.qualify_retries = 0
+        self.qualify_volume: Optional[int] = None
+        self.qualify_breed: Optional[str] = None
+        self.qualify_city: Optional[str] = None
+        self.interested: Optional[bool] = None
 
     def run(self):
         log.info(f"{'='*60}")
@@ -534,7 +587,7 @@ class FAQDialog:
         if "error" in result:
             self.active = False
             return
-        self.transcript.append({"role": "assistant", "content": "Здравствуйте! Это Азовский инкубатор, меня зовут Анжелла. У нас сейчас суточные бройлеры Кобб и Росс. Чем могу помочь?"})
+        self.transcript.append({"role": "assistant", "content": "..."})
         recording = wait_for_recording(self.last_call_time, timeout=RECORDING_WAIT_TIMEOUT)
         if not recording:
             self.active = False
@@ -545,21 +598,127 @@ class FAQDialog:
             return
         self.transcript.append({"role": "user", "content": client_text})
         log.info(f"[Turn 0] Client: «{client_text[:100]}»")
+
         if self._is_rejection(client_text):
-            self._respond_and_close("Поняла, спасибо за время. Если в будущем появится интерес — мы на связи. До свидания!")
+            self._respond_and_close("Извините за беспокойство. Всего доброго, хорошего дня!")
             return
-        self.turn = 1
+
+        if is_interest(client_text):
+            self.interested = True
+            self.qualify_state = "start"
+            log.info(f"[Turn 0] Client interested → qualify start")
+            self.turn = 1
+            return
+
+        # Client might have jumped straight to volume ("мне нужно 200 голов")
+        volume = extract_volume(client_text)
+        if volume:
+            self.interested = True
+            self.qualify_volume = volume
+            self.qualify_state = "breed"
+            self.turn = 1
+            return
+
+        # FAQ cache hit (client asked a question instead of yes/no)
+        faq_reply = faq_lookup(client_text)
+        if faq_reply:
+            self.interested = True
+            self.qualify_state = "start"
+            self.turn = 1
+            return
+
+        # Unclear → retry once, then close
+        if self._retry_unclear(client_text, UNCLEAR_RETRY):
+            # Listen again
+            recording = wait_for_recording(self.last_call_time, timeout=RECORDING_WAIT_TIMEOUT)
+            if recording:
+                client_text = transcribe(str(recording))
+                if client_text and len(client_text.strip()) >= 3:
+                    self.transcript.append({"role": "user", "content": client_text})
+                    if self._is_rejection(client_text):
+                        self._respond_and_close("Извините за беспокойство. Всего доброго!")
+                        return
+                    if is_interest(client_text):
+                        self.interested = True
+                        self.qualify_state = "start"
+                        self.turn = 1
+                        return
+                    volume = extract_volume(client_text)
+                    if volume:
+                        self.interested = True
+                        self.qualify_volume = volume
+                        self.qualify_state = "breed"
+                        self.turn = 1
+                        return
+        self._respond_and_close(UNCLEAR_CLOSE)
+
+    def _retry_unclear(self, client_text: str, retry_text: str) -> bool:
+        wav_path = synthesize_wav(retry_text)
+        if not wav_path:
+            return False
+        set_baresip_audio(wav_path)
+        time.sleep(CALLBACK_DELAY)
+        self.last_call_time = time.time()
+        result = mango_callback(self.phone, f"levitan_retry_{self.session_id}")
+        if "error" in result:
+            return False
+        return True
 
     def _turn_response(self):
         log.info(f"[Turn {self.turn}] Generating response...")
-        # 1. ПРОВЕРКА FAQ-КЭША (мгновенный ответ без LLM)
         client_last = self.transcript[-1]["content"] if self.transcript and self.transcript[-1]["role"] == "user" else ""
+        phone_found = self._extract_phone(client_last)
+        if phone_found:
+            self.got_phone = True
+        if self._is_rejection(client_last):
+            self._respond_and_close("Извините за беспокойство. Всего доброго, хорошего дня!")
+            return
+
+        # 1. QUALIFY FLOW (если клиент сказал "Да" на приветствие)
+        if self.qualify_state and self.qualify_state != "done":
+            response = self._handle_qualify(client_last)
+            if response is None:
+                return
+            self.transcript.append({"role": "assistant", "content": response})
+            log.info(f"[Turn {self.turn}] Qualify: «{response[:100]}»")
+            wav_path = synthesize_wav(response)
+            if not wav_path:
+                self.active = False
+                return
+            set_baresip_audio(wav_path)
+            time.sleep(CALLBACK_DELAY)
+            self.last_call_time = time.time()
+            cmd_id = f"levitan_q{self.turn}_{self.session_id}"
+            result = mango_callback(self.phone, cmd_id)
+            if "error" in result:
+                self.active = False
+                return
+            recording = wait_for_recording(self.last_call_time, timeout=RECORDING_WAIT_TIMEOUT)
+            if not recording:
+                self.active = False
+                return
+            client_text = transcribe(str(recording))
+            if not client_text or len(client_text.strip()) < 3:
+                if self.qualify_retries >= 2:
+                    self._respond_and_close(UNCLEAR_CLOSE)
+                    return
+                    self.active = False
+                return
+            self.transcript.append({"role": "user", "content": client_text})
+            log.info(f"[Turn {self.turn}] Client: «{client_text[:100]}»")
+            if self._is_rejection(client_text):
+                self._respond_and_close("Извините за беспокойство. Всего доброго!")
+                return
+            self.turn += 1
+            return
+
+        # 2. FAQ-КЭШ (мгновенный ответ)
         faq_reply = faq_lookup(client_last)
         if faq_reply:
             response = faq_reply
             log.info(f"[Turn {self.turn}] FAQ cache hit → instant TTS")
         else:
-            # 2. НЕТИПОВОЙ ВОПРОС → LLM
+            # 3. LLM
             response = llm_response(self.transcript)
             if not response:
                 self.active = False
@@ -589,17 +748,97 @@ class FAQDialog:
             return
         self.transcript.append({"role": "user", "content": client_text})
         log.info(f"[Turn {self.turn}] Client: «{client_text[:100]}»")
-        # собираем телефон
         phone_found = self._extract_phone(client_text)
         if phone_found:
             self.got_phone = True
         if self._is_rejection(client_text):
-            self._respond_and_close("Поняла, спасибо за время. Если в будущем появится интерес — мы на связи. До свидания!")
+            self._respond_and_close("Извините за беспокойство. Всего доброго!")
             return
         if self._is_complete(client_text):
             self._respond_and_close("Отлично, я всё зафиксировала. Наш менеджер свяжется с вами для подтверждения. Спасибо за время, до свидания!")
             return
         self.turn += 1
+
+    def _handle_qualify(self, client_text: str) -> Optional[str]:
+        if self.qualify_state == "start":
+            self.qualify_state = "volume"
+            return QUALIFY_PROMPTS["start"]
+
+        if self.qualify_state == "volume":
+            volume = extract_volume(client_text)
+            if volume:
+                self.qualify_volume = volume
+                self.qualify_state = "breed"
+                self.qualify_retries = 0
+                return QUALIFY_PROMPTS["breed"]
+            self.qualify_retries += 1
+            if self.qualify_retries >= 2:
+                self._respond_and_close(UNCLEAR_CLOSE)
+                return None
+            return QUALIFY_PROMPTS["volume"]
+
+        if self.qualify_state == "breed":
+            breed = extract_breed(client_text)
+            if breed:
+                self.qualify_breed = breed
+                self.qualify_state = "city"
+                self.qualify_retries = 0
+                return QUALIFY_PROMPTS["city"]
+            self.qualify_retries += 1
+            if self.qualify_retries >= 2:
+                self._respond_and_close(UNCLEAR_CLOSE)
+                return None
+            return QUALIFY_PROMPTS["breed_retry"]
+
+        if self.qualify_state == "city":
+            city = self._extract_city(client_text)
+            if city:
+                self.qualify_city = city
+                self.qualify_state = "phone"
+                self.qualify_retries = 0
+                return QUALIFY_PROMPTS["phone"]
+            self.qualify_retries += 1
+            if self.qualify_retries >= 2:
+                self._respond_and_close(UNCLEAR_CLOSE)
+                return None
+            return QUALIFY_PROMPTS["city_retry"]
+
+        if self.qualify_state == "phone":
+            phone = extract_phone(client_text)
+            if phone:
+                self.got_phone = True
+                self.qualify_state = "done"
+                vol_str = f" {self.qualify_volume} голов" if self.qualify_volume else ""
+                breed_str = f" {self.qualify_breed}" if self.qualify_breed else ""
+                city_str = f" в {self.qualify_city}" if self.qualify_city else ""
+                log.info(f"Qualify complete: {vol_str}{breed_str}{city_str} phone={phone}")
+                return (
+                    f"Спасибо! Я передала заказ{vol_str}{breed_str}{city_str}. "
+                    f"Наш менеджер перезвонит вам для подтверждения. До свидания!"
+                )
+            self.qualify_retries += 1
+            if self.qualify_retries >= 2:
+                self._respond_and_close(UNCLEAR_CLOSE)
+                return None
+            return QUALIFY_PROMPTS["phone_retry"]
+
+        return None
+
+    def _extract_city(self, text: str) -> Optional[str]:
+        t = text.lower().strip()
+        cities = {
+            "краснодар": "Краснодар", "ростов": "Ростов-на-Дону",
+            "ростов-на-дону": "Ростов-на-Дону", "волгоград": "Волгоград",
+            "ставрополь": "Ставрополь", "симферополь": "Симферополь",
+            "севастополь": "Севастополь", "ялта": "Ялта",
+            "феодосия": "Феодосия", "керачь": "Керчь",
+            "евпатория": "Евпатория", "джанкой": "Джанкой",
+            "азовское": "Азовское",
+        }
+        for key, val in cities.items():
+            if key in t:
+                return val
+        return None
 
     def _extract_phone(self, text: str) -> Optional[str]:
         return extract_phone(text)
