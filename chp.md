@@ -33,6 +33,10 @@
 - `projects/hh-ai-agent/AGENTS.md` (правила #8-11, формат вывода)
 - `projects/hh-ai-agent/prompts/candidate_profile.txt` (стек, инструменты, образование)
 - `projects/freelance-agent/.agent/rules/KWORK_SILENT_AUTO.md` (демо, анализ конкурентов)
+
+### Починка claude-mem
+- Проблема: `projectId=hh-ai-agent` даёт 403 (`project_id must belong to team_id`)
+- Решение: не передавать `projectId` в memory_add/memory_search — работает через дефолтный `ai-bureau` для всех проектов и системных задач. Проверено — запись создаётся без ошибок.
 8. **AGENTS.md обновлён** — каскадная система понижена до fallback, OmniRoute — основной режим.
 
 ### Архитектурные решения

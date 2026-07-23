@@ -53,8 +53,12 @@ SMART_MODELS = [
     "openrouter/openai/gpt-4o",
 ]
 PRO_MODELS = [
+    "openrouter/anthropic/claude-fable-5",
     "openrouter/anthropic/claude-opus-4.8",
-    "openrouter/openai/gpt-5-pro",
+    "openrouter/moonshotai/kimi-k3",
+    "openrouter/openai/gpt-5.2-pro",
+    "openrouter/openai/o3-pro",
+    "openrouter/z-ai/glm-5",
 ]
 
 TIER_CHAINS = {
@@ -132,6 +136,16 @@ class Features:
         if self.has_simple_q and not self.has_imperative and not self.has_code_block:
             if self.total_chars < 300:
                 return 0
+
+        # Planning/architecture with analysis → Pro (Tier 3)
+        if self.has_architecture and (self.has_analysis or self.has_tools):
+            return 3
+        if self.has_architecture and self.has_imperative:
+            return 3
+
+        # Multi-turn planning → Pro
+        if self.msg_count >= 6 and self.has_analysis:
+            return 3
 
         score = self.complexity_score
 
