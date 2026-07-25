@@ -17,7 +17,6 @@ import os
 import re
 import time
 from datetime import datetime, timedelta
-from typing import Optional
 
 import requests
 
@@ -43,7 +42,7 @@ def _sign(payload: dict) -> tuple[str, str, str]:
     return API_KEY, j, s
 
 
-def _post(endpoint: str, payload: dict, timeout: int = 30) -> Optional[dict]:
+def _post(endpoint: str, payload: dict, timeout: int = 30) -> dict | None:
     key, j, sign = _sign(payload)
     try:
         r = requests.post(
@@ -64,7 +63,7 @@ def _post(endpoint: str, payload: dict, timeout: int = 30) -> Optional[dict]:
         return None
 
 
-def _poll_stats(key: str, max_wait: int = 30) -> Optional[dict]:
+def _poll_stats(key: str, max_wait: int = 30) -> dict | None:
     deadline = time.time() + max_wait
     while time.time() < deadline:
         data = _post("stats/calls/result/", {"key": key})
@@ -80,9 +79,7 @@ def _poll_stats(key: str, max_wait: int = 30) -> Optional[dict]:
     return None
 
 
-def find_recording_via_stats(
-    phone: str, after_ts: float, timeout: int = 60
-) -> Optional[dict]:
+def find_recording_via_stats(phone: str, after_ts: float, timeout: int = 60) -> dict | None:
     """
     Найти recording_id через расширенную статистику ВАТС.
     Возвращает dict: {recording_id, entry_id, duration, talk_duration, called_number}
@@ -94,13 +91,16 @@ def find_recording_via_stats(
     start_dt = datetime.fromtimestamp(after_ts - 120).strftime("%d.%m.%Y %H:%M:%S")
     end_dt = (datetime.fromtimestamp(after_ts) + timedelta(hours=2)).strftime("%d.%m.%Y %H:%M:%S")
 
-    resp = _post("stats/calls/request", {
-        "start_date": start_dt,
-        "end_date": end_dt,
-        "limit": 50,
-        "offset": 0,
-        "search_string": target,
-    })
+    resp = _post(
+        "stats/calls/request",
+        {
+            "start_date": start_dt,
+            "end_date": end_dt,
+            "limit": 50,
+            "offset": 0,
+            "search_string": target,
+        },
+    )
     if not resp:
         log.info("Stats request failed for %s", phone)
         return None
@@ -141,15 +141,19 @@ def find_recording_via_stats(
     return None
 
 
-def get_transcript(recording_id: str, retries: int = 3) -> Optional[str]:
+def get_transcript(recording_id: str, retries: int = 3) -> str | None:
     """
     Получить расшифровку разговора через recording_transcripts.
     Возвращает текст расшифровки (все фразы склеенные).
     """
     for attempt in range(retries):
-        resp = _post("queries/recording_transcripts", {
-            "recording_id": recording_id,
-        }, timeout=60)
+        resp = _post(
+            "queries/recording_transcripts",
+            {
+                "recording_id": recording_id,
+            },
+            timeout=60,
+        )
         if resp is None and attempt < retries - 1:
             time.sleep(10 * (attempt + 1))
             continue
@@ -178,7 +182,7 @@ def get_transcript(recording_id: str, retries: int = 3) -> Optional[str]:
     return None
 
 
-def fetch_summary(phone: str, after_ts: float, timeout: int = 60) -> Optional[str]:
+def fetch_summary(phone: str, after_ts: float, timeout: int = 60) -> str | None:
     """
     Полный цикл: найти recording_id → получить расшифровку.
     Возвращает текст расшифровки или None.

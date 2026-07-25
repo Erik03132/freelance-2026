@@ -1,13 +1,13 @@
 """Smoke tests for prompts module."""
 
 from levitan.prompts import (
-    GREETING,
-    SYSTEM_PROMPT,
-    VOICE_NOT_HEARD,
+    CLOSING_CALLBACK,
     CLOSING_INTERESTED,
     CLOSING_NOT_INTERESTED,
-    CLOSING_CALLBACK,
+    GREETING,
     NO_ANSWER_GREETING,
+    SYSTEM_PROMPT,
+    VOICE_NOT_HEARD,
 )
 
 

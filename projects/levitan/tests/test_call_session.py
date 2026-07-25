@@ -1,8 +1,7 @@
 """Smoke tests for call_session module (data model only, no external deps)."""
 
-import pydantic
-import pytest
 from datetime import datetime
+
 from levitan.call_session import TranscriptEntry
 
 

@@ -5,7 +5,9 @@ from __future__ import annotations
 Elephant Alpha + Tavily + Perplexity + DuckDuckGo + Memory
 """
 import asyncio
+
 from core_agent import CoreAgent
+
 from tools import EXTENDED_TOOLS
 
 
@@ -22,7 +24,7 @@ async def test():
     )
 
     tools_list = [t.name for t in agent.tools]
-    print(f"\n📊 СТАТУС:")
+    print("\n📊 СТАТУС:")
     print(f"  Tools:  {len(agent.tools)} — {tools_list}")
     print(f"  Memory: {len(agent.memory.facts)} facts")
     print(f"  Hints:  {'✅' if agent.hints.hints_text else '❌'}")
@@ -47,7 +49,7 @@ async def test():
 
     await asyncio.sleep(3)
 
-    # Тест 4: ⭐ WEB SEARCH (Tavily!) 
+    # Тест 4: ⭐ WEB SEARCH (Tavily!)
     print("\n--- Тест 4: ⭐ Поиск в интернете (Tavily) ---")
     await agent.run("Найди в интернете: какая погода сейчас в Уфе?")
 
@@ -60,7 +62,7 @@ async def test():
     # Итоги
     facts = agent.memory.recall()
     print(f"\n🧠 Память: {facts}")
-    
+
     print("\n" + "=" * 60)
     print("✅ ФИНАЛЬНЫЙ ТЕСТ ЗАВЕРШЁН!")
     print(f"📊 Memory: {len(agent.memory.facts)} фактов на диске")

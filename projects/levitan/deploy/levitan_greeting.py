@@ -4,6 +4,7 @@
 Создаёт /tmp/levitan_greeting_lead.wav (8kHz mono) с фразой приветствия.
 Запуск: python3 deploy/levitan_greeting.py
 """
+
 import sys
 from pathlib import Path
 
@@ -22,6 +23,7 @@ if __name__ == "__main__":
     if wav:
         target = a.GREETING_WAV
         import shutil
+
         shutil.copy2(str(wav), str(target))
         print(f"Greeting saved: {target}")
     else:

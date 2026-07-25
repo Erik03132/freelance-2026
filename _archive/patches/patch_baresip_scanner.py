@@ -3,7 +3,7 @@ import sys
 
 src_path = sys.argv[1] if len(sys.argv) > 1 else "src/ua.c"
 
-with open(src_path, "r") as f:
+with open(src_path) as f:
     content = f.read()
 
 old = """\tua = uag_find(&msg->uri.user);

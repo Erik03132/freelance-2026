@@ -24,7 +24,6 @@ import json
 import os
 import re
 import sys
-import time
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -67,18 +66,42 @@ if ENV_FILE.exists():
 
 # === ФИЛЬТР КУЛЬТУР ===
 TARGET_KEYWORDS = [
-    "зерновые", "пшеница", "ячмень", "кукуруза",
-    "подсолнечник", "рапс", "соя",
-    "горох", "нут", "чечевица",
-    "масличные", "бобовые", "озимая", "яровая",
-    "зерно", "закупка зерновых",
+    "зерновые",
+    "пшеница",
+    "ячмень",
+    "кукуруза",
+    "подсолнечник",
+    "рапс",
+    "соя",
+    "горох",
+    "нут",
+    "чечевица",
+    "масличные",
+    "бобовые",
+    "озимая",
+    "яровая",
+    "зерно",
+    "закупка зерновых",
 ]
 
 EXCLUDE_KEYWORDS = [
-    "крс", "молочный", "мясной", "овцы", "свиньи",
-    "птица", "рыба", "овощи", "картофель", "сахарная",
-    "хранение", "сооружений", "техника", "ремонт",
-    "торговля", "производство молочной", "элеватор",
+    "крс",
+    "молочный",
+    "мясной",
+    "овцы",
+    "свиньи",
+    "птица",
+    "рыба",
+    "овощи",
+    "картофель",
+    "сахарная",
+    "хранение",
+    "сооружений",
+    "техника",
+    "ремонт",
+    "торговля",
+    "производство молочной",
+    "элеватор",
 ]
 
 
@@ -123,7 +146,7 @@ def mango_callback(phone: str) -> dict:
 def load_contacts() -> list[dict]:
     """Загрузить и отфильтровать контакты."""
     contacts = []
-    with open(CSV_PATH, "r", encoding="utf-8") as f:
+    with open(CSV_PATH, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             desc = (row.get("Описание", "") or "").lower()
@@ -142,15 +165,17 @@ def load_contacts() -> list[dict]:
             for phone in phone_list:
                 normalized = norm_phone(phone)
                 if is_valid_phone(normalized):
-                    contacts.append({
-                        "name": row.get("Название", "").strip(),
-                        "description": row.get("Описание", "").strip(),
-                        "region": row.get("Регион", "").strip(),
-                        "city": row.get("Город", "").strip(),
-                        "contact_name": row.get("Имя", "").strip(),
-                        "phone": normalized,
-                        "phone_display": phone.strip(),
-                    })
+                    contacts.append(
+                        {
+                            "name": row.get("Название", "").strip(),
+                            "description": row.get("Описание", "").strip(),
+                            "region": row.get("Регион", "").strip(),
+                            "city": row.get("Город", "").strip(),
+                            "contact_name": row.get("Имя", "").strip(),
+                            "phone": normalized,
+                            "phone_display": phone.strip(),
+                        }
+                    )
                     break  # Один номер на контакт
 
     return contacts
@@ -161,7 +186,7 @@ def load_already_called() -> set:
     called = set()
     for f in RESULTS_DIR.glob("results_*.csv"):
         try:
-            with open(f, "r", encoding="utf-8") as fh:
+            with open(f, encoding="utf-8") as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
                     if row.get("phone"):
@@ -176,10 +201,21 @@ def save_result(result: dict):
     # CSV
     file_exists = RESULTS_CSV.exists()
     with open(RESULTS_CSV, "a", encoding="utf-8", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=[
-            "timestamp", "phone", "name", "region", "description",
-            "status", "interest", "crops", "volume", "notes",
-        ])
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "timestamp",
+                "phone",
+                "name",
+                "region",
+                "description",
+                "status",
+                "interest",
+                "crops",
+                "volume",
+                "notes",
+            ],
+        )
         if not file_exists:
             writer.writeheader()
         writer.writerow(result)
@@ -245,7 +281,7 @@ def print_contact(idx: int, total: int, contact: dict):
     print(f"  Название:  {contact['name']}")
     print(f"  Описание:  {contact['description']}")
     print(f"  Регион:    {contact['region']}, {contact['city']}")
-    if contact['contact_name']:
+    if contact["contact_name"]:
         print(f"  Контакт:   {contact['contact_name']}")
     print(f"  Телефон:   {contact['phone_display']} → {contact['phone']}")
     print(f"{'─' * 60}")
@@ -268,8 +304,12 @@ def get_call_result(contact: dict) -> dict:
         print("  Введите число 1-6")
 
     status_map = {
-        "1": "lead", "2": "callback", "3": "rejected",
-        "4": "no_answer", "5": "wrong_number", "6": "other",
+        "1": "lead",
+        "2": "callback",
+        "3": "rejected",
+        "4": "no_answer",
+        "5": "wrong_number",
+        "6": "other",
     }
     status = status_map[choice]
 
@@ -339,6 +379,7 @@ def main():
 
     # Выбор региона
     from collections import Counter
+
     regions = Counter(c["region"] for c in contacts)
     print("\n  Регионы:")
     for i, (region, cnt) in enumerate(regions.most_common(), 1):
@@ -400,14 +441,16 @@ def main():
 
             # Статистика
             total_calls = sum(stats.values())
-            print(f"\n  📊 Статистика: {total_calls} звонков | "
-                  f"Лиды: {stats['lead']} | "
-                  f"Перезвон: {stats['callback']} | "
-                  f"Отказ: {stats['rejected']} | "
-                  f"Не взял: {stats['no_answer']}")
+            print(
+                f"\n  📊 Статистика: {total_calls} звонков | "
+                f"Лиды: {stats['lead']} | "
+                f"Перезвон: {stats['callback']} | "
+                f"Отказ: {stats['rejected']} | "
+                f"Не взял: {stats['no_answer']}"
+            )
 
-            if stats['lead'] > 0:
-                conv = stats['lead'] / total_calls * 100
+            if stats["lead"] > 0:
+                conv = stats["lead"] / total_calls * 100
                 print(f"  Конверсия в лиды: {conv:.1f}%")
 
             idx += 1
@@ -417,7 +460,7 @@ def main():
     # Итог
     total_calls = sum(stats.values())
     print(f"\n{'=' * 60}")
-    print(f"  ИТОГ ДНЯ")
+    print("  ИТОГ ДНЯ")
     print(f"{'=' * 60}")
     print(f"  Всего звонков: {total_calls}")
     print(f"  Лиды:         {stats['lead']}")

@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Slideshow builder for Maria's 10th birthday.
 Converts HEIC→JPEG, copies photos, generates HTML slideshow.
 """
 
-import os
-import sys
 import shutil
 import subprocess
 from pathlib import Path
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
-SOURCE_DIR  = Path("/Users/igorvasin/Documents/Маша/download")
-MUSIC_SRC   = Path("/Users/igorvasin/Downloads/Giorgia Fumanti - Ave Maria.mp3")
-OUT_DIR     = Path("/Users/igorvasin/freelance-2026/my-project/media/masha")
-PHOTOS_DIR  = OUT_DIR / "photos"
-MUSIC_DIR   = OUT_DIR / "music"
+SOURCE_DIR = Path("/Users/igorvasin/Documents/Маша/download")
+MUSIC_SRC = Path("/Users/igorvasin/Downloads/Giorgia Fumanti - Ave Maria.mp3")
+OUT_DIR = Path("/Users/igorvasin/freelance-2026/my-project/media/masha")
+PHOTOS_DIR = OUT_DIR / "photos"
+MUSIC_DIR = OUT_DIR / "music"
 
 # ─── Setup ────────────────────────────────────────────────────────────────────
 PHOTOS_DIR.mkdir(parents=True, exist_ok=True)
@@ -28,12 +25,12 @@ if not music_dest.exists():
     shutil.copy2(MUSIC_SRC, music_dest)
     print(f"✓ Music copied: {music_dest.name}")
 else:
-    print(f"✓ Music already exists")
+    print("✓ Music already exists")
 
 # ─── Collect & Convert ────────────────────────────────────────────────────────
 SKIP_EXTS = {".mov", ".dng", ".mp4", ".avi"}
-HEIC_EXTS  = {".heic"}
-COPY_EXTS  = {".jpg", ".jpeg", ".png"}
+HEIC_EXTS = {".heic"}
+COPY_EXTS = {".jpg", ".jpeg", ".png"}
 
 photos = []
 counter = 1
@@ -55,9 +52,20 @@ for f in sorted(SOURCE_DIR.iterdir()):
     if ext in HEIC_EXTS:
         # Convert HEIC → JPEG using macOS sips
         result = subprocess.run(
-            ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "85",
-             str(f), "--out", str(out_path)],
-            capture_output=True, text=True
+            [
+                "sips",
+                "-s",
+                "format",
+                "jpeg",
+                "-s",
+                "formatOptions",
+                "85",
+                str(f),
+                "--out",
+                str(out_path),
+            ],
+            capture_output=True,
+            text=True,
         )
         if result.returncode == 0:
             print(f"  ✓ HEIC→JPG: {f.name} → {out_name}")
@@ -77,12 +85,12 @@ print(f"\n✓ Total photos ready: {len(photos)}")
 # ─── Generate HTML ────────────────────────────────────────────────────────────
 # Ave Maria @ 70 BPM = 857ms/beat. 3/4 time → 1 bar = 2.57s.
 # Slide duration: 6 bars = ~15.4s; crossfade: 2s
-SLIDE_DURATION = 6000   # ms per slide (visible time excl. fade)
-FADE_DURATION  = 2000   # ms crossfade
+SLIDE_DURATION = 6000  # ms per slide (visible time excl. fade)
+FADE_DURATION = 2000  # ms crossfade
 
 photos_js = ",\n        ".join([f'"{p}"' for p in photos])
 
-html = f'''<!DOCTYPE html>
+html = f"""<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
@@ -588,12 +596,12 @@ initSlides();
 </script>
 </body>
 </html>
-'''
+"""
 
 out_html = OUT_DIR / "index.html"
 out_html.write_text(html, encoding="utf-8")
 print(f"\n✅ Slideshow generated: {out_html}")
 print(f"   Photos: {len(photos)}")
 print(f"   Slide duration: {SLIDE_DURATION/1000}s + {FADE_DURATION/1000}s fade")
-print(f"\n▶  Open in browser:")
+print("\n▶  Open in browser:")
 print(f"   open '{out_html}'")

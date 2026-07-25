@@ -10,12 +10,13 @@ Graph RAG Engine — Графовый поиск по нормативным д�
 3. Term resolution → подставляем определения терминов
 4. Context builder → собираем структурированный контекст для LLM
 """
-import os
+
 import json
+import os
 from difflib import SequenceMatcher
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GRAPH_PATH = os.path.join(BASE_DIR, 'data', 'legal_graph.json')
+GRAPH_PATH = os.path.join(BASE_DIR, "data", "legal_graph.json")
 
 
 class LegalGraph:
@@ -28,7 +29,7 @@ class LegalGraph:
         if not os.path.exists(GRAPH_PATH):
             print(f"⚠️ Legal Graph не найден: {GRAPH_PATH}")
             return
-        with open(GRAPH_PATH, 'r', encoding='utf-8') as f:
+        with open(GRAPH_PATH, encoding="utf-8") as f:
             data = json.load(f)
         self.nodes = data.get("nodes", {})
         self.terms = data.get("terms", {})
@@ -75,7 +76,7 @@ class LegalGraph:
     def search(self, query: str, max_depth: int = 2, top_k: int = 3) -> dict:
         """
         Графовый поиск: keyword match → graph traversal → context assembly.
-        
+
         Returns:
             {
                 "primary_nodes": [...],   # Прямые совпадения
@@ -85,7 +86,12 @@ class LegalGraph:
             }
         """
         if not self.nodes:
-            return {"primary_nodes": [], "linked_nodes": [], "terms": [], "context_block": ""}
+            return {
+                "primary_nodes": [],
+                "linked_nodes": [],
+                "terms": [],
+                "context_block": "",
+            }
 
         # 1. Скоринг всех узлов
         scored = []
@@ -132,16 +138,14 @@ class LegalGraph:
             context_parts.append("📌 ПРЯМЫЕ СОВПАДЕНИЯ (нормативные акты по теме):")
             for node_id, node, score in primary:
                 context_parts.append(
-                    f"  ▪ [{node['title']}] ({node.get('document', '')})\n"
-                    f"    {node['text']}"
+                    f"  ▪ [{node['title']}] ({node.get('document', '')})\n" f"    {node['text']}"
                 )
 
         if linked:
             context_parts.append("\n🔗 СВЯЗАННЫЕ НОРМЫ (обязательный контекст):")
             for node_id, node in linked[:5]:  # Ограничиваем до 5 связанных
                 context_parts.append(
-                    f"  ▪ [{node['title']}] ({node.get('document', '')})\n"
-                    f"    {node['text']}"
+                    f"  ▪ [{node['title']}] ({node.get('document', '')})\n" f"    {node['text']}"
                 )
 
         if terms:
@@ -155,7 +159,7 @@ class LegalGraph:
             "linked_nodes": [(nid, n["title"]) for nid, n in linked[:5]],
             "terms": terms,
             "context_block": context_block,
-            "total_nodes": len(primary) + len(linked)
+            "total_nodes": len(primary) + len(linked),
         }
 
     def get_citation_chain(self, node_id: str) -> list:
@@ -168,13 +172,15 @@ class LegalGraph:
                 return
             visited.add(nid)
             node = self.nodes[nid]
-            chain.append({
-                "depth": depth,
-                "id": nid,
-                "title": node["title"],
-                "document": node.get("document", ""),
-                "text": node["text"][:200]
-            })
+            chain.append(
+                {
+                    "depth": depth,
+                    "id": nid,
+                    "title": node["title"],
+                    "document": node.get("document", ""),
+                    "text": node["text"][:200],
+                }
+            )
             for link_id in node.get("links", []):
                 walk(link_id, depth + 1)
 
@@ -184,6 +190,7 @@ class LegalGraph:
 
 # Singleton
 _graph = None
+
 
 def get_legal_graph() -> LegalGraph:
     global _graph
@@ -196,7 +203,7 @@ if __name__ == "__main__":
     graph = get_legal_graph()
 
     # Тест 1: Налоговые льготы ИТ
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Тест 1: Налоговые льготы для ИТ")
     result = graph.search("Какие льготы по налогу на прибыль для ИТ-компаний?")
     print(f"Primary: {result['primary_nodes']}")
@@ -205,15 +212,17 @@ if __name__ == "__main__":
     print(f"\nContext:\n{result['context_block']}")
 
     # Тест 2: Банкротство
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Тест 2: Субсидиарная ответственность")
-    result = graph.search("Какие риски субсидиарной ответственности для директора при банкротстве ООО?")
+    result = graph.search(
+        "Какие риски субсидиарной ответственности для директора при банкротстве ООО?"
+    )
     print(f"Primary: {result['primary_nodes']}")
     print(f"Linked:  {result['linked_nodes']}")
     print(f"\nContext:\n{result['context_block']}")
 
     # Тест 3: Гранты ФСИ
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Тест 3: Грант Старт-1 ФСИ")
     result = graph.search("Как получить грант Старт-1 от ФСИ?")
     print(f"Primary: {result['primary_nodes']}")

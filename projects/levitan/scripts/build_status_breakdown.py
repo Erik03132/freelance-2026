@@ -1,4 +1,5 @@
-import csv, re
+import csv
+import re
 
 ROOT = "/Users/igorvasin/freelance-2026/projects/levitan/data/campaigns/csv"
 LOG = f"{ROOT}/ping_solo_final.log"
@@ -30,8 +31,7 @@ with open(LOG, encoding="utf-8") as f:
 rows = []
 for phone, (gorod, imya, opis) in cand.items():
     st = status.get(phone, "not_pinged")
-    rows.append({"Телефоны": phone, "Город": gorod, "Имя": imya,
-                 "Описание": opis, "Статус": st})
+    rows.append({"Телефоны": phone, "Город": gorod, "Имя": imya, "Описание": opis, "Статус": st})
 
 rows.sort(key=lambda r: (r["Город"], r["Имя"]))
 
@@ -42,6 +42,7 @@ with open(OUT, "w", encoding="utf-8", newline="") as f:
 
 # сводка по районам и статусам
 from collections import defaultdict
+
 agg = defaultdict(lambda: defaultdict(int))
 for r in rows:
     agg[r["Город"]][r["Статус"]] += 1

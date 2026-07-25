@@ -5,6 +5,7 @@
 Голос: Gemini TTS Kore. Формат: 8kHz mono pcm_s16le.
 Структура: 7с тишина + голос + 0.5с бип + 10с тишина
 """
+
 import base64
 import os
 import subprocess
@@ -19,7 +20,7 @@ ENV_PATH = Path("/Users/igorvasin/freelance-2026/projects/ai-eggs/.env")
 load_dotenv(ENV_PATH, override=True)
 
 API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-PROXY   = os.getenv("HTTPS_PROXY") or os.getenv("TELEGRAM_PROXY")
+PROXY = os.getenv("HTTPS_PROXY") or os.getenv("TELEGRAM_PROXY")
 
 TEXT = (
     "Здравствуйте! Это Азовский инкубатор. "
@@ -31,7 +32,7 @@ TEXT = (
 
 OUT_DIR = Path("/Users/igorvasin/freelance-2026/projects/levitan/data/turkey_audio")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
-RAW_WAV  = OUT_DIR / "turkey_june24_dialog.wav"
+RAW_WAV = OUT_DIR / "turkey_june24_dialog.wav"
 FINAL_WAV = OUT_DIR / "turkey_june24_final.wav"
 
 print(f"Текст ({len(TEXT)} символов):")
@@ -45,10 +46,8 @@ payload = {
     "contents": [{"parts": [{"text": TEXT}]}],
     "generationConfig": {
         "responseModalities": ["AUDIO"],
-        "speechConfig": {
-            "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": "Kore"}}
-        }
-    }
+        "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": "Kore"}}},
+    },
 }
 proxies = {"https": PROXY, "http": PROXY} if PROXY else None
 r = requests.post(url, json=payload, proxies=proxies, timeout=60)
@@ -76,16 +75,29 @@ print("\n=== Шаг 2: Сборка финального WAV ===")
 WORK = Path("/tmp/_turkey_build")
 WORK.mkdir(exist_ok=True)
 
-voice_8k   = WORK / "voice_8k.wav"
+voice_8k = WORK / "voice_8k.wav"
 silence_7s = WORK / "silence_7s.wav"
-bip        = WORK / "bip.wav"
+bip = WORK / "bip.wav"
 silence_10 = WORK / "silence_10s.wav"
 
 # Конвертируем голос 24kHz → 8kHz mono
-subprocess.run([
-    "ffmpeg", "-y", "-i", str(RAW_WAV),
-    "-ar", "8000", "-ac", "1", "-acodec", "pcm_s16le", str(voice_8k)
-], check=True, capture_output=True)
+subprocess.run(
+    [
+        "ffmpeg",
+        "-y",
+        "-i",
+        str(RAW_WAV),
+        "-ar",
+        "8000",
+        "-ac",
+        "1",
+        "-acodec",
+        "pcm_s16le",
+        str(voice_8k),
+    ],
+    check=True,
+    capture_output=True,
+)
 
 # Длительность голоса
 with wave.open(str(voice_8k), "rb") as w:
@@ -93,38 +105,86 @@ with wave.open(str(voice_8k), "rb") as w:
 print(f"  Голос 8kHz: {dur8:.1f}с")
 
 # 7с тишина (lead — чтобы клиент успел сказать «алло»)
-subprocess.run([
-    "ffmpeg", "-y", "-f", "lavfi",
-    "-i", "anullsrc=r=8000:cl=mono",
-    "-t", "7", "-acodec", "pcm_s16le", str(silence_7s)
-], check=True, capture_output=True)
+subprocess.run(
+    [
+        "ffmpeg",
+        "-y",
+        "-f",
+        "lavfi",
+        "-i",
+        "anullsrc=r=8000:cl=mono",
+        "-t",
+        "7",
+        "-acodec",
+        "pcm_s16le",
+        str(silence_7s),
+    ],
+    check=True,
+    capture_output=True,
+)
 
 # Бип 800Hz 0.5с
-subprocess.run([
-    "ffmpeg", "-y", "-f", "lavfi",
-    "-i", "sine=frequency=800:sample_rate=8000",
-    "-t", "0.5", "-acodec", "pcm_s16le", str(bip)
-], check=True, capture_output=True)
+subprocess.run(
+    [
+        "ffmpeg",
+        "-y",
+        "-f",
+        "lavfi",
+        "-i",
+        "sine=frequency=800:sample_rate=8000",
+        "-t",
+        "0.5",
+        "-acodec",
+        "pcm_s16le",
+        str(bip),
+    ],
+    check=True,
+    capture_output=True,
+)
 
 # 10с тишина (хвост — клиент говорит ответ)
-subprocess.run([
-    "ffmpeg", "-y", "-f", "lavfi",
-    "-i", "anullsrc=r=8000:cl=mono",
-    "-t", "10", "-acodec", "pcm_s16le", str(silence_10)
-], check=True, capture_output=True)
+subprocess.run(
+    [
+        "ffmpeg",
+        "-y",
+        "-f",
+        "lavfi",
+        "-i",
+        "anullsrc=r=8000:cl=mono",
+        "-t",
+        "10",
+        "-acodec",
+        "pcm_s16le",
+        str(silence_10),
+    ],
+    check=True,
+    capture_output=True,
+)
 
 # Склейка: 7с тишина + голос + бип + 10с тишина
-subprocess.run([
-    "ffmpeg", "-y",
-    "-i", str(silence_7s),
-    "-i", str(voice_8k),
-    "-i", str(bip),
-    "-i", str(silence_10),
-    "-filter_complex", "[0:a][1:a][2:a][3:a]concat=n=4:v=0:a=1[out]",
-    "-map", "[out]",
-    "-acodec", "pcm_s16le",
-    str(FINAL_WAV)
-], check=True, capture_output=True)
+subprocess.run(
+    [
+        "ffmpeg",
+        "-y",
+        "-i",
+        str(silence_7s),
+        "-i",
+        str(voice_8k),
+        "-i",
+        str(bip),
+        "-i",
+        str(silence_10),
+        "-filter_complex",
+        "[0:a][1:a][2:a][3:a]concat=n=4:v=0:a=1[out]",
+        "-map",
+        "[out]",
+        "-acodec",
+        "pcm_s16le",
+        str(FINAL_WAV),
+    ],
+    check=True,
+    capture_output=True,
+)
 
 # Проверка
 with wave.open(str(FINAL_WAV)) as w:

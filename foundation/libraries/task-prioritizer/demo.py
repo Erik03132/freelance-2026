@@ -19,10 +19,10 @@ def demo_basic_scoring():
     print("=" * 80)
     print("🎯 DEMO 1: Базовый скоринг задач")
     print("=" * 80)
-    
+
     scorer = TaskScorer(project_id="demo", niche="backend")
     scorer.load_niche_config("backend")
-    
+
     # Простой баг
     task1 = {
         "id": "T1",
@@ -31,13 +31,13 @@ def demo_basic_scoring():
         "tags": ["bug", "low-priority"],
         "created_at": datetime.now().isoformat(),
     }
-    
+
     score1 = scorer.score_task(task1)
     print(f"\n📌 Задача 1: {task1['title']}")
     print(f"   Скор: {score1.total}/100")
     print(f"   Объяснение: {score1.breakdown}")
     print(f"   Независимых сигналов: {score1.independent_signals}")
-    
+
     # Production outage
     task2 = {
         "id": "T2",
@@ -49,13 +49,13 @@ def demo_basic_scoring():
         "related_issues": 5,
         "reactions": 12,
     }
-    
+
     score2 = scorer.score_task(task2)
     print(f"\n📌 Задача 2: {task2['title']}")
     print(f"   Скор: {score2.total}/100")
     print(f"   Объяснение: {score2.breakdown}")
     print(f"   Независимых сигналов: {score2.independent_signals}")
-    
+
     # Security issue
     task3 = {
         "id": "T3",
@@ -64,7 +64,7 @@ def demo_basic_scoring():
         "tags": ["security", "vulnerability"],
         "created_at": datetime.now().isoformat(),
     }
-    
+
     score3 = scorer.score_task(task3)
     print(f"\n📌 Задача 3: {task3['title']}")
     print(f"   Скор: {score3.total}/100")
@@ -77,10 +77,10 @@ def demo_ranking():
     print("\n" + "=" * 80)
     print("🎯 DEMO 2: Ранжирование задач по приоритету")
     print("=" * 80)
-    
+
     scorer = TaskScorer(project_id="demo", niche="backend")
     scorer.load_niche_config("backend")
-    
+
     tasks = [
         {
             "id": "T1",
@@ -112,9 +112,9 @@ def demo_ranking():
             "created_at": datetime.now().isoformat(),
         },
     ]
-    
+
     ranked = scorer.rank_tasks(tasks)
-    
+
     print("\n📊 Отранжированные задачи (по приоритету):\n")
     for i, task in enumerate(ranked, 1):
         print(f"{i}. [{task['priority_score']:3d}] {task['id']}: {task['title']}")
@@ -126,10 +126,10 @@ def demo_trends():
     print("=" * 80)
     print("🎯 DEMO 3: Детектирование трендов в нише")
     print("=" * 80)
-    
+
     scorer = TaskScorer(project_id="demo", niche="backend")
     scorer.load_niche_config("backend")
-    
+
     # Симулируем находки о конкурентах
     competitor_findings = [
         {
@@ -170,9 +170,9 @@ def demo_trends():
             "created_at": datetime.now().isoformat(),
         },
     ]
-    
+
     trends = scorer.detect_trend(competitor_findings)
-    
+
     print("\n📈 Тренды в нише:\n")
     for trigger, findings in sorted(trends.items(), key=lambda x: len(x[1]), reverse=True):
         print(f"🔥 {trigger}: {len(findings)} находок")
@@ -186,12 +186,12 @@ def demo_competitor_research():
     print("=" * 80)
     print("🎯 DEMO 4: Исследование конкурентов (sherl-research use case)")
     print("=" * 80)
-    
+
     scorer = TaskScorer(project_id="competitor-research", niche="market-intelligence")
     scorer.load_niche_config("backend")  # Используем backend конфиг как пример
-    
+
     print("\n🔍 Находки о конкурентах:\n")
-    
+
     findings = [
         {
             "id": "C1",
@@ -217,9 +217,9 @@ def demo_competitor_research():
             "created_at": datetime.now().isoformat(),
         },
     ]
-    
+
     ranked_findings = scorer.rank_tasks(findings)
-    
+
     print("📊 Приоритизированные находки:\n")
     for i, finding in enumerate(ranked_findings, 1):
         print(f"{i}. [{finding['priority_score']:3d}] {finding['id']}")
@@ -233,14 +233,14 @@ def demo_freshness_decay():
     print("=" * 80)
     print("🎯 DEMO 5: Множитель свежести (старые задачи теряют приоритет)")
     print("=" * 80)
-    
+
     scorer = TaskScorer(project_id="demo", niche="backend")
     scorer.load_niche_config("backend")
-    
+
     from datetime import timedelta
-    
+
     now = datetime.now()
-    
+
     tasks = [
         {
             "id": "T1",
@@ -264,7 +264,7 @@ def demo_freshness_decay():
             "created_at": (now - timedelta(days=3)).isoformat(),
         },
     ]
-    
+
     print("\n⏰ Влияние времени на приоритет:\n")
     for task in tasks:
         score = scorer.score_task(task)
@@ -278,24 +278,25 @@ def main():
     print("╔" + "=" * 78 + "╗")
     print("║" + " " * 15 + "🚀 TASK-PRIORITIZER DEMO (из ContentCombine)" + " " * 20 + "║")
     print("╚" + "=" * 78 + "╝")
-    
+
     try:
         demo_basic_scoring()
         demo_ranking()
         demo_trends()
         demo_competitor_research()
         demo_freshness_decay()
-        
+
         print("\n" + "=" * 80)
         print("✅ Все демонстрации завершены успешно!")
         print("=" * 80)
-        
+
     except Exception as e:
         print(f"\n❌ Ошибка: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
-    
+
     return 0
 
 

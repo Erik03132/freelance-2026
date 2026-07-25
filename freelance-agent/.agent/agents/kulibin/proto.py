@@ -5,7 +5,12 @@ from __future__ import annotations
 from .llm_client import call_llm
 
 
-def generate_prototype(idea: str, language: str = "python", api_key: str | None = None, learned_context: str = "") -> str | None:
+def generate_prototype(
+    idea: str,
+    language: str = "python",
+    api_key: str | None = None,
+    learned_context: str = "",
+) -> str | None:
     """Generate an isolated PoC script for an idea."""
     if language not in ("python", "js", "ts"):
         language = "python"
@@ -24,7 +29,9 @@ Requirements:
     return call_llm(prompt, max_tokens=1500, temperature=0.2, api_key=api_key)
 
 
-def benchmark_snippet(code: str, api_key: str | None = None, learned_context: str = "") -> str | None:
+def benchmark_snippet(
+    code: str, api_key: str | None = None, learned_context: str = ""
+) -> str | None:
     """Suggest a benchmarking approach for a code snippet."""
     prompt = f"""Suggest how to benchmark/measure performance of this code, and
 identify the likely bottlenecks:

@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class Contact(BaseModel):
     """Контакт из базы."""
+
     phone: str
     name: str | None = None
     company: str | None = None
@@ -30,6 +31,7 @@ class Contact(BaseModel):
 
 class Campaign(BaseModel):
     """Кампания обзвона."""
+
     name: str
     csv_path: Path
     status: str = "active"  # active, paused, completed
@@ -49,11 +51,7 @@ class Campaign(BaseModel):
 class CampaignManager:
     """Менеджер кампаний обзвона."""
 
-    def __init__(
-        self,
-        mango_client: MangoClient,
-        llm_api_key: str = ""
-    ):
+    def __init__(self, mango_client: MangoClient, llm_api_key: str = ""):
         self.mango_client = mango_client
         self.llm_api_key = llm_api_key
         self.active_campaigns: dict[str, Campaign] = {}
@@ -75,11 +73,7 @@ class CampaignManager:
         # Подсчет контактов
         contacts = self._load_contacts(csv_path)
 
-        campaign = Campaign(
-            name=name,
-            csv_path=csv_path,
-            total_contacts=len(contacts)
-        )
+        campaign = Campaign(name=name, csv_path=csv_path, total_contacts=len(contacts))
 
         self.active_campaigns[name] = campaign
 
@@ -113,7 +107,7 @@ class CampaignManager:
                         description=row.get("Описание", row.get("description")),
                         email=row.get("Email", row.get("email")),
                         website=row.get("Сайт", row.get("website")),
-                        address=row.get("Адрес", row.get("address"))
+                        address=row.get("Адрес", row.get("address")),
                     )
 
                     contacts.append(contact)
@@ -175,10 +169,7 @@ class CampaignManager:
         """Обработка очереди звонков."""
         while self._is_running and not self._call_queue.empty():
             try:
-                campaign_name, contact = await asyncio.wait_for(
-                    self._call_queue.get(),
-                    timeout=1.0
-                )
+                campaign_name, contact = await asyncio.wait_for(self._call_queue.get(), timeout=1.0)
 
                 # Проверяем лимит параллельных звонков
                 if len(self.active_sessions) >= 5:
@@ -208,10 +199,7 @@ class CampaignManager:
                 return
 
             # Инициируем callback через Mango
-            result = await self.mango_client.initiate_callback(
-                number=contact.phone,
-                extension="1"
-            )
+            result = await self.mango_client.initiate_callback(number=contact.phone, extension="1")
 
             if result.get("result") == 0:
                 call_id = result.get("call_id", "")
@@ -222,17 +210,13 @@ class CampaignManager:
                     phone=contact.phone,
                     mango_client=self.mango_client,
                     knowledge_base=get_knowledge_base(),
-                    llm_api_key=self.llm_api_key
+                    llm_api_key=self.llm_api_key,
                 )
 
                 self.active_sessions[call_id] = session
 
                 # Создаем запись лида
-                lead = Lead(
-                    phone=contact.phone,
-                    call_id=call_id,
-                    status="initiated"
-                )
+                lead = Lead(phone=contact.phone, call_id=call_id, status="initiated")
                 lead_storage.save_lead(lead)
 
                 # Обновляем статистику кампании
@@ -308,18 +292,15 @@ class CampaignManager:
             "called_count": campaign.called_count,
             "success_count": campaign.success_count,
             "interested_count": campaign.interested_count,
-            "active_sessions": len(self.active_sessions)
+            "active_sessions": len(self.active_sessions),
         }
 
     def get_all_stats(self) -> dict:
         """Получение общей статистики."""
         return {
-            "campaigns": {
-                name: self.get_campaign_stats(name)
-                for name in self.active_campaigns
-            },
+            "campaigns": {name: self.get_campaign_stats(name) for name in self.active_campaigns},
             "active_sessions": len(self.active_sessions),
-            "queue_size": self._call_queue.qsize()
+            "queue_size": self._call_queue.qsize(),
         }
 
 
@@ -334,13 +315,9 @@ def get_campaign_manager() -> CampaignManager:
         from .config import settings
         from .mango_client import MangoClient
 
-        mango_client = MangoClient(
-            api_key=settings.mango.api_key,
-            salt=settings.mango.salt
-        )
+        mango_client = MangoClient(api_key=settings.mango.api_key, salt=settings.mango.salt)
 
         _campaign_manager = CampaignManager(
-            mango_client=mango_client,
-            llm_api_key=settings.openrouter.api_key
+            mango_client=mango_client, llm_api_key=settings.openrouter.api_key
         )
     return _campaign_manager

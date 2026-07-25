@@ -3,7 +3,9 @@
 Приоритет: Gemini Direct → OpenRouter → Ollama (offline).
 Паттерн переиспользован из ai-eggs/angelochka_core.py.
 """
+
 import os
+
 import requests
 from dotenv import load_dotenv
 
@@ -20,14 +22,16 @@ if GOOGLE_PROXY:
     os.environ["HTTP_PROXY"] = GOOGLE_PROXY
     os.environ["HTTPS_PROXY"] = GOOGLE_PROXY
 
+
 def _call_gemini_direct(prompt, history=None, temperature=0.7):
     """Вызов Gemini API напрямую."""
     if not GEMINI_API_KEY:
         return None
     try:
         import google.generativeai as genai
+
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-1.5-flash") # gemini-2.0 is deprecated for new users
+        model = genai.GenerativeModel("gemini-1.5-flash")  # gemini-2.0 is deprecated for new users
         chat = model.start_chat(history=history or [])
         response = chat.send_message(prompt)
         return response.text
@@ -45,13 +49,17 @@ def _call_openrouter(prompt, history=None, temperature=0.7):
     if history:
         for msg in history:
             role = "assistant" if msg.get("role") == "model" else msg.get("role", "user")
-            content = msg.get("parts", [msg.get("content", "")])[0] if isinstance(msg.get("parts"), list) else msg.get("content", "")
+            content = (
+                msg.get("parts", [msg.get("content", "")])[0]
+                if isinstance(msg.get("parts"), list)
+                else msg.get("content", "")
+            )
             messages.append({"role": role, "content": content})
 
     messages.append({"role": "user", "content": prompt})
 
     or_models = [
-        "moonshotai/kimi-k2.6", # 🚀 Kimi K2.6 - Новейшая имба
+        "moonshotai/kimi-k2.6",  # 🚀 Kimi K2.6 - Новейшая имба
         "google/gemini-2.5-flash",
         "google/gemini-flash-1.5",
         "openrouter/auto",
@@ -71,7 +79,10 @@ def _call_openrouter(prompt, history=None, temperature=0.7):
                     "temperature": temperature,
                 },
                 timeout=30,
-                proxies={"http": "", "https": ""} # OpenRouter не может идти через наш прокси
+                proxies={
+                    "http": "",
+                    "https": "",
+                },  # OpenRouter не может идти через наш прокси
             )
             data = resp.json()
             if "choices" in data:
@@ -91,7 +102,11 @@ def _call_ollama_local(prompt, history=None, temperature=0.7):
         if history:
             for msg in history:
                 role = "assistant" if msg.get("role") == "model" else msg.get("role", "user")
-                content = msg.get("parts", [msg.get("content", "")])[0] if isinstance(msg.get("parts"), list) else msg.get("content", "")
+                content = (
+                    msg.get("parts", [msg.get("content", "")])[0]
+                    if isinstance(msg.get("parts"), list)
+                    else msg.get("content", "")
+                )
                 messages.append({"role": role, "content": content})
         messages.append({"role": "user", "content": prompt})
 

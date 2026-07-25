@@ -2,7 +2,9 @@
 Deep Search — глубокий контекстный поиск через Perplexity и Tavily API.
 Используется для обогащения инициатив фактами и мировым опытом.
 """
+
 import os
+
 import requests
 from dotenv import load_dotenv
 
@@ -15,12 +17,12 @@ TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 def search_perplexity(query, focus="internet", max_tokens=1500):
     """
     Поиск через Perplexity API (sonar model).
-    
+
     Args:
         query: Поисковый запрос
         focus: Тип поиска (internet, academic, news)
         max_tokens: Максимум токенов в ответе
-    
+
     Returns:
         dict: {"answer": str, "sources": list[str]} или None
     """
@@ -68,12 +70,12 @@ def search_perplexity(query, focus="internet", max_tokens=1500):
 def search_tavily(query, search_depth="advanced", max_results=5):
     """
     Поиск через Tavily API (оптимизирован для AI-агентов).
-    
+
     Args:
         query: Поисковый запрос
         search_depth: "basic" или "advanced"
         max_results: Количество результатов
-    
+
     Returns:
         dict: {"answer": str, "results": list[dict]} или None
     """
@@ -119,11 +121,11 @@ def deep_search(query, context="legislation"):
     """
     Комбинированный глубокий поиск: Perplexity + Tavily.
     Возвращает объединённый результат.
-    
+
     Args:
         query: Запрос
         context: Контекст (legislation, global_experience, regional)
-    
+
     Returns:
         dict: {
             "perplexity": {"answer": str, "sources": list},
@@ -172,10 +174,11 @@ def deep_search(query, context="legislation"):
     if not parts:
         try:
             from scanner.web_search import search_web_free
+
             ddg_context = search_web_free(enriched, max_results=7)
             if ddg_context:
                 parts.append(ddg_context)
-                print(f"  🦆 DDG fallback: найдены результаты")
+                print("  🦆 DDG fallback: найдены результаты")
         except Exception as e:
             print(f"  ⚠️ DDG fallback failed: {e}")
 

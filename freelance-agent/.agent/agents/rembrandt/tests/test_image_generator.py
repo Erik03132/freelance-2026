@@ -1,4 +1,5 @@
-from rembrandt import leonardo_generate, download_image
+from rembrandt import leonardo_generate
+
 
 def test_leonardo_generate_no_key(monkeypatch):
     monkeypatch.setenv("LEONARDO_API_KEY", "")

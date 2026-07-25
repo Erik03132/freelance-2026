@@ -12,12 +12,7 @@ logger = logging.getLogger(__name__)
 class STTEngine:
     """Движок распознавания речи на основе faster-whisper."""
 
-    def __init__(
-        self,
-        model_size: str = "base",
-        language: str = "ru",
-        device: str = "cpu"
-    ):
+    def __init__(self, model_size: str = "base", language: str = "ru", device: str = "cpu"):
         self.model_size = model_size
         self.language = language
         self.device = device
@@ -28,21 +23,18 @@ class STTEngine:
         if self._model is None:
             try:
                 from faster_whisper import WhisperModel
+
                 self._model = WhisperModel(
                     self.model_size,
                     device=self.device,
-                    compute_type="int8" if self.device == "cpu" else "float16"
+                    compute_type="int8" if self.device == "cpu" else "float16",
                 )
                 logger.info(f"Loaded Whisper model: {self.model_size}")
             except Exception as e:
                 logger.error(f"Failed to load Whisper model: {e}")
                 raise
 
-    def transcribe(
-        self,
-        audio_data: bytes,
-        sample_rate: int = 8000
-    ) -> str:
+    def transcribe(self, audio_data: bytes, sample_rate: int = 8000) -> str:
         """
         Распознавание речи из аудиоданных.
 
@@ -65,10 +57,7 @@ class STTEngine:
                 language=self.language,
                 beam_size=5,
                 vad_filter=True,
-                vad_parameters=dict(
-                    min_silence_duration_ms=500,
-                    speech_pad_ms=200
-                )
+                vad_parameters=dict(min_silence_duration_ms=500, speech_pad_ms=200),
             )
 
             # Объединяем сегменты
@@ -94,10 +83,7 @@ class STTEngine:
 
         try:
             segments, info = self._model.transcribe(
-                str(file_path),
-                language=self.language,
-                beam_size=5,
-                vad_filter=True
+                str(file_path), language=self.language, beam_size=5, vad_filter=True
             )
 
             text = " ".join([segment.text for segment in segments])
@@ -144,7 +130,7 @@ class STTEngine:
         """
         try:
             audio_array = self._bytes_to_numpy(audio_data, 8000)
-            energy = np.mean(audio_array ** 2)
+            energy = np.mean(audio_array**2)
             return energy > threshold
         except Exception:
             return False

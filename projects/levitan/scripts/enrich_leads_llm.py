@@ -105,16 +105,24 @@ def main():
     hot = [r for r in data if r.get("status_llm") in ("lead", "callback")]
     print(f"\n## 🔥 Интересные клиенты Адыгеи — {len(hot)} из {len(data)}\n", file=sys.stderr)
     with open(OUT_MD, "w", encoding="utf-8") as f:
-        f.write(f"# Интересные клиенты Адыгеи (по расшифровкам звонков)\n\n")
-        f.write(f"Всего обработано звонков >15с: {len(data)} | Интересных (lead/callback): {len(hot)}\n\n")
+        f.write("# Интересные клиенты Адыгеи (по расшифровкам звонков)\n\n")
+        f.write(
+            f"Всего обработано звонков >15с: {len(data)} | Интересных (lead/callback): {len(hot)}\n\n"
+        )
         f.write("## Горячие лиды\n\n")
-        f.write("| # | Имя | Район | Телефон | Культура | Объём (т) | Готовность | Цена | Договорённости |\n")
-        f.write("|---|------|-------|---------|----------|-----------|------------|------|----------------|\n")
+        f.write(
+            "| # | Имя | Район | Телефон | Культура | Объём (т) | Готовность | Цена | Договорённости |\n"
+        )
+        f.write(
+            "|---|------|-------|---------|----------|-----------|------------|------|----------------|\n"
+        )
         for i, r in enumerate(hot, 1):
             name = r["name"].replace("Глава: ", "").replace("Дир.: ", "").replace("Предс.: ", "")
-            f.write(f"| {i} | {name} | {r['district']} | {r['phone']} | {r.get('product_llm') or '—'} "
-                    f"| {r.get('volume_llm') or '—'} | {r.get('ready_date_llm') or '—'} "
-                    f"| {r.get('price_llm') or '—'} | {r.get('notes_llm') or '—'} |\n")
+            f.write(
+                f"| {i} | {name} | {r['district']} | {r['phone']} | {r.get('product_llm') or '—'} "
+                f"| {r.get('volume_llm') or '—'} | {r.get('ready_date_llm') or '—'} "
+                f"| {r.get('price_llm') or '—'} | {r.get('notes_llm') or '—'} |\n"
+            )
         f.write("\n## Все остальные\n\n")
         f.write("| # | Имя | Район | Телефон | Статус | Культура | Объём |\n")
         f.write("|---|------|-------|---------|--------|----------|--------|\n")
@@ -124,8 +132,10 @@ def main():
                 continue
             n += 1
             name = r["name"].replace("Глава: ", "").replace("Дир.: ", "").replace("Предс.: ", "")
-            f.write(f"| {n} | {name} | {r['district']} | {r['phone']} | {r.get('status_llm') or '—'} "
-                    f"| {r.get('product_llm') or '—'} | {r.get('volume_llm') or '—'} |\n")
+            f.write(
+                f"| {n} | {name} | {r['district']} | {r['phone']} | {r.get('status_llm') or '—'} "
+                f"| {r.get('product_llm') or '—'} | {r.get('volume_llm') or '—'} |\n"
+            )
     print(f"Saved → {OUT_JSON}\nSaved table → {OUT_MD}", file=sys.stderr)
 
 

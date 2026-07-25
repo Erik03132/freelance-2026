@@ -1,8 +1,7 @@
 """Tests for CRM enrichment."""
 
 import pytest
-
-from levitan.crm_enricher import CrmEnricher, MockCrmProvider, ContactInfo
+from levitan.crm_enricher import ContactInfo, CrmEnricher, MockCrmProvider
 
 
 @pytest.fixture

@@ -57,7 +57,9 @@ def test_soul_context_includes_constitution(tmp_soul):
 
 def test_evolve_folds_lessons_into_auto_zone(tmp_soul):
     soul.ensure_soul("rembrandt", "Рембрандт", "Designer")
-    changed = soul.evolve_soul("rembrandt", lessons="- Users favor framework=astro\n- Acceptance 80%")
+    changed = soul.evolve_soul(
+        "rembrandt", lessons="- Users favor framework=astro\n- Acceptance 80%"
+    )
     assert changed is True
     text = soul.load_soul("rembrandt")
     assert "framework=astro" in text

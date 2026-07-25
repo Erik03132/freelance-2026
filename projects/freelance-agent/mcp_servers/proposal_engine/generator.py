@@ -2,9 +2,9 @@
 Генератор отклика на фриланс-задачу: 30% работы + дорожная карта.
 """
 
-from pathlib import Path
 import os
 import sys
+from pathlib import Path
 
 ROOT = Path(__file__).parent.parent.parent
 PROMPTS = ROOT / "prompts"

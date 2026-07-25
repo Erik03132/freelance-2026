@@ -1,4 +1,5 @@
-from rembrandt import generate_component, COMPONENT_TYPES, INCUBIRD_DEFAULT
+from rembrandt import COMPONENT_TYPES, INCUBIRD_DEFAULT, generate_component
+
 
 def test_component_types():
     assert "button" in COMPONENT_TYPES
@@ -7,13 +8,20 @@ def test_component_types():
     assert "nav" in COMPONENT_TYPES
     assert len(COMPONENT_TYPES) >= 10
 
+
 def test_generate_component_no_key(monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "")
     result = generate_component("button", "Primary CTA button", INCUBIRD_DEFAULT)
     assert result is not None
     assert "button" in result.lower()
 
+
 def test_generate_component_returns_html():
-    result = generate_component("card", "Feature card with icon, title, description", INCUBIRD_DEFAULT, api_key="")
+    result = generate_component(
+        "card",
+        "Feature card with icon, title, description",
+        INCUBIRD_DEFAULT,
+        api_key="",
+    )
     assert result is not None
     assert isinstance(result, str)

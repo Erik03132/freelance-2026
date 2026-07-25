@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Build a vertical 1080x1920 MP4 slideshow for Maria's 10th birthday.
 
@@ -14,37 +13,35 @@ Parameters (confirmed by user):
 """
 
 import os
-import re
 import shutil
 import subprocess
-import sys
 import tempfile
-from pathlib import Path
 from datetime import datetime
-
-
+from pathlib import Path
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
-SOURCE_DIR  = Path("/Users/igorvasin/Documents/Маша/download")
-MUSIC_SRC   = Path("/Users/igorvasin/Downloads/Giorgia Fumanti - Ave Maria.mp3")
+SOURCE_DIR = Path("/Users/igorvasin/Documents/Маша/download")
+MUSIC_SRC = Path("/Users/igorvasin/Downloads/Giorgia Fumanti - Ave Maria.mp3")
 PROJECT_DIR = Path("/Users/igorvasin/freelance-2026/my-project/media/masha")
-ASSETS_DIR  = PROJECT_DIR / "assets"
-CLIPS_DIR   = PROJECT_DIR / "clips"
-MUSIC_DIR   = PROJECT_DIR / "music"
-OUT_FILE    = Path("/Users/igorvasin/Desktop/maria_10_ave_maria_1080x1920.mp4")
+ASSETS_DIR = PROJECT_DIR / "assets"
+CLIPS_DIR = PROJECT_DIR / "clips"
+MUSIC_DIR = PROJECT_DIR / "music"
+OUT_FILE = Path("/Users/igorvasin/Desktop/maria_10_ave_maria_1080x1920.mp4")
 
 # ─── Parameters ───────────────────────────────────────────────────────────────
-TARGET_W        = 1080
-TARGET_H        = 1920
-FPS             = 30
-BPM             = 70.0
+TARGET_W = 1080
+TARGET_H = 1920
+FPS = 30
+BPM = 70.0
 BEATS_PER_SLIDE = 4
-FADE_S          = 0.6
-TARGET_TOTAL_S  = None  # will be read from music
+FADE_S = 0.6
+TARGET_TOTAL_S = None  # will be read from music
+
 
 # ─── Logging helpers ──────────────────────────────────────────────────────────
 def log(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+
 
 def run(cmd, **kwargs):
     """Run a shell command and print it."""
@@ -52,11 +49,14 @@ def run(cmd, **kwargs):
         print("$ " + " ".join(str(c) for c in cmd), flush=True)
     else:
         print("$ " + cmd, flush=True)
-    result = subprocess.run(cmd, shell=isinstance(cmd, str), capture_output=True, text=True, **kwargs)
+    result = subprocess.run(
+        cmd, shell=isinstance(cmd, str), capture_output=True, text=True, **kwargs
+    )
     if result.returncode != 0:
         print(f"ERROR: {result.stderr}", flush=True)
         raise RuntimeError(f"Command failed: {cmd}")
     return result
+
 
 def run_with_timeout(cmd, timeout_sec=30, **kwargs):
     """Run command with timeout; return (ok, result_or_None)."""
@@ -66,25 +66,43 @@ def run_with_timeout(cmd, timeout_sec=30, **kwargs):
         print("$ " + cmd, flush=True)
     try:
         result = subprocess.run(
-            cmd, shell=isinstance(cmd, str), capture_output=True, text=True,
-            timeout=timeout_sec, **kwargs
+            cmd,
+            shell=isinstance(cmd, str),
+            capture_output=True,
+            text=True,
+            timeout=timeout_sec,
+            **kwargs,
         )
         return result.returncode == 0, result
     except subprocess.TimeoutExpired as e:
-        log(f"TIMEOUT after {timeout_sec}s: {cmd if isinstance(cmd, str) else ' '.join(str(c) for c in cmd)}")
+        log(
+            f"TIMEOUT after {timeout_sec}s: {cmd if isinstance(cmd, str) else ' '.join(str(c) for c in cmd)}"
+        )
         return False, e
     except Exception as e:
         log(f"ERROR running command: {e}")
         return False, e
 
+
 # ─── Music duration ───────────────────────────────────────────────────────────
 def get_music_duration(path):
     result = subprocess.run(
-        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-         "-of", "default=noprint_wrappers=1:nokey=1", str(path)],
-        capture_output=True, text=True, check=True
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            str(path),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
     )
     return float(result.stdout.strip())
+
 
 # ─── Asset preparation ────────────────────────────────────────────────────────
 def is_file_local(path):
@@ -92,17 +110,22 @@ def is_file_local(path):
     try:
         result = subprocess.run(
             ["stat", "-f", "%b", str(path)],
-            capture_output=True, text=True, timeout=5, check=True
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=True,
         )
         blocks = int(result.stdout.strip())
         return blocks > 0
     except Exception:
         return False
 
+
 def prepare_dirs():
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
     CLIPS_DIR.mkdir(parents=True, exist_ok=True)
     MUSIC_DIR.mkdir(parents=True, exist_ok=True)
+
 
 def copy_music():
     dest = MUSIC_DIR / "ave_maria.mp3"
@@ -111,27 +134,47 @@ def copy_music():
         log(f"Music copied -> {dest}")
     return dest
 
+
 def convert_heic_to_jpg(src, dst):
     ok, _ = run_with_timeout(
-        ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "90",
-         str(src), "--out", str(dst)],
-        timeout_sec=60
+        [
+            "sips",
+            "-s",
+            "format",
+            "jpeg",
+            "-s",
+            "formatOptions",
+            "90",
+            str(src),
+            "--out",
+            str(dst),
+        ],
+        timeout_sec=60,
     )
     return ok
+
 
 def convert_image_to_jpg(src, dst):
     """Normalize JPG/PNG/DNG to JPG using ffmpeg (with timeout)."""
     ok, res = run_with_timeout(
-        ["ffmpeg", "-y", "-i", str(src),
-         "-vf", "scale='min(2560,iw)':-1",
-         "-q:v", "2",
-         str(dst)],
-        timeout_sec=30
+        [
+            "ffmpeg",
+            "-y",
+            "-i",
+            str(src),
+            "-vf",
+            "scale='min(2560,iw)':-1",
+            "-q:v",
+            "2",
+            str(dst),
+        ],
+        timeout_sec=30,
     )
     if not ok:
-        err = res.stderr[-200:] if hasattr(res, 'stderr') and res.stderr else ""
+        err = res.stderr[-200:] if hasattr(res, "stderr") and res.stderr else ""
         log(f"  ffmpeg conversion failed: {err}")
     return ok
+
 
 def collect_assets():
     """Convert/copy all source images and videos to assets/."""
@@ -189,24 +232,44 @@ def collect_assets():
 
             # Convert MOV to normalized vertical MP4 (center crop, 30fps)
             ok, res = run_with_timeout(
-                ["ffmpeg", "-y", "-i", str(f),
-                 "-vf", f"scale='if(gte(iw/ih,{TARGET_W}/{TARGET_H}),-1,{TARGET_W})':'if(gte(iw/ih,{TARGET_W}/{TARGET_H}),{TARGET_H},-1)',crop={TARGET_W}:{TARGET_H}",
-                 "-c:v", "libx264", "-preset", "fast", "-crf", "18",
-                 "-r", str(FPS), "-pix_fmt", "yuv420p", "-an",
-                 str(out_path)],
-                timeout_sec=120
+                [
+                    "ffmpeg",
+                    "-y",
+                    "-i",
+                    str(f),
+                    "-vf",
+                    f"scale='if(gte(iw/ih,{TARGET_W}/{TARGET_H}),-1,{TARGET_W})':'if(gte(iw/ih,{TARGET_W}/{TARGET_H}),{TARGET_H},-1)',crop={TARGET_W}:{TARGET_H}",
+                    "-c:v",
+                    "libx264",
+                    "-preset",
+                    "fast",
+                    "-crf",
+                    "18",
+                    "-r",
+                    str(FPS),
+                    "-pix_fmt",
+                    "yuv420p",
+                    "-an",
+                    str(out_path),
+                ],
+                timeout_sec=120,
             )
             if ok:
                 log(f"  MOV -> MP4: {f.name}")
                 video_assets.append(out_path)
                 counter_vid += 1
             else:
-                err = res.stderr.strip()[:200] if hasattr(res, 'stderr') and res.stderr else "timeout/error"
+                err = (
+                    res.stderr.strip()[:200]
+                    if hasattr(res, "stderr") and res.stderr
+                    else "timeout/error"
+                )
                 log(f"  FAILED MOV: {f.name}: {err}")
 
     log(f"Total image assets: {len(image_assets)}")
     log(f"Total video assets: {len(video_assets)}")
     return image_assets, video_assets
+
 
 # ─── Quality scoring for images ───────────────────────────────────────────────
 def image_quality_score(path):
@@ -215,12 +278,22 @@ def image_quality_score(path):
     tmp.close()
     try:
         ok, res = run_with_timeout(
-            ["ffmpeg", "-y", "-i", str(path),
-             "-vf", "scale=512:512:force_original_aspect_ratio=decrease,format=gray",
-             "-frames:v", "1",
-             "-f", "rawvideo", "-pix_fmt", "gray",
-             tmp.name],
-            timeout_sec=20
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                str(path),
+                "-vf",
+                "scale=512:512:force_original_aspect_ratio=decrease,format=gray",
+                "-frames:v",
+                "1",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "gray",
+                tmp.name,
+            ],
+            timeout_sec=20,
         )
         if not ok:
             return 0.0
@@ -236,12 +309,22 @@ def image_quality_score(path):
         variance = sum((x - mean) ** 2 for x in pixels) / n
         # Sobel-like sharpness: variance of edges
         edges_ok, _ = run_with_timeout(
-            ["ffmpeg", "-y", "-i", str(path),
-             "-vf", "scale=512:512:force_original_aspect_ratio=decrease,format=gray,edgedetect=low=0.1:high=0.4",
-             "-frames:v", "1",
-             "-f", "rawvideo", "-pix_fmt", "gray",
-             tmp.name],
-            timeout_sec=20
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                str(path),
+                "-vf",
+                "scale=512:512:force_original_aspect_ratio=decrease,format=gray,edgedetect=low=0.1:high=0.4",
+                "-frames:v",
+                "1",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "gray",
+                tmp.name,
+            ],
+            timeout_sec=20,
         )
         if edges_ok:
             with open(tmp.name, "rb") as f:
@@ -264,6 +347,7 @@ def image_quality_score(path):
             os.unlink(tmp.name)
         except Exception:
             pass
+
 
 def select_best_images(image_assets, target_count):
     """Select best images while preserving chronological order."""
@@ -288,6 +372,7 @@ def select_best_images(image_assets, target_count):
     selected = [good[int(i * step)] for i in range(target_count)]
     log(f"Selected {len(selected)} best images (from {len(image_assets)} total)")
     return selected
+
 
 # ─── Build ordered asset list ─────────────────────────────────────────────────
 def build_timeline(image_assets, video_assets, total_needed):
@@ -315,6 +400,7 @@ def build_timeline(image_assets, video_assets, total_needed):
     log(f"Timeline length: {len(all_assets)} assets")
     return all_assets
 
+
 # ─── Generate individual slide clips ──────────────────────────────────────────
 def generate_clip(kind, src_path, idx, duration):
     out_path = CLIPS_DIR / f"clip_{idx:03d}.mp4"
@@ -339,12 +425,28 @@ def generate_clip(kind, src_path, idx, duration):
             f"colorchannelmixer=rr=1.04:rg=0.02:rb=-0.02:gr=-0.01:gg=1.02:gb=0.01"
         )
         cmd = [
-            "ffmpeg", "-y", "-loop", "1", "-i", str(src_path),
-            "-vf", vf,
-            "-t", str(duration),
-            "-r", str(FPS), "-c:v", "libx264", "-preset", "fast", "-crf", "18",
-            "-pix_fmt", "yuv420p", "-an",
-            str(out_path)
+            "ffmpeg",
+            "-y",
+            "-loop",
+            "1",
+            "-i",
+            str(src_path),
+            "-vf",
+            vf,
+            "-t",
+            str(duration),
+            "-r",
+            str(FPS),
+            "-c:v",
+            "libx264",
+            "-preset",
+            "fast",
+            "-crf",
+            "18",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            str(out_path),
         ]
     else:  # video
         vf = (
@@ -354,20 +456,37 @@ def generate_clip(kind, src_path, idx, duration):
             f"colorchannelmixer=rr=1.04:rg=0.02:rb=-0.02:gr=-0.01:gg=1.02:gb=0.01"
         )
         cmd = [
-            "ffmpeg", "-y", "-stream_loop", "-1", "-i", str(src_path),
-            "-vf", vf,
-            "-t", str(duration),
-            "-r", str(FPS), "-c:v", "libx264", "-preset", "fast", "-crf", "18",
-            "-pix_fmt", "yuv420p", "-an",
-            str(out_path)
+            "ffmpeg",
+            "-y",
+            "-stream_loop",
+            "-1",
+            "-i",
+            str(src_path),
+            "-vf",
+            vf,
+            "-t",
+            str(duration),
+            "-r",
+            str(FPS),
+            "-c:v",
+            "libx264",
+            "-preset",
+            "fast",
+            "-crf",
+            "18",
+            "-pix_fmt",
+            "yuv420p",
+            "-an",
+            str(out_path),
         ]
 
     ok, res = run_with_timeout(cmd, timeout_sec=60)
     if not ok:
-        err = res.stderr[:500] if hasattr(res, 'stderr') and res.stderr else str(res)
+        err = res.stderr[:500] if hasattr(res, "stderr") and res.stderr else str(res)
         log(f"Failed to generate clip {idx}: {err}")
         raise RuntimeError(f"Clip generation failed for {src_path}")
     return out_path
+
 
 # ─── Build final video with xfade ─────────────────────────────────────────────
 def build_final_video(clip_paths, music_path, out_path):
@@ -403,24 +522,42 @@ def build_final_video(clip_paths, music_path, out_path):
     # Build per-clip durations via setpts/trim? ffmpeg xfade needs inputs long enough.
     # We'll create clips with correct durations already, so just concat.
 
-    cmd = ["ffmpeg", "-y"] + inputs + [
-        "-filter_complex", filter_complex,
-        "-map", "[v]",
-        "-map", f"{n}:a",
-        "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-        "-c:a", "aac", "-b:a", "192k",
-        "-r", str(FPS),
-        "-pix_fmt", "yuv420p",
-        "-shortest",
-        str(out_path)
-    ]
+    cmd = (
+        ["ffmpeg", "-y"]
+        + inputs
+        + [
+            "-filter_complex",
+            filter_complex,
+            "-map",
+            "[v]",
+            "-map",
+            f"{n}:a",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "medium",
+            "-crf",
+            "18",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "192k",
+            "-r",
+            str(FPS),
+            "-pix_fmt",
+            "yuv420p",
+            "-shortest",
+            str(out_path),
+        ]
+    )
 
     ok, res = run_with_timeout(cmd, timeout_sec=1200)
     if not ok:
-        err = res.stderr[-1000:] if hasattr(res, 'stderr') and res.stderr else str(res)
+        err = res.stderr[-1000:] if hasattr(res, "stderr") and res.stderr else str(res)
         log(f"Final render failed: {err}")
         raise RuntimeError("Final render failed")
     log(f"Final video saved: {out_path}")
+
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 def main():
@@ -467,6 +604,7 @@ def main():
     out_duration = get_music_duration(OUT_FILE)  # ffprobe works for video too
     size_mb = OUT_FILE.stat().st_size / (1024 * 1024)
     log(f"Done! Duration: {out_duration:.2f}s, Size: {size_mb:.1f} MB")
+
 
 if __name__ == "__main__":
     main()

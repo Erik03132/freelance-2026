@@ -18,16 +18,23 @@ import re
 import sqlite3
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 # --- Конфигурация дедупликации ------------------------------------------------
 
 # Файлы/пути, которые НЕЛЬЗЯ дедуплицировать (volatile / real-time / tiny).
 # "Где можно урезать расход, а где это нежелательно."
 VOLATILE_GLOBS = [
-    r"\.log$", r"\.lock$", r"/tmp/", r"/dev/", r"\.pid$",
-    r"\.sqlite$", r"\.db$", r"traces\.json$", r"smart_faq_counter\.json$",
-    r"run\.log$", r"voice_cached_responses\.json$",
+    r"\.log$",
+    r"\.lock$",
+    r"/tmp/",
+    r"/dev/",
+    r"\.pid$",
+    r"\.sqlite$",
+    r"\.db$",
+    r"traces\.json$",
+    r"smart_faq_counter\.json$",
+    r"run\.log$",
+    r"voice_cached_responses\.json$",
 ]
 VOLATILE_RE = re.compile("|".join(VOLATILE_GLOBS))
 
@@ -46,18 +53,18 @@ def estimate_tokens(text: str) -> int:
 class ReadResult:
     content: str
     ref: str
-    deduped: bool          # True = отдали ссылку, контент НЕ передавали
+    deduped: bool  # True = отдали ссылку, контент НЕ передавали
     bytes_sent: int
     ref_count: int
-    reason: str = ""       # почему deduped / почему нет
+    reason: str = ""  # почему deduped / почему нет
 
 
 @dataclass
 class SessionStats:
     reads: int = 0
     deduped: int = 0
-    bytes_raw: int = 0          # сколько байт ушло бы без дедупа
-    bytes_sent: int = 0         # сколько реально передали
+    bytes_raw: int = 0  # сколько байт ушло бы без дедупа
+    bytes_sent: int = 0  # сколько реально передали
     by_path: dict[str, int] = field(default_factory=dict)
 
     @property
@@ -83,16 +90,16 @@ class SessionStats:
             "bytes_saved": self.bytes_saved,
             "pct_saved": round(self.pct_saved, 1),
             "est_tokens_saved": self.est_tokens_saved,
-            "top_saved_paths": sorted(
-                self.by_path.items(), key=lambda kv: kv[1], reverse=True
-            )[:10],
+            "top_saved_paths": sorted(self.by_path.items(), key=lambda kv: kv[1], reverse=True)[
+                :10
+            ],
         }
 
 
 class DedupEngine:
     """Content-addressed cache чтений в рамках сессии."""
 
-    def __init__(self, session_id: str, db_path: Optional[str] = None):
+    def __init__(self, session_id: str, db_path: str | None = None):
         self.session_id = session_id
         if db_path is None:
             base = os.environ.get("GEEKNEURAL_HOME", os.path.expanduser("~/.geekneural"))
@@ -128,13 +135,13 @@ class DedupEngine:
     def _load_stats(self) -> SessionStats:
         cur = self.conn.execute(
             "SELECT reads, deduped, bytes_raw, bytes_sent, by_path "
-            "FROM stats WHERE session_id=?", (self.session_id,)
+            "FROM stats WHERE session_id=?",
+            (self.session_id,),
         )
         row = cur.fetchone()
         if not row:
             return SessionStats()
-        s = SessionStats(reads=row[0], deduped=row[1], bytes_raw=row[2],
-                         bytes_sent=row[3])
+        s = SessionStats(reads=row[0], deduped=row[1], bytes_raw=row[2], bytes_sent=row[3])
         s.by_path = json.loads(row[4]) if row[4] else {}
         return s
 
@@ -142,13 +149,18 @@ class DedupEngine:
         self.conn.execute(
             "INSERT OR REPLACE INTO stats(session_id, reads, deduped, "
             "bytes_raw, bytes_sent, by_path) VALUES(?,?,?,?,?,?)",
-            (self.session_id, self.stats.reads, self.stats.deduped,
-             self.stats.bytes_raw, self.stats.bytes_sent,
-             json.dumps(self.stats.by_path, ensure_ascii=False)),
+            (
+                self.session_id,
+                self.stats.reads,
+                self.stats.deduped,
+                self.stats.bytes_raw,
+                self.stats.bytes_sent,
+                json.dumps(self.stats.by_path, ensure_ascii=False),
+            ),
         )
         self.conn.commit()
 
-    def read(self, path: str, force: bool = False, label: Optional[str] = None) -> ReadResult:
+    def read(self, path: str, force: bool = False, label: str | None = None) -> ReadResult:
         """Прочитать файл с дедупликацией.
 
         При повторном чтении того же содержимого в сессии возвращает короткую
@@ -157,12 +169,15 @@ class DedupEngine:
         self.stats.reads += 1
         label = label or path
         try:
-            with open(path, "r", encoding="utf-8", errors="replace") as fh:
+            with open(path, encoding="utf-8", errors="replace") as fh:
                 content = fh.read()
         except (OSError, UnicodeDecodeError) as exc:
             return ReadResult(
                 content=f"[GeekNeural] cannot read {path}: {exc}",
-                ref="", deduped=False, bytes_sent=0, ref_count=0,
+                ref="",
+                deduped=False,
+                bytes_sent=0,
+                ref_count=0,
                 reason="read_error",
             )
 
@@ -188,8 +203,10 @@ class DedupEngine:
             self._save_stats()
             return ReadResult(
                 content=f"[GeekNeural] ↺ уже в контексте ({ref}, {raw_bytes}B). "
-                        f"Повторная передача пропущена.",
-                ref=ref, deduped=True, bytes_sent=len(ref),
+                f"Повторная передача пропущена.",
+                ref=ref,
+                deduped=True,
+                bytes_sent=len(ref),
                 ref_count=row[0] + 1,
                 reason="cache_hit",
             )
@@ -199,8 +216,11 @@ class DedupEngine:
         self.stats.bytes_sent += raw_bytes
         self._save_stats()
         return ReadResult(
-            content=content, ref=ref, deduped=False,
-            bytes_sent=raw_bytes, ref_count=1,
+            content=content,
+            ref=ref,
+            deduped=False,
+            bytes_sent=raw_bytes,
+            ref_count=1,
             reason="cache_miss" if can_dedup else ("forced" if force else "volatile_or_tiny"),
         )
 
@@ -225,27 +245,30 @@ class DedupEngine:
             self._save_stats()
             return ReadResult(
                 content=f"[GeekNeural] ↺ дубликат контекста ({ref}, {raw_bytes}B) пропущен.",
-                ref=ref, deduped=True, bytes_sent=len(ref),
-                ref_count=row[0] + 1, reason="cache_hit",
+                ref=ref,
+                deduped=True,
+                bytes_sent=len(ref),
+                ref_count=row[0] + 1,
+                reason="cache_hit",
             )
         self._store(chash, key, raw_bytes)
         self.stats.bytes_sent += raw_bytes
         self._save_stats()
         return ReadResult(
-            content=text, ref=ref, deduped=False, bytes_sent=raw_bytes,
-            ref_count=1, reason="cache_miss",
+            content=text,
+            ref=ref,
+            deduped=False,
+            bytes_sent=raw_bytes,
+            ref_count=1,
+            reason="cache_miss",
         )
 
     def stats_dict(self) -> dict:
         return self.stats.to_dict()
 
     def clear_session(self) -> int:
-        cur = self.conn.execute(
-            "DELETE FROM seen WHERE session_id=?", (self.session_id,)
-        )
-        self.conn.execute(
-            "DELETE FROM stats WHERE session_id=?", (self.session_id,)
-        )
+        cur = self.conn.execute("DELETE FROM seen WHERE session_id=?", (self.session_id,))
+        self.conn.execute("DELETE FROM stats WHERE session_id=?", (self.session_id,))
         self.conn.commit()
         n = cur.rowcount
         self.stats = SessionStats()

@@ -15,23 +15,23 @@
   6. Монтирует слайдшоу с кроссфейдами под удары музыки
 """
 
-import sys
-import os
-import subprocess
 import json
 import math
+import os
+import subprocess
+import sys
 from pathlib import Path
-from collections import defaultdict
 
-import numpy as np
-from PIL import Image, ExifTags
 import face_recognition
+import numpy as np
+from PIL import ExifTags, Image
 
-SUPPORTED_IMAGES = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp'}
+SUPPORTED_IMAGES = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
 
 # ============================================================
 #  Шаг 1: сбор фото
 # ============================================================
+
 
 def collect_photos(folder: str) -> list[Path]:
     photos = []
@@ -45,6 +45,7 @@ def collect_photos(folder: str) -> list[Path]:
 #  Шаг 2: EXIF — дата съёмки
 # ============================================================
 
+
 def get_exif_date(path: Path) -> float | None:
     """Возвращает timestamp из EXIF или None."""
     try:
@@ -56,6 +57,7 @@ def get_exif_date(path: Path) -> float | None:
             tag_name = ExifTags.TAGS.get(tag_id, "")
             if tag_name in ("DateTimeOriginal", "DateTime", "DateTimeDigitized"):
                 from datetime import datetime
+
                 return datetime.strptime(value, "%Y:%m:%d %H:%M:%S").timestamp()
     except Exception:
         return None
@@ -66,9 +68,11 @@ def get_exif_date(path: Path) -> float | None:
 #  Шаг 3: качество фото
 # ============================================================
 
+
 def score_sharpness(img: np.ndarray) -> float:
     """Оценка резкости через дисперсию Лапласиана."""
     import cv2
+
     gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     laplacian = cv2.Laplacian(gray, cv2.CV_64F)
     return float(laplacian.var())
@@ -102,7 +106,7 @@ def score_face_quality(face_locations: list, img_shape: tuple) -> float:
         # Центрирование лица
         face_cx = (left + right) / 2
         face_cy = (top + bottom) / 2
-        dist = math.sqrt((face_cx - center_x)**2 + (face_cy - center_y)**2)
+        dist = math.sqrt((face_cx - center_x) ** 2 + (face_cy - center_y) ** 2)
         max_dist = math.sqrt(center_x**2 + center_y**2)
         centering_score = 1.0 - dist / max_dist
         combined = area_score * 0.6 + centering_score * 0.4
@@ -113,6 +117,7 @@ def score_face_quality(face_locations: list, img_shape: tuple) -> float:
 # ============================================================
 #  Шаг 4: поиск человека
 # ============================================================
+
 
 def encode_reference_face(ref_path: str) -> list:
     """Кодирует ВСЕ лица с референсного фото. Возвращает список кодировок."""
@@ -188,14 +193,16 @@ def find_person_photos(
 
         total_score = sharp * 0.35 + bright * 0.15 + face_q * 0.50
 
-        results.append({
-            "path": path,
-            "timestamp": ts,
-            "sharpness": sharp,
-            "brightness": bright,
-            "face_quality": face_q,
-            "total_score": total_score,
-        })
+        results.append(
+            {
+                "path": path,
+                "timestamp": ts,
+                "sharpness": sharp,
+                "brightness": bright,
+                "face_quality": face_q,
+                "total_score": total_score,
+            }
+        )
 
     print()
     if skipped_solo:
@@ -208,6 +215,7 @@ def find_person_photos(
 # ============================================================
 #  Шаг 5: отбор лучших и сортировка
 # ============================================================
+
 
 def select_and_sort(
     found: list[dict],
@@ -228,7 +236,7 @@ def select_and_sort(
     if len(good) < beat_count:
         # Снижаем порог или берём всё что есть
         good = sorted(found, key=lambda r: r["total_score"], reverse=True)
-        good = good[:max(beat_count, len(good))]
+        good = good[: max(beat_count, len(good))]
 
     # Разделяем: с датой и без
     with_date = [r for r in good if r["timestamp"] is not None]
@@ -253,12 +261,12 @@ def select_and_sort(
     # Отбираем: сначала хронология, потом добивка по качеству
     selected = with_date[:beat_count]
     if len(selected) < beat_count:
-        selected += without_date[:beat_count - len(selected)]
+        selected += without_date[: beat_count - len(selected)]
 
     # Если всё ещё мало — циклически повторяем (равномерно)
     if len(selected) < beat_count and len(selected) > 0:
         while len(selected) < beat_count:
-            selected += selected[:beat_count - len(selected)]
+            selected += selected[: beat_count - len(selected)]
 
     return [r["path"] for r in selected[:beat_count]]
 
@@ -267,12 +275,14 @@ def select_and_sort(
 #  Шаг 6: аудиоанализ (биты)
 # ============================================================
 
+
 def detect_beats(audio_path: str, max_beats: int = 40) -> list[float]:
     import librosa
+
     print("Анализ битов...")
     y, sr = librosa.load(audio_path)
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
-    tempo_val = float(tempo.item()) if hasattr(tempo, 'item') else float(tempo)
+    tempo_val = float(tempo.item()) if hasattr(tempo, "item") else float(tempo)
     beat_times = librosa.frames_to_time(beat_frames, sr=sr).tolist()
     print(f"  Темп: {tempo_val:.1f} BPM,  битов: {len(beat_times)}")
 
@@ -286,10 +296,12 @@ def detect_beats(audio_path: str, max_beats: int = 40) -> list[float]:
 
 
 def audio_duration(audio_path: str) -> float:
-    result = subprocess.run([
-        "ffprobe", "-v", "quiet", "-print_format", "json",
-        "-show_format", audio_path
-    ], capture_output=True, text=True, check=True)
+    result = subprocess.run(
+        ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", audio_path],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
     info = json.loads(result.stdout)
     return float(info["format"]["duration"])
 
@@ -300,15 +312,15 @@ def audio_duration(audio_path: str) -> float:
 
 # Набор переходов (xfade): мягкие, без перебора
 TRANSITIONS = [
-    "fade",       # основной — мягкий
-    "fade",       # снова fade (чаще всего)
-    "dissolve",   # растворение
-    "fade",       # fade
+    "fade",  # основной — мягкий
+    "fade",  # снова fade (чаще всего)
+    "dissolve",  # растворение
+    "fade",  # fade
     "fadewhite",  # воздушная вспышка
-    "fade",       # fade
+    "fade",  # fade
     "fadeblack",  # драматичная пауза
-    "fade",       # fade
-    "circleopen", # мягкое открытие кругом
+    "fade",  # fade
+    "circleopen",  # мягкое открытие кругом
 ]
 
 
@@ -349,11 +361,13 @@ def build_slideshow(
     segments = []
     for i, beat in enumerate(beat_times):
         next_beat = beat_times[i + 1] if i + 1 < len(beat_times) else total_duration
-        segments.append({
-            "photo": photo_pool[i],
-            "start": max(0, beat - fade),
-            "duration": next_beat - beat + fade,
-        })
+        segments.append(
+            {
+                "photo": photo_pool[i],
+                "start": max(0, beat - fade),
+                "duration": next_beat - beat + fade,
+            }
+        )
 
     inputs = []
     for seg in segments:
@@ -399,20 +413,32 @@ def build_slideshow(
     filter_complex = "; ".join(filter_parts)
 
     cmd = [
-        "ffmpeg", "-y",
+        "ffmpeg",
+        "-y",
         *inputs,
-        "-i", audio_path,
-        "-filter_complex", filter_complex,
-        "-map", f"[{prev}]",
-        "-map", f"{n_segs}:a",
-        "-c:v", "libx264",
-        "-preset", "medium",
-        "-crf", "23",
-        "-pix_fmt", "yuv420p",
-        "-c:a", "aac",
-        "-b:a", "192k",
+        "-i",
+        audio_path,
+        "-filter_complex",
+        filter_complex,
+        "-map",
+        f"[{prev}]",
+        "-map",
+        f"{n_segs}:a",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "23",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "192k",
         "-shortest",
-        "-movflags", "+faststart",
+        "-movflags",
+        "+faststart",
         output,
     ]
 
@@ -424,6 +450,7 @@ def build_slideshow(
 # ============================================================
 #  main
 # ============================================================
+
 
 def main():
     if len(sys.argv) < 4:
@@ -464,7 +491,11 @@ def main():
     audio_path = sys.argv[3]
     output = sys.argv[4] if len(sys.argv) > 4 else "smart_slideshow.mp4"
 
-    for path, label in [(photo_dir, "Папка"), (ref_photo, "Референс"), (audio_path, "Аудио")]:
+    for path, label in [
+        (photo_dir, "Папка"),
+        (ref_photo, "Референс"),
+        (audio_path, "Аудио"),
+    ]:
         if not os.path.exists(path):
             print(f"{label} не найден(о): {path}")
             sys.exit(1)

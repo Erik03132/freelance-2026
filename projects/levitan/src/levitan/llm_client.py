@@ -16,7 +16,7 @@ class LLMClient:
         self,
         api_key: str,
         model: str = "deepseek/deepseek-chat-v3-0324",
-        fallback_model: str = "qwen/qwen-2.5-7b-instruct"
+        fallback_model: str = "qwen/qwen-2.5-7b-instruct",
     ):
         self.api_key = api_key
         self.model = model
@@ -29,7 +29,7 @@ class LLMClient:
         model: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 500,
-        use_fallback: bool = True
+        use_fallback: bool = True,
     ) -> str:
         """
         Генерация ответа LLM.
@@ -52,14 +52,14 @@ class LLMClient:
                 headers={
                     "Authorization": f"Bearer {self.api_key}",
                     "HTTP-Referer": "https://levitan.app",
-                    "X-Title": "Levitan Voice Agent"
+                    "X-Title": "Levitan Voice Agent",
                 },
                 json={
                     "model": model_to_use,
                     "messages": messages,
                     "temperature": temperature,
-                    "max_tokens": max_tokens
-                }
+                    "max_tokens": max_tokens,
+                },
             )
 
             result = response.json()
@@ -81,10 +81,7 @@ class LLMClient:
             return ""
 
     async def _fallback_generate(
-        self,
-        messages: list[dict],
-        temperature: float,
-        max_tokens: int
+        self, messages: list[dict], temperature: float, max_tokens: int
     ) -> str:
         """Генерация через fallback модель."""
         try:
@@ -93,7 +90,7 @@ class LLMClient:
                 model=self.fallback_model,
                 temperature=temperature,
                 max_tokens=max_tokens,
-                use_fallback=False
+                use_fallback=False,
             )
         except Exception as e:
             logger.error(f"Fallback LLM generation failed: {e}")
@@ -104,7 +101,7 @@ class LLMClient:
         system_prompt: str,
         user_message: str,
         context: str = "",
-        recent_history: list[dict] = None
+        recent_history: list[dict] = None,
     ) -> str:
         """
         Генерация ответа для диалога.
@@ -122,10 +119,7 @@ class LLMClient:
 
         # Добавляем контекст
         if context:
-            messages.append({
-                "role": "system",
-                "content": f"Дополнительная информация:\n{context}"
-            })
+            messages.append({"role": "system", "content": f"Дополнительная информация:\n{context}"})
 
         # Добавляем историю
         if recent_history:
@@ -137,11 +131,7 @@ class LLMClient:
 
         return await self.generate(messages, temperature=0.7, max_tokens=300)
 
-    async def extract_lead_info(
-        self,
-        transcript: str,
-        system_prompt: str
-    ) -> dict:
+    async def extract_lead_info(self, transcript: str, system_prompt: str) -> dict:
         """
         Извлечение информации о лиде из транскрипта.
 
@@ -154,13 +144,14 @@ class LLMClient:
         """
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Транскрипт разговора:\n{transcript}"}
+            {"role": "user", "content": f"Транскрипт разговора:\n{transcript}"},
         ]
 
         try:
             response = await self.generate(messages, temperature=0.3, max_tokens=500)
             # Парсим JSON из ответа
             import json
+
             # Пробуем найти JSON в ответе
             start = response.find("{")
             end = response.rfind("}") + 1

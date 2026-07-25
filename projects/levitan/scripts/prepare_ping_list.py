@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Prepare Adygea ping candidate list: not-covered + no_answer (didn't pick up)."""
+
 import csv
 import glob
 import os
 import re
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
 from datetime import datetime
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,7 +41,7 @@ def load_all():
     for dist, fn in files.items():
         with open(os.path.join(BASE, fn), encoding="utf-8") as f:
             for r in csv.DictReader(f):
-                raw = (r.get("Телефоны") or "")
+                raw = r.get("Телефоны") or ""
                 nums = re.findall(r"\d+", raw)
                 if nums:
                     d = norm("".join(nums))
@@ -56,9 +57,11 @@ def load_all():
 
 def load_statuses():
     status = defaultdict(list)
-    for fn in glob.glob(os.path.join(CSV_DIR, "ping_*.csv")) + \
-             glob.glob(os.path.join(CSV_DIR, "_ping*.csv")) + \
-             glob.glob(os.path.join(CSV_DIR, "adygea_grain_*pinged*.csv")):
+    for fn in (
+        glob.glob(os.path.join(CSV_DIR, "ping_*.csv"))
+        + glob.glob(os.path.join(CSV_DIR, "_ping*.csv"))
+        + glob.glob(os.path.join(CSV_DIR, "adygea_grain_*pinged*.csv"))
+    ):
         base = os.path.basename(fn)
         st = base.split("_")[1] if "_" in base else "unknown"
         if st not in ("alive", "no_answer", "dead", "unreachable", "unknown"):
@@ -121,13 +124,19 @@ def main():
         for d in candidates:
             m = all_n[d]
             reason = "never" if d in never else "no_answer"
-            w.writerow({
-                "Название": "", "Описание": m["culture"], "Регион": "Республика Адыгея",
-                "Город": m["city"], "Имя": m["name"],
-                "Телефоны": "7" + d, "ping_reason": reason,
-            })
+            w.writerow(
+                {
+                    "Название": "",
+                    "Описание": m["culture"],
+                    "Регион": "Республика Адыгея",
+                    "Город": m["city"],
+                    "Имя": m["name"],
+                    "Телефоны": "7" + d,
+                    "ping_reason": reason,
+                }
+            )
     print(f"\nГотовый список сохранён → {out}")
-    print(f"Ждём окончания обзвона сотрудника, потом: python3 scripts/ping_adygea_alive.py")
+    print("Ждём окончания обзвона сотрудника, потом: python3 scripts/ping_adygea_alive.py")
 
 
 if __name__ == "__main__":

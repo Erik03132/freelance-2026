@@ -23,19 +23,19 @@ import re
 import shutil
 import subprocess
 import sys
-import time
 import threading
+import time
 import uuid
 import wave
 from datetime import datetime
 from difflib import SequenceMatcher
 from pathlib import Path
-from typing import Optional
 
 import requests
 
 # === CONFIG (из .env) ===
 from dotenv import load_dotenv
+
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 API_KEY = os.getenv("MANGO_VPBX_API_KEY", "")
@@ -50,7 +50,9 @@ MANGO_FROM_NUMBER = os.getenv("MANGO_FROM_NUMBER", "")
 
 # Пути
 BARESIP_AUFILE_PATH = Path(os.getenv("BARESIP_AUFILE_PATH", "/tmp/levitan_play.wav"))
-BARESIP_RECORD_DIR = Path(os.getenv("BARESIP_RECORD_DIR", str(Path.home() / ".baresip" / "recordings")))
+BARESIP_RECORD_DIR = Path(
+    os.getenv("BARESIP_RECORD_DIR", str(Path.home() / ".baresip" / "recordings"))
+)
 GREETING_WAV = Path(os.getenv("LEVITAN_GREETING_WAV", "/tmp/levitan_greeting_lead.wav"))
 TTS_OUTPUT_DIR = Path("/tmp/levitan_tts")
 TTS_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -114,6 +116,8 @@ SYSTEM_PROMPT = """Ты — Анжелла, голосовой менеджер 
 
 # === FAQ CACHE ===
 _faq_cache: dict = {}
+
+
 def load_faq_cache() -> dict:
     global _faq_cache
     try:
@@ -126,6 +130,7 @@ def load_faq_cache() -> dict:
         _faq_cache = {}
     return _faq_cache
 
+
 def _normalize(text: str) -> str:
     """Нормализация текста для fuzzy match."""
     text = text.lower()
@@ -134,7 +139,8 @@ def _normalize(text: str) -> str:
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
-def faq_lookup(transcript: str) -> Optional[str]:
+
+def faq_lookup(transcript: str) -> str | None:
     """Поиск по FAQ-кэшу. Возвращает готовую реплику или None.
 
     Использует fuzzy match (SequenceMatcher) по нормализованному тексту.
@@ -172,6 +178,7 @@ def _mango_sign(payload: dict) -> str:
     j = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
     return hashlib.sha256((API_KEY + j + API_SALT).encode()).hexdigest()
 
+
 def mango_callback(phone: str, command_id: str = "") -> dict:
     if not command_id:
         command_id = f"levitan_{uuid.uuid4().hex[:8]}"
@@ -200,6 +207,7 @@ def mango_callback(phone: str, command_id: str = "") -> dict:
         log.error(f"Callback failed: {e}")
         return {"error": str(e)}
 
+
 def mango_download_recording(recording_id: str, output_path: str) -> bool:
     payload = {"recording_id": recording_id}
     j = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
@@ -208,7 +216,8 @@ def mango_download_recording(recording_id: str, output_path: str) -> bool:
         r = requests.post(
             f"{MANGO_API_BASE}queries/recording/post",
             data={"vpbx_api_key": API_KEY, "json": j, "sign": sign},
-            timeout=60, stream=True,
+            timeout=60,
+            stream=True,
         )
         if r.status_code == 200 and len(r.content) > 1000:
             with open(output_path, "wb") as f:
@@ -221,6 +230,7 @@ def mango_download_recording(recording_id: str, output_path: str) -> bool:
     except Exception as e:
         log.error(f"Recording download error: {e}")
         return False
+
 
 def _norm_phone(num: str) -> str:
     d = re.sub(r"\D", "", num or "")
@@ -239,7 +249,8 @@ def set_baresip_audio(wav_path: Path):
         log.error(f"Failed to set baresip audio: {e}")
         return False
 
-def get_latest_recording(after_timestamp: float = 0) -> Optional[Path]:
+
+def get_latest_recording(after_timestamp: float = 0) -> Path | None:
     recordings = []
     for pattern in ["dump-*-dec.wav", "*.wav"]:
         for f in BARESIP_RECORD_DIR.glob(pattern):
@@ -250,7 +261,10 @@ def get_latest_recording(after_timestamp: float = 0) -> Optional[Path]:
     recordings.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     return recordings[0]
 
-def wait_for_recording(after_timestamp: float, timeout: int = RECORDING_WAIT_TIMEOUT) -> Optional[Path]:
+
+def wait_for_recording(
+    after_timestamp: float, timeout: int = RECORDING_WAIT_TIMEOUT
+) -> Path | None:
     start = time.time()
     while time.time() - start < timeout:
         rec = get_latest_recording(after_timestamp)
@@ -263,20 +277,27 @@ def wait_for_recording(after_timestamp: float, timeout: int = RECORDING_WAIT_TIM
 
 # === STT (faster-whisper) ===
 _whisper_model = None
+
+
 def get_whisper():
     global _whisper_model
     if _whisper_model is None:
         from faster_whisper import WhisperModel
+
         _whisper_model = WhisperModel("base", device="cpu", compute_type="int8")
         log.info("Whisper model loaded")
     return _whisper_model
+
 
 def transcribe(wav_path: str) -> str:
     try:
         model = get_whisper()
         segments, info = model.transcribe(
-            wav_path, language="ru", beam_size=5,
-            vad_filter=True, vad_parameters=dict(min_silence_duration_ms=500),
+            wav_path,
+            language="ru",
+            beam_size=5,
+            vad_filter=True,
+            vad_parameters=dict(min_silence_duration_ms=500),
         )
         text = " ".join(s.text for s in segments).strip()
         log.info(f"STT [{Path(wav_path).name}]: «{text[:100]}»")
@@ -298,8 +319,16 @@ def llm_response(transcript: list[dict]) -> str:
     try:
         r = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
-            headers={"Authorization": f"Bearer {OPENROUTER_KEY}", "HTTP-Referer": "https://levitan.app"},
-            json={"model": "deepseek/deepseek-chat-v3-0324", "messages": messages, "max_tokens": 150, "temperature": 0.7},
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_KEY}",
+                "HTTP-Referer": "https://levitan.app",
+            },
+            json={
+                "model": "deepseek/deepseek-chat-v3-0324",
+                "messages": messages,
+                "max_tokens": 150,
+                "temperature": 0.7,
+            },
             timeout=25,
         )
         if r.status_code == 200:
@@ -315,8 +344,10 @@ def llm_response(transcript: list[dict]) -> str:
             r = requests.post(
                 "https://llm.api.cloud.yandex.net/llm/v1/chat/completions",
                 headers={"Authorization": f"Api-Key {YC_API_KEY_TTS}"},
-                json={"modelUri": f"gpt://{YC_FOLDER_ID_TTS}/yandexgpt-lite",
-                      "messages": [{"role": m["role"], "text": m["content"]} for m in messages]},
+                json={
+                    "modelUri": f"gpt://{YC_FOLDER_ID_TTS}/yandexgpt-lite",
+                    "messages": [{"role": m["role"], "text": m["content"]} for m in messages],
+                },
                 timeout=25,
             )
             if r.status_code == 200:
@@ -330,11 +361,14 @@ def llm_response(transcript: list[dict]) -> str:
     log.warning("LLM unavailable — local template fallback")
     return _local_fallback(last_user)
 
+
 def _local_fallback(text: str) -> str:
     """Безопасный шаблонный ответ без LLM (для автономного режима)."""
     t = text.lower()
     if extract_phone(text):
-        return "Отлично, записала ваш номер! Менеджер перезвонит и подтвердит заказ. До скорой связи!"
+        return (
+            "Отлично, записала ваш номер! Менеджер перезвонит и подтвердит заказ. До скорой связи!"
+        )
     if any(w in t for w in ["москв", "питер", "спб", "санкт"]):
         return "В Москву и Питер пока не доставляем — только Крым и Юг России. Если есть знакомые на юге — подскажите им!"
     if "почему" in t and ("дорог" in t or "цена" in t):
@@ -344,7 +378,9 @@ def _local_fallback(text: str) -> str:
     if any(w in t for w in ["оплат", "перевод", "карт"]):
         return "Оплата наличными при получении, перевод на карту или по реквизитам. Предоплата 50%."
     if any(w in t for w in ["гарант", "дохл", "доx", "умер"]):
-        return "Гарантия сто процентов! Если что-то в дороге — заменим бесплатно. Вакцинация входит."
+        return (
+            "Гарантия сто процентов! Если что-то в дороге — заменим бесплатно. Вакцинация входит."
+        )
     return "Хороший вопрос! Я записала его — наш менеджер перезвонит и ответит подробнее. Оставьте, пожалуйста, ваш номер?"
 
 
@@ -353,7 +389,8 @@ YC_API_KEY_TTS = os.getenv("YC_API_KEY", os.getenv("YC_API_KEY_TTS", ""))
 YC_FOLDER_ID_TTS = os.getenv("YC_FOLDER_ID", os.getenv("YC_FOLDER_ID_TTS", ""))
 TTS_VOICE = os.getenv("TTS_VOICE", "alena")  # Яндекс голос (Алёна)
 
-def _tts_yandex(text: str) -> Optional[bytes]:
+
+def _tts_yandex(text: str) -> bytes | None:
     """Синтез через Яндекс SpeechKit → PCM 8000Hz mono s16le."""
     if not YC_API_KEY_TTS or not YC_FOLDER_ID_TTS:
         return None
@@ -362,8 +399,12 @@ def _tts_yandex(text: str) -> Optional[bytes]:
             "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize",
             headers={"Authorization": f"Api-Key {YC_API_KEY_TTS}"},
             data={
-                "text": text, "folderId": YC_FOLDER_ID_TTS, "lang": "ru-RU",
-                "voice": TTS_VOICE, "format": "lpcm", "sampleRateHertz": 8000,
+                "text": text,
+                "folderId": YC_FOLDER_ID_TTS,
+                "lang": "ru-RU",
+                "voice": TTS_VOICE,
+                "format": "lpcm",
+                "sampleRateHertz": 8000,
             },
             timeout=30,
         )
@@ -375,21 +416,46 @@ def _tts_yandex(text: str) -> Optional[bytes]:
         log.error(f"Yandex TTS error: {e}")
         return None
 
-def _tts_edge(text: str, voice: str = "ru-RU-DariyaNeural") -> Optional[Path]:
+
+def _tts_edge(text: str, voice: str = "ru-RU-DariyaNeural") -> Path | None:
     """Fallback: edge-tts → MP3 → WAV 8kHz."""
     ts = int(time.time() * 1000)
     mp3_path = TTS_OUTPUT_DIR / f"tts_edge_{ts}.mp3"
     wav_path = TTS_OUTPUT_DIR / f"tts_edge_{ts}.wav"
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "edge_tts", "--voice", voice, "--text", text, "--write-media", str(mp3_path)],
-            capture_output=True, timeout=30,
+            [
+                sys.executable,
+                "-m",
+                "edge_tts",
+                "--voice",
+                voice,
+                "--text",
+                text,
+                "--write-media",
+                str(mp3_path),
+            ],
+            capture_output=True,
+            timeout=30,
         )
         if result.returncode != 0 or not mp3_path.exists():
             return None
         result = subprocess.run(
-            ["ffmpeg", "-i", str(mp3_path), "-ar", "8000", "-ac", "1", "-sample_fmt", "s16", str(wav_path), "-y"],
-            capture_output=True, timeout=15,
+            [
+                "ffmpeg",
+                "-i",
+                str(mp3_path),
+                "-ar",
+                "8000",
+                "-ac",
+                "1",
+                "-sample_fmt",
+                "s16",
+                str(wav_path),
+                "-y",
+            ],
+            capture_output=True,
+            timeout=15,
         )
         mp3_path.unlink(missing_ok=True)
         if result.returncode != 0 or not wav_path.exists():
@@ -398,7 +464,8 @@ def _tts_edge(text: str, voice: str = "ru-RU-DariyaNeural") -> Optional[Path]:
     except Exception:
         return None
 
-def synthesize_wav(text: str) -> Optional[Path]:
+
+def synthesize_wav(text: str) -> Path | None:
     """Синтезировать текст в WAV 8000Hz mono.
     Сначала Яндекс SpeechKit (чистый русский голос), fallback — edge-tts.
     """
@@ -432,6 +499,7 @@ def synthesize_wav(text: str) -> Optional[Path]:
         return wav_with_lead
     return wav_path
 
+
 def _add_lead_silence(input_wav: Path, output_wav: Path, seconds: float = 0.8):
     try:
         with wave.open(str(input_wav), "rb") as w:
@@ -462,7 +530,7 @@ def notify_telegram(text: str):
 
 
 # === PHONE EXTRACTION ===
-def extract_phone(text: str) -> Optional[str]:
+def extract_phone(text: str) -> str | None:
     """Извлечь номер телефона из текста клиента.
     Ловит: +7XXX, 8XXX, 7XXX, или просто 10 цифр (РФ)."""
     # Вариант 1: с кодом (7/8) + 10 цифр
@@ -478,32 +546,64 @@ def extract_phone(text: str) -> Optional[str]:
 
 # === DIALOG HELPERS ===
 REJECTION_PHRASES = [
-    "не интересно", "не интересует", "не надо", "отказ",
-    "до свидания", "не продаем", "не продаём", "не выращиваем",
-    "не звоните", "отстаньте", "нет спасибо", "нет, спасибо",
-    "не нужно", "занят", "перезвоните",
+    "не интересно",
+    "не интересует",
+    "не надо",
+    "отказ",
+    "до свидания",
+    "не продаем",
+    "не продаём",
+    "не выращиваем",
+    "не звоните",
+    "отстаньте",
+    "нет спасибо",
+    "нет, спасибо",
+    "не нужно",
+    "занят",
+    "перезвоните",
 ]
+
+
 def is_rejection(text: str) -> bool:
     t = text.lower()
     return any(p in t for p in REJECTION_PHRASES)
 
+
 INTEREST_PHRASES = [
-    "да", "ага", "угу", "интересно", "расскажите", "расскажи",
-    "давай", "давайте", "хорошо", "конечно", "слушаю",
-    "да интересно", "очень интересно", "подробнее", "продолжайте",
-    "я слушаю", "давайте послушаем",
+    "да",
+    "ага",
+    "угу",
+    "интересно",
+    "расскажите",
+    "расскажи",
+    "давай",
+    "давайте",
+    "хорошо",
+    "конечно",
+    "слушаю",
+    "да интересно",
+    "очень интересно",
+    "подробнее",
+    "продолжайте",
+    "я слушаю",
+    "давайте послушаем",
 ]
+
+
 def is_interest(text: str) -> bool:
     t = text.lower().strip()
     if t in ("да", "ага", "угу", "ну", "ок", "ok"):
         return True
     return any(p in t for p in INTEREST_PHRASES)
 
+
 UNCLEAR_RETRY = "Извините, я не расслышала. Вам интересно наше предложение по бройлерам?"
 UNCLEAR_CLOSE = "Хорошо, я поняла. Наш менеджер перезвонит в удобное время, чтобы уточнить все детали. Спасибо за звонок, до свидания!"
 
 VOLUME_RE = re.compile(r"(\d+)\s*(голов|штук|шт|гол|тысяч|тыс)")
-def extract_volume(text: str) -> Optional[int]:
+
+
+def extract_volume(text: str) -> int | None:
     m = VOLUME_RE.search(text.lower())
     if m:
         return int(m.group(1))
@@ -512,7 +612,8 @@ def extract_volume(text: str) -> Optional[int]:
         return int(nums[0])
     return None
 
-def extract_breed(text: str) -> Optional[str]:
+
+def extract_breed(text: str) -> str | None:
     t = text.lower()
     if re.search(r"кобб|cobb|500", t):
         return "Кобб-500"
@@ -521,6 +622,7 @@ def extract_breed(text: str) -> Optional[str]:
     if any(w in t for w in ["оба", "любая", "всё равно", "без разницы", "на ваш вкус"]):
         return "Любая"
     return None
+
 
 QUALIFY_PROMPTS = {
     "start": "Отлично! Сколько голов бройлеров вам нужно?",
@@ -532,6 +634,7 @@ QUALIFY_PROMPTS = {
     "phone": "Оставьте, пожалуйста, ваш номер телефона — менеджер перезвонит подтвердить заказ.",
     "phone_retry": "Не расслышала номер. Скажите, пожалуйста, ваш телефон — мы перезвоним для подтверждения.",
 }
+
 
 def is_complete(text: str, turn: int = 0, got_phone: bool = False) -> bool:
     if turn < 4 or not got_phone:
@@ -553,12 +656,12 @@ class FAQDialog:
         self.started_at = datetime.now()
         self.last_call_time: float = 0
         self.got_phone = False
-        self.qualify_state: Optional[str] = None
+        self.qualify_state: str | None = None
         self.qualify_retries = 0
-        self.qualify_volume: Optional[int] = None
-        self.qualify_breed: Optional[str] = None
-        self.qualify_city: Optional[str] = None
-        self.interested: Optional[bool] = None
+        self.qualify_volume: int | None = None
+        self.qualify_breed: str | None = None
+        self.qualify_city: str | None = None
+        self.interested: bool | None = None
 
     def run(self):
         log.info(f"{'='*60}")
@@ -606,7 +709,7 @@ class FAQDialog:
         if is_interest(client_text):
             self.interested = True
             self.qualify_state = "start"
-            log.info(f"[Turn 0] Client interested → qualify start")
+            log.info("[Turn 0] Client interested → qualify start")
             self.turn = 1
             return
 
@@ -666,7 +769,11 @@ class FAQDialog:
 
     def _turn_response(self):
         log.info(f"[Turn {self.turn}] Generating response...")
-        client_last = self.transcript[-1]["content"] if self.transcript and self.transcript[-1]["role"] == "user" else ""
+        client_last = (
+            self.transcript[-1]["content"]
+            if self.transcript and self.transcript[-1]["role"] == "user"
+            else ""
+        )
         phone_found = self._extract_phone(client_last)
         if phone_found:
             self.got_phone = True
@@ -755,11 +862,13 @@ class FAQDialog:
             self._respond_and_close("Извините за беспокойство. Всего доброго!")
             return
         if self._is_complete(client_text):
-            self._respond_and_close("Отлично, я всё зафиксировала. Наш менеджер свяжется с вами для подтверждения. Спасибо за время, до свидания!")
+            self._respond_and_close(
+                "Отлично, я всё зафиксировала. Наш менеджер свяжется с вами для подтверждения. Спасибо за время, до свидания!"
+            )
             return
         self.turn += 1
 
-    def _handle_qualify(self, client_text: str) -> Optional[str]:
+    def _handle_qualify(self, client_text: str) -> str | None:
         if self.qualify_state == "start":
             self.qualify_state = "volume"
             return QUALIFY_PROMPTS["start"]
@@ -824,15 +933,21 @@ class FAQDialog:
 
         return None
 
-    def _extract_city(self, text: str) -> Optional[str]:
+    def _extract_city(self, text: str) -> str | None:
         t = text.lower().strip()
         cities = {
-            "краснодар": "Краснодар", "ростов": "Ростов-на-Дону",
-            "ростов-на-дону": "Ростов-на-Дону", "волгоград": "Волгоград",
-            "ставрополь": "Ставрополь", "симферополь": "Симферополь",
-            "севастополь": "Севастополь", "ялта": "Ялта",
-            "феодосия": "Феодосия", "керачь": "Керчь",
-            "евпатория": "Евпатория", "джанкой": "Джанкой",
+            "краснодар": "Краснодар",
+            "ростов": "Ростов-на-Дону",
+            "ростов-на-дону": "Ростов-на-Дону",
+            "волгоград": "Волгоград",
+            "ставрополь": "Ставрополь",
+            "симферополь": "Симферополь",
+            "севастополь": "Севастополь",
+            "ялта": "Ялта",
+            "феодосия": "Феодосия",
+            "керачь": "Керчь",
+            "евпатория": "Евпатория",
+            "джанкой": "Джанкой",
             "азовское": "Азовское",
         }
         for key, val in cities.items():
@@ -840,7 +955,7 @@ class FAQDialog:
                 return val
         return None
 
-    def _extract_phone(self, text: str) -> Optional[str]:
+    def _extract_phone(self, text: str) -> str | None:
         return extract_phone(text)
 
     def _respond_and_close(self, text: str):
@@ -862,22 +977,31 @@ class FAQDialog:
     def _finish(self):
         duration = (datetime.now() - self.started_at).total_seconds()
         dialog_data = {
-            "session_id": self.session_id, "phone": self.phone, "campaign": self.campaign,
-            "turns": self.turn, "duration_sec": round(duration),
+            "session_id": self.session_id,
+            "phone": self.phone,
+            "campaign": self.campaign,
+            "turns": self.turn,
+            "duration_sec": round(duration),
             "got_phone": self.got_phone,
-            "started_at": self.started_at.isoformat(), "ended_at": datetime.now().isoformat(),
+            "started_at": self.started_at.isoformat(),
+            "ended_at": datetime.now().isoformat(),
             "transcript": self.transcript,
         }
         path = DIALOGS_DIR / f"{self.session_id}.json"
         with open(path, "w") as f:
             json.dump(dialog_data, f, ensure_ascii=False, indent=2)
         log.info(f"{'='*60}")
-        log.info(f"DIALOG END: {self.phone} | turns={self.turn} | {duration:.0f}s | phone={self.got_phone}")
+        log.info(
+            f"DIALOG END: {self.phone} | turns={self.turn} | {duration:.0f}s | phone={self.got_phone}"
+        )
         log.info(f"Saved: {path}")
         log.info(f"{'='*60}")
-        transcript_text = "\n".join([
-            f"{'🤖' if e['role'] == 'assistant' else '👤'} {e['content'][:80]}" for e in self.transcript
-        ])
+        transcript_text = "\n".join(
+            [
+                f"{'🤖' if e['role'] == 'assistant' else '👤'} {e['content'][:80]}"
+                for e in self.transcript
+            ]
+        )
         notify_telegram(
             f"🐣 <b>Диалог завершён</b>\nТелефон: {self.phone}\nХодов: {self.turn}\n"
             f"Длительность: {duration:.0f} сек\nТелефон собран: {'да' if self.got_phone else 'нет'}\n\n"
@@ -891,12 +1015,12 @@ class FAQDialog:
 def watch_for_calls():
     seen = set()
     active_phones = set()
-    log.info("="*60)
+    log.info("=" * 60)
     log.info("LEVITAN FAQ-AGENT STARTED (Анжелла, бройлеры)")
     log.info(f"  Greeting: {GREETING_WAV}")
     log.info(f"  FAQ-кэш: {FAQ_CACHE_PATH}")
     log.info(f"  Max turns: {MAX_TURNS}")
-    log.info("="*60)
+    log.info("=" * 60)
     load_faq_cache()
     if GREETING_WAV.exists():
         set_baresip_audio(GREETING_WAV)
@@ -925,12 +1049,14 @@ def watch_for_calls():
                                 continue
                             log.info(f"New call detected: {phone}")
                             active_phones.add(phone)
+
                             def run_dialog(ph):
                                 try:
                                     dialog = FAQDialog(ph)
                                     dialog.run()
                                 finally:
                                     active_phones.discard(ph)
+
                             t = threading.Thread(target=run_dialog, args=(phone,), daemon=True)
                             t.start()
             time.sleep(1)

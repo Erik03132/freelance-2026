@@ -40,39 +40,34 @@ config = {
         "enabled": True
         # Habr не требует credentials - парсим HTML
     },
-    
     "medium": {
         "enabled": False,  # Включите когда будете готовы
         "usernames": [
             # "username1",
             # "username2",
-        ]
+        ],
     },
-    
     "twitter": {
         "enabled": False,  # Включите когда будете готовы
         "bearer_token": "",  # Получить на https://developer.twitter.com
-        "query": "AI OR machine learning"
+        "query": "AI OR machine learning",
     },
-    
     "telegram": {
         "enabled": False,  # Включите когда будете готовы
         "bot_token": "",  # Получить от @BotFather
-        "channel_id": ""  # Канал для парсинга
+        "channel_id": "",  # Канал для парсинга
     },
-    
     # TELEGRAM ВЫВОД (ОБЯЗАТЕЛЬНО)
     "telegram_bot_token": "123456789:ABCdefGHIjklmnoPQRstuvWXYZ1234567890",  # ВАШ ТОКЕН
     "telegram_chat_id": "-1001234567890",  # ВАШ CHAT_ID
-    
     # ОБРАБОТКА
-    "min_score": 40,        # Минимальный score для digest
-    "max_items": 100,       # Макс. статей за раз
-    "dedup_threshold": 0.85 # Порог дедупликации
+    "min_score": 40,  # Минимальный score для digest
+    "max_items": 100,  # Макс. статей за раз
+    "dedup_threshold": 0.85,  # Порог дедупликации
 }
 
 # Сохраните в /Users/igorvasin/freelance-2026/projects/agent-lab/config.json
-with open('config.json', 'w') as f:
+with open("config.json", "w") as f:
     json.dump(config, f, indent=2)
 
 print("✓ config.json создан")
@@ -143,35 +138,40 @@ pip install apscheduler
 # Создайте scheduler.py:
 """
 
-from apscheduler.schedulers.background import BackgroundScheduler
-from pipeline_integration import ContentCombinePipeline
 import asyncio
 import json
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from pipeline_integration import ContentCombinePipeline
+
+
 def run_pipeline():
     """Запустить pipeline"""
-    with open('config.json') as f:
+    with open("config.json") as f:
         config = json.load(f)
-    
+
     pipeline = ContentCombinePipeline.__new__(ContentCombinePipeline)
     pipeline.config = config
-    
+
     from normalizer import Normalizer
+
     pipeline.normalizer = Normalizer()
-    
+
     # Импортируем TelegramExporter если нужен
-    if config.get('telegram_bot_token'):
+    if config.get("telegram_bot_token"):
         from telegram_exporter import TelegramExporter
-        pipeline.telegram_exporter = TelegramExporter(config['telegram_bot_token'])
-    
+
+        pipeline.telegram_exporter = TelegramExporter(config["telegram_bot_token"])
+
     # Запустим pipeline
     asyncio.run(pipeline.run())
+
 
 # Создайте scheduler
 scheduler = BackgroundScheduler()
 
 # Добавьте jobs
-scheduler.add_job(run_pipeline, 'interval', hours=1, id='habr_digest')  # Каждый час
+scheduler.add_job(run_pipeline, "interval", hours=1, id="habr_digest")  # Каждый час
 # scheduler.add_job(run_pipeline, 'cron', hour=9, minute=0, id='daily_digest')  # Каждый день в 9:00
 # scheduler.add_job(run_pipeline, 'cron', hour='*/6', minute=0, id='every_6h')  # Каждые 6 часов
 
@@ -183,6 +183,7 @@ print("Scheduler запущен. Нажмите Ctrl+C для остановки
 try:
     # Держим процесс живым
     import time
+
     while True:
         time.sleep(1)
 except KeyboardInterrupt:
@@ -311,7 +312,7 @@ crontab:
 # ШАГ 7: МОНИТОРИНГ И ОТЛАДКА
 # ============================================================
 
-"""
+r"""
 ЛОГИРОВАНИЕ
 ===========
 
@@ -380,31 +381,33 @@ curl https://api.telegram.org/botYOUR_TOKEN/getMe
 import time
 from datetime import datetime
 
+
 def run_with_metrics():
     """Pipeline с метриками"""
     start_time = time.time()
-    
+
     # ... запустить pipeline ...
-    
+
     elapsed = time.time() - start_time
-    
+
     metrics = {
-        'timestamp': datetime.now().isoformat(),
-        'total_items': 20,
-        'alerts': 2,
-        'digest': 15,
-        'trending': 3,
-        'avg_score': 45.2,
-        'processing_time_sec': elapsed,
-        'items_per_second': 20 / elapsed
+        "timestamp": datetime.now().isoformat(),
+        "total_items": 20,
+        "alerts": 2,
+        "digest": 15,
+        "trending": 3,
+        "avg_score": 45.2,
+        "processing_time_sec": elapsed,
+        "items_per_second": 20 / elapsed,
     }
-    
+
     # Сохраните в файл
-    with open('metrics.jsonl', 'a') as f:
-        f.write(json.dumps(metrics) + '\n')
-    
+    with open("metrics.jsonl", "a") as f:
+        f.write(json.dumps(metrics) + "\n")
+
     print(f"✓ Pipeline completed in {elapsed:.2f}s")
     print(f"  Items/sec: {metrics['items_per_second']:.1f}")
+
 
 # ============================================================
 # ШАГ 9: ИНТЕГРАЦИЯ С ДРУГИМИ СИСТЕМАМИ

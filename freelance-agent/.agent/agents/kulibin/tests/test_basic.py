@@ -1,8 +1,15 @@
 from kulibin import (
-    EVAL_CRITERIA, FILE_EXTENSIONS, LANGUAGES,
-    analyze, deep_audit, scout, evaluate,
-    generate_prototype, benchmark_snippet,
-    security_audit, owasp_audit,
+    EVAL_CRITERIA,
+    FILE_EXTENSIONS,
+    LANGUAGES,
+    analyze,
+    benchmark_snippet,
+    deep_audit,
+    evaluate,
+    generate_prototype,
+    owasp_audit,
+    scout,
+    security_audit,
 )
 
 

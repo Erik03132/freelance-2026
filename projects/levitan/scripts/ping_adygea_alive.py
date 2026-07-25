@@ -4,6 +4,7 @@ Ping Adygea numbers from adygea_ping_ready_<date>.csv (never + no_answer).
 Waits ~55s for client to pick up (per-minute billing).
 Saves alive numbers incrementally to data/campaigns/csv/adygea_alive_50_<date>.csv
 """
+
 import csv
 import os
 import re
@@ -19,8 +20,8 @@ BASE = pc.BASE_DIR
 CSV_DIR = pc.CSV_DIR
 TARGET = 999
 BATCH = 50
-pc.PING_OPERATOR_WAIT = 5   # baresip отвечает <1 сек локально
-pc.PING_CLIENT_WAIT = 55   # ждём клиента почти минуту (тарификация поминутная)
+pc.PING_OPERATOR_WAIT = 5  # baresip отвечает <1 сек локально
+pc.PING_CLIENT_WAIT = 55  # ждём клиента почти минуту (тарификация поминутная)
 pc.PING_BETWEEN_CALLS = 2
 
 
@@ -33,9 +34,6 @@ def norm(n):
     return d[-10:] if d else None
 
 
-
-
-
 def load_ready():
     """Load candidates from adygea_ping_ready_<date>.csv (never + no_answer)."""
     today = datetime.now().strftime("%Y%m%d")
@@ -46,13 +44,17 @@ def load_ready():
     all_n = {}
     with open(fn, encoding="utf-8") as f:
         for r in csv.DictReader(f):
-            raw = (r.get("Телефоны") or "")
+            raw = r.get("Телефоны") or ""
             nums = re.findall(r"\d+", raw)
             if nums:
                 d = norm("".join(nums))
                 if d:
                     all_n[d] = {
-                        "district": (r.get("Город") or "").replace("район", "").strip().rstrip(",").strip(),
+                        "district": (r.get("Город") or "")
+                        .replace("район", "")
+                        .strip()
+                        .rstrip(",")
+                        .strip(),
                         "city": (r.get("Город") or "").strip(),
                         "name": (r.get("Имя") or "").strip(),
                         "culture": (r.get("Описание") or "").strip(),
@@ -130,9 +132,16 @@ def main():
             st = res.get("status", "unknown")
             print(f"  → {st}", file=sys.stderr)
             if st == "alive":
-                alive_records.append({"Название": "", "Описание": m["culture"],
-                                      "Регион": "Республика Адыгея", "Город": m["city"],
-                                      "Имя": m["name"], "Телефоны": phone})
+                alive_records.append(
+                    {
+                        "Название": "",
+                        "Описание": m["culture"],
+                        "Регион": "Республика Адыгея",
+                        "Город": m["city"],
+                        "Имя": m["name"],
+                        "Телефоны": phone,
+                    }
+                )
                 save()
                 print(f"  ✅ ALIVE {len(alive_records)}/{TARGET}", file=sys.stderr)
             if idx % BATCH == 0:

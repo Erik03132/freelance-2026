@@ -19,7 +19,6 @@ import re
 import signal
 import sys
 import time
-from datetime import datetime
 
 import requests
 from dotenv import load_dotenv
@@ -46,10 +45,45 @@ DISTRICT_FILES = {
 START = "05.07.2026 00:00:00"
 END = "10.07.2026 23:59:59"
 MIN_DURATION = 15
-CULTURES = ["пшеница", "ячмень", "подсолнечник", "кукуруза", "соя", "рапс", "овёс", "овес",
-            "горох", "нут", "чечевица", "рис", "гречиха", "просо", "подсол", "зернов", "маслич", "технич"]
-INTEREST_KW = ["прода", "продам", "цена", "тонн", "объём", "объем", "интерес", "перезвони",
-               "позвони", "менеджер", "скин", "пришл", "готов", "куп", "нужн", "сотруднич", "продаж"]
+CULTURES = [
+    "пшеница",
+    "ячмень",
+    "подсолнечник",
+    "кукуруза",
+    "соя",
+    "рапс",
+    "овёс",
+    "овес",
+    "горох",
+    "нут",
+    "чечевица",
+    "рис",
+    "гречиха",
+    "просо",
+    "подсол",
+    "зернов",
+    "маслич",
+    "технич",
+]
+INTEREST_KW = [
+    "прода",
+    "продам",
+    "цена",
+    "тонн",
+    "объём",
+    "объем",
+    "интерес",
+    "перезвони",
+    "позвони",
+    "менеджер",
+    "скин",
+    "пришл",
+    "готов",
+    "куп",
+    "нужн",
+    "сотруднич",
+    "продаж",
+]
 
 
 def timeout(signum, frame):
@@ -77,10 +111,15 @@ def fetch_all_calls():
     calls = []
     offset = 0
     while True:
-        req = _post("stats/calls/request", {
-            "start_date": START, "end_date": END,
-            "limit": 100, "offset": offset,
-        })
+        req = _post(
+            "stats/calls/request",
+            {
+                "start_date": START,
+                "end_date": END,
+                "limit": 100,
+                "offset": offset,
+            },
+        )
         if not req or not req.get("key"):
             break
         key = req["key"]
@@ -109,14 +148,16 @@ def fetch_all_calls():
                 for leg in c.get("context_calls", []):
                     rec = leg.get("recording_id")
                     if rec:
-                        calls.append({
-                            "number": norm_phone(c.get("called_number", "")),
-                            "duration": int(c.get("duration", 0) or 0),
-                            "talk": int(c.get("talk_duration", 0) or 0),
-                            "rec_id": rec[0] if isinstance(rec, list) else rec,
-                            "entry_id": c.get("entry_id", ""),
-                            "date": c.get("call_created", ""),
-                        })
+                        calls.append(
+                            {
+                                "number": norm_phone(c.get("called_number", "")),
+                                "duration": int(c.get("duration", 0) or 0),
+                                "talk": int(c.get("talk_duration", 0) or 0),
+                                "rec_id": rec[0] if isinstance(rec, list) else rec,
+                                "entry_id": c.get("entry_id", ""),
+                                "date": c.get("call_created", ""),
+                            }
+                        )
         if page_calls < 100:
             break
         offset += 100
@@ -151,6 +192,7 @@ def transcribe_audio(mp3_bytes):
     global _MODEL
     if _MODEL is None:
         from faster_whisper import WhisperModel
+
         _MODEL = WhisperModel("base", device="cpu", compute_type="int8")
     tmp = "/tmp/adygea_rec_%d.mp3" % int(time.time() * 1000)
     with open(tmp, "wb") as f:
@@ -196,7 +238,9 @@ def analyze(transcript, base_culture):
 def main():
     signal.signal(signal.SIGALRM, timeout)
     signal.alarm(2400)
-    out_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "adygea_leads")
+    out_dir = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "adygea_leads"
+    )
     os.makedirs(out_dir, exist_ok=True)
     json_path = os.path.join(out_dir, "leads_raw.json")
     md_path = os.path.join(out_dir, "leads_transcripts.md")
@@ -228,8 +272,12 @@ def main():
         if not tr:
             continue
         entry = {
-            "phone": num, "district": meta["district"], "name": meta["name"],
-            "duration": c["duration"], "base_culture": meta["culture"], "transcript": tr,
+            "phone": num,
+            "district": meta["district"],
+            "name": meta["name"],
+            "duration": c["duration"],
+            "base_culture": meta["culture"],
+            "transcript": tr,
         }
         a = analyze(tr, meta["culture"])
         if a:
@@ -253,8 +301,10 @@ def main():
     print("|---|------|-------|---------|----------|-------|-------|---------------------|")
     for i, r in enumerate(hot, 1):
         name = re.sub(r"^(Глава|Дир|Предс)\.?\s*:\s*", "", r["name"])
-        print(f"| {i} | {name} | {r['district']} | {r['phone']} | {', '.join(r.get('cultures', []))} "
-              f"| {r.get('volume') or '—'} | {r['duration']}с | {', '.join(r.get('interest', [])[:4])} |")
+        print(
+            f"| {i} | {name} | {r['district']} | {r['phone']} | {', '.join(r.get('cultures', []))} "
+            f"| {r.get('volume') or '—'} | {r['duration']}с | {', '.join(r.get('interest', [])[:4])} |"
+        )
     with open(md_path, "w", encoding="utf-8") as f:
         for i, r in enumerate(results, 1):
             f.write(f"### {i}. {r['name']} ({r['district']}) — score {r.get('score',0)}\n")

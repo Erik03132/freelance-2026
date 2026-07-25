@@ -4,11 +4,10 @@
   - 07:00 — Сканирование RSS + Deep Search + Генерация инициативы
   - 10:00 — Отправка инициативы сенатору в Telegram
 """
+
 import os
 import sys
 import time
-import asyncio
-import subprocess
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -21,8 +20,8 @@ os.makedirs(LOG_DIR, exist_ok=True)
 load_dotenv(os.path.join(BASE_DIR, ".env"), override=True)
 
 # Расписание (часы по серверному времени)
-PIPELINE_HOUR = 7   # Запуск полного pipeline
-DELIVERY_HOUR = 10   # Доставка в Telegram
+PIPELINE_HOUR = 7  # Запуск полного pipeline
+DELIVERY_HOUR = 10  # Доставка в Telegram
 
 VENV_PYTHON = os.path.join(BASE_DIR, "venv", "bin", "python3")
 if not os.path.exists(VENV_PYTHON):
@@ -43,6 +42,7 @@ def run_pipeline():
     try:
         sys.path.insert(0, SCRIPT_DIR)
         from senator_core import run_daily_pipeline
+
         result = run_daily_pipeline()
         if result:
             initiative = result.get("initiative", {})
@@ -53,6 +53,7 @@ def run_pipeline():
     except Exception as e:
         log(f"  ❌ Pipeline error: {e}")
         import traceback
+
         traceback.print_exc()
     return None
 
@@ -70,7 +71,7 @@ def send_to_telegram(text):
 
     try:
         # Разбиваем длинные сообщения
-        parts = [text[i:i+4000] for i in range(0, len(text), 4000)]
+        parts = [text[i : i + 4000] for i in range(0, len(text), 4000)]
         for part in parts:
             resp = requests.post(
                 f"https://api.telegram.org/bot{token}/sendMessage",
@@ -90,6 +91,7 @@ def send_to_telegram(text):
 def deliver_initiative():
     """Загружает сегодняшнюю инициативу и отправляет в Telegram."""
     import json
+
     today = datetime.now().strftime("%Y-%m-%d")
     digest_path = os.path.join(BASE_DIR, "data", "daily_digests", f"digest_{today}.json")
 
@@ -97,7 +99,7 @@ def deliver_initiative():
         log(f"  ⚠️ Дайджест за {today} не найден (pipeline не запускался?)")
         return
 
-    with open(digest_path, "r", encoding="utf-8") as f:
+    with open(digest_path, encoding="utf-8") as f:
         data = json.load(f)
 
     initiative = data.get("initiative", {})

@@ -10,7 +10,7 @@
 
 Подключение к агенту:
   Через конфигурацию в core_agent.py или напрямую:
-  
+
   from langchain_mcp_adapters.client import MultiServerMCPClient
   client = MultiServerMCPClient({
       "utils": {
@@ -20,11 +20,12 @@
       }
   })
 """
-import os
+
 import httpx
 
 try:
     from fastmcp import FastMCP
+
     HAS_FASTMCP = True
 except ImportError:
     HAS_FASTMCP = False
@@ -37,7 +38,7 @@ if HAS_FASTMCP:
     async def get_weather(city: str) -> str:
         """
         Получает текущую погоду для города.
-        
+
         Args:
             city: Название города (например, "Москва" или "London")
         """
@@ -74,7 +75,7 @@ if HAS_FASTMCP:
     async def get_exchange_rate(currency: str = "USD") -> str:
         """
         Получает текущий курс валюты к рублю.
-        
+
         Args:
             currency: Код валюты (USD, EUR, CNY)
         """
@@ -93,7 +94,6 @@ if HAS_FASTMCP:
                 return f"Валюта '{currency}' не найдена"
         except Exception as e:
             return f"Ошибка получения курса: {e}"
-
 
     if __name__ == "__main__":
         print("🔌 MCP-сервер 'UtilityTools' запущен (stdio)")

@@ -5,6 +5,7 @@ Transcribe MCP — транскрибация аудио + саммари чер
 MCP-сервер поверх faster-whisper. Разговор по JSON-RPC 2.0 через stdio.
 Поддерживает: mp3, wav, m4a, ogg, flac, webm, opus.
 """
+
 from __future__ import annotations
 
 import json
@@ -20,9 +21,7 @@ warnings.filterwarnings("ignore")
 
 PROTOCOL_VERSION = "2024-11-05"
 SESSION_ID = os.environ.get("TRANSCRIBE_SESSION") or ("tx-" + uuid.uuid4().hex[:8])
-OMNI_URL = os.environ.get(
-    "OMNI_URL", "http://217.149.23.113:20128/v1/chat/completions"
-)
+OMNI_URL = os.environ.get("OMNI_URL", "http://217.149.23.113:20128/v1/chat/completions")
 MODEL_CACHE = {}  # model_size → WhisperModel
 
 
@@ -38,7 +37,10 @@ def _get_model(model_size: str = "base"):
         from faster_whisper import WhisperModel
 
         MODEL_CACHE[model_size] = WhisperModel(
-            model_size, device="cpu", compute_type="int8", cpu_threads=4,
+            model_size,
+            device="cpu",
+            compute_type="int8",
+            cpu_threads=4,
         )
         _log(f"model '{model_size}' loaded")
     return MODEL_CACHE[model_size]
@@ -59,12 +61,23 @@ def _convert_to_wav(input_path: str) -> str | None:
     try:
         subprocess.run(
             [
-                "ffmpeg", "-y", "-loglevel", "error",
-                "-i", input_path,
-                "-ar", "16000", "-ac", "1", "-sample_fmt", "s16",
+                "ffmpeg",
+                "-y",
+                "-loglevel",
+                "error",
+                "-i",
+                input_path,
+                "-ar",
+                "16000",
+                "-ac",
+                "1",
+                "-sample_fmt",
+                "s16",
                 tmp.name,
             ],
-            check=True, capture_output=True, timeout=300,
+            check=True,
+            capture_output=True,
+            timeout=300,
         )
         return tmp.name
     except subprocess.CalledProcessError as e:
@@ -80,14 +93,18 @@ def _call_llm(prompt: str, model: str = "openrouter/deepseek/deepseek-chat") -> 
     """Вызов LLM через OmniRoute для суммаризации."""
     import urllib.request
 
-    body = json.dumps({
-        "model": model,
-        "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 2048,
-        "stream": False,
-    }).encode()
+    body = json.dumps(
+        {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 2048,
+            "stream": False,
+        }
+    ).encode()
     req = urllib.request.Request(
-        OMNI_URL, data=body, method="POST",
+        OMNI_URL,
+        data=body,
+        method="POST",
         headers={"Content-Type": "application/json"},
     )
     try:
@@ -123,15 +140,13 @@ TOOLS = [
                     "enum": ["tiny", "base", "small", "medium", "large"],
                     "default": "base",
                     "description": (
-                        "размер модели (tiny=быстро, base=баланс, "
-                        "large=точно, но медленно)"
+                        "размер модели (tiny=быстро, base=баланс, " "large=точно, но медленно)"
                     ),
                 },
                 "language": {
                     "type": "string",
                     "description": (
-                        "язык (ru/en/de/fr/es и т.д., "
-                        "по умолчанию автоопределение)"
+                        "язык (ru/en/de/fr/es и т.д., " "по умолчанию автоопределение)"
                     ),
                 },
                 "response_format": {
@@ -220,9 +235,22 @@ def handle_transcribe(args: dict) -> dict:
         return {"error": f"Файл слишком большой ({file_size/1024/1024:.0f}MB). Максимум 500MB."}
 
     ext = Path(file_path).suffix.lower()
-    supported = {".mp3", ".wav", ".m4a", ".ogg", ".flac", ".webm", ".opus", ".aac", ".aiff", ".wma"}
+    supported = {
+        ".mp3",
+        ".wav",
+        ".m4a",
+        ".ogg",
+        ".flac",
+        ".webm",
+        ".opus",
+        ".aac",
+        ".aiff",
+        ".wma",
+    }
     if ext not in supported:
-        return {"error": f"Формат {ext} не поддерживается. Используй: {', '.join(sorted(supported))}"}
+        return {
+            "error": f"Формат {ext} не поддерживается. Используй: {', '.join(sorted(supported))}"
+        }
 
     # Конвертация в WAV
     _log(f"converting {file_path} → wav ...")
@@ -251,11 +279,13 @@ def handle_transcribe(args: dict) -> dict:
             }
             text_parts = []
             for seg in segments:
-                result["segments"].append({
-                    "start": round(seg.start, 2),
-                    "end": round(seg.end, 2),
-                    "text": seg.text.strip(),
-                })
+                result["segments"].append(
+                    {
+                        "start": round(seg.start, 2),
+                        "end": round(seg.end, 2),
+                        "text": seg.text.strip(),
+                    }
+                )
                 text_parts.append(seg.text.strip())
             result["text"] = " ".join(text_parts)
         elif response_format == "srt":
@@ -320,7 +350,7 @@ def handle_summarize(args: dict) -> dict:
         ),
         "action_items": (
             "Извлеки из текста ниже только конкретные действия, задачи, "
-            "решения и договорённости. Если действий нет — напиши \"Нет действий\".\n\n{text}"
+            'решения и договорённости. Если действий нет — напиши "Нет действий".\n\n{text}'
         ),
     }
 
@@ -341,9 +371,7 @@ def handle_summarize(args: dict) -> dict:
 
     if len(chunks) > 1:
         # Сводим саммари чанков в один
-        final = _call_llm(
-            "Сведи следующие части саммари в один связный текст:\n\n" + combined
-        )
+        final = _call_llm("Сведи следующие части саммари в один связный текст:\n\n" + combined)
         return {"result": final, "chunks": len(chunks)}
     return {"result": combined}
 
@@ -372,7 +400,11 @@ def handle_transcribe_summarize(args: dict) -> dict:
     if "error" in t_result:
         return t_result
 
-    transcript = t_result["result"] if isinstance(t_result["result"], str) else t_result["result"].get("text", str(t_result["result"]))
+    transcript = (
+        t_result["result"]
+        if isinstance(t_result["result"], str)
+        else t_result["result"].get("text", str(t_result["result"]))
+    )
     if not transcript:
         return {"error": "Транскрибация не дала текста"}
 
@@ -386,7 +418,9 @@ def handle_transcribe_summarize(args: dict) -> dict:
         "transcript": transcript,
         "summary": s_result.get("result", "Ошибка саммари"),
         "language": t_result.get("language"),
-        "duration_sec": t_result.get("result", {}).get("duration_sec") if isinstance(t_result.get("result"), dict) else None,
+        "duration_sec": t_result.get("result", {}).get("duration_sec")
+        if isinstance(t_result.get("result"), dict)
+        else None,
     }
 
 
@@ -417,15 +451,24 @@ def handle_request(msg: dict) -> dict | None:
         arguments = msg.get("params", {}).get("arguments", {})
         handler = HANDLERS.get(name)
         if not handler:
-            return {"isError": True, "content": [{"type": "text", "text": f"Unknown tool: {name}"}]}
+            return {
+                "isError": True,
+                "content": [{"type": "text", "text": f"Unknown tool: {name}"}],
+            }
         try:
             result = handler(arguments)
             if "error" in result:
-                return {"isError": True, "content": [{"type": "text", "text": result["error"]}]}
+                return {
+                    "isError": True,
+                    "content": [{"type": "text", "text": result["error"]}],
+                }
             text = json.dumps(result, ensure_ascii=False, indent=2)
             return {"content": [{"type": "text", "text": text}]}
         except Exception as e:
-            return {"isError": True, "content": [{"type": "text", "text": f"Error: {e}"}]}
+            return {
+                "isError": True,
+                "content": [{"type": "text", "text": f"Error: {e}"}],
+            }
 
     elif method == "notifications/initialized":
         return None

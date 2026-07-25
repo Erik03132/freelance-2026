@@ -30,7 +30,7 @@ class MangoClient:
         number: str,
         extension: str = "22",
         sip_uri: str = "user4@vpbx400161137.mangosip.ru",
-        command_id: str | None = None
+        command_id: str | None = None,
     ) -> dict:
         """
         Инициировать callback-звонок через Mango Office (правильный формат).
@@ -68,7 +68,7 @@ class MangoClient:
                     "vpbx_api_key": self.api_key,
                     "json": j,
                     "sign": sign,
-                }
+                },
             )
             result = response.json()
             logger.info(f"Callback initiated to {number}: {result}")
@@ -97,15 +97,12 @@ class MangoClient:
                 "call_id": call_id,
                 "audio_id": audio_file_id,
                 "timestamp": timestamp,
-                "signature": signature
-            }
+                "signature": signature,
+            },
         }
 
         try:
-            response = await self.client.post(
-                self.BASE_URL,
-                json=payload
-            )
+            response = await self.client.post(self.BASE_URL, json=payload)
             result = response.json()
             logger.info(f"Playing audio {audio_file_id} in call {call_id}: {result}")
             return result
@@ -128,18 +125,11 @@ class MangoClient:
 
         payload = {
             "command": "play/stop",
-            "parameters": {
-                "call_id": call_id,
-                "timestamp": timestamp,
-                "signature": signature
-            }
+            "parameters": {"call_id": call_id, "timestamp": timestamp, "signature": signature},
         }
 
         try:
-            response = await self.client.post(
-                self.BASE_URL,
-                json=payload
-            )
+            response = await self.client.post(self.BASE_URL, json=payload)
             result = response.json()
             logger.info(f"Stopped audio in call {call_id}: {result}")
             return result
@@ -162,18 +152,11 @@ class MangoClient:
 
         payload = {
             "command": "calls/hangup",
-            "parameters": {
-                "call_id": call_id,
-                "timestamp": timestamp,
-                "signature": signature
-            }
+            "parameters": {"call_id": call_id, "timestamp": timestamp, "signature": signature},
         }
 
         try:
-            response = await self.client.post(
-                self.BASE_URL,
-                json=payload
-            )
+            response = await self.client.post(self.BASE_URL, json=payload)
             result = response.json()
             logger.info(f"Terminated call {call_id}: {result}")
             return result
@@ -188,17 +171,11 @@ class MangoClient:
 
         payload = {
             "command": "get/balance",
-            "parameters": {
-                "timestamp": timestamp,
-                "signature": signature
-            }
+            "parameters": {"timestamp": timestamp, "signature": signature},
         }
 
         try:
-            response = await self.client.post(
-                self.BASE_URL,
-                json=payload
-            )
+            response = await self.client.post(self.BASE_URL, json=payload)
             return response.json()
         except Exception as e:
             logger.error(f"Failed to get balance: {e}")
@@ -221,14 +198,9 @@ class MangoClient:
         try:
             with open(file_path, "rb") as f:
                 files = {"file": (filename, f, "audio/wav")}
-                data = {
-                    "timestamp": str(timestamp),
-                    "signature": signature
-                }
+                data = {"timestamp": str(timestamp), "signature": signature}
                 response = await self.client.post(
-                    f"{self.BASE_URL}/files/upload",
-                    data=data,
-                    files=files
+                    f"{self.BASE_URL}/files/upload", data=data, files=files
                 )
                 result = response.json()
                 logger.info(f"Uploaded audio {filename}: {result}")

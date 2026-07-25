@@ -6,8 +6,8 @@ import logging
 import os
 import re
 import threading
-import uuid
 import time
+import uuid
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
@@ -165,19 +165,23 @@ class LevitanHandler(BaseHTTPRequestHandler):
         path = self.path.strip("/").rstrip("/")
 
         if path == "health":
-            self._ok({
-                "status": "running",
-                "service": "levitan-webhook",
-                "pending": len(pending_calls),
-                "active": len(active_calls),
-            })
+            self._ok(
+                {
+                    "status": "running",
+                    "service": "levitan-webhook",
+                    "pending": len(pending_calls),
+                    "active": len(active_calls),
+                }
+            )
             return
         elif path == "status":
-            self._ok({
-                "service": "levitan-webhook",
-                "pending_calls": len(pending_calls),
-                "active_calls": {k: v for k, v in list(active_calls.items())[-20:]},
-            })
+            self._ok(
+                {
+                    "service": "levitan-webhook",
+                    "pending_calls": len(pending_calls),
+                    "active_calls": {k: v for k, v in list(active_calls.items())[-20:]},
+                }
+            )
             return
         self._ok({"service": "levitan-webhook"})
 
@@ -231,15 +235,14 @@ class LevitanHandler(BaseHTTPRequestHandler):
                 ctx = pending_calls[key]
                 break
 
-        client_phone = (
-            _norm_phone(from_num)
-            if callback_initiator != "API"
-            else _norm_phone(to_num)
-        )
+        client_phone = _norm_phone(from_num) if callback_initiator != "API" else _norm_phone(to_num)
 
         log.info(
             "📥 %s | %s | %s→%s | cmd=%s call=%s",
-            call_state, path, from_num, to_num,
+            call_state,
+            path,
+            from_num,
+            to_num,
             (command_id or entry_id or "-")[:20],
             (call_id or "-")[:20],
         )
@@ -254,10 +257,12 @@ class LevitanHandler(BaseHTTPRequestHandler):
                     "events": [],
                     "started": datetime.now().isoformat(),
                 }
-            active_calls[call_id]["events"].append({
-                "state": call_state,
-                "time": datetime.now().isoformat(),
-            })
+            active_calls[call_id]["events"].append(
+                {
+                    "state": call_state,
+                    "time": datetime.now().isoformat(),
+                }
+            )
 
         # Handle callback connected → client answered
         if call_state == "Connected" and callback_initiator == "API":
@@ -281,9 +286,7 @@ class LevitanHandler(BaseHTTPRequestHandler):
 
                 # Telegram notification
                 notify_telegram(
-                    f"📞 <b>Новый звонок</b>\n"
-                    f"Телефон: {client_phone}\n"
-                    f"Статус: Connected"
+                    f"📞 <b>Новый звонок</b>\n" f"Телефон: {client_phone}\n" f"Статус: Connected"
                 )
 
                 ctx_data = ctx or {}

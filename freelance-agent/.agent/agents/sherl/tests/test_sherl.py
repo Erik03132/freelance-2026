@@ -1,7 +1,14 @@
 from sherl import (
-    SEARCH_PROVIDERS, GEO_MODELS, COMPETITOR_FACTORS,
-    research, geo_scan, competitor_audit, market_research,
-    format_geo, format_comparison, format_confidence,
+    COMPETITOR_FACTORS,
+    GEO_MODELS,
+    SEARCH_PROVIDERS,
+    competitor_audit,
+    format_comparison,
+    format_confidence,
+    format_geo,
+    geo_scan,
+    market_research,
+    research,
 )
 
 

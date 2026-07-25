@@ -5,6 +5,7 @@
 Mango callback звонит на этот extension, baresip снимает трубку,
 играет 1 секунду тишины и вешает трубку.
 """
+
 import logging
 import signal
 import subprocess

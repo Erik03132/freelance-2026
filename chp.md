@@ -1,3 +1,70 @@
+## 🌞 2026-07-25 — omni-auto v3: прямой OpenRouter, калибровка классификатора, предупреждения
+
+**Статус:** Сессия активна. OmniRoute VPS починен.
+
+### Сделано
+1. **omni-auto v3** — переписан роутер: идёт напрямую в OpenRouter через US прокси, минуя сломанный OmniRoute на VPS (AUTH_002).
+2. **Калибровка классификатора** — снижена агрессивность: убраны ложные срабатывания на multi-turn, system messages, tool calls. Пороги: T3 ≥6, T2 ≥3, T1 ≥1, T0 <1.
+3. **Free chain по бенчмаркам:** Nemotron Ultra 550B #1 (Intel Index 38) → Ling 3.0 Flash (быстрый) → Laguna S 2.1 (код) → Gemma 4 31B (vision) → Nemotron Super.
+4. **Pro chain:** Sonnet 5 → GPT-5.6 Sol → Nemotron Ultra (free fallback).
+5. **Предупреждение ⚠️** — при выборе платной модели (Tier 2+) в JSON-ответ добавляется `notice`, в лог пишется WARNING.
+6. **omni-free провайдер** — модель `free-only` форсирует T0, всегда бесплатно.
+7. **Добавлены модели:** GPT-5.6 Sol/Pro/Terra/Luna, Claude Sonnet 5, Laguna S 2.1 / XS 2.1.
+
+### Проблемы
+- OpenRouter баланс: $0.39 остаток из $20 (потрачено $19.61 за месяц).
+
+### Архитектурные решения
+- omni-auto v3: OmniRoute VPS → fallback прямой OpenRouter через US-прокси
+- OmniRoute VPS (217.149.23.113:20128) — primary backend, компрессия RTK+Caveman включена
+- 7 неработающих моделей удалены из opencode.jsonc
+- OmniRoute VPS починен: добавлен OPENROUTER_API_KEY в ~/.omniroute/.env, создан API-ключ sk-c7a0aac..., подключён OpenRouter провайдер с ключом
+- Компрессия RTK+Caveman включена (stacked), semantic cache активен
+- ACTIVE_TASKS.md обновлён — добавлен блок OmniRoute (O1-O8) с полной программой донастройки
+- Free модели всегда первыми в цепочке T1. T2/T3 — paid first для качества, free fallback при $0 балансе.
+
+### Файлы
+- `tools/omni-auto-router/server.py` — v3 роутер
+- `~/.config/opencode/opencode.jsonc` — omni-free, GPT-5.6 Sol, Claude Sonnet 5
+- `~/Library/LaunchAgents/com.pm2.omni-auto.plist` — прокси + API ключ в env
+
+### Полная выкладка (25.07.2026 — продолжение)
+
+**OmniRoute VPS (217.149.23.113:20128) — полностью настроен:**
+- Добавлен `OPENROUTER_API_KEY` в `~/.omniroute/.env`
+- Создан API-ключ `sk-c7a0aac80f1d23cf-7fafe9-1d83e9bf` через дашборд
+- Подключён провайдер **OpenRouter** с ключом
+- **Компрессия RTK + Caveman (stacked)** включена — входящие запросы сжимаются ~89%
+- **Caveman Output Mode** включён — исходящие ответы тоже сжимаются
+- **Ultra compression** включён (aggressive mode)
+- **Semantic cache** — активен (авто-настройка)
+- **Combo `free-cascade`** создан: 5 бесплатных моделей с priority fallback (Nemotron Ultra → Ling 3.0 → Gemma 4 31B → Laguna XS 2.1 → Nemotron Super)
+- Перезапущен через PM2
+
+**omni-auto v3 (localhost:8123) — обновлён:**
+- Primary: VPS OmniRoute (передаёт модель с префиксом `openrouter/`)
+- Fallback: прямой OpenRouter через US HTTP-прокси
+- Автоматически ставит `stream: false` для совместимости с VPS
+- Классификация калибрована (T3≥6, T2≥3, T1≥1, T0<1)
+- Предупреждение ⚠️ в JSON при Tier 2+ моделях
+- Free chain: Nemotron Ultra → Ling 3.0 → Gemma 4 31B → Laguna XS 2.1 → Nemotron Super
+
+**Удалены 7 неработающих моделей:** GPT-5 Chat, Sonar Pro, Sonar Reason Pro, Gemma 3 27B, GPT-OSS 120B, Laguna S 2.1, Laguna M1
+
+**opencode.jsonc — расширен:**
+- `omni-auto` — Auto + Free Cascade + Free Only
+- `omni-free` — полная вкладка с 10 бесплатными моделями + каскад
+- `omniroute-vps` — прямой доступ к VPS с API-ключом для сервисов
+- `omni` — все модели по коротким именам через omni-auto
+
+**ACTIVE_TASKS.md** — добавлен блок **OmniRoute — Полная настройка AI-шлюза (O1–O8)**
+
+**Recovery скрипт:** `tools/omni-auto-router/omniroute-recover.sh` — полное восстановление VPS с нуля
+
+**claude-mem** — session-summary записана
+
+---
+
 ## 🌞 2026-07-23 — HH-агент: генерация откликов + правила агента
 
 **Статус:** Сессия завершена (finish-day).

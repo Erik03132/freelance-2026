@@ -1,13 +1,12 @@
 import json
 import os
 import sys
-from datetime import datetime, date
+from datetime import date, datetime
 from pathlib import Path
-from typing import Optional
 
 import jinja2
-from fastapi import FastAPI, Request, Query, HTTPException, Form
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -46,6 +45,7 @@ def render(name: str, **context):
 
 # === PYDANTIC MODELS ===
 
+
 class ContactCreate(BaseModel):
     timestamp: str = ""
     phone: str = ""
@@ -63,19 +63,19 @@ class ContactCreate(BaseModel):
 
 
 class ContactUpdate(BaseModel):
-    timestamp: Optional[str] = None
-    phone: Optional[str] = None
-    company_name: Optional[str] = None
-    region: Optional[str] = None
-    contact_name: Optional[str] = None
-    product: Optional[str] = None
-    volume: Optional[str] = None
-    ready_date: Optional[str] = None
-    price_info: Optional[str] = None
-    status: Optional[str] = None
-    notes: Optional[str] = None
-    transcript: Optional[str] = None
-    recording_id: Optional[str] = None
+    timestamp: str | None = None
+    phone: str | None = None
+    company_name: str | None = None
+    region: str | None = None
+    contact_name: str | None = None
+    product: str | None = None
+    volume: str | None = None
+    ready_date: str | None = None
+    price_info: str | None = None
+    status: str | None = None
+    notes: str | None = None
+    transcript: str | None = None
+    recording_id: str | None = None
 
 
 class ReminderCreate(BaseModel):
@@ -93,6 +93,7 @@ class QueueAdd(BaseModel):
 
 # === WEB ROUTES ===
 
+
 @app.on_event("startup")
 async def startup():
     await init_db()
@@ -102,21 +103,32 @@ async def startup():
 async def dashboard(request: Request):
     db = await get_db()
     total = (await (await db.execute("SELECT COUNT(*) FROM contacts")).fetchone())[0]
-    leads = (await (await db.execute("SELECT COUNT(*) FROM contacts WHERE status='lead'")).fetchone())[0]
+    leads = (
+        await (await db.execute("SELECT COUNT(*) FROM contacts WHERE status='lead'")).fetchone()
+    )[0]
     today = date.today().isoformat()
 
-    today_calls = (await (await db.execute(
-        "SELECT COUNT(*) FROM contacts WHERE date(timestamp)=? AND timestamp != ''", (today,)
-    )).fetchone())[0]
+    today_calls = (
+        await (
+            await db.execute(
+                "SELECT COUNT(*) FROM contacts WHERE date(timestamp)=? AND timestamp != ''",
+                (today,),
+            )
+        ).fetchone()
+    )[0]
 
-    pending = (await (await db.execute(
-        "SELECT COUNT(*) FROM reminders WHERE done=0 AND due_date>=?",
-        (today,)
-    )).fetchone())[0]
-    overdue = (await (await db.execute(
-        "SELECT COUNT(*) FROM reminders WHERE done=0 AND due_date<?",
-        (today,)
-    )).fetchone())[0]
+    pending = (
+        await (
+            await db.execute(
+                "SELECT COUNT(*) FROM reminders WHERE done=0 AND due_date>=?", (today,)
+            )
+        ).fetchone()
+    )[0]
+    overdue = (
+        await (
+            await db.execute("SELECT COUNT(*) FROM reminders WHERE done=0 AND due_date<?", (today,))
+        ).fetchone()
+    )[0]
 
     cur = await db.execute(
         "SELECT status, COUNT(*) as cnt FROM contacts GROUP BY status ORDER BY cnt DESC"
@@ -132,7 +144,8 @@ async def dashboard(request: Request):
     queue_count = (await (await db.execute("SELECT COUNT(*) FROM call_queue")).fetchone())[0]
     await db.close()
 
-    return render("dashboard.html",
+    return render(
+        "dashboard.html",
         request=request,
         total=total,
         leads=leads,
@@ -180,7 +193,8 @@ async def contacts_page(
     await db.close()
 
     pages = max(1, (total + per_page - 1) // per_page)
-    return render("contacts.html",
+    return render(
+        "contacts.html",
         request=request,
         contacts=contacts,
         page=page,
@@ -188,7 +202,15 @@ async def contacts_page(
         total=total,
         search=search,
         status_filter=status,
-        statuses=["lead", "callback", "rejected", "no_interest", "no_answer", "no_contact", "other"],
+        statuses=[
+            "lead",
+            "callback",
+            "rejected",
+            "no_interest",
+            "no_answer",
+            "no_contact",
+            "other",
+        ],
     )
 
 
@@ -200,7 +222,8 @@ async def contact_detail(request: Request, contact_id: int):
     await db.close()
     if not contact:
         return HTMLResponse("Contact not found", status_code=404)
-    return render("contact_detail.html",
+    return render(
+        "contact_detail.html",
         request=request,
         c=dict(contact),
     )
@@ -210,16 +233,15 @@ async def contact_detail(request: Request, contact_id: int):
 async def reminders_page(request: Request):
     db = await get_db()
     today = date.today().isoformat()
-    active = await db.execute(
-        "SELECT * FROM reminders WHERE done=0 ORDER BY due_date ASC"
-    )
+    active = await db.execute("SELECT * FROM reminders WHERE done=0 ORDER BY due_date ASC")
     done_rows = await db.execute(
         "SELECT * FROM reminders WHERE done=1 ORDER BY due_date DESC LIMIT 50"
     )
     active_reminders = [dict(r) for r in await active.fetchall()]
     done_reminders = [dict(r) for r in await done_rows.fetchall()]
     await db.close()
-    return render("reminders.html",
+    return render(
+        "reminders.html",
         request=request,
         active=active_reminders,
         done=done_reminders,
@@ -233,8 +255,7 @@ async def today_page(request: Request):
     today = date.today().isoformat()
     # Reminders due today or overdue
     cur = await db.execute(
-        "SELECT * FROM reminders WHERE done=0 AND due_date<=? ORDER BY due_date ASC",
-        (today,)
+        "SELECT * FROM reminders WHERE done=0 AND due_date<=? ORDER BY due_date ASC", (today,)
     )
     due_reminders = [dict(r) for r in await cur.fetchall()]
     # Manually added queue items
@@ -242,7 +263,8 @@ async def today_page(request: Request):
     queue = [dict(r) for r in await cur.fetchall()]
     overdue = len([r for r in due_reminders if r["due_date"] < today])
     await db.close()
-    return render("today.html",
+    return render(
+        "today.html",
         request=request,
         due_reminders=due_reminders,
         queue=queue,
@@ -254,7 +276,8 @@ async def today_page(request: Request):
 @app.get("/import", response_class=HTMLResponse)
 async def import_page(request: Request, message: str = ""):
     files = sorted(DATA_DIR.glob("*.json"), key=os.path.getmtime, reverse=True)
-    return render("import.html",
+    return render(
+        "import.html",
         request=request,
         files=[f.name for f in files],
         message=message,
@@ -263,15 +286,23 @@ async def import_page(request: Request, message: str = ""):
 
 # === API ROUTES ===
 
+
 @app.get("/api/stats")
 async def api_stats():
     db = await get_db()
     total = (await (await db.execute("SELECT COUNT(*) FROM contacts")).fetchone())[0]
-    leads = (await (await db.execute("SELECT COUNT(*) FROM contacts WHERE status='lead'")).fetchone())[0]
+    leads = (
+        await (await db.execute("SELECT COUNT(*) FROM contacts WHERE status='lead'")).fetchone()
+    )[0]
     today = date.today().isoformat()
-    today_calls = (await (await db.execute(
-        "SELECT COUNT(*) FROM contacts WHERE date(timestamp)=? AND timestamp != ''", (today,)
-    )).fetchone())[0]
+    today_calls = (
+        await (
+            await db.execute(
+                "SELECT COUNT(*) FROM contacts WHERE date(timestamp)=? AND timestamp != ''",
+                (today,),
+            )
+        ).fetchone()
+    )[0]
     await db.close()
     return {"total": total, "leads": leads, "today_calls": today_calls}
 
@@ -319,10 +350,23 @@ async def api_create_contact(data: ContactCreate):
          volume, ready_date, price_info, status, notes, transcript, recording_id,
          created_at, updated_at)
         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-        (data.timestamp, data.phone, data.company_name, data.region,
-         data.contact_name, data.product, data.volume, data.ready_date,
-         data.price_info, data.status, data.notes, data.transcript,
-         data.recording_id, now, now),
+        (
+            data.timestamp,
+            data.phone,
+            data.company_name,
+            data.region,
+            data.contact_name,
+            data.product,
+            data.volume,
+            data.ready_date,
+            data.price_info,
+            data.status,
+            data.notes,
+            data.transcript,
+            data.recording_id,
+            now,
+            now,
+        ),
     )
     await db.commit()
     contact_id = cur.lastrowid
@@ -346,9 +390,7 @@ async def api_update_contact(contact_id: int, data: ContactUpdate):
     updates["updated_at"] = now
     set_clause = ", ".join(f"{k}=?" for k in updates)
     values = list(updates.values()) + [contact_id]
-    await db.execute(
-        f"UPDATE contacts SET {set_clause} WHERE id=?", values
-    )
+    await db.execute(f"UPDATE contacts SET {set_clause} WHERE id=?", values)
     await db.commit()
     row = await (await db.execute("SELECT * FROM contacts WHERE id=?", (contact_id,))).fetchone()
     await db.close()
@@ -365,7 +407,7 @@ async def api_delete_contact(contact_id: int):
 
 
 @app.get("/api/reminders")
-async def api_reminders(done: Optional[int] = None):
+async def api_reminders(done: int | None = None):
     db = await get_db()
     if done is not None:
         rows = await db.execute(
@@ -436,13 +478,23 @@ async def api_import(filename: str = Query(...)):
              volume, ready_date, price_info, status, notes, transcript,
              recording_id, created_at, updated_at)
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-            (ts, item.get("phone", ""), item.get("company_name", ""),
-             item.get("region", ""), item.get("contact_name", ""),
-             item.get("product", ""), item.get("volume", ""),
-             item.get("ready_date", ""), item.get("price_info", ""),
-             item.get("status", "other"), item.get("notes", ""),
-             item.get("transcript", ""), item.get("recording_id", ""),
-             now, now),
+            (
+                ts,
+                item.get("phone", ""),
+                item.get("company_name", ""),
+                item.get("region", ""),
+                item.get("contact_name", ""),
+                item.get("product", ""),
+                item.get("volume", ""),
+                item.get("ready_date", ""),
+                item.get("price_info", ""),
+                item.get("status", "other"),
+                item.get("notes", ""),
+                item.get("transcript", ""),
+                item.get("recording_id", ""),
+                now,
+                now,
+            ),
         )
         imported += 1
     await db.commit()
@@ -451,6 +503,7 @@ async def api_import(filename: str = Query(...)):
 
 
 # === QUEUE API ===
+
 
 @app.get("/api/queue")
 async def api_queue():
@@ -472,7 +525,13 @@ async def api_queue_add(data: QueueAdd):
     await db.commit()
     qid = cur.lastrowid
     await db.close()
-    return {"id": qid, "phone": data.phone, "company_name": data.company_name, "note": data.note, "created_at": now}
+    return {
+        "id": qid,
+        "phone": data.phone,
+        "company_name": data.company_name,
+        "note": data.note,
+        "created_at": now,
+    }
 
 
 @app.patch("/api/queue/{qid}/done")
@@ -496,4 +555,5 @@ async def api_queue_delete(qid: int):
 # === MAIN ===
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("crm.app:app", host="0.0.0.0", port=8088, reload=True)

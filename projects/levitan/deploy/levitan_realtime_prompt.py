@@ -49,6 +49,7 @@ Purina Старт (990₽/25кг, 1–10 дн), Рост (950₽, 11–29 дн),
 НЕ предлагай корм и допы ДО получения телефона.
 Когда собрала породу, количество, город и телефон — вызови save_lead."""
 
+
 # === ДИНАМИКА (инжектится в КОНЕЦ промпта, НЕ ломает prefix cache) ===
 def build_dynamic_suffix(caller_id: str = "", city_hint: str = "", nearest_dates: str = "") -> str:
     """Собирает trailing-часть промпта с данными конкретного звонка."""
@@ -68,11 +69,13 @@ def build_dynamic_suffix(caller_id: str = "", city_hint: str = "", nearest_dates
 # Загружается из docs/ANGELLA_BROILERS_FAQ_CACHE.json
 _FAQ_PATH = Path(__file__).resolve().parent.parent / "docs" / "ANGELLA_BROILERS_FAQ_CACHE.json"
 
+
 def load_faq_cache() -> dict:
     try:
         return json.loads(_FAQ_PATH.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
 
 FAQ_CACHE = load_faq_cache()
 
@@ -86,16 +89,27 @@ SAVE_LEAD_TOOL = {
         "parameters": {
             "type": "object",
             "properties": {
-                "breed": {"type": "string", "enum": ["КОББ-500", "РОСС-308"], "description": "Порода бройлера"},
+                "breed": {
+                    "type": "string",
+                    "enum": ["КОББ-500", "РОСС-308"],
+                    "description": "Порода бройлера",
+                },
                 "volume": {"type": "integer", "description": "Количество голов"},
                 "city": {"type": "string", "description": "Город доставки или самовывоза"},
                 "phone": {"type": "string", "description": "Телефон клиента для подтверждения"},
-                "delivery_type": {"type": "string", "enum": ["доставка", "самовывоз"], "description": "Способ получения"},
-                "desired_date": {"type": "string", "description": "Желаемая дата вывода, если назвал"}
+                "delivery_type": {
+                    "type": "string",
+                    "enum": ["доставка", "самовывоз"],
+                    "description": "Способ получения",
+                },
+                "desired_date": {
+                    "type": "string",
+                    "description": "Желаемая дата вывода, если назвал",
+                },
             },
-            "required": ["breed", "volume", "city", "phone"]
-        }
-    }
+            "required": ["breed", "volume", "city", "phone"],
+        },
+    },
 }
 
 TOOLS = [SAVE_LEAD_TOOL]

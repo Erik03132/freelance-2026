@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 """Levitan Real-Time Dialog Engine — FIFO-based conversation loop."""
 
-import hashlib, json, logging, os, re, subprocess, sys, threading, time, wave
+import json
+import logging
+import os
+import subprocess
+import sys
+import threading
+import time
+import wave
 from datetime import datetime
 from pathlib import Path
+
 import requests
 
 # === CONFIG ===
@@ -34,6 +42,7 @@ SYSTEM_PROMPT = """Ты Иван, менеджер компании «Глоба
 
 # === Audio Helpers ===
 
+
 def create_silence_wav(seconds: float, path: str):
     """Create silence WAV file."""
     nframes = int(8000 * seconds)
@@ -43,6 +52,7 @@ def create_silence_wav(seconds: float, path: str):
         w.setframerate(8000)
         w.writeframes(b"\x00" * (nframes * 2))
 
+
 def write_to_fifo(data: bytes):
     """Write raw PCM data to FIFO."""
     try:
@@ -51,10 +61,12 @@ def write_to_fifo(data: bytes):
     except Exception as e:
         log.error(f"FIFO write: {e}")
 
+
 def wav_to_pcm(wav_path: str) -> bytes:
     """Extract raw PCM from WAV file."""
     with wave.open(wav_path, "rb") as w:
         return w.readframes(w.getnframes())
+
 
 def play_wav_via_fifo(wav_path: str):
     """Play WAV file through FIFO."""
@@ -68,11 +80,14 @@ def play_wav_via_fifo(wav_path: str):
         log.error(f"Play WAV: {e}")
         return 0
 
+
 def play_silence_via_fifo():
     """Switch FIFO to silence."""
     import subprocess
+
     # Kill old silence feeder and start new one
     subprocess.run("pkill -f 'silence_feeder'", shell=True)
+
     def feed_silence():
         silence = b"\x00" * 16000
         while True:
@@ -81,19 +96,24 @@ def play_silence_via_fifo():
                 time.sleep(0.1)
             except:
                 break
+
     t = threading.Thread(target=feed_silence, daemon=True)
     t.start()
+
 
 # === STT ===
 
 _model = None
 
+
 def get_stt_model():
     global _model
     if _model is None:
         from faster_whisper import WhisperModel
+
         _model = WhisperModel("base", device="cpu", compute_type="int8")
     return _model
+
 
 def transcribe(filepath: str) -> str:
     try:
@@ -106,17 +126,29 @@ def transcribe(filepath: str) -> str:
         log.error(f"STT: {e}")
         return ""
 
+
 # === LLM ===
+
 
 def generate_response(transcript: list[dict]) -> str:
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     for entry in transcript[-6:]:
         messages.append(entry)
     try:
-        r = requests.post("https://openrouter.ai/api/v1/chat/completions",
-            headers={"Authorization": f"Bearer {OPENROUTER_KEY}", "HTTP-Referer": "https://levitan.app"},
-            json={"model": "deepseek/deepseek-chat-v3-0324", "messages": messages, "max_tokens": 150, "temperature": 0.7},
-            timeout=20)
+        r = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_KEY}",
+                "HTTP-Referer": "https://levitan.app",
+            },
+            json={
+                "model": "deepseek/deepseek-chat-v3-0324",
+                "messages": messages,
+                "max_tokens": 150,
+                "temperature": 0.7,
+            },
+            timeout=20,
+        )
         resp = r.json()["choices"][0]["message"]["content"]
         log.info(f"LLM: {resp[:100]}")
         return resp
@@ -124,28 +156,57 @@ def generate_response(transcript: list[dict]) -> str:
         log.error(f"LLM: {e}")
         return "Извините, не расслышал. Повторите, пожалуйста."
 
+
 # === TTS ===
+
 
 def synthesize(text: str) -> str:
     try:
         import asyncio
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-        # Generate greeting WAV locally  
+        # Generate greeting WAV locally
         local_path = f"/tmp/levitan_tts_{int(time.time())}.mp3"
-        
+
         # Direct call to edge-tts
-        subprocess.run([sys.executable, "-m", "edge_tts", "--voice", "ru-RU-SvetlanaNeural",
-                       "--text", text, "--write-media", local_path],
-                      capture_output=True, timeout=30)
-        
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "edge_tts",
+                "--voice",
+                "ru-RU-SvetlanaNeural",
+                "--text",
+                text,
+                "--write-media",
+                local_path,
+            ],
+            capture_output=True,
+            timeout=30,
+        )
+
         # Convert to WAV 8000Hz
         wav_path = local_path.replace(".mp3", ".wav")
-        subprocess.run(["ffmpeg", "-i", local_path, "-ar", "8000", "-ac", "1",
-                       "-sample_fmt", "s16", wav_path, "-y"],
-                      capture_output=True, timeout=10)
-        
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-i",
+                local_path,
+                "-ar",
+                "8000",
+                "-ac",
+                "1",
+                "-sample_fmt",
+                "s16",
+                wav_path,
+                "-y",
+            ],
+            capture_output=True,
+            timeout=10,
+        )
+
         # Verify
         if os.path.exists(wav_path) and os.path.getsize(wav_path) > 100:
             return wav_path
@@ -154,7 +215,9 @@ def synthesize(text: str) -> str:
         log.error(f"TTS: {e}")
         return ""
 
+
 # === Dialog Session ===
+
 
 class DialogSession:
     def __init__(self, call_id: str, phone: str):
@@ -175,7 +238,9 @@ class DialogSession:
                 return
 
             duration = play_wav_via_fifo(greeting_path)
-            self.transcript.append({"role": "assistant", "content": "[Приветствие и вопрос о культурах]"})
+            self.transcript.append(
+                {"role": "assistant", "content": "[Приветствие и вопрос о культурах]"}
+            )
             log.info(f"Greeting played ({duration:.1f}s)")
 
             # Dialog loop
@@ -196,7 +261,10 @@ class DialogSession:
                 log.info(f"👤 {text[:80]}")
 
                 # Check for disinterest
-                if any(w in text.lower() for w in ["не интересно", "не надо", "отказ", "до свидания", "не продаем"]):
+                if any(
+                    w in text.lower()
+                    for w in ["не интересно", "не надо", "отказ", "до свидания", "не продаем"]
+                ):
                     response = "Спасибо за время. Если будут вопросы — мы на связи. До свидания!"
                     self._respond(response)
                     break
@@ -231,9 +299,7 @@ class DialogSession:
         start = time.time()
         while time.time() - start < timeout:
             recordings = sorted(
-                RECORDINGS_DIR.glob("dump-*-dec.wav"),
-                key=lambda p: p.stat().st_mtime,
-                reverse=True
+                RECORDINGS_DIR.glob("dump-*-dec.wav"), key=lambda p: p.stat().st_mtime, reverse=True
             )
             for rec in recordings:
                 age = time.time() - rec.stat().st_mtime
@@ -248,17 +314,23 @@ class DialogSession:
         """Save transcript."""
         path = LOG_DIR / f"dialog_{self.phone}_{int(time.time())}.json"
         with open(path, "w") as f:
-            json.dump({
-                "call_id": self.call_id,
-                "phone": self.phone,
-                "turns": self.turn,
-                "transcript": self.transcript,
-                "saved_at": datetime.now().isoformat(),
-            }, f, ensure_ascii=False, indent=2)
+            json.dump(
+                {
+                    "call_id": self.call_id,
+                    "phone": self.phone,
+                    "turns": self.turn,
+                    "transcript": self.transcript,
+                    "saved_at": datetime.now().isoformat(),
+                },
+                f,
+                ensure_ascii=False,
+                indent=2,
+            )
         log.info(f"📁 Saved: {path}")
 
 
 # === Main Loop ===
+
 
 def watch_events():
     events_path = LOG_DIR / "events.jsonl"

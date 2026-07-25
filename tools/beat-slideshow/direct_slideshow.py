@@ -14,14 +14,12 @@
   6. Продлевает музыку зацикливанием если нужно
 """
 
-import sys
+import json
 import os
 import subprocess
-import json
-import math
-import tempfile
-import shutil
+import sys
 from pathlib import Path
+
 from PIL import Image, ImageDraw, ImageFont
 
 WIDTH = 1080
@@ -32,9 +30,9 @@ PHOTO_DUR = 3.8
 TITLE_DUR = 4.0
 BATCH_SIZE = 20
 
-PHOTO_EXT = {'.jpg', '.jpeg', '.png', '.heic'}
-VIDEO_EXT = {'.mov', '.mp4'}
-SKIP_EXT = {'.dng'}
+PHOTO_EXT = {".jpg", ".jpeg", ".png", ".heic"}
+VIDEO_EXT = {".mov", ".mp4"}
+SKIP_EXT = {".dng"}
 
 ZOOM_VARIANTS = [
     ("min(zoom+0.0012,1.25)", "iw/2-(iw/zoom/2)", "ih/2-(ih/zoom/2)"),
@@ -48,11 +46,14 @@ ZOOM_VARIANTS = [
 def convert_heic(folder: Path, tmpdir: Path) -> dict:
     """Конвертирует HEIC → JPG через sips. Возвращает {stem: jpg_path}."""
     converted = {}
-    heic_files = [f for f in folder.iterdir() if f.suffix.lower() == '.heic']
+    heic_files = [f for f in folder.iterdir() if f.suffix.lower() == ".heic"]
     for i, f in enumerate(heic_files):
         out = tmpdir / f"{f.stem}.jpg"
-        subprocess.run(["sips", "-s", "format", "jpeg", str(f), "--out", str(out)],
-                       capture_output=True, check=False)
+        subprocess.run(
+            ["sips", "-s", "format", "jpeg", str(f), "--out", str(out)],
+            capture_output=True,
+            check=False,
+        )
         converted[f.stem] = out
         print(f"\r  HEIC→JPG: {i+1}/{len(heic_files)}", end="", flush=True)
     if heic_files:
@@ -65,7 +66,7 @@ def find_live_photo_dupes(folder: Path) -> set:
     video_stems = {f.stem for f in folder.iterdir() if f.suffix.lower() in VIDEO_EXT}
     dupes = set()
     for f in folder.iterdir():
-        if f.suffix.lower() == '.heic' and f.stem in video_stems:
+        if f.suffix.lower() == ".heic" and f.stem in video_stems:
             dupes.add(f.stem)
     return dupes
 
@@ -79,7 +80,7 @@ def collect_media(folder: Path, heic_map: dict, dupes: set) -> list[dict]:
 
         if ext in SKIP_EXT:
             continue
-        if ext == '.heic':
+        if ext == ".heic":
             if stem in dupes:
                 continue  # используем MOV вместо HEIC
             if stem in heic_map:
@@ -93,16 +94,18 @@ def collect_media(folder: Path, heic_map: dict, dupes: set) -> list[dict]:
 
 
 def video_duration(path: str) -> float:
-    r = subprocess.run([
-        "ffprobe", "-v", "quiet", "-print_format", "json",
-        "-show_format", str(path)
-    ], capture_output=True, text=True, check=True)
+    r = subprocess.run(
+        ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", str(path)],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
     return float(json.loads(r.stdout)["format"]["duration"])
 
 
 def create_title_card(text: str, subtitle: str, out_path: Path):
     """Создаёт красивую заставку через PIL."""
-    img = Image.new('RGB', (WIDTH, HEIGHT), (8, 8, 12))
+    img = Image.new("RGB", (WIDTH, HEIGHT), (8, 8, 12))
     draw = ImageDraw.Draw(img)
 
     # Градиентный фон
@@ -130,8 +133,12 @@ def create_title_card(text: str, subtitle: str, out_path: Path):
     if subtitle:
         bbox2 = draw.textbbox((0, 0), subtitle, font=font_sub)
         tw2 = bbox2[2] - bbox2[0]
-        draw.text(((WIDTH - tw2) / 2, HEIGHT // 2 + th + 20), subtitle,
-                  fill=(180, 180, 200), font=font_sub)
+        draw.text(
+            ((WIDTH - tw2) / 2, HEIGHT // 2 + th + 20),
+            subtitle,
+            fill=(180, 180, 200),
+            font=font_sub,
+        )
 
     img.save(str(out_path), "JPEG", quality=95)
 
@@ -143,7 +150,14 @@ def render_photo_clip(photo: Path, duration: float, out_path: Path, variant_idx:
     fade_out_start = max(duration - FADE, 0.1)
 
     cmd = [
-        "ffmpeg", "-y", "-loop", "1", "-t", f"{duration:.3f}", "-i", str(photo),
+        "ffmpeg",
+        "-y",
+        "-loop",
+        "1",
+        "-t",
+        f"{duration:.3f}",
+        "-i",
+        str(photo),
         "-vf",
         f"scale=w={WIDTH}:h={HEIGHT}:force_original_aspect_ratio=increase,"
         f"crop={WIDTH}:{HEIGHT},"
@@ -151,9 +165,14 @@ def render_photo_clip(photo: Path, duration: float, out_path: Path, variant_idx:
         f"x='{zoom_x}':y='{zoom_y}':s={WIDTH}x{HEIGHT},"
         f"settb=AVTB,fps={FPS},setpts=PTS-STARTPTS,"
         f"fade=t=in:st=0:d={FADE},fade=t=out:st={fade_out_start:.2f}:d={FADE}",
-        "-c:v", "h264_videotoolbox", "-b:v", "4M",
-        "-pix_fmt", "yuv420p", "-an",
-        str(out_path)
+        "-c:v",
+        "h264_videotoolbox",
+        "-b:v",
+        "4M",
+        "-pix_fmt",
+        "yuv420p",
+        "-an",
+        str(out_path),
     ]
     subprocess.run(cmd, capture_output=True, check=True)
 
@@ -163,16 +182,25 @@ def render_video_clip(video: Path, duration: float, out_path: Path):
     fade_out_start = max(duration - FADE, 0.1)
 
     cmd = [
-        "ffmpeg", "-y", "-i", str(video),
-        "-t", f"{duration:.3f}",
+        "ffmpeg",
+        "-y",
+        "-i",
+        str(video),
+        "-t",
+        f"{duration:.3f}",
         "-vf",
         f"scale=w={WIDTH}:h={HEIGHT}:force_original_aspect_ratio=increase,"
         f"crop={WIDTH}:{HEIGHT},"
         f"settb=AVTB,fps={FPS},setpts=PTS-STARTPTS,"
         f"fade=t=in:st=0:d={FADE},fade=t=out:st={fade_out_start:.2f}:d={FADE}",
-        "-c:v", "h264_videotoolbox", "-b:v", "4M",
-        "-pix_fmt", "yuv420p", "-an",
-        str(out_path)
+        "-c:v",
+        "h264_videotoolbox",
+        "-b:v",
+        "4M",
+        "-pix_fmt",
+        "yuv420p",
+        "-an",
+        str(out_path),
     ]
     subprocess.run(cmd, capture_output=True, check=True)
 
@@ -182,10 +210,23 @@ def extend_music(audio_path: str, target_dur: float, out_path: Path):
     src_dur = video_duration(audio_path)
     if src_dur >= target_dur:
         # Просто обрезаем
-        subprocess.run([
-            "ffmpeg", "-y", "-i", audio_path, "-t", f"{target_dur:.1f}",
-            "-c:a", "aac", "-b:a", "192k", str(out_path)
-        ], capture_output=True, check=True)
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                audio_path,
+                "-t",
+                f"{target_dur:.1f}",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "192k",
+                str(out_path),
+            ],
+            capture_output=True,
+            check=True,
+        )
         return
 
     # Зацикливаем: исход + последние 30с повторяем
@@ -201,12 +242,27 @@ def extend_music(audio_path: str, target_dur: float, out_path: Path):
             f.write(f"file '{audio_path}'\n")
 
     # concat + trim
-    subprocess.run([
-        "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(list_file),
-        "-t", f"{target_dur:.1f}",
-        "-c:a", "aac", "-b:a", "192k",
-        str(out_path)
-    ], capture_output=True, check=True)
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            str(list_file),
+            "-t",
+            f"{target_dur:.1f}",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "192k",
+            str(out_path),
+        ],
+        capture_output=True,
+        check=True,
+    )
 
 
 def main():
@@ -265,7 +321,14 @@ def main():
                 dur = min(video_durs.get(m["stem"], 3.0), 5.0)  # максимум 5с на видео
             else:
                 dur = PHOTO_DUR
-            segments.append({"type": m["type"], "path": m["path"], "duration": dur, "stem": m.get("stem", "")})
+            segments.append(
+                {
+                    "type": m["type"],
+                    "path": m["path"],
+                    "duration": dur,
+                    "stem": m.get("stem", ""),
+                }
+            )
             total += dur
         segments.append({"type": "title", "path": outro_path, "duration": TITLE_DUR})
         total += TITLE_DUR
@@ -299,10 +362,23 @@ def main():
                 f.write(f"file '{cp}'\n")
 
         video_only = tmpdir / "video_only.mp4"
-        subprocess.run([
-            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(concat_list),
-            "-c", "copy", str(video_only)
-        ], capture_output=True, check=True)
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-f",
+                "concat",
+                "-safe",
+                "0",
+                "-i",
+                str(concat_list),
+                "-c",
+                "copy",
+                str(video_only),
+            ],
+            capture_output=True,
+            check=True,
+        )
 
         # 8. Продление музыки
         print("Подготовка музыки...")
@@ -311,16 +387,28 @@ def main():
 
         # 9. Финальный mux
         print("Финальный рендер...")
-        subprocess.run([
-            "ffmpeg", "-y",
-            "-i", str(video_only),
-            "-i", str(audio_ext),
-            "-c:v", "copy",
-            "-c:a", "aac", "-b:a", "192k",
-            "-shortest",
-            "-movflags", "+faststart",
-            output
-        ], capture_output=True, check=True)
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                str(video_only),
+                "-i",
+                str(audio_ext),
+                "-c:v",
+                "copy",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "192k",
+                "-shortest",
+                "-movflags",
+                "+faststart",
+                output,
+            ],
+            capture_output=True,
+            check=True,
+        )
 
         print(f"Готово: {output}")
         print(f"  Длительность: {total:.0f}с")

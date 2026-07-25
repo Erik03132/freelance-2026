@@ -8,6 +8,7 @@
   gn stats                           # сводка по сессии (экономия токенов)
   gn clear                           # сброс кеша сессии
 """
+
 from __future__ import annotations
 
 import argparse
@@ -43,10 +44,19 @@ def main(argv=None) -> int:
     if args.cmd == "read":
         res = eng.read(args.path, force=args.force)
         if args.json:
-            print(json.dumps({"content": res.content, "ref": res.ref,
-                              "deduped": res.deduped, "bytes_sent": res.bytes_sent,
-                              "ref_count": res.ref_count, "reason": res.reason},
-                             ensure_ascii=False))
+            print(
+                json.dumps(
+                    {
+                        "content": res.content,
+                        "ref": res.ref,
+                        "deduped": res.deduped,
+                        "bytes_sent": res.bytes_sent,
+                        "ref_count": res.ref_count,
+                        "reason": res.reason,
+                    },
+                    ensure_ascii=False,
+                )
+            )
         else:
             sys.stdout.write(res.content)
             if not res.content.endswith("\n"):
@@ -56,10 +66,19 @@ def main(argv=None) -> int:
     if args.cmd == "read-text":
         res = eng.read_text(args.text, args.key, force=args.force)
         if args.json:
-            print(json.dumps({"content": res.content, "ref": res.ref,
-                              "deduped": res.deduped, "bytes_sent": res.bytes_sent,
-                              "ref_count": res.ref_count, "reason": res.reason},
-                             ensure_ascii=False))
+            print(
+                json.dumps(
+                    {
+                        "content": res.content,
+                        "ref": res.ref,
+                        "deduped": res.deduped,
+                        "bytes_sent": res.bytes_sent,
+                        "ref_count": res.ref_count,
+                        "reason": res.reason,
+                    },
+                    ensure_ascii=False,
+                )
+            )
         else:
             sys.stdout.write(res.content)
             sys.stdout.write("\n")

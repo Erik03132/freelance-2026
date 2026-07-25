@@ -2,28 +2,31 @@
 MarinaVectorDB — Облачная векторная база знаний (Neon + pgvector)
 С auto-reconnect и валидацией соединений.
 """
+
 import os
 import time
-import json
+
 import psycopg2
 import psycopg2.extras
+from dotenv import load_dotenv
 from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
-from dotenv import load_dotenv
 
 # Загружаем настройки
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-load_dotenv(os.path.join(BASE_DIR, '.env'), override=True)
+load_dotenv(os.path.join(BASE_DIR, ".env"), override=True)
 if not os.getenv("GEMINI_API_KEY"):
-    load_dotenv(os.path.join(BASE_DIR, '..', 'freelance-agent', '.env'), override=True)
+    load_dotenv(os.path.join(BASE_DIR, "..", "freelance-agent", ".env"), override=True)
 
 # Lazy import Gemini (избегаем конфликтов при старте)
 _genai = None
+
 
 def _get_genai():
     global _genai
     if _genai is None:
         import google.generativeai as genai
+
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
         _genai = genai
     return _genai
@@ -90,9 +93,9 @@ class MarinaVectorDB:
         result = genai.embed_content(
             model="models/text-embedding-004",
             content=text,
-            task_type="retrieval_document"
+            task_type="retrieval_document",
         )
-        return result['embedding']
+        return result["embedding"]
 
     def add_knowledge(self, text: str, meta: dict):
         if not self.enabled:
@@ -109,8 +112,10 @@ class MarinaVectorDB:
                 break
             except Exception as e:
                 if "429" in str(e) and attempt < max_retries - 1:
-                    wait_time = base_delay * (2 ** attempt)
-                    print(f"   ⚠️ API 429. Сплю {wait_time} сек... (Попытка {attempt+1}/{max_retries})")
+                    wait_time = base_delay * (2**attempt)
+                    print(
+                        f"   ⚠️ API 429. Сплю {wait_time} сек... (Попытка {attempt+1}/{max_retries})"
+                    )
                     time.sleep(wait_time)
                 else:
                     print(f"❌ Ошибка генерации эмбеддинга: {e}")
@@ -123,7 +128,7 @@ class MarinaVectorDB:
                 with conn.cursor() as cur:
                     cur.execute(
                         "INSERT INTO marina_knowledge (content, metadata, embedding) VALUES (%s, %s, %s)",
-                        (text, psycopg2.extras.Json(meta), embedding)
+                        (text, psycopg2.extras.Json(meta), embedding),
                     )
                     conn.commit()
                 print("   ✅ Успешно проиндексировано в Neon")
@@ -144,7 +149,7 @@ class MarinaVectorDB:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(
                     "SELECT content, metadata, 1 - (embedding <=> %s::vector) as similarity FROM marina_knowledge ORDER BY similarity DESC LIMIT %s",
-                    (query_embedding, limit)
+                    (query_embedding, limit),
                 )
                 return cur.fetchall()
         except Exception as e:

@@ -23,6 +23,7 @@ def _run(args, timeout=15, no_key=False):
     cwd = _AGENTS
     if no_key:
         import tempfile
+
         cwd = tempfile.mkdtemp()
     result = subprocess.run(
         [PYTHON, "-m"] + args,
@@ -35,6 +36,7 @@ def _run(args, timeout=15, no_key=False):
 
 
 # ── Artemiy ─────────────────────────────────────────────────────────────
+
 
 def test_artemiy_help():
     rc, out, err = _run(["artemiy", "--help"])
@@ -62,6 +64,7 @@ def test_artemiy_no_key_returns_none():
 
 # ── Kulibin ─────────────────────────────────────────────────────────────
 
+
 def test_kulibin_help():
     rc, out, err = _run(["kulibin", "--help"])
     assert rc == 0
@@ -88,6 +91,7 @@ def test_kulibin_audit_nonexistent():
 
 # ── Sherl ───────────────────────────────────────────────────────────────
 
+
 def test_sherl_help():
     rc, out, err = _run(["sherl", "--help"])
     assert rc == 0
@@ -107,6 +111,7 @@ def test_sherl_no_key_returns_none():
 
 
 # ── Rembrandt ───────────────────────────────────────────────────────────
+
 
 def test_rembrandt_help():
     rc, out, err = _run(["rembrandt", "--help"])

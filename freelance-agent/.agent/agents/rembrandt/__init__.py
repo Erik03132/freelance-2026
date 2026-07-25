@@ -5,9 +5,9 @@ Python API + CLI (python3 -m rembrandt).
 """
 
 from .brand_system import (
+    INCUBIRD_DEFAULT,
     BrandSystem,
     DesignToken,
-    INCUBIRD_DEFAULT,
     load_brand,
 )
 from .component_generator import COMPONENT_TYPES, generate_component

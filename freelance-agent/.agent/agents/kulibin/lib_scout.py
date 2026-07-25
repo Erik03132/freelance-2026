@@ -6,7 +6,12 @@ from .llm_client import call_llm
 from .perf_config import EVAL_CRITERIA
 
 
-def scout(task: str, context: str = "Astro/React/Python projects", api_key: str | None = None, learned_context: str = "") -> str | None:
+def scout(
+    task: str,
+    context: str = "Astro/React/Python projects",
+    api_key: str | None = None,
+    learned_context: str = "",
+) -> str | None:
     """Recommend libraries/tools for a given task."""
     criteria = "\n".join(f"- {c}" for c in EVAL_CRITERIA)
     prompt = f"""You are Kulibin, an engineering library scout. Find the best open-source

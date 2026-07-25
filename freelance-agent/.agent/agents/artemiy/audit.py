@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from .frontend_config import CWV_TARGETS, SEO_CHECKS
+from .frontend_config import CWV_TARGETS
 from .llm_client import call_llm
 
 SEO_PATTERNS = {

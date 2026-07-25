@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import re
 path = "/opt/mango_webhook.py"
 with open(path) as f:
     content = f.read()
@@ -23,7 +22,7 @@ else:
     print("inbound_call block not found, searching...")
     idx = content.find('"inbound_call"')
     if idx >= 0:
-        print("Found at", idx, repr(content[idx:idx+400]))
+        print("Found at", idx, repr(content[idx : idx + 400]))
 
 with open(path, "w") as f:
     f.write(content)

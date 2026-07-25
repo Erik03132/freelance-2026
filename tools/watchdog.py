@@ -5,14 +5,20 @@
 Уровень 2: Авторестарт PM2/nginx при падении
 Уровень 3: Алерт в Telegram (с прокси, т.к. TG заблокирован в РФ)
 """
-import subprocess, json, os, sys, time
+
+import json
+import os
+import subprocess
+import sys
+import time
 from datetime import datetime
 
-BOT_TOKEN  = "8336409939:AAHr2wbuOfED5woCzCokKKM9JnkVRYepfms"
-ADMIN_ID   = "176203333"
-PROXY      = "socks5h://Q3NeJXTY:dsBaWh2L@172.120.21.141:64469"
+BOT_TOKEN = "8336409939:AAHr2wbuOfED5woCzCokKKM9JnkVRYepfms"
+ADMIN_ID = "176203333"
+PROXY = "socks5h://Q3NeJXTY:dsBaWh2L@172.120.21.141:64469"
 STATE_FILE = "/tmp/watchdog_state"
-LOG_FILE   = "/var/log/watchdog.log"
+LOG_FILE = "/var/log/watchdog.log"
+
 
 def log(msg):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -21,35 +27,55 @@ def log(msg):
     with open(LOG_FILE, "a") as f:
         f.write(line + "\n")
 
+
 def tg(msg):
     try:
-        payload = json.dumps({
-            "chat_id": ADMIN_ID,
-            "text": msg,
-            "parse_mode": "Markdown"
-        })
-        r = subprocess.run([
-            "curl", "-s", "-x", PROXY,
-            "-X", "POST",
-            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            "-H", "Content-Type: application/json",
-            "-d", payload,
-            "--max-time", "10"
-        ], capture_output=True, timeout=15)
+        payload = json.dumps({"chat_id": ADMIN_ID, "text": msg, "parse_mode": "Markdown"})
+        r = subprocess.run(
+            [
+                "curl",
+                "-s",
+                "-x",
+                PROXY,
+                "-X",
+                "POST",
+                f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+                "-H",
+                "Content-Type: application/json",
+                "-d",
+                payload,
+                "--max-time",
+                "10",
+            ],
+            capture_output=True,
+            timeout=15,
+        )
         is_ok = b'"ok":true' in r.stdout
         log(f"  TG: {'OK' if is_ok else 'ERROR: ' + r.stdout[:80].decode(errors='replace')}")
     except Exception as e:
         log(f"  TG error: {e}")
 
+
 def now_str():
     return datetime.now().strftime("%H:%M %d.%m.%Y")
+
 
 def check_health():
     try:
         r = subprocess.run(
-            ["curl", "-s", "-o", "/tmp/wd_resp", "-w", "%{http_code}",
-             "https://vezemcip.ru/api/health", "--max-time", "10"],
-            capture_output=True, timeout=15
+            [
+                "curl",
+                "-s",
+                "-o",
+                "/tmp/wd_resp",
+                "-w",
+                "%{http_code}",
+                "https://vezemcip.ru/api/health",
+                "--max-time",
+                "10",
+            ],
+            capture_output=True,
+            timeout=15,
         )
         code = r.stdout.decode().strip()
         body = open("/tmp/wd_resp").read() if os.path.exists("/tmp/wd_resp") else ""
@@ -58,16 +84,15 @@ def check_health():
     except Exception as e:
         return False, "ERR", str(e)
 
+
 def port_up(port):
     r = subprocess.run(["ss", "-tlnp"], capture_output=True)
     return f":{port}" in r.stdout.decode()
 
+
 def pm2_restart(name):
-    subprocess.run(
-        ["pm2", "restart", name],
-        cwd="/root/antigravity/ai-eggs",
-        capture_output=True
-    )
+    subprocess.run(["pm2", "restart", name], cwd="/root/antigravity/ai-eggs", capture_output=True)
+
 
 # === Читаем последний статус ===
 last_status = "ok"
@@ -100,9 +125,10 @@ if not port_up(4321):
     log("  pm2 restart vezem-web")
     time.sleep(5)
 
-nginx_active = subprocess.run(
-    ["systemctl", "is-active", "nginx"], capture_output=True
-).stdout.decode().strip() == "active"
+nginx_active = (
+    subprocess.run(["systemctl", "is-active", "nginx"], capture_output=True).stdout.decode().strip()
+    == "active"
+)
 
 if not nginx_active:
     subprocess.run(["systemctl", "restart", "nginx"])

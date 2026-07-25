@@ -6,7 +6,7 @@ import os
 import re
 
 from .llm_client import call_llm
-from .perf_config import EVAL_CRITERIA, FILE_EXTENSIONS, JS_SMELLS, PY_SMELLS
+from .perf_config import FILE_EXTENSIONS, JS_SMELLS, PY_SMELLS
 
 
 def _iter_files(path: str, languages: list[str]) -> list[str]:

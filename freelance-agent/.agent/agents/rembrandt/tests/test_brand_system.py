@@ -1,5 +1,9 @@
-import json, tempfile, os
-from rembrandt import BrandSystem, DesignToken, load_brand, INCUBIRD_DEFAULT
+import json
+import os
+import tempfile
+
+from rembrandt import INCUBIRD_DEFAULT, BrandSystem, DesignToken, load_brand
+
 
 def test_brand_system_creation():
     brand = BrandSystem(
@@ -15,9 +19,11 @@ def test_brand_system_creation():
     assert brand.theme == "dark"
     assert brand.colors[0].name == "Void"
 
+
 def test_incubird_default_exists():
     assert INCUBIRD_DEFAULT is not None
     assert INCUBIRD_DEFAULT.name == "IncuBird"
+
 
 def test_load_brand():
     data = {
@@ -38,7 +44,16 @@ def test_load_brand():
     finally:
         os.unlink(path)
 
+
 def test_brand_to_dict():
-    brand = BrandSystem(name="Test", theme="light", colors=[], typography={}, spacing={}, components={}, guidelines=[])
+    brand = BrandSystem(
+        name="Test",
+        theme="light",
+        colors=[],
+        typography={},
+        spacing={},
+        components={},
+        guidelines=[],
+    )
     d = brand.to_dict()
     assert d["name"] == "Test"

@@ -8,10 +8,9 @@ filter applied across every district, and rebuilds adygea_grain_all.csv.
 Grain filter: keep a row if its `Описание` (lowercased) contains any grain
 culture keyword. Junk rows (empty city / "добавлено..." in city column) are dropped.
 """
+
 import csv
 import os
-import re
-import sys
 
 import openpyxl
 
@@ -21,21 +20,37 @@ SRC = "/Users/igorvasin/Downloads/Республика Адыгея 2025.xlsx"
 
 # district_key -> (csv_filename, exact city value in xlsx `Город` column)
 DISTRICTS = {
-    "Гиагинский":       ("adygea_grain_Гиагинский_район.csv",       "Гиагинский район"),
-    "Кошехабльский":    ("adygea_grain_Кошехабльский_2025.csv",      "Кошехабльский район"),
+    "Гиагинский": ("adygea_grain_Гиагинский_район.csv", "Гиагинский район"),
+    "Кошехабльский": ("adygea_grain_Кошехабльский_2025.csv", "Кошехабльский район"),
     "Красногвардейский": ("adygea_grain_Красногвардейский_2025.csv", "Красногвардейский район"),
-    "Тахтамукайский":   ("adygea_grain_Тахтамукайский_район.csv",    "Тахтамукайский район"),
-    "Теучежский":       ("adygea_grain_Теучежский_район.csv",        "Теучежский район"),
-    "Майкопский":       ("adygea_grain_Майкопский_район.csv",        "Майкопский район"),
-    "Шовгеновский":     ("adygea_grain_Шовгеновский_район.csv",      "Шовгеновский район"),
-    "Майкоп":           ("adygea_grain_Майкоп_г.csv",                "Майкоп г."),
-    "Адыгейск":         ("adygea_grain_Адыгейск_г.csv",              "Адыгейск г."),
+    "Тахтамукайский": ("adygea_grain_Тахтамукайский_район.csv", "Тахтамукайский район"),
+    "Теучежский": ("adygea_grain_Теучежский_район.csv", "Теучежский район"),
+    "Майкопский": ("adygea_grain_Майкопский_район.csv", "Майкопский район"),
+    "Шовгеновский": ("adygea_grain_Шовгеновский_район.csv", "Шовгеновский район"),
+    "Майкоп": ("adygea_grain_Майкоп_г.csv", "Майкоп г."),
+    "Адыгейск": ("adygea_grain_Адыгейск_г.csv", "Адыгейск г."),
 }
 
 GRAIN_KW = [
-    "пшеница", "ячмень", "подсолнечник", "подсол", "кукуруза", "соя", "рапс",
-    "овёс", "овес", "горох", "нут", "чечевица", "рис", "гречиха", "просо",
-    "зернов", "зернобобов", "маслич", "технич",
+    "пшеница",
+    "ячмень",
+    "подсолнечник",
+    "подсол",
+    "кукуруза",
+    "соя",
+    "рапс",
+    "овёс",
+    "овес",
+    "горох",
+    "нут",
+    "чечевица",
+    "рис",
+    "гречиха",
+    "просо",
+    "зернов",
+    "зернобобов",
+    "маслич",
+    "технич",
 ]
 
 OUT_COLS = ["Название", "Описание", "Регион", "Город", "Имя", "Телефоны"]
@@ -80,14 +95,16 @@ def main():
         grain = [r for r in src if is_grain(r[1])]
         out = []
         for r in grain:
-            out.append({
-                "Название": (r[0] or "").strip(),
-                "Описание": (r[1] or "").strip(),
-                "Регион": (r[2] or "").strip() or "Республика Адыгея",
-                "Город": (r[3] or "").strip(),
-                "Имя": (r[4] or "").strip(),
-                "Телефоны": (r[7] or "").strip(),
-            })
+            out.append(
+                {
+                    "Название": (r[0] or "").strip(),
+                    "Описание": (r[1] or "").strip(),
+                    "Регион": (r[2] or "").strip() or "Республика Адыгея",
+                    "Город": (r[3] or "").strip(),
+                    "Имя": (r[4] or "").strip(),
+                    "Телефоны": (r[7] or "").strip(),
+                }
+            )
         path = os.path.join(CSV_DIR, fname)
         with open(path, "w", encoding="utf-8", newline="") as f:
             w = csv.DictWriter(f, fieldnames=OUT_COLS)

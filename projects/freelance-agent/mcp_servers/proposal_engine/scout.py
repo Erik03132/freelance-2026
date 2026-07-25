@@ -5,7 +5,6 @@ ScoutAgent — анализирует задачу: категория, выпо
 import json
 import re
 from pathlib import Path
-from typing import Optional
 
 ROOT = Path(__file__).parent.parent.parent
 CONFIG_DIR = ROOT / "config"
@@ -47,10 +46,30 @@ class ScoutResult:
 
 class ScoutAgent:
     CATEGORIES = {
-        "web_fullstack": ["react", "vue", "angular", "next", "nuxt", "fullstack", "frontend", "backend", "api"],
+        "web_fullstack": [
+            "react",
+            "vue",
+            "angular",
+            "next",
+            "nuxt",
+            "fullstack",
+            "frontend",
+            "backend",
+            "api",
+        ],
         "telegram_bot": ["telegram", "tg bot", "aiogram", "telegram bot"],
         "parsing_scraping": ["парсинг", "scraping", "scraper", "parser", "сбор данных"],
-        "ai_ml": ["ai", "ии", "нейросеть", "ml", "machine learning", "gpt", "llm", "rag", "chatbot"],
+        "ai_ml": [
+            "ai",
+            "ии",
+            "нейросеть",
+            "ml",
+            "machine learning",
+            "gpt",
+            "llm",
+            "rag",
+            "chatbot",
+        ],
         "integration": ["интеграция", "api", "bitrix", "crm", "mango"],
         "web_dev": ["сайт", "landing", "лендинг", "web", "html", "css", "react", "vue"],
         "automation": ["автоматизация", "automation", "бот", "bot", "скрипт"],
@@ -63,7 +82,6 @@ class ScoutAgent:
         self.profile = self._load_profile()
 
     def _load_profile(self) -> dict:
-        import json
         path = CONFIG_DIR / "profile.json"
         if path.exists():
             return json.loads(path.read_text(encoding="utf-8"))
@@ -122,20 +140,30 @@ class ScoutAgent:
             score += 0.1
 
         clarity_signals = [
-            r"\bstack\b", r"\bтехнологи", r"\bpython\b", r"\bfastapi\b",
-            r"\bпример", r"\bреференс", r"https?://",
-            r"\bпользователь\s+(должен|может)", r"\bсценарий\b",
-            r"\bтребование\b", r"\bкритерий\b",
-            r"\bбюджет\b", r"\bсрок\b",
+            r"\bstack\b",
+            r"\bтехнологи",
+            r"\bpython\b",
+            r"\bfastapi\b",
+            r"\bпример",
+            r"\bреференс",
+            r"https?://",
+            r"\bпользователь\s+(должен|может)",
+            r"\bсценарий\b",
+            r"\bтребование\b",
+            r"\bкритерий\b",
+            r"\bбюджет\b",
+            r"\bсрок\b",
         ]
-        import re
         for pattern in clarity_signals:
             if re.search(pattern, description, re.IGNORECASE):
                 score += 0.15
 
         vague = [
-            r"\bкак-нибудь\b", r"\bкрасиво\b", r"\bподумаем по ходу\b",
-            r"\bсделать хорошо\b", r"\bразберемся\b"
+            r"\bкак-нибудь\b",
+            r"\bкрасиво\b",
+            r"\bподумаем по ходу\b",
+            r"\bсделать хорошо\b",
+            r"\bразберемся\b",
         ]
         for pattern in vague:
             if re.search(pattern, description, re.IGNORECASE):
@@ -172,9 +200,16 @@ class ScoutAgent:
     def _estimate_effort(self, description: str, category: str) -> float:
         words = len(description.split())
         base = {
-            "web_fullstack": 40, "telegram_bot": 20, "parsing_scraping": 15,
-            "ai_ml": 30, "integration": 20, "web_dev": 25,
-            "automation": 15, "design": 10, "content": 8, "consulting": 5,
+            "web_fullstack": 40,
+            "telegram_bot": 20,
+            "parsing_scraping": 15,
+            "ai_ml": 30,
+            "integration": 20,
+            "web_dev": 25,
+            "automation": 15,
+            "design": 10,
+            "content": 8,
+            "consulting": 5,
         }.get(category, 20)
         complexity = min(words / 200, 2.0)
         return round(base * complexity, 1)

@@ -13,10 +13,7 @@ class TTSEngine:
     """Движок текст-в-речь с кэшированием аудиофайлов."""
 
     def __init__(
-        self,
-        voice: str = "ru-RU-SvetlanaNeural",
-        rate: str = "+0%",
-        cache_dir: Path | None = None
+        self, voice: str = "ru-RU-SvetlanaNeural", rate: str = "+0%", cache_dir: Path | None = None
     ):
         self.voice = voice
         self.rate = rate
@@ -32,11 +29,7 @@ class TTSEngine:
         cache_key = self._get_cache_key(text)
         return self.cache_dir / f"{cache_key}.wav"
 
-    async def synthesize(
-        self,
-        text: str,
-        output_path: Path | None = None
-    ) -> Path:
+    async def synthesize(self, text: str, output_path: Path | None = None) -> Path:
         """
         Синтез речи из текста.
 
@@ -66,10 +59,7 @@ class TTSEngine:
             raise
 
     async def synthesize_to_wav(
-        self,
-        text: str,
-        sample_rate: int = 8000,
-        output_path: Path | None = None
+        self, text: str, sample_rate: int = 8000, output_path: Path | None = None
     ) -> Path:
         """
         Синтез речи в WAV формате с указанным sample rate.
@@ -90,13 +80,19 @@ class TTSEngine:
 
         try:
             import subprocess
+
             cmd = [
-                "ffmpeg", "-i", str(mp3_path),
-                "-ar", str(sample_rate),
-                "-ac", "1",
-                "-f", "wav",
+                "ffmpeg",
+                "-i",
+                str(mp3_path),
+                "-ar",
+                str(sample_rate),
+                "-ac",
+                "1",
+                "-f",
+                "wav",
                 str(wav_path),
-                "-y"
+                "-y",
             ]
             subprocess.run(cmd, capture_output=True, check=True)
             logger.info(f"Converted to WAV: {wav_path}")
@@ -110,9 +106,7 @@ class TTSEngine:
             return mp3_path
 
     async def synthesize_batch(
-        self,
-        texts: list[str],
-        output_dir: Path | None = None
+        self, texts: list[str], output_dir: Path | None = None
     ) -> list[Path]:
         """
         Пакетный синтез нескольких текстов.

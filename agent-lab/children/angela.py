@@ -10,24 +10,26 @@
 Запуск:
   python -m children.angela
 """
+
 import asyncio
-import sys
 import os
+import sys
 
 # Добавляем родительский каталог в path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core_agent import CoreAgent
+
 from tools import CORE_TOOLS, tool
 
-
 # === Специфичные инструменты Анжелы ===
+
 
 @tool
 def calculate_feed(breed: str, count: int, days: int = 40) -> str:
     """Рассчитывает количество корма для птицы.
     Используй, когда клиент спрашивает сколько корма нужно.
-    
+
     Args:
         breed: Порода (бройлер, несушка, индюк, утка)
         count: Количество голов
@@ -35,10 +37,10 @@ def calculate_feed(breed: str, count: int, days: int = 40) -> str:
     """
     # Нормы потребления корма (кг на 1 голову за весь период)
     feed_rates = {
-        "бройлер": 4.5,    # ~4.5 кг за 40 дней
-        "несушка": 0.12,   # 120г в день
-        "индюк": 16.0,     # за 120 дней
-        "утка": 7.0,       # за 50 дней
+        "бройлер": 4.5,  # ~4.5 кг за 40 дней
+        "несушка": 0.12,  # 120г в день
+        "индюк": 16.0,  # за 120 дней
+        "утка": 7.0,  # за 50 дней
     }
 
     breed_lower = breed.lower()
@@ -57,7 +59,7 @@ def calculate_feed(breed: str, count: int, days: int = 40) -> str:
         total_kg = rate * count
 
     bags_25kg = -(-int(total_kg) // 25)  # Округление вверх
-    
+
     return (
         f"Расчёт корма для {count} голов ({breed}):\n"
         f"Общий расход: {total_kg:.0f} кг\n"

@@ -5,7 +5,6 @@ import json
 from .brand_system import BrandSystem, DesignToken
 from .llm_client import call_llm
 
-
 APPLE_DESIGN_RULES = """
 ## Apple Design Rules (apply to ALL generated output)
 
@@ -81,7 +80,9 @@ Design brief: {brief}
 Return ONLY valid JSON, no markdown, no explanation."""
 
 
-def generate_design_md(brief: str, api_key: str | None = None, learned_context: str = "") -> str | None:
+def generate_design_md(
+    brief: str, api_key: str | None = None, learned_context: str = ""
+) -> str | None:
     """
     Generate a complete DESIGN.md from a natural language brief.
 
@@ -93,8 +94,14 @@ def generate_design_md(brief: str, api_key: str | None = None, learned_context: 
     Returns:
         DESIGN.md content as string, or None if generation fails
     """
-    prompt = DESIGN_SYSTEM_PROMPT.format(apple_rules=APPLE_DESIGN_RULES, brief=brief, learned_context=learned_context or "")
-    content = call_llm(prompt, complexity="complex", max_tokens=2000, temperature=0.3, api_key=api_key)
+    prompt = DESIGN_SYSTEM_PROMPT.format(
+        apple_rules=APPLE_DESIGN_RULES,
+        brief=brief,
+        learned_context=learned_context or "",
+    )
+    content = call_llm(
+        prompt, complexity="complex", max_tokens=2000, temperature=0.3, api_key=api_key
+    )
     if not content:
         return None
 
@@ -128,7 +135,9 @@ def render_design_md(brand: BrandSystem) -> str:
     lines.append(f"# {brand.name} — Design System")
     lines.append(f"> **Theme:** {brand.theme}")
     lines.append("")
-    lines.append("> **Apple Design Reference:** `apple-design.md` — WWDC 2018-2026 fluid interface rules applied")
+    lines.append(
+        "> **Apple Design Reference:** `apple-design.md` — WWDC 2018-2026 fluid interface rules applied"
+    )
     lines.append("")
 
     lines.append("## Tokens — Colors")

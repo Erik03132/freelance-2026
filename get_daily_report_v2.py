@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Полный отчёт за день — v2: ищем ВСЕХ менеджеров и детали звонков"""
-import urllib.request
+
 import json
+import urllib.request
 from collections import defaultdict
 
 WH = "https://incubird.bitrix24.ru/rest/41624/w2b11s24upbycolk/"
 TODAY = "2026-04-21"
+
 
 def call_api(method, params=""):
     all_results = []
@@ -16,12 +18,12 @@ def call_api(method, params=""):
         try:
             req = urllib.request.Request(url)
             with urllib.request.urlopen(req, timeout=30) as resp:
-                data = json.loads(resp.read().decode('utf-8'))
-                results = data.get('result', [])
+                data = json.loads(resp.read().decode("utf-8"))
+                results = data.get("result", [])
                 if not results:
                     break
                 all_results.extend(results)
-                nxt = data.get('next')
+                nxt = data.get("next")
                 if not nxt or len(all_results) >= 500:
                     break
                 start = nxt
@@ -29,6 +31,7 @@ def call_api(method, params=""):
             print(f"  API error ({method} start={start}): {e}")
             break
     return all_results
+
 
 # === 1. ВСЕ пользователи — найдём менеджеров ===
 print("👤 Загружаю ВСЕХ пользователей Битрикс24...")
@@ -46,10 +49,12 @@ for u in users_raw:
 
 # === 2. Лиды за сегодня ===
 print("\n📋 Загружаю лиды за сегодня...")
-leads = call_api("crm.lead.list.json",
+leads = call_api(
+    "crm.lead.list.json",
     f"filter[>=DATE_CREATE]={TODAY}T00:00:00%2B03:00"
     f"&select[]=ID&select[]=TITLE&select[]=ASSIGNED_BY_ID&select[]=SOURCE_ID"
-    f"&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=COMMENTS")
+    f"&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=COMMENTS",
+)
 print(f"   Найдено лидов: {len(leads)}")
 
 # Лиды по менеджерам
@@ -74,10 +79,12 @@ for src, cnt in sorted(lead_src.items(), key=lambda x: -x[1]):
 
 # === 3. Сделки за сегодня ===
 print("\n💰 Загружаю сделки за сегодня...")
-deals = call_api("crm.deal.list.json",
+deals = call_api(
+    "crm.deal.list.json",
     f"filter[>=DATE_CREATE]={TODAY}T00:00:00%2B03:00"
     f"&select[]=ID&select[]=TITLE&select[]=OPPORTUNITY&select[]=ASSIGNED_BY_ID"
-    f"&select[]=DATE_CREATE&select[]=STAGE_ID&select[]=COMMENTS&select[]=CONTACT_ID")
+    f"&select[]=DATE_CREATE&select[]=STAGE_ID&select[]=COMMENTS&select[]=CONTACT_ID",
+)
 print(f"   Найдено сделок: {len(deals)}")
 
 # Сделки по менеджерам
@@ -88,22 +95,26 @@ for d in deals:
     mgr_name = users.get(mgr_id, f"ID:{mgr_id}")
     opp = float(d.get("OPPORTUNITY", 0) or 0)
     total_sum += opp
-    mgr_deals[mgr_name].append({
-        "id": d.get("ID"),
-        "title": d.get("TITLE", ""),
-        "sum": opp,
-        "time": d.get("DATE_CREATE", ""),
-        "stage": d.get("STAGE_ID", ""),
-        "comments": d.get("COMMENTS", ""),
-    })
+    mgr_deals[mgr_name].append(
+        {
+            "id": d.get("ID"),
+            "title": d.get("TITLE", ""),
+            "sum": opp,
+            "time": d.get("DATE_CREATE", ""),
+            "stage": d.get("STAGE_ID", ""),
+            "comments": d.get("COMMENTS", ""),
+        }
+    )
 
 # === 4. Звонки — с деталями ===
 print("\n📞 Загружаю звонки за сегодня (с деталями)...")
-calls = call_api("crm.activity.list.json",
+calls = call_api(
+    "crm.activity.list.json",
     f"filter[>=CREATED]={TODAY}T00:00:00%2B03:00"
     f"&filter[TYPE_ID]=2"
     f"&select[]=ID&select[]=SUBJECT&select[]=RESPONSIBLE_ID&select[]=DIRECTION"
-    f"&select[]=CREATED&select[]=DESCRIPTION&select[]=COMMUNICATIONS")
+    f"&select[]=CREATED&select[]=DESCRIPTION&select[]=COMMUNICATIONS",
+)
 print(f"   Найдено звонков: {len(calls)}")
 
 # Звонки по менеджерам
@@ -118,11 +129,11 @@ for name, cnt in sorted(calls_by_mgr.items(), key=lambda x: -x[1]):
     print(f"   {name}: {cnt} звонков")
 
 # === ФОРМИРУЕМ КРАСИВЫЙ ОТЧЁТ ===
-print("\n" + "="*60)
-print(f"📊 ОТЧЁТ CRM — 21 АПРЕЛЯ 2026")
-print("━"*40)
+print("\n" + "=" * 60)
+print("📊 ОТЧЁТ CRM — 21 АПРЕЛЯ 2026")
+print("━" * 40)
 
-print(f"\n🔑 КЛЮЧЕВЫЕ ЦИФРЫ ДНЯ\n")
+print("\n🔑 КЛЮЧЕВЫЕ ЦИФРЫ ДНЯ\n")
 print(f"▫️ Лиды: {len(leads)}")
 print(f"▫️ Сделки: {len(deals)}")
 print(f"▫️ Общая сумма: {total_sum:,.0f} ₽")
@@ -130,10 +141,10 @@ if deals:
     avg = total_sum / len(deals)
     print(f"▫️ Средний чек: {avg:,.0f} ₽")
     top = max(deals, key=lambda x: float(x.get("OPPORTUNITY", 0) or 0))
-    top_mgr = users.get(str(top.get("ASSIGNED_BY_ID","")), "?")
+    top_mgr = users.get(str(top.get("ASSIGNED_BY_ID", "")), "?")
     print(f"▫️ Крупнейшая: {float(top.get('OPPORTUNITY',0)):,.0f} ₽ ({top_mgr})")
 
-print(f"\n👩‍💼 МЕНЕДЖЕРЫ\n")
+print("\n👩‍💼 МЕНЕДЖЕРЫ\n")
 mgr_sorted = sorted(mgr_deals.items(), key=lambda x: sum(d["sum"] for d in x[1]), reverse=True)
 medals = ["🥇", "🥈", "🥉"]
 for i, (name, deal_list) in enumerate(mgr_sorted):
@@ -141,17 +152,24 @@ for i, (name, deal_list) in enumerate(mgr_sorted):
     mgr_sum = sum(d["sum"] for d in deal_list)
     print(f"{medal} {name} — {mgr_sum:,.0f} ₽ (~{len(deal_list)} сделок)")
 
-print(f"\n📞 ИСТОЧНИКИ\n")
+print("\n📞 ИСТОЧНИКИ\n")
 for src, cnt in sorted(lead_src.items(), key=lambda x: -x[1]):
-    label = {"CALL": "📞 Звонки", "CALLBACK": "📞 Обратные звонки", 
-             "WEB": "🌐 Сайт", "EMAIL": "📧 Email", "SELF": "✏️ Вручную",
-             "UC_AVITO": "📱 Авито", "1": "📞 Звонки", "CRM_FORM": "📋 Форма"}.get(src, src)
+    label = {
+        "CALL": "📞 Звонки",
+        "CALLBACK": "📞 Обратные звонки",
+        "WEB": "🌐 Сайт",
+        "EMAIL": "📧 Email",
+        "SELF": "✏️ Вручную",
+        "UC_AVITO": "📱 Авито",
+        "1": "📞 Звонки",
+        "CRM_FORM": "📋 Форма",
+    }.get(src, src)
     print(f"{label}: {cnt} ({cnt*100//len(leads)}%)")
 
-print(f"\n💰 ТОП-10 СДЕЛОК\n")
+print("\n💰 ТОП-10 СДЕЛОК\n")
 deals_sorted = sorted(deals, key=lambda x: float(x.get("OPPORTUNITY", 0) or 0), reverse=True)
 for i, d in enumerate(deals_sorted[:10]):
-    mgr_name = users.get(str(d.get("ASSIGNED_BY_ID","")), "?")
+    mgr_name = users.get(str(d.get("ASSIGNED_BY_ID", "")), "?")
     opp = float(d.get("OPPORTUNITY", 0) or 0)
     title = d.get("TITLE", "")
     time_str = d.get("DATE_CREATE", "")
@@ -159,10 +177,10 @@ for i, d in enumerate(deals_sorted[:10]):
     print(f"  {i+1}. {opp:,.0f} ₽ — {mgr_name} ({time_short}) [{title}]")
 
 # Детали ключевых звонков — берём первые 20
-print(f"\n📞 КЛЮЧЕВЫЕ ЗВОНКИ\n")
+print("\n📞 КЛЮЧЕВЫЕ ЗВОНКИ\n")
 for c in calls[:20]:
     subj = c.get("SUBJECT", "")
-    resp = users.get(str(c.get("RESPONSIBLE_ID","")), "?")
+    resp = users.get(str(c.get("RESPONSIBLE_ID", "")), "?")
     direction = "📥" if str(c.get("DIRECTION")) == "1" else "📤"
     created = c.get("CREATED", "")
     time_short = created.split("T")[1][:5] if "T" in created else ""
@@ -177,4 +195,4 @@ for c in calls[:20]:
         print(f"     💬 {desc}")
 
 print(f"\n📊 Конверсия лид→сделка: {len(deals)*100//max(len(leads),1)}%")
-print(f"\nОтчёт сформирован Анжелочкой 🐣")
+print("\nОтчёт сформирован Анжелочкой 🐣")

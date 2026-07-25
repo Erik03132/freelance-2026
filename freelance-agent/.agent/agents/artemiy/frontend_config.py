@@ -5,9 +5,22 @@ from __future__ import annotations
 FRAMEWORKS = ["astro", "react", "vanilla"]
 
 COMPONENT_TYPES = [
-    "button", "card", "input", "nav", "hero", "section",
-    "badge", "stats", "footer", "modal", "form", "header",
-    "table", "accordion", "tabs", "toast",
+    "button",
+    "card",
+    "input",
+    "nav",
+    "hero",
+    "section",
+    "badge",
+    "stats",
+    "footer",
+    "modal",
+    "form",
+    "header",
+    "table",
+    "accordion",
+    "tabs",
+    "toast",
 ]
 
 DEFAULTS = {

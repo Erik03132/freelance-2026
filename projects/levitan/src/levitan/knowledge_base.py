@@ -34,8 +34,7 @@ class KnowledgeBase:
             # Извлекаем FAQ
             if "faq" in self._data:
                 self._faq_texts = [
-                    f"{item['question']} {item['answer']}"
-                    for item in self._data["faq"]
+                    f"{item['question']} {item['answer']}" for item in self._data["faq"]
                 ]
 
             # Извлекаем возражения
@@ -89,8 +88,7 @@ class KnowledgeBase:
 
             # Ищем ближайших соседей
             distances, indices = self._index.search(
-                np.array(query_embedding).astype("float32"),
-                min(top_k, len(self._faq_texts))
+                np.array(query_embedding).astype("float32"), min(top_k, len(self._faq_texts))
             )
 
             # Формируем контекст
@@ -99,8 +97,7 @@ class KnowledgeBase:
                 if idx < len(self._data.get("faq", [])):
                     faq_item = self._data["faq"][idx]
                     context_parts.append(
-                        f"Вопрос: {faq_item['question']}\n"
-                        f"Ответ: {faq_item['answer']}"
+                        f"Вопрос: {faq_item['question']}\n" f"Ответ: {faq_item['answer']}"
                     )
 
             return "\n\n".join(context_parts)
@@ -152,10 +149,7 @@ class KnowledgeBase:
         if "faq" not in self._data:
             self._data["faq"] = []
 
-        self._data["faq"].append({
-            "question": question,
-            "answer": answer
-        })
+        self._data["faq"].append({"question": question, "answer": answer})
 
         # Пересоздаем индекс
         self._faq_texts.append(f"{question} {answer}")
@@ -171,10 +165,7 @@ class KnowledgeBase:
         if "objections" not in self._data:
             self._data["objections"] = []
 
-        self._data["objections"].append({
-            "objection": objection,
-            "response": response
-        })
+        self._data["objections"].append({"objection": objection, "response": response})
 
         self._save()
 
@@ -213,5 +204,6 @@ def get_knowledge_base() -> KnowledgeBase:
     global _knowledge_base
     if _knowledge_base is None:
         from .config import KNOWLEDGE_BASE_PATH
+
         _knowledge_base = KnowledgeBase(KNOWLEDGE_BASE_PATH)
     return _knowledge_base

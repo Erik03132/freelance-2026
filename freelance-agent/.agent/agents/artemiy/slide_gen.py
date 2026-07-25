@@ -7,7 +7,6 @@ Each slide is a component with Build animations, Cover, Agenda layouts.
 from __future__ import annotations
 
 from .llm_client import call_llm
-from .frontend_config import DEFAULTS
 
 SLIDES_PROMPT = """You are a senior frontend engineer. Build an interactive presentation as a **single, self-contained HTML file** about:
 

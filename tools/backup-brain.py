@@ -41,7 +41,7 @@ BACKUP_MANIFEST = {
     ],
     "optional": [
         "brain/",  # conversation logs (can be large)
-    ]
+    ],
 }
 
 RESTORE_INSTRUCTIONS = """

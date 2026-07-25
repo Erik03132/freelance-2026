@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Склеивает клипы через pipe — стриминг декодера напрямую в энкодер."""
-import subprocess, sys
+
+import subprocess
+import sys
 from pathlib import Path
 
 clips_dir = Path(sys.argv[1])
@@ -13,17 +15,33 @@ print(f"Склейка {len(clips)} клипов через pipe...")
 W, H, FPS = 1080, 1920, 25
 
 enc_cmd = [
-    "ffmpeg", "-y",
-    "-f", "rawvideo", "-pix_fmt", "yuv420p",
-    "-s", f"{W}x{H}", "-r", str(FPS),
-    "-i", "-",
+    "ffmpeg",
+    "-y",
+    "-f",
+    "rawvideo",
+    "-pix_fmt",
+    "yuv420p",
+    "-s",
+    f"{W}x{H}",
+    "-r",
+    str(FPS),
+    "-i",
+    "-",
 ]
 if audio:
     enc_cmd.extend(["-i", audio])
-enc_cmd.extend([
-    "-c:v", "h264_videotoolbox", "-b:v", "4M",
-    "-pix_fmt", "yuv420p", "-r", str(FPS),
-])
+enc_cmd.extend(
+    [
+        "-c:v",
+        "h264_videotoolbox",
+        "-b:v",
+        "4M",
+        "-pix_fmt",
+        "yuv420p",
+        "-r",
+        str(FPS),
+    ]
+)
 if audio:
     enc_cmd.extend(["-c:a", "aac", "-b:a", "192k", "-shortest"])
 enc_cmd.extend(["-movflags", "+faststart", output])
@@ -31,11 +49,24 @@ enc_cmd.extend(["-movflags", "+faststart", output])
 encoder = subprocess.Popen(enc_cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
 for i, clip in enumerate(clips):
-    dec = subprocess.Popen([
-        "ffmpeg", "-i", str(clip),
-        "-f", "rawvideo", "-pix_fmt", "yuv420p",
-        "-s", f"{W}x{H}", "-r", str(FPS), "-"
-    ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    dec = subprocess.Popen(
+        [
+            "ffmpeg",
+            "-i",
+            str(clip),
+            "-f",
+            "rawvideo",
+            "-pix_fmt",
+            "yuv420p",
+            "-s",
+            f"{W}x{H}",
+            "-r",
+            str(FPS),
+            "-",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    )
 
     try:
         while True:

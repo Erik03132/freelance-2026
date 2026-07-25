@@ -24,13 +24,12 @@ import re
 import shutil
 import subprocess
 import sys
-import time
 import threading
+import time
 import uuid
 import wave
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import requests
 
@@ -103,6 +102,7 @@ SYSTEM_PROMPT = """Ты — Иван, менеджер по закупкам к�
 # MANGO API
 # ============================================================
 
+
 def _mango_sign(payload: dict) -> str:
     """Подпись для Mango API."""
     j = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
@@ -174,6 +174,7 @@ def _norm_phone(num: str) -> str:
 # BARESIP AUDIO MANAGEMENT
 # ============================================================
 
+
 def set_baresip_audio(wav_path: Path):
     """
     Подменить WAV файл для baresip aufile.
@@ -189,7 +190,7 @@ def set_baresip_audio(wav_path: Path):
         return False
 
 
-def get_latest_recording(after_timestamp: float = 0) -> Optional[Path]:
+def get_latest_recording(after_timestamp: float = 0) -> Path | None:
     """
     Найти последнюю запись baresip (dec.wav).
     Ищем файлы dump-*-dec.wav новее after_timestamp.
@@ -208,7 +209,9 @@ def get_latest_recording(after_timestamp: float = 0) -> Optional[Path]:
     return recordings[0]
 
 
-def wait_for_recording(after_timestamp: float, timeout: int = RECORDING_WAIT_TIMEOUT) -> Optional[Path]:
+def wait_for_recording(
+    after_timestamp: float, timeout: int = RECORDING_WAIT_TIMEOUT
+) -> Path | None:
     """Ждать появления новой записи."""
     start = time.time()
     while time.time() - start < timeout:
@@ -232,6 +235,7 @@ def get_whisper():
     global _whisper_model
     if _whisper_model is None:
         from faster_whisper import WhisperModel
+
         _whisper_model = WhisperModel("base", device="cpu", compute_type="int8")
         log.info("Whisper model loaded")
     return _whisper_model
@@ -259,6 +263,7 @@ def transcribe(wav_path: str) -> str:
 # ============================================================
 # LLM (OpenRouter)
 # ============================================================
+
 
 def llm_response(transcript: list[dict]) -> str:
     """Сгенерировать ответ через OpenRouter."""
@@ -293,7 +298,8 @@ def llm_response(transcript: list[dict]) -> str:
 # TTS (edge-tts → WAV 8kHz mono)
 # ============================================================
 
-def synthesize_wav(text: str) -> Optional[Path]:
+
+def synthesize_wav(text: str) -> Path | None:
     """Синтезировать текст в WAV 8000Hz mono."""
     ts = int(time.time() * 1000)
     mp3_path = TTS_OUTPUT_DIR / f"tts_{ts}.mp3"
@@ -302,10 +308,17 @@ def synthesize_wav(text: str) -> Optional[Path]:
     try:
         # edge-tts → MP3
         result = subprocess.run(
-            [sys.executable, "-m", "edge_tts",
-             "--voice", "ru-RU-DmitryNeural",
-             "--text", text,
-             "--write-media", str(mp3_path)],
+            [
+                sys.executable,
+                "-m",
+                "edge_tts",
+                "--voice",
+                "ru-RU-DmitryNeural",
+                "--text",
+                text,
+                "--write-media",
+                str(mp3_path),
+            ],
             capture_output=True,
             timeout=30,
         )
@@ -315,9 +328,19 @@ def synthesize_wav(text: str) -> Optional[Path]:
 
         # MP3 → WAV 8kHz mono (для телефонии)
         result = subprocess.run(
-            ["ffmpeg", "-i", str(mp3_path),
-             "-ar", "8000", "-ac", "1", "-sample_fmt", "s16",
-             str(wav_path), "-y"],
+            [
+                "ffmpeg",
+                "-i",
+                str(mp3_path),
+                "-ar",
+                "8000",
+                "-ac",
+                "1",
+                "-sample_fmt",
+                "s16",
+                str(wav_path),
+                "-y",
+            ],
             capture_output=True,
             timeout=15,
         )
@@ -365,6 +388,7 @@ def _add_lead_silence(input_wav: Path, output_wav: Path, seconds: float = 1.0):
 # TELEGRAM NOTIFICATIONS
 # ============================================================
 
+
 def notify_telegram(text: str):
     """Отправить уведомление в Telegram."""
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
@@ -382,6 +406,7 @@ def notify_telegram(text: str):
 # ============================================================
 # DIALOG SESSION (Turn-Based)
 # ============================================================
+
 
 class TurnBasedDialog:
     """
@@ -406,9 +431,7 @@ class TurnBasedDialog:
         log.info(f"{'='*60}")
 
         notify_telegram(
-            f"🎙 <b>Диалог начат</b>\n"
-            f"Телефон: {self.phone}\n"
-            f"Сессия: {self.session_id}"
+            f"🎙 <b>Диалог начат</b>\n" f"Телефон: {self.phone}\n" f"Сессия: {self.session_id}"
         )
 
         try:
@@ -448,12 +471,14 @@ class TurnBasedDialog:
                 self.active = False
                 return
 
-        self.transcript.append({
-            "role": "assistant",
-            "content": "Здравствуйте! Меня зовут Иван, я представляю компанию «Глобал Филдс Экспорт». "
-                       "Мы закупаем зерновые, масличные и бобовые культуры у сельхозпроизводителей по всей России. "
-                       "Подскажите, пожалуйста, выращиваете ли вы что-то из этого на продажу?"
-        })
+        self.transcript.append(
+            {
+                "role": "assistant",
+                "content": "Здравствуйте! Меня зовут Иван, я представляю компанию «Глобал Филдс Экспорт». "
+                "Мы закупаем зерновые, масличные и бобовые культуры у сельхозпроизводителей по всей России. "
+                "Подскажите, пожалуйста, выращиваете ли вы что-то из этого на продажу?",
+            }
+        )
 
         # Ждём запись ответа клиента
         recording = wait_for_recording(self.last_call_time, timeout=RECORDING_WAIT_TIMEOUT)
@@ -572,10 +597,21 @@ class TurnBasedDialog:
     def _is_rejection(self, text: str) -> bool:
         """Проверить отказ клиента."""
         rejection_phrases = [
-            "не интересно", "не интересует", "не надо", "отказ",
-            "до свидания", "не продаем", "не продаём", "не выращиваем",
-            "не звоните", "отстаньте", "нет спасибо", "нет, спасибо",
-            "не нужно", "занят", "перезвоните",
+            "не интересно",
+            "не интересует",
+            "не надо",
+            "отказ",
+            "до свидания",
+            "не продаем",
+            "не продаём",
+            "не выращиваем",
+            "не звоните",
+            "отстаньте",
+            "нет спасибо",
+            "нет, спасибо",
+            "не нужно",
+            "занят",
+            "перезвоните",
         ]
         text_lower = text.lower()
         return any(phrase in text_lower for phrase in rejection_phrases)
@@ -615,10 +651,12 @@ class TurnBasedDialog:
         log.info(f"{'='*60}")
 
         # Telegram отчёт
-        transcript_text = "\n".join([
-            f"{'🤖' if e['role'] == 'assistant' else '👤'} {e['content'][:80]}"
-            for e in self.transcript
-        ])
+        transcript_text = "\n".join(
+            [
+                f"{'🤖' if e['role'] == 'assistant' else '👤'} {e['content'][:80]}"
+                for e in self.transcript
+            ]
+        )
 
         notify_telegram(
             f"🏁 <b>Диалог завершён</b>\n"
@@ -637,6 +675,7 @@ class TurnBasedDialog:
 # EVENT WATCHER (слушает events.jsonl от webhook)
 # ============================================================
 
+
 def watch_for_calls():
     """
     Мониторит events.jsonl и запускает диалог при появлении
@@ -645,13 +684,13 @@ def watch_for_calls():
     seen = set()
     active_phones = set()  # Не звоним одному номеру одновременно
 
-    log.info("="*60)
+    log.info("=" * 60)
     log.info("LEVITAN TURN-BASED ENGINE STARTED")
     log.info(f"  Greeting: {GREETING_WAV}")
     log.info(f"  Aufile path: {BARESIP_AUFILE_PATH}")
     log.info(f"  Record dir: {BARESIP_RECORD_DIR}")
     log.info(f"  Max turns: {MAX_TURNS}")
-    log.info("="*60)
+    log.info("=" * 60)
 
     # Устанавливаем приветствие по умолчанию
     if GREETING_WAV.exists():
@@ -713,6 +752,7 @@ def watch_for_calls():
 # ============================================================
 # MANUAL TRIGGER (для тестирования)
 # ============================================================
+
 
 def manual_call(phone: str):
     """Запустить диалог вручную (для тестирования)."""

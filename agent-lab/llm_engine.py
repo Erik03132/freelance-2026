@@ -17,6 +17,7 @@ from __future__ import annotations
   DuckDuckGo (бесплатный, без API ключа, работает из РФ)
 """
 import os
+
 import httpx
 from dotenv import load_dotenv
 
@@ -36,10 +37,8 @@ OPENROUTER_MODELS = [
     # Уровень 1: Elephant Alpha — бесплатная, 100B, #1 trending
     # 256K контекст, 32K вывод, ~50-65 tok/s, function calling ✅
     "openrouter/elephant-alpha",
-    
     # Уровень 2: Auto — OpenRouter сам подбирает лучшую доступную
     "openrouter/auto",
-    
     # Уровень 3: Gemini через OpenRouter (может упасть по гео)
     "google/gemini-2.0-flash-001",
 ]
@@ -56,9 +55,9 @@ async def _call_openrouter(
     """
     if not OPENROUTER_KEY:
         return None
-    
+
     target_model = model or OPENROUTER_MODELS[0]
-    
+
     try:
         body = {
             "model": target_model,
@@ -67,7 +66,7 @@ async def _call_openrouter(
         }
         if tools:
             body["tools"] = tools
-        
+
         async with httpx.AsyncClient(timeout=25) as client:
             resp = await client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
@@ -78,7 +77,7 @@ async def _call_openrouter(
                 json=body,
             )
             data = resp.json()
-            
+
             if resp.status_code == 200 and "choices" in data:
                 msg = data["choices"][0]["message"]
                 return {
@@ -86,12 +85,12 @@ async def _call_openrouter(
                     "tool_calls": msg.get("tool_calls"),
                     "model_used": target_model,
                 }
-            
+
             err = data.get("error", {}).get("message", "")[:80]
             print(f"⚠️ {target_model}: {resp.status_code} — {err}")
     except Exception as e:
         print(f"⚠️ {target_model}: {e}")
-    
+
     return None
 
 
@@ -129,7 +128,7 @@ async def call_gemini_direct(messages: list[dict]) -> str | None:
             body = {"contents": contents}
             if system_text:
                 body["systemInstruction"] = {"parts": [{"text": system_text}]}
-            
+
             resp = await client.post(
                 f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_KEY}",
                 json=body,
@@ -147,11 +146,13 @@ async def call_ollama(messages: list[dict]) -> str | None:
     try:
         ollama_msgs = []
         for msg in messages:
-            ollama_msgs.append({
-                "role": msg["role"] if msg["role"] != "system" else "system",
-                "content": msg["content"],
-            })
-        
+            ollama_msgs.append(
+                {
+                    "role": msg["role"] if msg["role"] != "system" else "system",
+                    "content": msg["content"],
+                }
+            )
+
         async with httpx.AsyncClient(timeout=120) as client:
             resp = await client.post(
                 f"{OLLAMA_URL}/api/chat",
@@ -172,17 +173,18 @@ async def call_ollama(messages: list[dict]) -> str | None:
 # ГЛАВНАЯ ФУНКЦИЯ — ЖЕЛЕЗОБЕТОННЫЙ КАСКАД
 # ============================================================
 
+
 async def call_llm(messages: list[dict], tools: list[dict] = None) -> str:
     """
     Железобетонный каскад LLM. 5 уровней защиты.
-    
+
     Порядок:
       1. Elephant Alpha (бесплатная, с tool calling)
       2. OpenRouter Auto (бесплатная, auto-подбор)
       3. Gemini через OpenRouter
       4. Gemini Direct API
       5. Ollama (локальная, офлайн)
-    
+
     Гарантия: ответ ВСЕГДА будет, даже без интернета.
     """
     # Уровни 1-3: OpenRouter каскад (с tool calling!)
@@ -193,6 +195,7 @@ async def call_llm(messages: list[dict], tools: list[dict] = None) -> str:
         # Если пришли tool_calls — возвращаем JSON
         if result.get("tool_calls"):
             import json
+
             return json.dumps(result["tool_calls"], ensure_ascii=False)
 
     # Уровень 4: Gemini Direct (без tool calling, но стабильный)
@@ -212,7 +215,7 @@ async def call_llm(messages: list[dict], tools: list[dict] = None) -> str:
 
 # ============================================================
 # 🔍 КАСКАД ПОИСКА — 3 уровня
-# Tavily (✅ 1000 req/мес бесплатно) 
+# Tavily (✅ 1000 req/мес бесплатно)
 # → Perplexity (❌ квота кончилась, код готов)
 # → DuckDuckGo (∞ бесплатно, без ключа)
 # ============================================================
@@ -224,7 +227,7 @@ PERPLEXITY_KEY = os.getenv("PERPLEXITY_API_KEY", "")
 async def _search_tavily(query: str, max_results: int = 3) -> list[dict]:
     """
     Уровень 1: Tavily — лучший поиск для AI-агентов.
-    
+
     Бесплатно: 1000 запросов/мес. Возвращает чистый текст (не HTML).
     Идеально для RAG и агентов.
     """
@@ -243,23 +246,27 @@ async def _search_tavily(query: str, max_results: int = 3) -> list[dict]:
                 },
             )
             data = resp.json()
-            
+
             results = []
             # Tavily может вернуть готовый ответ
             if data.get("answer"):
-                results.append({
-                    "title": "Tavily AI Answer",
-                    "url": "",
-                    "snippet": data["answer"],
-                })
-            
+                results.append(
+                    {
+                        "title": "Tavily AI Answer",
+                        "url": "",
+                        "snippet": data["answer"],
+                    }
+                )
+
             for item in data.get("results", [])[:max_results]:
-                results.append({
-                    "title": item.get("title", ""),
-                    "url": item.get("url", ""),
-                    "snippet": item.get("content", ""),
-                })
-            
+                results.append(
+                    {
+                        "title": item.get("title", ""),
+                        "url": item.get("url", ""),
+                        "snippet": item.get("content", ""),
+                    }
+                )
+
             if results:
                 print(f"🔍 Tavily: {len(results)} результатов")
             return results
@@ -271,9 +278,9 @@ async def _search_tavily(query: str, max_results: int = 3) -> list[dict]:
 async def _search_perplexity(query: str) -> list[dict]:
     """
     Уровень 2: Perplexity Sonar — поиск через LLM.
-    
+
     Статус: ❌ Квота исчерпана (401 insufficient_quota).
-    Код готов — заработает после пополнения. 
+    Код готов — заработает после пополнения.
     """
     if not PERPLEXITY_KEY:
         return []
@@ -292,7 +299,7 @@ async def _search_perplexity(query: str) -> list[dict]:
                 },
             )
             data = resp.json()
-            
+
             if resp.status_code == 200 and "choices" in data:
                 content = data["choices"][0]["message"]["content"]
                 citations = data.get("citations", [])
@@ -301,7 +308,7 @@ async def _search_perplexity(query: str) -> list[dict]:
                     "url": citations[0] if citations else "",
                     "snippet": content,
                 }
-                print(f"🔍 Perplexity: ответ получен")
+                print("🔍 Perplexity: ответ получен")
                 return [result]
             else:
                 err = data.get("error", {}).get("message", "")[:60]
@@ -314,8 +321,8 @@ async def _search_perplexity(query: str) -> list[dict]:
 async def _search_duckduckgo(query: str, max_results: int = 3) -> list[dict]:
     """
     Уровень 3: DuckDuckGo — бесплатный fallback.
-    
-    Без API ключа, без лимитов. 
+
+    Без API ключа, без лимитов.
     Ограничение: только Instant Answer (не полный поиск).
     """
     try:
@@ -325,23 +332,27 @@ async def _search_duckduckgo(query: str, max_results: int = 3) -> list[dict]:
                 params={"q": query, "format": "json", "no_html": 1, "skip_disambig": 1},
             )
             data = resp.json()
-            
+
             results = []
             if data.get("AbstractText"):
-                results.append({
-                    "title": data.get("Heading", ""),
-                    "url": data.get("AbstractURL", ""),
-                    "snippet": data["AbstractText"],
-                })
-            
+                results.append(
+                    {
+                        "title": data.get("Heading", ""),
+                        "url": data.get("AbstractURL", ""),
+                        "snippet": data["AbstractText"],
+                    }
+                )
+
             for topic in data.get("RelatedTopics", [])[:max_results]:
                 if isinstance(topic, dict) and "Text" in topic:
-                    results.append({
-                        "title": topic.get("Text", "")[:80],
-                        "url": topic.get("FirstURL", ""),
-                        "snippet": topic.get("Text", ""),
-                    })
-            
+                    results.append(
+                        {
+                            "title": topic.get("Text", "")[:80],
+                            "url": topic.get("FirstURL", ""),
+                            "snippet": topic.get("Text", ""),
+                        }
+                    )
+
             if results:
                 print(f"🔍 DuckDuckGo: {len(results)} результатов")
             return results[:max_results]
@@ -353,11 +364,11 @@ async def _search_duckduckgo(query: str, max_results: int = 3) -> list[dict]:
 async def web_search(query: str, max_results: int = 3) -> list[dict]:
     """
     Железобетонный каскад поиска. 3 уровня:
-    
+
       1. Tavily (✅ 1000 req/мес бесплатно, чистый текст)
       2. Perplexity Sonar (❌ квота, но код готов)
       3. DuckDuckGo (∞ бесплатно, Instant Answer)
-    
+
     Returns:
         Список {title, url, snippet}
     """
@@ -366,7 +377,7 @@ async def web_search(query: str, max_results: int = 3) -> list[dict]:
     if results:
         return results
 
-    # Уровень 2: Perplexity  
+    # Уровень 2: Perplexity
     results = await _search_perplexity(query)
     if results:
         return results
@@ -378,4 +389,3 @@ async def web_search(query: str, max_results: int = 3) -> list[dict]:
 
     print(f"⚠️ Все 3 поисковика не дали результатов для: {query}")
     return []
-

@@ -11,20 +11,17 @@
 Требования: ffmpeg, venv/ с установленными librosa, numpy
 """
 
-import sys
+import json
 import os
 import subprocess
-import json
+import sys
 from pathlib import Path
 
-SUPPORTED_IMAGES = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp'}
+SUPPORTED_IMAGES = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp"}
 
 
 def collect_photos(folder: str) -> list[Path]:
-    photos = sorted(
-        p for p in Path(folder).iterdir()
-        if p.suffix.lower() in SUPPORTED_IMAGES
-    )
+    photos = sorted(p for p in Path(folder).iterdir() if p.suffix.lower() in SUPPORTED_IMAGES)
     if not photos:
         print(f"Нет фото в {folder}")
         sys.exit(1)
@@ -34,6 +31,7 @@ def collect_photos(folder: str) -> list[Path]:
 
 def detect_beats(audio_path: str) -> list[float]:
     import librosa
+
     print("Анализ битов...")
     y, sr = librosa.load(audio_path)
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
@@ -43,10 +41,12 @@ def detect_beats(audio_path: str) -> list[float]:
 
 
 def audio_duration(audio_path: str) -> float:
-    result = subprocess.run([
-        "ffprobe", "-v", "quiet", "-print_format", "json",
-        "-show_format", audio_path
-    ], capture_output=True, text=True, check=True)
+    result = subprocess.run(
+        ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", audio_path],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
     info = json.loads(result.stdout)
     return float(info["format"]["duration"])
 
@@ -70,11 +70,13 @@ def build_slideshow(
     segments = []
     for i, beat in enumerate(beat_times):
         next_beat = beat_times[i + 1] if i + 1 < len(beat_times) else total_duration
-        segments.append({
-            "photo": photo_cycle[i],
-            "start": max(0, beat - fade),        # начинаем чуть раньше для кроссфейда
-            "duration": next_beat - beat + fade,  # длим до следующего бита + запас на fade
-        })
+        segments.append(
+            {
+                "photo": photo_cycle[i],
+                "start": max(0, beat - fade),  # начинаем чуть раньше для кроссфейда
+                "duration": next_beat - beat + fade,  # длим до следующего бита + запас на fade
+            }
+        )
 
     # ffmpeg inputs: каждый фото как отдельный input
     inputs = []
@@ -116,20 +118,32 @@ def build_slideshow(
     filter_complex = "; ".join(filter_parts)
 
     cmd = [
-        "ffmpeg", "-y",
+        "ffmpeg",
+        "-y",
         *inputs,
-        "-i", audio_path,
-        "-filter_complex", filter_complex,
-        "-map", f"[{prev}]",
-        "-map", f"{n_segs}:a",
-        "-c:v", "libx264",
-        "-preset", "medium",
-        "-crf", "23",
-        "-pix_fmt", "yuv420p",
-        "-c:a", "aac",
-        "-b:a", "192k",
+        "-i",
+        audio_path,
+        "-filter_complex",
+        filter_complex,
+        "-map",
+        f"[{prev}]",
+        "-map",
+        f"{n_segs}:a",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "23",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "192k",
         "-shortest",
-        "-movflags", "+faststart",
+        "-movflags",
+        "+faststart",
         output,
     ]
 

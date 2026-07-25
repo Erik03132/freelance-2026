@@ -29,6 +29,7 @@ def _restore_store():
 
 # ── signal.py tests ─────────────────────────────────────────────────────
 
+
 def test_capture_start_returns_sid():
     with tempfile.TemporaryDirectory() as d:
         _use_tmpdir(d)
@@ -123,6 +124,7 @@ def test_capture_start_multiple_same_agent():
 
 # ── learner.py tests ────────────────────────────────────────────────────
 
+
 def _seed_signals(tmpdir, agent, specs_outcomes):
     """Helper: write start+outcome pairs directly to JSONL.
 
@@ -135,15 +137,32 @@ def _seed_signals(tmpdir, agent, specs_outcomes):
     records = []
     for i, (spec, outcome) in enumerate(specs_outcomes):
         sid = f"seed_{i}_{outcome[:3]}"
-        records.append(json.dumps({
-            "sid": sid, "ts": 0, "phase": "start",
-            "agent": agent, "action": "test", "spec": spec,
-            "meta": {}, "outcome": None,
-        }))
-        records.append(json.dumps({
-            "sid": sid, "ts": 1, "phase": "outcome",
-            "agent": agent, "outcome": outcome, "note": "",
-        }))
+        records.append(
+            json.dumps(
+                {
+                    "sid": sid,
+                    "ts": 0,
+                    "phase": "start",
+                    "agent": agent,
+                    "action": "test",
+                    "spec": spec,
+                    "meta": {},
+                    "outcome": None,
+                }
+            )
+        )
+        records.append(
+            json.dumps(
+                {
+                    "sid": sid,
+                    "ts": 1,
+                    "phase": "outcome",
+                    "agent": agent,
+                    "outcome": outcome,
+                    "note": "",
+                }
+            )
+        )
     with open(_signal_mod.SIGNAL_FILE, "w") as f:
         f.write("\n".join(records) + "\n")
 
@@ -160,12 +179,16 @@ def test_build_learned_context_insufficient_data():
 
 def test_build_learned_context_enough_data():
     with tempfile.TemporaryDirectory() as d:
-        _seed_signals(d, "artemiy", [
-            ("hero button component", "accepted"),
-            ("nav bar footer", "accepted"),
-            ("sidebar layout", "rejected"),
-            ("modal dialog", "edited"),
-        ])
+        _seed_signals(
+            d,
+            "artemiy",
+            [
+                ("hero button component", "accepted"),
+                ("nav bar footer", "accepted"),
+                ("sidebar layout", "rejected"),
+                ("modal dialog", "edited"),
+            ],
+        )
         try:
             ctx = learning.build_learned_context("artemiy", min_samples=3)
             assert "[Learned from past usage]" in ctx
@@ -182,16 +205,32 @@ def test_build_learned_context_meta_preferences():
             records = []
             for i in range(4):
                 sid = f"meta_{i}"
-                records.append(json.dumps({
-                    "sid": sid, "ts": 0, "phase": "start",
-                    "agent": "artemiy", "action": "component",
-                    "spec": f"component {i}", "meta": {"framework": "react"},
-                    "outcome": None,
-                }))
-                records.append(json.dumps({
-                    "sid": sid, "ts": 1, "phase": "outcome",
-                    "agent": "artemiy", "outcome": "accepted", "note": "",
-                }))
+                records.append(
+                    json.dumps(
+                        {
+                            "sid": sid,
+                            "ts": 0,
+                            "phase": "start",
+                            "agent": "artemiy",
+                            "action": "component",
+                            "spec": f"component {i}",
+                            "meta": {"framework": "react"},
+                            "outcome": None,
+                        }
+                    )
+                )
+                records.append(
+                    json.dumps(
+                        {
+                            "sid": sid,
+                            "ts": 1,
+                            "phase": "outcome",
+                            "agent": "artemiy",
+                            "outcome": "accepted",
+                            "note": "",
+                        }
+                    )
+                )
             with open(_signal_mod.SIGNAL_FILE, "w") as f:
                 f.write("\n".join(records) + "\n")
             ctx = learning.build_learned_context("artemiy", min_samples=3)
@@ -202,11 +241,15 @@ def test_build_learned_context_meta_preferences():
 
 def test_build_learned_context_wrong_agent_empty():
     with tempfile.TemporaryDirectory() as d:
-        _seed_signals(d, "sherl", [
-            ("query1", "accepted"),
-            ("query2", "accepted"),
-            ("query3", "rejected"),
-        ])
+        _seed_signals(
+            d,
+            "sherl",
+            [
+                ("query1", "accepted"),
+                ("query2", "accepted"),
+                ("query3", "rejected"),
+            ],
+        )
         try:
             ctx = learning.build_learned_context("artemiy", min_samples=3)
             assert ctx == ""

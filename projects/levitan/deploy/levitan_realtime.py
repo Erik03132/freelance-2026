@@ -28,6 +28,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 import websockets
@@ -41,8 +42,9 @@ YC_RT_URL = "wss://llm.api.cloud.yandex.net/llm/v1/realtime"
 
 # Промпт + FAQ-кэш + save_lead tool
 import sys
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from levitan_realtime_prompt import SYSTEM_PROMPT, FAQ_CACHE, TOOLS, build_dynamic_suffix
+from levitan_realtime_prompt import SYSTEM_PROMPT, TOOLS, build_dynamic_suffix
 
 LOG_DIR = Path(os.getenv("LEVITAN_LOG_DIR", "/var/log/levitan"))
 try:
@@ -59,6 +61,7 @@ log = logging.getLogger("levitan-realtime")
 
 
 # === ЗАГЛУШКИ (наполняются на Этапах 2-5) ===
+
 
 async def connect_yandex(ws_path: str = YC_RT_URL) -> "websockets.WebSocketClientProtocol":
     """Открыть WS к Яндекс Realtime с Api-Key в заголовке.
@@ -104,14 +107,18 @@ async def handle_tool_call(yc_ws, item: dict):
     args = item.get("arguments", {})
     log.info(f"save_lead → {args}")
     # TODO: httpx.post(CRM_URL, json=args)
-    await yc_ws.send(json.dumps({
-        "type": "conversation.item.create",
-        "item": {
-            "type": "message",
-            "role": "system",
-            "content": [{"type": "text", "text": "Лид сохранён. Подтвердите клиенту."}],
-        },
-    }))
+    await yc_ws.send(
+        json.dumps(
+            {
+                "type": "conversation.item.create",
+                "item": {
+                    "type": "message",
+                    "role": "system",
+                    "content": [{"type": "text", "text": "Лид сохранён. Подтвердите клиенту."}],
+                },
+            }
+        )
+    )
 
 
 async def faq_cache_lookup(transcript: str) -> str | None:

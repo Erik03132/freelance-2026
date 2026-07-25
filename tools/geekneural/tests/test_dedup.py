@@ -1,4 +1,5 @@
 """GeekNeural: тесты ядра дедупликации."""
+
 import os
 import tempfile
 import uuid

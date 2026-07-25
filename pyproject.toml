@@ -1,0 +1,23 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+exclude = [
+  "agent-lab",
+  "tools/omni-auto-router",
+  "tools/transcribe-mcp",
+  ".ecc-library",
+  "projects/levitan/.venv",
+  "freelance-agent",
+  "projects/ai-eggs",
+  "projects/ai-scout",
+  "projects/angel-backend",
+  "projects/hh-ai-agent",
+  "foundation",
+  ".venv",
+  "__pycache__",
+  "*.pyc"
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E741", "E501", "W293", "N802", "E722", "F841", "E402", "F821", "N806", "UP031", "I001", "W291", "W292"]

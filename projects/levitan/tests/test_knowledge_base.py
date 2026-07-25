@@ -7,41 +7,29 @@ from pathlib import Path
 
 def _make_kb_data():
     return {
-        "company": {
-            "name": "Глобал Филдс Экспорт",
-            "phone": "+7(918)639-30-30"
-        },
+        "company": {"name": "Глобал Филдс Экспорт", "phone": "+7(918)639-30-30"},
         "faq": [
             {
                 "question": "Какие культуры закупаете?",
-                "answer": "Пшеницу, ячмень, кукурузу, подсолнечник, рапс."
+                "answer": "Пшеницу, ячмень, кукурузу, подсолнечник, рапс.",
             },
-            {
-                "question": "Какие минимальные объемы?",
-                "answer": "От 100 тонн для зерновых."
-            }
+            {"question": "Какие минимальные объемы?", "answer": "От 100 тонн для зерновых."},
         ],
         "objections": [
             {
                 "objection": "Уже работаю с другим покупателем",
-                "response": "Понимаю, мы можем предложить альтернативные условия."
+                "response": "Понимаю, мы можем предложить альтернативные условия.",
             },
-            {
-                "objection": "Цены низкие",
-                "response": "Готовы обсудить индивидуальные условия."
-            }
+            {"objection": "Цены низкие", "response": "Готовы обсудить индивидуальные условия."},
         ],
-        "products": {
-            "пшеница": {"price": "по рынку", "min_volume": 100}
-        },
-        "delivery_terms": {
-            "CPT": "доставка до терминала"
-        }
+        "products": {"пшеница": {"price": "по рынку", "min_volume": 100}},
+        "delivery_terms": {"CPT": "доставка до терминала"},
     }
 
 
 def _make_kb(data=None):
     from levitan.knowledge_base import KnowledgeBase
+
     payload = data if data is not None else _make_kb_data()
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False)

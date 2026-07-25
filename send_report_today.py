@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """Отправка отчёта за 21 апреля Андрею в ТГ"""
-import urllib.request
-import urllib.parse
+
 import json
 import time
+import urllib.parse
+import urllib.request
 
 BOT_TOKEN = "8336409939:AAHr2wbuOfED5woCzCokKKM9JnkVRYepfms"
 API = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 ANDREY_ID = 444248782
 
+
 def send(chat_id, text):
-    data = urllib.parse.urlencode({
-        "chat_id": chat_id,
-        "text": text,
-        "parse_mode": "HTML"
-    }).encode('utf-8')
+    data = urllib.parse.urlencode({"chat_id": chat_id, "text": text, "parse_mode": "HTML"}).encode(
+        "utf-8"
+    )
     try:
-        req = urllib.request.Request(API, data=data, method='POST')
+        req = urllib.request.Request(API, data=data, method="POST")
         with urllib.request.urlopen(req, timeout=15) as resp:
-            result = json.loads(resp.read().decode('utf-8'))
+            result = json.loads(resp.read().decode("utf-8"))
             if result.get("ok"):
                 print(f"✅ OK -> {chat_id}")
             else:
@@ -26,6 +26,7 @@ def send(chat_id, text):
     except Exception as e:
         print(f"❌ Exception: {e}")
     time.sleep(1)
+
 
 # === ОТЧЁТ ===
 part1 = """📊 <b>ОТЧЁТ CRM — 21 АПРЕЛЯ 2026</b>

@@ -6,7 +6,11 @@
 Результат: /tmp/levitan_play.wav
 """
 
-import subprocess, struct, wave, sys, os
+import os
+import struct
+import subprocess
+import sys
+import wave
 
 GREETING_TEXT = (
     "Здравствуйте! Вас приветствует Азовский инкубатор. "
@@ -28,15 +32,15 @@ VOICE = "ru-RU-SvetlanaNeural"
 
 
 def main():
-    print(f"=== Анжелла: генерация приветствия ===")
+    print("=== Анжелла: генерация приветствия ===")
     print(f"Текст: {GREETING_TEXT[:80]}...")
     print(f"Голос: {VOICE}")
 
     # 1. edge-tts → MP3
     r = subprocess.run(
-        ["edge-tts", "--voice", VOICE, "--text", GREETING_TEXT,
-         "--write-media", TMP_MP3],
-        capture_output=True, text=True
+        ["edge-tts", "--voice", VOICE, "--text", GREETING_TEXT, "--write-media", TMP_MP3],
+        capture_output=True,
+        text=True,
     )
     if r.returncode:
         print(f"edge-tts error: {r.stderr}")
@@ -45,10 +49,21 @@ def main():
 
     # 2. ffmpeg → WAV 8kHz mono s16le
     r = subprocess.run(
-        ["ffmpeg", "-y", "-i", TMP_MP3,
-         "-acodec", "pcm_s16le", "-ar", str(SAMPLE_RATE), "-ac", "1",
-         TMP_WAV],
-        capture_output=True, text=True
+        [
+            "ffmpeg",
+            "-y",
+            "-i",
+            TMP_MP3,
+            "-acodec",
+            "pcm_s16le",
+            "-ar",
+            str(SAMPLE_RATE),
+            "-ac",
+            "1",
+            TMP_WAV,
+        ],
+        capture_output=True,
+        text=True,
     )
     if r.returncode:
         print(f"ffmpeg error: {r.stderr}")
@@ -59,8 +74,9 @@ def main():
         frames = w.readframes(w.getnframes())
         params = w.getparams()
 
-    silence = struct.pack("<" + "h" * (SAMPLE_RATE * LEAD_SILENCE_SEC),
-                          *([0] * (SAMPLE_RATE * LEAD_SILENCE_SEC)))
+    silence = struct.pack(
+        "<" + "h" * (SAMPLE_RATE * LEAD_SILENCE_SEC), *([0] * (SAMPLE_RATE * LEAD_SILENCE_SEC))
+    )
 
     with wave.open(OUTPUT, "wb") as w:
         w.setparams(params)
@@ -71,9 +87,7 @@ def main():
     print(f"Длительность: {LEAD_SILENCE_SEC}s тишины + голос")
 
     # 4. Проверка
-    r = subprocess.run(
-        ["ffprobe", OUTPUT], capture_output=True, text=True
-    )
+    r = subprocess.run(["ffprobe", OUTPUT], capture_output=True, text=True)
     for line in r.stderr.split("\n"):
         if "Duration" in line or "Audio" in line:
             print(f"  {line.strip()}")

@@ -14,15 +14,15 @@ Global Boot Protocol (GBP) runner
 """
 
 import os
-import subprocess
 import pathlib
-import sys
+import subprocess
 from datetime import datetime
 
-ROOT = pathlib.Path(__file__).parents[2]      # ~/freelance-2026
+ROOT = pathlib.Path(__file__).parents[2]  # ~/freelance-2026
 AGENT_ROOT = ROOT / ".agent"
 RULES_DIR = AGENT_ROOT / "rules"
 SKILLS_ROOT = pathlib.Path(os.getenv("HOME")) / ".gemini" / "antigravity" / "skills"
+
 
 def read_file(p: pathlib.Path) -> str:
     try:
@@ -30,21 +30,26 @@ def read_file(p: pathlib.Path) -> str:
     except Exception as e:
         return f"❌ Ошибка чтения {p.name}: {e}"
 
+
 def check_env_keys() -> list:
     keys = ["GEMINI_API_KEY", "PERPLEXITY_API_KEY"]
     missing = [k for k in keys if not os.getenv(k)]
     return missing
+
 
 def ping_mcp() -> bool:
     # простая проверка доступности сервера через curl (если curl установлен)
     try:
         subprocess.run(
             ["curl", "-sSf", "https://stitchmcp.googleapis.com"],
-            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
         return True
     except Exception:
         return False
+
 
 def load_rules() -> list:
     missing = []
@@ -53,17 +58,24 @@ def load_rules() -> list:
             missing.append(fn)
     return missing
 
+
 def skill_readiness() -> dict:
     agents = [
-        "igorek-core", "kulibin-engineer", "artemiy-frontend",
-        "botman-creator", "rembrandt-designer", "shakespeare-editor",
-        "sherl-research", "marketer-strategist"
+        "igorek-core",
+        "kulibin-engineer",
+        "artemiy-frontend",
+        "botman-creator",
+        "rembrandt-designer",
+        "shakespeare-editor",
+        "sherl-research",
+        "marketer-strategist",
     ]
     results = {}
     for a in agents:
         skill_path = SKILLS_ROOT / a / "SKILL.md"
         results[a] = skill_path.is_file()
     return results
+
 
 def read_checkpoints() -> dict:
     chp = ROOT / "chp.md"
@@ -76,8 +88,9 @@ def read_checkpoints() -> dict:
     return {
         "chp.md": chp.is_file(),
         "ACTIVE_TASKS.md": active.is_file(),
-        "latest_report": latest_report
+        "latest_report": latest_report,
     }
+
 
 def main():
     print("=== GBP RUNNER –", datetime.now().isoformat(), "===\n")
@@ -89,7 +102,10 @@ def main():
 
     # 2. Переменные окружения
     missing_keys = check_env_keys()
-    print("2️⃣ Переменные окружения:", "✅ всё в порядке" if not missing_keys else f"❌ Отсутствуют: {', '.join(missing_keys)}")
+    print(
+        "2️⃣ Переменные окружения:",
+        "✅ всё в порядке" if not missing_keys else f"❌ Отсутствуют: {', '.join(missing_keys)}",
+    )
 
     # 3. MCP‑сервер
     mcp_ok = ping_mcp()
@@ -97,7 +113,10 @@ def main():
 
     # 4. Правила
     missing_rules = load_rules()
-    print("4️⃣ Правила:", "✅ все есть" if not missing_rules else f"❌ Missing: {', '.join(missing_rules)}")
+    print(
+        "4️⃣ Правила:",
+        "✅ все есть" if not missing_rules else f"❌ Missing: {', '.join(missing_rules)}",
+    )
 
     # 5. Скиллы
     readiness = skill_readiness()
@@ -116,17 +135,22 @@ def main():
         print(f"   {k:15} {'✅' if v else '❌'}")
 
     # 8. Итоги
-    all_ok = all([
-        gp_path.is_file(),
-        not missing_keys,
-        mcp_ok,
-        not missing_rules,
-        all(readiness.values()),
-        scope_lock,
-        all(cp.values())
-    ])
+    all_ok = all(
+        [
+            gp_path.is_file(),
+            not missing_keys,
+            mcp_ok,
+            not missing_rules,
+            all(readiness.values()),
+            scope_lock,
+            all(cp.values()),
+        ]
+    )
     print("\n=== ИТОГИ GBP ===")
-    print("✅ Сессия считается **Safe**" if all_ok else "⚠️ Сессия **не Safe** – требуется исправление")
+    print(
+        "✅ Сессия считается **Safe**" if all_ok else "⚠️ Сессия **не Safe** – требуется исправление"
+    )
+
 
 if __name__ == "__main__":
     main()

@@ -3,18 +3,17 @@ Telegram-бот для Senator AI (Мустай).
 Интерфейс сенатора к AI-помощнику.
 Паттерн из ai-eggs/tg_bot.py.
 """
-import os
-import sys
+
 import asyncio
+import os
 import signal
-import re
-import logging
+import sys
 from datetime import datetime
 
 from aiogram import Bot, Dispatcher, types
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.filters import Command
 from aiogram.types import BotCommand, BotCommandScopeChat
-from aiogram.client.session.aiohttp import AiohttpSession
 from dotenv import load_dotenv
 
 # Пути
@@ -57,6 +56,7 @@ def is_admin(user_id: int) -> bool:
 # 📋 КОМАНДЫ БОТА
 # ============================================================
 
+
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     user_id = message.from_user.id
@@ -89,13 +89,14 @@ async def cmd_initiative(message: types.Message):
 
     try:
         from senator_core import run_daily_pipeline
+
         result = await asyncio.to_thread(run_daily_pipeline)
         initiative = result.get("initiative", {})
         text = initiative.get("text", "⚠️ Не удалось сгенерировать инициативу")
 
         # Разбиваем на части если слишком длинный
         if len(text) > 4000:
-            parts = [text[i:i+4000] for i in range(0, len(text), 4000)]
+            parts = [text[i : i + 4000] for i in range(0, len(text), 4000)]
             for part in parts:
                 await message.answer(part)
         else:
@@ -121,6 +122,7 @@ async def cmd_search(message: types.Message):
 
     try:
         from senator_core import get_answer
+
         answer = await asyncio.to_thread(get_answer, f"найди {query}")
         if len(answer) > 4000:
             answer = answer[:3997] + "..."
@@ -144,8 +146,8 @@ async def cmd_global(message: types.Message):
     await message.answer(f"🌍 Ищу мировой опыт по теме: *{query}*...", parse_mode="Markdown")
 
     try:
-        from scanner.deep_search import deep_search
         from llm_cascade import call_llm_structured
+        from scanner.deep_search import deep_search
 
         result = await asyncio.to_thread(deep_search, query, "global_experience")
         context = result.get("combined_context", "")
@@ -190,6 +192,7 @@ async def cmd_compare(message: types.Message):
 
     try:
         from senator_core import get_answer
+
         answer = await asyncio.to_thread(get_answer, f"сравни {query}")
         if len(answer) > 4000:
             answer = answer[:3997] + "..."
@@ -208,21 +211,30 @@ async def cmd_focus(message: types.Message):
     topic = message.text.replace("/focus", "").strip()
     if not topic:
         from senator_core import _get_focus_topic
+
         current = _get_focus_topic()
         if current:
-            await message.answer(f"🎯 Текущий фокус: *{current}*\n\nДля изменения: /focus [новая тема]\nДля очистки: /focus clear", parse_mode="Markdown")
+            await message.answer(
+                f"🎯 Текущий фокус: *{current}*\n\nДля изменения: /focus [новая тема]\nДля очистки: /focus clear",
+                parse_mode="Markdown",
+            )
         else:
             await message.answer("🎯 Фокус не задан.\nУстановить: /focus [тема]")
         return
 
     if topic.lower() == "clear":
         from senator_core import clear_focus_topic
+
         clear_focus_topic()
         await message.answer("🎯 Фокус очищен. Инициативы будут по самым актуальным темам.")
     else:
         from senator_core import set_focus_topic
+
         set_focus_topic(topic)
-        await message.answer(f"🎯 Фокус установлен: *{topic}*\n\nСледующая инициатива будет в этом направлении.", parse_mode="Markdown")
+        await message.answer(
+            f"🎯 Фокус установлен: *{topic}*\n\nСледующая инициатива будет в этом направлении.",
+            parse_mode="Markdown",
+        )
 
 
 @dp.message(Command("history"))
@@ -233,13 +245,14 @@ async def cmd_history(message: types.Message):
         return
 
     import json
+
     history_path = os.path.join(BASE_DIR, "data", "initiatives_history.json")
 
     if not os.path.exists(history_path):
         await message.answer("📜 Архив пуст — инициатив ещё не было.")
         return
 
-    with open(history_path, "r", encoding="utf-8") as f:
+    with open(history_path, encoding="utf-8") as f:
         history = json.load(f)
 
     if not history:
@@ -266,11 +279,14 @@ async def cmd_digest(message: types.Message):
     digest_path = os.path.join(BASE_DIR, "data", "daily_digests", f"digest_{today}.json")
 
     if not os.path.exists(digest_path):
-        await message.answer("📰 Дайджест за сегодня ещё не сформирован.\nЗапустите /pipeline для генерации.")
+        await message.answer(
+            "📰 Дайджест за сегодня ещё не сформирован.\nЗапустите /pipeline для генерации."
+        )
         return
 
     import json
-    with open(digest_path, "r", encoding="utf-8") as f:
+
+    with open(digest_path, encoding="utf-8") as f:
         data = json.load(f)
 
     classification = data.get("classification", "Нет данных")
@@ -293,10 +309,13 @@ async def cmd_pipeline(message: types.Message):
         await message.answer("⛔ Нет доступа.")
         return
 
-    await message.answer("⚙️ Запускаю полный pipeline...\n📡 RSS → 🔍 Анализ → 🏛️ Инициатива\nЭто займёт 2-3 минуты.")
+    await message.answer(
+        "⚙️ Запускаю полный pipeline...\n📡 RSS → 🔍 Анализ → 🏛️ Инициатива\nЭто займёт 2-3 минуты."
+    )
 
     try:
         from senator_core import run_daily_pipeline
+
         result = await asyncio.to_thread(run_daily_pipeline)
         initiative = result.get("initiative", {})
         text = initiative.get("text", "⚠️ Ошибка генерации")
@@ -304,13 +323,14 @@ async def cmd_pipeline(message: types.Message):
         await message.answer("✅ Pipeline завершён!\n\n" + "─" * 30)
 
         if len(text) > 4000:
-            parts = [text[i:i+4000] for i in range(0, len(text), 4000)]
+            parts = [text[i : i + 4000] for i in range(0, len(text), 4000)]
             for part in parts:
                 await message.answer(part)
         else:
             await message.answer(text)
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         await message.answer(f"❌ Ошибка pipeline: {e}")
 
@@ -329,14 +349,16 @@ async def cmd_status(message: types.Message):
     neon = "✅" if os.getenv("NEON_DATABASE_URL") else "❌"
 
     from senator_core import _get_focus_topic
+
     focus = _get_focus_topic() or "не задан"
 
     # Считаем инициативы
     import json
+
     h_path = os.path.join(BASE_DIR, "data", "initiatives_history.json")
     ini_count = 0
     if os.path.exists(h_path):
-        with open(h_path, "r") as f:
+        with open(h_path) as f:
             ini_count = len(json.load(f))
 
     await message.answer(
@@ -359,6 +381,7 @@ async def cmd_status(message: types.Message):
 # 💬 Свободный диалог
 # ============================================================
 
+
 @dp.message()
 async def chat_handler(message: types.Message):
     """Обработка произвольных сообщений."""
@@ -379,6 +402,7 @@ async def chat_handler(message: types.Message):
 
     try:
         from senator_core import get_answer
+
         response = await asyncio.to_thread(get_answer, text, history)
 
         if len(response) > 4000:
@@ -392,6 +416,7 @@ async def chat_handler(message: types.Message):
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback
+
         traceback.print_exc()
         await message.answer(f"⚠️ Ошибка обработки: {e}")
 
@@ -400,11 +425,12 @@ async def chat_handler(message: types.Message):
 # 🚀 Запуск
 # ============================================================
 
+
 def _acquire_lock():
     """Захват lock-файла."""
     if os.path.exists(LOCK_FILE):
         try:
-            with open(LOCK_FILE, "r") as f:
+            with open(LOCK_FILE) as f:
                 old_pid = int(f.read().strip())
             os.kill(old_pid, 0)
             print(f"❌ Другой экземпляр уже работает (PID {old_pid})")
@@ -423,7 +449,7 @@ def _release_lock():
     """Освобождение lock-файла."""
     try:
         if os.path.exists(LOCK_FILE):
-            with open(LOCK_FILE, "r") as f:
+            with open(LOCK_FILE) as f:
                 if int(f.read().strip()) == os.getpid():
                     os.remove(LOCK_FILE)
     except Exception:
@@ -434,7 +460,7 @@ async def main():
     if not _acquire_lock():
         return
 
-    print(f"\n🏛️ Мустай v1.0 — AI-помощник сенатора")
+    print("\n🏛️ Мустай v1.0 — AI-помощник сенатора")
     print(f"   PID:         {os.getpid()}")
     print(f"   Gemini:      {'✅' if os.getenv('GEMINI_API_KEY') else '❌'}")
     print(f"   OpenRouter:  {'✅' if os.getenv('OPENROUTER_API_KEY') else '❌'}")
@@ -448,19 +474,19 @@ async def main():
     # Регистрация меню
     commands = [
         BotCommand(command="initiative", description="🏛️ Инициатива дня"),
-        BotCommand(command="search",     description="🔍 Глубокий поиск"),
-        BotCommand(command="global",     description="🌍 Мировой опыт"),
-        BotCommand(command="compare",    description="📊 Сравнение регионов"),
-        BotCommand(command="focus",      description="🎯 Фокусная тема"),
-        BotCommand(command="digest",     description="📰 Дайджест дня"),
-        BotCommand(command="history",    description="📜 Архив инициатив"),
-        BotCommand(command="pipeline",   description="⚙️ Запуск цикла"),
-        BotCommand(command="status",     description="📊 Статус системы"),
+        BotCommand(command="search", description="🔍 Глубокий поиск"),
+        BotCommand(command="global", description="🌍 Мировой опыт"),
+        BotCommand(command="compare", description="📊 Сравнение регионов"),
+        BotCommand(command="focus", description="🎯 Фокусная тема"),
+        BotCommand(command="digest", description="📰 Дайджест дня"),
+        BotCommand(command="history", description="📜 Архив инициатив"),
+        BotCommand(command="pipeline", description="⚙️ Запуск цикла"),
+        BotCommand(command="status", description="📊 Статус системы"),
     ]
 
     try:
         await bot.set_my_commands(commands, scope=BotCommandScopeChat(chat_id=ADMIN_ID))
-        print(f"   ✅ Меню зарегистрировано")
+        print("   ✅ Меню зарегистрировано")
     except Exception as e:
         print(f"   ⚠️ Меню: {e}")
 
@@ -473,7 +499,7 @@ async def main():
             break
         except Exception as e:
             if "conflict" in str(e).lower() or "409" in str(e):
-                wait = min(2 ** attempt, 30)
+                wait = min(2**attempt, 30)
                 print(f"⚠️ Conflict (попытка {attempt}). Жду {wait}с...")
                 await asyncio.sleep(wait)
             else:

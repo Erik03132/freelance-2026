@@ -23,9 +23,7 @@ edge-tts поддерживает SSML для пауз:
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import subprocess
-import sys
 from pathlib import Path
 
 # ── Конфигурация ──────────────────────────────────────────────────────────────
@@ -81,6 +79,7 @@ GREETINGS = {
 
 # ── Генерация аудио ───────────────────────────────────────────────────────────
 
+
 async def generate_greeting_ssml(
     ssml_text: str,
     output_path: Path,
@@ -90,19 +89,30 @@ async def generate_greeting_ssml(
     """Генерация аудио из SSML через edge-tts."""
     try:
         import edge_tts
+
         communicate = edge_tts.Communicate(ssml_text, voice, rate=rate)
         mp3_path = output_path.with_suffix(".mp3")
         await communicate.save(str(mp3_path))
 
         # Конвертация в WAV 8 kHz для Mango
         subprocess.run(
-            ["ffmpeg", "-y",
-             "-i", str(mp3_path),
-             "-ar", str(SR), "-ac", "1",
-             "-c:a", "pcm_s16le",
-             "-f", "wav",
-             str(output_path)],
-            capture_output=True, timeout=15
+            [
+                "ffmpeg",
+                "-y",
+                "-i",
+                str(mp3_path),
+                "-ar",
+                str(SR),
+                "-ac",
+                "1",
+                "-c:a",
+                "pcm_s16le",
+                "-f",
+                "wav",
+                str(output_path),
+            ],
+            capture_output=True,
+            timeout=15,
         )
 
         if output_path.exists():
@@ -124,11 +134,18 @@ async def generate_all_greetings(output_dir: Path):
         if ok:
             # Информация о длительности
             result = subprocess.run(
-                ["ffprobe", "-v", "error",
-                 "-show_entries", "format=duration",
-                 "-of", "default=noprint_wrappers=1:nokey=1",
-                 str(wav_path)],
-                capture_output=True, text=True
+                [
+                    "ffprobe",
+                    "-v",
+                    "error",
+                    "-show_entries",
+                    "format=duration",
+                    "-of",
+                    "default=noprint_wrappers=1:nokey=1",
+                    str(wav_path),
+                ],
+                capture_output=True,
+                text=True,
             )
             duration = float(result.stdout.strip()) if result.stdout.strip() else 0
             print(f"   Длительность: {duration:.1f} сек")
@@ -198,15 +215,25 @@ OPERATOR_CHECKLIST = """
 
 # ── Запуск ────────────────────────────────────────────────────────────────────
 
+
 def main():
     import argparse
+
     parser = argparse.ArgumentParser(description="Генерация приветствий Smart Dialer")
-    parser.add_argument("--type", choices=list(GREETINGS.keys()), default="default",
-                        help="Тип приветствия (default/short/repeat/callback/reminder)")
+    parser.add_argument(
+        "--type",
+        choices=list(GREETINGS.keys()),
+        default="default",
+        help="Тип приветствия (default/short/repeat/callback/reminder)",
+    )
     parser.add_argument("--all", action="store_true", help="Сгенерировать все варианты")
     parser.add_argument("--checklist", action="store_true", help="Показать чеклист оператора")
-    parser.add_argument("--output-dir", type=Path, default=Path(__file__).parent / "tts_cache",
-                        help="Директория для выходных файлов")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path(__file__).parent / "tts_cache",
+        help="Директория для выходных файлов",
+    )
     args = parser.parse_args()
 
     if args.checklist:

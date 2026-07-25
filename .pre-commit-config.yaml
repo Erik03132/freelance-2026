@@ -1,0 +1,46 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.7
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix, --config, pyproject.toml]
+      - id: ruff-format
+        args: [--config, pyproject.toml]
+
+  - repo: local
+    hooks:
+      - id: check-claude-md
+        name: Check CLAUDE.md rules updated
+        entry: .git/hooks/check-claude-md.sh
+        language: script
+        stages: [commit-msg]
+
+      - id: check-adr
+        name: Check ADR for architectural changes
+        entry: .git/hooks/check-adr.sh
+        language: script
+        stages: [commit-msg]
+
+      - id: check-tests
+        name: Check tests for new code
+        entry: .git/hooks/check-tests.sh
+        language: script
+        stages: [commit-msg]
+
+      - id: check-context-md
+        name: Check CONTEXT.md for new domain terms
+        entry: .git/hooks/check-context-md.sh
+        language: script
+        stages: [commit-msg]
+
+      - id: no-secrets
+        name: Check for secrets
+        entry: .git/hooks/no-secrets.sh
+        language: script
+        stages: [commit]
+
+      - id: check-handoff
+        name: Check handoff for long tasks
+        entry: .git/hooks/check-handoff.sh
+        language: script
+        stages: [commit-msg]

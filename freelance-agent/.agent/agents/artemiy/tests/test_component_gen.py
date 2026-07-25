@@ -1,4 +1,10 @@
-from artemiy import COMPONENT_TYPES, DEFAULTS, generate_component, generate_page, generate_scaffold
+from artemiy import (
+    COMPONENT_TYPES,
+    DEFAULTS,
+    generate_component,
+    generate_page,
+    generate_scaffold,
+)
 
 
 def test_component_types():

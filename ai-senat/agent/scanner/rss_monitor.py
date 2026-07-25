@@ -2,9 +2,10 @@
 RSS-мониторинг: парсит ленты федеральных и региональных источников.
 Запускается по расписанию через scheduler.py.
 """
-import os
-import json
+
 import hashlib
+import json
+import os
 import time
 from datetime import datetime, timedelta
 
@@ -83,7 +84,7 @@ RSS_FEEDS = {
 def _load_seen():
     """Загрузка уже обработанных записей."""
     if os.path.exists(SEEN_PATH):
-        with open(SEEN_PATH, "r", encoding="utf-8") as f:
+        with open(SEEN_PATH, encoding="utf-8") as f:
             return json.load(f)
     return {}
 
@@ -103,7 +104,7 @@ def _entry_hash(entry):
 def scan_all_feeds(max_age_hours=48):
     """
     Сканирует все RSS-ленты, возвращает список новых записей.
-    
+
     Returns:
         list[dict]: Новые записи с полями:
             - title, link, summary, published
@@ -169,7 +170,7 @@ def scan_all_feeds(max_age_hours=48):
         raw_path = os.path.join(RAW_DIR, f"feed_{today}.json")
         existing = []
         if os.path.exists(raw_path):
-            with open(raw_path, "r", encoding="utf-8") as f:
+            with open(raw_path, encoding="utf-8") as f:
                 existing = json.load(f)
         existing.extend(new_items)
         with open(raw_path, "w", encoding="utf-8") as f:
@@ -195,14 +196,16 @@ def scan_feed_by_id(source_id):
             h = _entry_hash(entry)
             if h in seen:
                 continue
-            items.append({
-                "title": entry.get("title", "").strip(),
-                "link": entry.get("link", ""),
-                "summary": entry.get("summary", "")[:1000],
-                "source_id": source_id,
-                "source_name": config["name"],
-                "category": config["category"],
-            })
+            items.append(
+                {
+                    "title": entry.get("title", "").strip(),
+                    "link": entry.get("link", ""),
+                    "summary": entry.get("summary", "")[:1000],
+                    "source_id": source_id,
+                    "source_name": config["name"],
+                    "category": config["category"],
+                }
+            )
             seen[h] = time.time()
     except Exception as e:
         print(f"❌ {source_id} error: {e}")

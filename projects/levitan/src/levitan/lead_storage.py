@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Lead(BaseModel):
     """Модель лида."""
+
     phone: str
     call_id: str
     duration_sec: int = 0
@@ -113,7 +114,8 @@ class LeadStorage:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO leads (
                     phone, call_id, duration_sec, status,
                     has_interest, crops, volume, region, basis, harvest_time,
@@ -121,29 +123,31 @@ class LeadStorage:
                     objections, notes, confidence, transcript_path, audio_url,
                     created_at, updated_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                lead.phone,
-                lead.call_id,
-                lead.duration_sec,
-                lead.status,
-                lead.has_interest,
-                str(lead.crops),
-                lead.volume,
-                lead.region,
-                lead.basis,
-                lead.harvest_time,
-                lead.contact_name,
-                lead.best_time_to_call,
-                lead.preferred_channel,
-                lead.email,
-                str(lead.objections),
-                lead.notes,
-                lead.confidence,
-                lead.transcript_path,
-                lead.audio_url,
-                lead.created_at or datetime.now().isoformat(),
-                datetime.now().isoformat()
-            ))
+            """,
+                (
+                    lead.phone,
+                    lead.call_id,
+                    lead.duration_sec,
+                    lead.status,
+                    lead.has_interest,
+                    str(lead.crops),
+                    lead.volume,
+                    lead.region,
+                    lead.basis,
+                    lead.harvest_time,
+                    lead.contact_name,
+                    lead.best_time_to_call,
+                    lead.preferred_channel,
+                    lead.email,
+                    str(lead.objections),
+                    lead.notes,
+                    lead.confidence,
+                    lead.transcript_path,
+                    lead.audio_url,
+                    lead.created_at or datetime.now().isoformat(),
+                    datetime.now().isoformat(),
+                ),
+            )
 
             conn.commit()
             lead_id = cursor.lastrowid
@@ -205,7 +209,7 @@ class LeadStorage:
         status: str | None = None,
         has_interest: bool | None = None,
         region: str | None = None,
-        limit: int = 100
+        limit: int = 100,
     ) -> list[Lead]:
         """
         Получение списка лидов.
@@ -257,11 +261,14 @@ class LeadStorage:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 UPDATE leads
                 SET status = ?, updated_at = ?
                 WHERE call_id = ?
-            """, (status, datetime.now().isoformat(), call_id))
+            """,
+                (status, datetime.now().isoformat(), call_id),
+            )
 
             conn.commit()
             conn.close()
@@ -337,6 +344,7 @@ class LeadStorage:
             crops_count = {}
             for row in crops_rows:
                 import ast
+
                 crops = ast.literal_eval(row[0])
                 for crop in crops:
                     crops_count[crop] = crops_count.get(crop, 0) + 1
@@ -375,7 +383,7 @@ class LeadStorage:
             transcript_path=row[18],
             audio_url=row[19],
             created_at=row[20] or "",
-            updated_at=row[21] or ""
+            updated_at=row[21] or "",
         )
 
     def export_to_csv(self, output_path: Path):
@@ -389,27 +397,39 @@ class LeadStorage:
                 writer = csv.writer(f)
 
                 # Заголовки
-                writer.writerow([
-                    "phone", "status", "has_interest", "crops", "volume",
-                    "region", "basis", "harvest_time", "contact_name",
-                    "notes", "created_at"
-                ])
+                writer.writerow(
+                    [
+                        "phone",
+                        "status",
+                        "has_interest",
+                        "crops",
+                        "volume",
+                        "region",
+                        "basis",
+                        "harvest_time",
+                        "contact_name",
+                        "notes",
+                        "created_at",
+                    ]
+                )
 
                 # Данные
                 for lead in leads:
-                    writer.writerow([
-                        lead.phone,
-                        lead.status,
-                        lead.has_interest,
-                        ", ".join(lead.crops),
-                        lead.volume,
-                        lead.region,
-                        lead.basis,
-                        lead.harvest_time,
-                        lead.contact_name,
-                        lead.notes,
-                        lead.created_at
-                    ])
+                    writer.writerow(
+                        [
+                            lead.phone,
+                            lead.status,
+                            lead.has_interest,
+                            ", ".join(lead.crops),
+                            lead.volume,
+                            lead.region,
+                            lead.basis,
+                            lead.harvest_time,
+                            lead.contact_name,
+                            lead.notes,
+                            lead.created_at,
+                        ]
+                    )
 
             logger.info(f"Exported {len(leads)} leads to {output_path}")
 
@@ -426,5 +446,6 @@ def get_lead_storage() -> LeadStorage:
     global _lead_storage
     if _lead_storage is None:
         from .config import LEADS_DB_PATH
+
         _lead_storage = LeadStorage(LEADS_DB_PATH)
     return _lead_storage

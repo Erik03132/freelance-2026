@@ -1,12 +1,14 @@
 """
 Ulyana AI Expert Backend — FastAPI сервер (порт 8000)
 """
+
 import os
 import sys
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
+
 import uvicorn
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 # Добавляем текущую директорию в sys.path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -23,26 +25,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class ChatRequest(BaseModel):
     message: str
+
 
 class ChatResponse(BaseModel):
     answer: str
     source: str
 
+
 # Хранилище истории (in-memory, per session)
 sessions = {}
+
 
 @app.get("/")
 async def root():
     return {
         "message": "Ulyana AI Expert Backend is running",
-        "endpoints": {
-            "chat": "/api/chat",
-            "health": "/api/health",
-            "docs": "/docs"
-        }
+        "endpoints": {"chat": "/api/chat", "health": "/api/health", "docs": "/docs"},
     }
+
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
@@ -64,12 +67,15 @@ async def chat_endpoint(request: ChatRequest):
     except Exception as e:
         print(f"❌ Ошибка бэкенда: {e}")
         import traceback
+
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "agent": "Ulyana"}
+
 
 if __name__ == "__main__":
     print("\n👩‍💼 Ulyana AI Expert Backend v2.0")

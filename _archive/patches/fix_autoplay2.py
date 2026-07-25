@@ -1,5 +1,4 @@
-import re
-path = '/opt/mango_webhook.py'
+path = "/opt/mango_webhook.py"
 with open(path) as f:
     c = f.read()
 
@@ -9,8 +8,8 @@ new = '        # Auto-play greeting for inbound calls on Appeared\n        cb_ci
 
 if old in c:
     c = c.replace(old, new)
-    with open(path, 'w') as f:
+    with open(path, "w") as f:
         f.write(c)
-    print('OK')
+    print("OK")
 else:
-    print('NOT FOUND')
+    print("NOT FOUND")

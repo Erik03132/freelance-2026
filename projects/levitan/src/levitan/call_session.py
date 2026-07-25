@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class TranscriptEntry(BaseModel):
     """Запись в транскрипте."""
+
     role: str  # "agent" или "client"
     text: str
     timestamp: datetime = Field(default_factory=datetime.now)
@@ -32,7 +33,7 @@ class CallSession:
         phone: str,
         mango_client: MangoClient,
         knowledge_base: KnowledgeBase,
-        llm_api_key: str = ""
+        llm_api_key: str = "",
     ):
         self.call_id = call_id
         self.phone = phone
@@ -87,10 +88,7 @@ class CallSession:
             return VOICE_NOT_HEARD
 
         # Записываем в транскрипт
-        self.transcript.append(TranscriptEntry(
-            role="client",
-            text=client_text
-        ))
+        self.transcript.append(TranscriptEntry(role="client", text=client_text))
 
         # Генерируем ответ
         agent_response = await self._generate_response(client_text)
@@ -109,8 +107,7 @@ class CallSession:
 
         # Формируем контекст
         recent_history = [
-            {"role": entry.role, "content": entry.text}
-            for entry in self.transcript[-5:]
+            {"role": entry.role, "content": entry.text} for entry in self.transcript[-5:]
         ]
 
         # Генерируем ответ
@@ -118,7 +115,7 @@ class CallSession:
             system_prompt=SYSTEM_PROMPT,
             user_message=client_text,
             context=kb_context,
-            recent_history=recent_history
+            recent_history=recent_history,
         )
 
         if not response:
@@ -129,10 +126,7 @@ class CallSession:
     async def _send_agent_message(self, text: str):
         """Отправить сообщение агента через TTS и Mango."""
         # Записываем в транскрипт
-        self.transcript.append(TranscriptEntry(
-            role="agent",
-            text=text
-        ))
+        self.transcript.append(TranscriptEntry(role="agent", text=text))
 
         self.last_agent_text = text
 
@@ -143,15 +137,11 @@ class CallSession:
         if tts_path and tts_path.exists():
             # Загружаем аудио в Mango
             upload_result = await self.mango_client.upload_audio(
-                str(tts_path),
-                f"tts_{self.call_id}_{len(self.transcript)}.wav"
+                str(tts_path), f"tts_{self.call_id}_{len(self.transcript)}.wav"
             )
 
             if "audio_id" in upload_result:
-                await self.mango_client.play_audio(
-                    self.call_id,
-                    upload_result["audio_id"]
-                )
+                await self.mango_client.play_audio(self.call_id, upload_result["audio_id"])
 
     async def end(self, reason: str = "completed"):
         """Завершить сессию."""
@@ -181,16 +171,13 @@ class CallSession:
             "turn_count": self.turn_count,
             "status": self.status,
             "transcript": [
-                {
-                    "role": entry.role,
-                    "text": entry.text,
-                    "timestamp": entry.timestamp.isoformat()
-                }
+                {"role": entry.role, "text": entry.text, "timestamp": entry.timestamp.isoformat()}
                 for entry in self.transcript
-            ]
+            ],
         }
 
         import json
+
         with open(transcript_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -202,10 +189,12 @@ class CallSession:
             return
 
         # Формируем транскрипт
-        transcript_text = "\n".join([
-            f"{'Агент' if entry.role == 'agent' else 'Клиент'}: {entry.text}"
-            for entry in self.transcript
-        ])
+        transcript_text = "\n".join(
+            [
+                f"{'Агент' if entry.role == 'agent' else 'Клиент'}: {entry.text}"
+                for entry in self.transcript
+            ]
+        )
 
         # Извлекаем информацию
         extraction_prompt = f"""Проанализируй транскрипт разговора и извлеки информацию:
@@ -228,16 +217,15 @@ class CallSession:
 - status: лид/перезвон/не_заинтересован/отказ
 """
 
-        self.lead_info = await self.llm.extract_lead_info(
-            transcript_text,
-            extraction_prompt
-        )
+        self.lead_info = await self.llm.extract_lead_info(transcript_text, extraction_prompt)
 
         logger.info(f"Lead info extracted: {self.lead_info}")
 
     def get_transcript_text(self) -> str:
         """Получить текст транскрипта."""
-        return "\n".join([
-            f"{'Агент' if entry.role == 'agent' else 'Клиент'}: {entry.text}"
-            for entry in self.transcript
-        ])
+        return "\n".join(
+            [
+                f"{'Агент' if entry.role == 'agent' else 'Клиент'}: {entry.text}"
+                for entry in self.transcript
+            ]
+        )

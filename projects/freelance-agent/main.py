@@ -56,8 +56,10 @@ def cmd_analyze(args):
     if task is None:
         return
     from mcp_servers.proposal_engine.scout import ScoutAgent
+
     scout = ScoutAgent()
     import json
+
     result = scout.analyze(args.title or "", task, args.budget or 0)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 

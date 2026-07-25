@@ -81,9 +81,7 @@ def compact(agent: str, keep: int = 500) -> dict:
     return {"before": before, "after": after, "removed": before - after}
 
 
-def recall_scored(
-    agent: str, query: str, top_k: int = 3, min_score: float = 0.0
-) -> list[dict]:
+def recall_scored(agent: str, query: str, top_k: int = 3, min_score: float = 0.0) -> list[dict]:
     """Smart RAG top-K: return the most relevant facts as ranked dicts.
 
     Chen mechanic #2 — retrieve only the few most relevant items (ranked by

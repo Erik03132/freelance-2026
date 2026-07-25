@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Test: ping one Adygea number via baresip+Mango to verify alive-detection."""
-import os, sys, time, signal
+
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ping_checker as pc
 

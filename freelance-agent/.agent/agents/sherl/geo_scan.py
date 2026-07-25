@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from .llm_client import call_llm
-from .research_config import COMPETITOR_FACTORS, GEO_MODELS
+from .research_config import COMPETITOR_FACTORS
 from .searcher import research
 
 

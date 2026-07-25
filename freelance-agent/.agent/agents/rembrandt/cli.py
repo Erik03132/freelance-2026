@@ -21,40 +21,56 @@ if _AGENTS not in sys.path:
 try:
     from learning import build_learned_context, capture_outcome, capture_start
 except ImportError:
+
     def build_learned_context(agent, min_samples=3):
         return ""
+
     def capture_start(*a, **k):
         return ""
+
     def capture_outcome(*a, **k):
         return False
+
 
 try:
     from security import scan_leaks
 except ImportError:
+
     def scan_leaks(code):
         return []
 
+
 try:
-    from memory import compact as mem_compact, enrich_context, recall, remember
+    from memory import compact as mem_compact
+    from memory import enrich_context, recall, remember
 except ImportError:
+
     def enrich_context(agent, query, ctx="", top_k=2):
         return ctx
+
     def recall(agent, query, top_k=3):
         return []
+
     def remember(agent, fact, kind):
         pass
+
     def mem_compact(agent, keep=500):
         return {"before": 0, "after": 0, "removed": 0}
+
 
 try:
     from soul import ensure_soul, evolve_soul, soul_context
 except ImportError:
+
     def ensure_soul(agent, name="", role=""):
         return ""
+
     def evolve_soul(agent, lessons):
         return False
+
     def soul_context(agent, max_chars=1500):
         return ""
+
 
 AGENT = "rembrandt"
 _base_learned = build_learned_context
@@ -67,7 +83,8 @@ def build_learned_context(agent, min_samples=3):  # noqa: F811 — wrap to injec
         return s + ("\n\n" + base if base else "")
     return base
 
-from .brand_system import BrandSystem, INCUBIRD_DEFAULT, load_brand
+
+from .brand_system import INCUBIRD_DEFAULT, BrandSystem, load_brand
 from .component_generator import COMPONENT_TYPES, generate_component
 from .design_generator import generate_design_md
 from .image_generator import download_image, leonardo_generate
@@ -103,29 +120,56 @@ Examples:
   python3 -m rembrandt --list-components
         """,
     )
-    parser.add_argument("--design", "-d", type=str, default=None,
-                        help="Generate DESIGN.md from a design brief")
-    parser.add_argument("--component", "-c", type=str, default=None,
-                        choices=COMPONENT_TYPES + [None],
-                        help=f"Generate a UI component ({', '.join(COMPONENT_TYPES)})")
-    parser.add_argument("--spec", "-s", type=str, default="",
-                        help="Component specification (natural language)")
-    parser.add_argument("--style", type=str, default="incubird",
-                        choices=["incubird", "custom"],
-                        help="Brand style to use")
-    parser.add_argument("--brand", type=str, default=None,
-                        help="Path to custom brand JSON file")
-    parser.add_argument("--prompt", "-p", type=str, default=None,
-                        help="Image description for Leonardo.ai generation")
-    parser.add_argument("--output", "-o", type=str, default=None,
-                        help="Output file path for image")
-    parser.add_argument("--list-components", action="store_true",
-                        help="List available component types")
-    parser.add_argument("--list-brands", action="store_true",
-                        help="List available brand systems")
-    parser.add_argument("--feedback", type=str, default=None, nargs=2,
-                        metavar=("SID", "OUTCOME"),
-                        help="Record verdict for a signal: --feedback <sid> accepted|edited|rejected")
+    parser.add_argument(
+        "--design",
+        "-d",
+        type=str,
+        default=None,
+        help="Generate DESIGN.md from a design brief",
+    )
+    parser.add_argument(
+        "--component",
+        "-c",
+        type=str,
+        default=None,
+        choices=COMPONENT_TYPES + [None],
+        help=f"Generate a UI component ({', '.join(COMPONENT_TYPES)})",
+    )
+    parser.add_argument(
+        "--spec",
+        "-s",
+        type=str,
+        default="",
+        help="Component specification (natural language)",
+    )
+    parser.add_argument(
+        "--style",
+        type=str,
+        default="incubird",
+        choices=["incubird", "custom"],
+        help="Brand style to use",
+    )
+    parser.add_argument("--brand", type=str, default=None, help="Path to custom brand JSON file")
+    parser.add_argument(
+        "--prompt",
+        "-p",
+        type=str,
+        default=None,
+        help="Image description for Leonardo.ai generation",
+    )
+    parser.add_argument("--output", "-o", type=str, default=None, help="Output file path for image")
+    parser.add_argument(
+        "--list-components", action="store_true", help="List available component types"
+    )
+    parser.add_argument("--list-brands", action="store_true", help="List available brand systems")
+    parser.add_argument(
+        "--feedback",
+        type=str,
+        default=None,
+        nargs=2,
+        metavar=("SID", "OUTCOME"),
+        help="Record verdict for a signal: --feedback <sid> accepted|edited|rejected",
+    )
 
     args = parser.parse_args()
 
@@ -141,7 +185,9 @@ Examples:
                 print(f"🧬 Soul evolved: folded fresh lessons into {AGENT}.soul.md")
         _stats = mem_compact(AGENT)
         if _stats["removed"]:
-            print(f"🗜️  Memory compacted: {_stats['before']}→{_stats['after']} (-{_stats['removed']})")
+            print(
+                f"🗜️  Memory compacted: {_stats['before']}→{_stats['after']} (-{_stats['removed']})"
+            )
         return
 
     brand: BrandSystem = INCUBIRD_DEFAULT
@@ -186,7 +232,9 @@ Examples:
             path = _save(f"{args.component}.html", result)
             print(f"✅ Component saved to {path}")
             _guard(result, sid)
-            print(f"📡 Signal {sid} logged — later: python3 -m rembrandt --feedback {sid} accepted|edited|rejected")
+            print(
+                f"📡 Signal {sid} logged — later: python3 -m rembrandt --feedback {sid} accepted|edited|rejected"
+            )
         else:
             print("❌ Failed to generate component")
             sys.exit(1)

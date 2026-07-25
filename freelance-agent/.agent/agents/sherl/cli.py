@@ -21,34 +21,48 @@ if _AGENTS not in sys.path:
 try:
     from learning import build_learned_context, capture_outcome, capture_start
 except ImportError:
+
     def build_learned_context(agent, min_samples=3):
         return ""
+
     def capture_start(*a, **k):
         return ""
+
     def capture_outcome(*a, **k):
         return False
 
+
 try:
-    from memory import compact as mem_compact, enrich_context, recall, remember
+    from memory import compact as mem_compact
+    from memory import enrich_context, recall, remember
 except ImportError:
+
     def enrich_context(agent, query, ctx="", top_k=2):
         return ctx
+
     def recall(agent, query, top_k=3):
         return []
+
     def remember(agent, fact, kind):
         pass
+
     def mem_compact(agent, keep=500):
         return {"before": 0, "after": 0, "removed": 0}
+
 
 try:
     from soul import ensure_soul, evolve_soul, soul_context
 except ImportError:
+
     def ensure_soul(agent, name="", role=""):
         return ""
+
     def evolve_soul(agent, lessons):
         return False
+
     def soul_context(agent, max_chars=1500):
         return ""
+
 
 AGENT = "sherl"
 _base_learned = build_learned_context
@@ -60,6 +74,7 @@ def build_learned_context(agent, min_samples=3):  # noqa: F811 — wrap to injec
     if s:
         return s + ("\n\n" + base if base else "")
     return base
+
 
 from . import (
     SEARCH_PROVIDERS,
@@ -89,21 +104,26 @@ def main():
         "  python3 -m sherl --geo-scan 'Levitan' --query 'CRM обзвон'\n"
         "  python3 -m sherl --competitor 'amoCRM'\n",
     )
-    parser.add_argument("--research", "-r", type=str, default=None,
-                        help="Multi-source research query")
-    parser.add_argument("--geo-scan", type=str, default=None,
-                        help="Brand name for GEO presence scan")
-    parser.add_argument("--query", "-q", type=str, default="",
-                        help="Query used with --geo-scan")
-    parser.add_argument("--competitor", "-c", type=str, default=None,
-                        help="Competitor name for audit")
-    parser.add_argument("--market", "-m", type=str, default=None,
-                        help="Market research question")
-    parser.add_argument("--list-providers", action="store_true",
-                        help="List search providers")
-    parser.add_argument("--feedback", type=str, default=None, nargs=2,
-                        metavar=("SID", "OUTCOME"),
-                        help="Record verdict for a signal: --feedback <sid> accepted|edited|rejected")
+    parser.add_argument(
+        "--research", "-r", type=str, default=None, help="Multi-source research query"
+    )
+    parser.add_argument(
+        "--geo-scan", type=str, default=None, help="Brand name for GEO presence scan"
+    )
+    parser.add_argument("--query", "-q", type=str, default="", help="Query used with --geo-scan")
+    parser.add_argument(
+        "--competitor", "-c", type=str, default=None, help="Competitor name for audit"
+    )
+    parser.add_argument("--market", "-m", type=str, default=None, help="Market research question")
+    parser.add_argument("--list-providers", action="store_true", help="List search providers")
+    parser.add_argument(
+        "--feedback",
+        type=str,
+        default=None,
+        nargs=2,
+        metavar=("SID", "OUTCOME"),
+        help="Record verdict for a signal: --feedback <sid> accepted|edited|rejected",
+    )
 
     args = parser.parse_args()
 
@@ -119,7 +139,9 @@ def main():
                 print(f"🧬 Soul evolved: folded fresh lessons into {AGENT}.soul.md")
         _stats = mem_compact(AGENT)
         if _stats["removed"]:
-            print(f"🗜️  Memory compacted: {_stats['before']}→{_stats['after']} (-{_stats['removed']})")
+            print(
+                f"🗜️  Memory compacted: {_stats['before']}→{_stats['after']} (-{_stats['removed']})"
+            )
         return
 
     if args.list_providers:
@@ -138,12 +160,16 @@ def main():
             print("\nSources:")
             for s in res["sources"][:5]:
                 print(f"  - {s.get('title')}: {s.get('url')}")
-        print(f"\n📡 Signal {sid} logged — later: python3 -m sherl --feedback {sid} accepted|edited|rejected")
+        print(
+            f"\n📡 Signal {sid} logged — later: python3 -m sherl --feedback {sid} accepted|edited|rejected"
+        )
         return
 
     if args.geo_scan:
         print(f"🔍 GEO-scan: {args.geo_scan} / {args.query}")
-        ctx = enrich_context("sherl", f"{args.geo_scan} {args.query}", build_learned_context("sherl"))
+        ctx = enrich_context(
+            "sherl", f"{args.geo_scan} {args.query}", build_learned_context("sherl")
+        )
         sid = capture_start("sherl", "geo_scan", f"{args.geo_scan} {args.query}")
         result = geo_scan(args.geo_scan, args.query)
         text = format_geo(result)
@@ -160,7 +186,9 @@ def main():
         path = _save(f"competitor_{args.competitor}.md", result["report"])
         print(result["report"][:2000])
         print(f"\n✅ Saved to {path}")
-        print(f"📡 Signal {sid} logged — later: python3 -m sherl --feedback {sid} accepted|edited|rejected")
+        print(
+            f"📡 Signal {sid} logged — later: python3 -m sherl --feedback {sid} accepted|edited|rejected"
+        )
         return
 
     if args.market:
@@ -171,7 +199,9 @@ def main():
         path = _save("market.md", result["brief"])
         print(result["brief"][:2000])
         print(f"\n✅ Saved to {path}")
-        print(f"📡 Signal {sid} logged — later: python3 -m sherl --feedback {sid} accepted|edited|rejected")
+        print(
+            f"📡 Signal {sid} logged — later: python3 -m sherl --feedback {sid} accepted|edited|rejected"
+        )
         return
 
     parser.print_help()

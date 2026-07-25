@@ -14,6 +14,7 @@ Ping Checker — проверка "живых" номеров через кор�
     data/campaigns/csv/alive_YYYY-MM-DD.csv
     data/campaigns/csv/dead_YYYY-MM-DD.csv
 """
+
 import argparse
 import csv
 import hashlib
@@ -23,12 +24,12 @@ import os
 import re
 import subprocess
 import sys
-import requests
 import threading
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+
+import requests
 
 logging.basicConfig(
     level=logging.INFO,
@@ -47,10 +48,10 @@ PING_EXT = "23"
 PING_SIP_DOMAIN = "vpbx400374818.mangosip.ru"
 
 # Настройки пинга
-PING_OPERATOR_WAIT = 10      # сколько ждём, пока baresip примет звонок (оператор)
-PING_CLIENT_WAIT = 10        # сколько держим линию после ответа оператора
-PING_POST_HANGUP_WAIT = 3    # пауза перед запросом статистики
-PING_BETWEEN_CALLS = 2       # пауза между звонками
+PING_OPERATOR_WAIT = 10  # сколько ждём, пока baresip примет звонок (оператор)
+PING_CLIENT_WAIT = 10  # сколько держим линию после ответа оператора
+PING_POST_HANGUP_WAIT = 3  # пауза перед запросом статистики
+PING_BETWEEN_CALLS = 2  # пауза между звонками
 
 
 def load_env():
@@ -155,7 +156,11 @@ def get_call_status(phone: str, after_ts: float) -> str:
                         start_ts = int(row[1])
                     except ValueError:
                         continue
-                    if norm_phone(to_number) != target or from_ext != PING_EXT or start_ts < int(after_ts):
+                    if (
+                        norm_phone(to_number) != target
+                        or from_ext != PING_EXT
+                        or start_ts < int(after_ts)
+                    ):
                         continue
 
                     if call_type == "1110" and answer_time and answer_time != "0":
@@ -179,8 +184,8 @@ class PingBridge:
     """Управляет baresip для пинга."""
 
     def __init__(self):
-        self.proc: Optional[subprocess.Popen] = None
-        self._reader_thread: Optional[threading.Thread] = None
+        self.proc: subprocess.Popen | None = None
+        self._reader_thread: threading.Thread | None = None
         self._lock = threading.Lock()
         self._lines: list[str] = []
         self.established = False
@@ -298,21 +303,23 @@ class PingBridge:
 
 def load_contacts(csv_path: Path) -> list[dict]:
     contacts = []
-    with open(csv_path, "r", encoding="utf-8") as f:
+    with open(csv_path, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             phones_raw = row.get("Телефоны", "") or ""
             for phone in re.findall(r"[\d\-\(\)\+\s]{7,}", phones_raw):
                 normalized = norm_phone(phone)
                 if is_valid_phone(normalized):
-                    contacts.append({
-                        "name": (row.get("Название", "") or "").strip(),
-                        "description": (row.get("Описание", "") or "").strip(),
-                        "region": (row.get("Регион", "") or "").strip(),
-                        "city": (row.get("Город", "") or "").strip(),
-                        "contact_name": (row.get("Имя", "") or "").strip(),
-                        "phone": normalized,
-                    })
+                    contacts.append(
+                        {
+                            "name": (row.get("Название", "") or "").strip(),
+                            "description": (row.get("Описание", "") or "").strip(),
+                            "region": (row.get("Регион", "") or "").strip(),
+                            "city": (row.get("Город", "") or "").strip(),
+                            "contact_name": (row.get("Имя", "") or "").strip(),
+                            "phone": normalized,
+                        }
+                    )
                     break
     return contacts
 
@@ -330,14 +337,16 @@ def save_results(results: dict[str, list[dict]], prefix: str = ""):
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             for c in rows:
-                writer.writerow({
-                    "Название": c["name"],
-                    "Описание": c["description"],
-                    "Регион": c["region"],
-                    "Город": c["city"],
-                    "Имя": c["contact_name"],
-                    "Телефоны": c["phone"],
-                })
+                writer.writerow(
+                    {
+                        "Название": c["name"],
+                        "Описание": c["description"],
+                        "Регион": c["region"],
+                        "Город": c["city"],
+                        "Имя": c["contact_name"],
+                        "Телефоны": c["phone"],
+                    }
+                )
         paths[status] = path
     return paths
 
@@ -345,11 +354,12 @@ def save_results(results: dict[str, list[dict]], prefix: str = ""):
 def main():
     load_env()
 
-    import argparse
     parser = argparse.ArgumentParser(description="Пинг-чекер номеров")
     parser.add_argument("csv", nargs="?", help="Путь к CSV с контактами")
     parser.add_argument("limit", nargs="?", type=int, default=0, help="Лимит контактов")
-    parser.add_argument("--quick", action="store_true", help="Быстрый пинг: 2 сек, только проверка доступности")
+    parser.add_argument(
+        "--quick", action="store_true", help="Быстрый пинг: 2 сек, только проверка доступности"
+    )
     args = parser.parse_args()
 
     if not args.csv:
@@ -398,6 +408,7 @@ def main():
         stopped = True
 
     import signal
+
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 

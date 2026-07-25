@@ -38,14 +38,13 @@ import uuid
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 from urllib.parse import urlparse
 
 try:
     import httpx
     import requests
-    from telegram import Update, ReplyKeyboardMarkup
-    from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+    from telegram import ReplyKeyboardMarkup, Update
+    from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
     from telegram.request import HTTPXRequest
 except ImportError:
     print("pip install python-telegram-bot requests httpx[socks]")
@@ -188,18 +187,41 @@ def _pick_working_proxy(test_url: str = "https://api.telegram.org") -> str:
 
 # === ФИЛЬТР ===
 TARGET_KEYWORDS = [
-    "зерновые", "пшеница", "ячмень", "кукуруза",
-    "подсолнечник", "рапс", "соя",
-    "горох", "нут", "чечевица",
-    "масличные", "бобовые", "озимая", "яровая",
-    "зерно", "закупка зерновых",
+    "зерновые",
+    "пшеница",
+    "ячмень",
+    "кукуруза",
+    "подсолнечник",
+    "рапс",
+    "соя",
+    "горох",
+    "нут",
+    "чечевица",
+    "масличные",
+    "бобовые",
+    "озимая",
+    "яровая",
+    "зерно",
+    "закупка зерновых",
 ]
 
 EXCLUDE_ONLY = [
-    "крс", "молочный", "мясной", "овцы", "свиньи",
-    "птица", "рыба", "овощи", "картофель", "сахарная",
-    "хранение", "сооружений", "техника", "ремонт",
-    "торговля", "производство молочной",
+    "крс",
+    "молочный",
+    "мясной",
+    "овцы",
+    "свиньи",
+    "птица",
+    "рыба",
+    "овощи",
+    "картофель",
+    "сахарная",
+    "хранение",
+    "сооружений",
+    "техника",
+    "ремонт",
+    "торговля",
+    "производство молочной",
 ]
 
 # === LLM PROMPT ===
@@ -236,6 +258,7 @@ EXTRACTION_PROMPT = """Проанализируй транскрипт теле�
 # STATE
 # ============================================================
 
+
 class DialerState:
     """Состояние обзвона для одного оператора."""
 
@@ -244,16 +267,16 @@ class DialerState:
         self.carousel = False
         self.contacts: list[dict] = []
         self.current_idx = 0
-        self.current_contact: Optional[dict] = None
+        self.current_contact: dict | None = None
         self.call_start: float = 0
         self.stats = Counter()
         self.results: list[dict] = []
         self.waiting_for_hangup = False
         self.waiting_for_next = False
-        self.next_event: Optional[asyncio.Event] = None
-        self.csv_path: Optional[str] = None
-        self.ext: Optional[str] = None
-        self.chat_id: Optional[str] = None
+        self.next_event: asyncio.Event | None = None
+        self.csv_path: str | None = None
+        self.ext: str | None = None
+        self.chat_id: str | None = None
         self.waiting_for_summary = False
 
     def reset(self):
@@ -275,6 +298,7 @@ def get_state(chat_id: int) -> DialerState:
         _operator_states[chat_id] = DialerState()
     return _operator_states[chat_id]
 
+
 # Кнопки
 MAIN_BUTTONS = [["▶ Начать обзвон", "⏹ Стоп"], ["⏭ Следующий", "⏩ Пропустить"], ["📊 Статус"]]
 IDLE_BUTTONS = [["▶ Начать обзвон", "🎠 Карусель"], ["📊 Статус"]]
@@ -286,6 +310,7 @@ CAROUSEL_BUTTONS = [["🎠 Карусель ✓", "⏭ Следующий"], ["�
 # ============================================================
 # UTILS
 # ============================================================
+
 
 def norm_phone(num: str) -> str:
     d = re.sub(r"\D", "", num or "")
@@ -328,7 +353,7 @@ def contact_context(contact: dict) -> str:
     return "\n".join(f"{k}: {v}" for k, v in fields if v) or "нет данных"
 
 
-_CONTACT_LOOKUP_CACHE: Optional[dict[str, dict]] = None
+_CONTACT_LOOKUP_CACHE: dict[str, dict] | None = None
 
 
 def load_contact_lookup() -> dict[str, dict]:
@@ -340,7 +365,7 @@ def load_contact_lookup() -> dict[str, dict]:
     csv_dir = DATA_DIR / "campaigns" / "csv"
     for path in sorted(csv_dir.glob("*.csv")):
         try:
-            with open(path, "r", encoding="utf-8-sig") as f:
+            with open(path, encoding="utf-8-sig") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     phones = row.get("Телефоны", row.get("phone", "")) or ""
@@ -354,7 +379,7 @@ def load_contact_lookup() -> dict[str, dict]:
     return lookup
 
 
-def find_contact_by_phone(phone: str) -> Optional[dict]:
+def find_contact_by_phone(phone: str) -> dict | None:
     normalized = norm_phone(phone)
     if not is_valid_phone(normalized):
         return None
@@ -426,7 +451,8 @@ def is_blocked(phone: str) -> bool:
 # MANGO API
 # ============================================================
 
-def mango_callback(client_phone: str, from_ext: Optional[str] = None) -> dict:
+
+def mango_callback(client_phone: str, from_ext: str | None = None) -> dict:
     """
     Predictive callback: Mango звонит клиенту,
     если ответил — соединяет с MY_PHONE.
@@ -460,22 +486,27 @@ def mango_callback(client_phone: str, from_ext: Optional[str] = None) -> dict:
 # RECORDING & STT (КАСКАД: VPS → локально)
 # ============================================================
 
+
 def check_vps() -> bool:
     import subprocess
+
     try:
         r = subprocess.run(
             ["ssh", "-o", "ConnectTimeout=3", f"{VPS_USER}@{VPS_HOST}", "echo ok"],
-            capture_output=True, text=True, timeout=8,
+            capture_output=True,
+            text=True,
+            timeout=8,
         )
         return r.returncode == 0
     except Exception:
         return False
 
 
-def find_recording_mango(phone: str, after_ts: float) -> Optional[str]:
+def find_recording_mango(phone: str, after_ts: float) -> str | None:
     """Найти recording_id через расширенную статистику Mango API."""
     try:
         from mango_s2t import find_recording_via_stats
+
         found = find_recording_via_stats(phone, after_ts, timeout=30)
         if found:
             return found["recording_id"]
@@ -484,7 +515,7 @@ def find_recording_mango(phone: str, after_ts: float) -> Optional[str]:
     return None
 
 
-def wait_for_recording(phone: str, call_start: float, timeout: int = 90) -> Optional[str]:
+def wait_for_recording(phone: str, call_start: float, timeout: int = 90) -> str | None:
     """Каскад: VPS events → Mango API скрипт."""
     # 1. VPS
     if VPS_AVAILABLE:
@@ -494,19 +525,29 @@ def wait_for_recording(phone: str, call_start: float, timeout: int = 90) -> Opti
             time.sleep(4)
             try:
                 result = subprocess.run(
-                    ["ssh", "-o", "ConnectTimeout=5", f"{VPS_USER}@{VPS_HOST}",
-                     "grep 'recording_added' /var/log/voice-angela/events.jsonl 2>/dev/null | tail -5"],
-                    capture_output=True, text=True, timeout=8,
+                    [
+                        "ssh",
+                        "-o",
+                        "ConnectTimeout=5",
+                        f"{VPS_USER}@{VPS_HOST}",
+                        "grep 'recording_added' /var/log/voice-angela/events.jsonl 2>/dev/null | tail -5",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    timeout=8,
                 )
                 for line in result.stdout.strip().split("\n"):
-                    if not line: continue
+                    if not line:
+                        continue
                     try:
                         evt = json.loads(line)
                         et = evt.get("timestamp", "")
                         if et and datetime.fromisoformat(et).timestamp() > call_start:
                             return evt.get("recording_id", "")
-                    except: pass
-            except: pass
+                    except:
+                        pass
+            except:
+                pass
 
     # 2. Mango API
     log.info("Mango API: ищем запись...")
@@ -514,16 +555,17 @@ def wait_for_recording(phone: str, call_start: float, timeout: int = 90) -> Opti
     while time.time() - start < timeout:
         time.sleep(8)
         rec = find_recording_mango(phone, call_start)
-        if rec: return rec
+        if rec:
+            return rec
     return None
 
 
-def process_recording(recording_id: str) -> Optional[str]:
+def process_recording(recording_id: str) -> str | None:
     """Каскад: VPS STT → локальный STT."""
     # 1. VPS
     if VPS_AVAILABLE:
         try:
-            script = f'''
+            script = f"""
 import os, hashlib, json, requests, sys
 from dotenv import load_dotenv
 load_dotenv("/opt/.env")
@@ -540,14 +582,24 @@ from faster_whisper import WhisperModel
 m=WhisperModel("base",device="cpu",compute_type="int8")
 segs,_=m.transcribe(mp3,language="ru",beam_size=5,vad_filter=True)
 print(" ".join(s.text for s in segs).strip())
-'''
+"""
             result = subprocess.run(
-                ["ssh", "-o", "ConnectTimeout=8", f"{VPS_USER}@{VPS_HOST}", f"python3 -c '{script}'"],
-                capture_output=True, text=True, timeout=180,
+                [
+                    "ssh",
+                    "-o",
+                    "ConnectTimeout=8",
+                    f"{VPS_USER}@{VPS_HOST}",
+                    f"python3 -c '{script}'",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=180,
             )
             output = result.stdout.strip()
-            if output and output != "FAIL": return output
-        except: pass
+            if output and output != "FAIL":
+                return output
+        except:
+            pass
 
     # 2. Локально
     payload = {"recording_id": recording_id, "action": "download"}
@@ -559,10 +611,13 @@ print(" ".join(s.text for s in segs).strip())
             data={"vpbx_api_key": MANGO_API_KEY, "json": j, "sign": sign},
             timeout=60,
         )
-        if r.status_code != 200 or len(r.content) < 1000: return None
+        if r.status_code != 200 or len(r.content) < 1000:
+            return None
         mp3 = f"/tmp/levitan_local_{id(recording_id)}.mp3"
-        with open(mp3, "wb") as f: f.write(r.content)
+        with open(mp3, "wb") as f:
+            f.write(r.content)
         from faster_whisper import WhisperModel
+
         model = WhisperModel("base", device="cpu", compute_type="int8")
         segments, _ = model.transcribe(mp3, language="ru", beam_size=5, vad_filter=True)
         return " ".join(s.text for s in segments).strip()
@@ -571,9 +626,11 @@ print(" ".join(s.text for s in segs).strip())
         return None
 
 
-def extract_crm_data(transcript: str, contact: Optional[dict] = None) -> dict:
+def extract_crm_data(transcript: str, contact: dict | None = None) -> dict:
     """LLM извлечение CRM-данных."""
-    prompt = EXTRACTION_PROMPT.format(transcript=transcript, contact_context=contact_context(contact or {}))
+    prompt = EXTRACTION_PROMPT.format(
+        transcript=transcript, contact_context=contact_context(contact or {})
+    )
     try:
         r = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -600,6 +657,7 @@ def extract_crm_data(transcript: str, contact: Optional[dict] = None) -> dict:
 # ============================================================
 # CRM
 # ============================================================
+
 
 def save_to_crm(
     contact: dict,
@@ -662,7 +720,8 @@ def save_to_crm(
 
 # === CRM API ===
 
-def _crm_api(method: str, path: str, data: dict = None) -> Optional[dict]:
+
+def _crm_api(method: str, path: str, data: dict = None) -> dict | None:
     """Вызов CRM API. Возвращает dict или None при ошибке."""
     global CRM_AVAILABLE
     try:
@@ -689,13 +748,13 @@ def _crm_api(method: str, path: str, data: dict = None) -> Optional[dict]:
         return None
 
 
-def crm_save_contact(result: dict, transcript: str) -> Optional[dict]:
+def crm_save_contact(result: dict, transcript: str) -> dict | None:
     """Сохранить контакт в CRM через API."""
     payload = {**result, "transcript": transcript}
     return _crm_api("POST", "/api/contacts", payload)
 
 
-def crm_find_by_phone(phone: str) -> Optional[dict]:
+def crm_find_by_phone(phone: str) -> dict | None:
     """Найти контакт в CRM по телефону."""
     data = _crm_api("GET", f"/api/contacts?search={phone}")
     if isinstance(data, list):
@@ -705,7 +764,7 @@ def crm_find_by_phone(phone: str) -> Optional[dict]:
     return None
 
 
-def crm_update_contact(contact_id: int, updates: dict) -> Optional[dict]:
+def crm_update_contact(contact_id: int, updates: dict) -> dict | None:
     """Обновить контакт в CRM."""
     return _crm_api("PUT", f"/api/contacts/{contact_id}", updates)
 
@@ -728,10 +787,16 @@ def crm_get_stats() -> dict:
     return data if isinstance(data, dict) else {}
 
 
-def crm_save_reminder(phone: str, due_date: str, note: str) -> Optional[dict]:
-    return _crm_api("POST", "/api/reminders", {
-        "phone": phone, "due_date": due_date, "note": note,
-    })
+def crm_save_reminder(phone: str, due_date: str, note: str) -> dict | None:
+    return _crm_api(
+        "POST",
+        "/api/reminders",
+        {
+            "phone": phone,
+            "due_date": due_date,
+            "note": note,
+        },
+    )
 
 
 def crm_get_reminders() -> list[dict]:
@@ -739,11 +804,11 @@ def crm_get_reminders() -> list[dict]:
     return data if isinstance(data, list) else []
 
 
-def crm_toggle_reminder(rid: int) -> Optional[dict]:
+def crm_toggle_reminder(rid: int) -> dict | None:
     return _crm_api("PATCH", f"/api/reminders/{rid}/done")
 
 
-def crm_delete_reminder(rid: int) -> Optional[dict]:
+def crm_delete_reminder(rid: int) -> dict | None:
     return _crm_api("DELETE", f"/api/reminders/{rid}")
 
 
@@ -751,11 +816,12 @@ def crm_delete_reminder(rid: int) -> Optional[dict]:
 # CONTACTS
 # ============================================================
 
-def load_contacts(weekend_only: bool = False, csv_path: Optional[str] = None) -> list[dict]:
+
+def load_contacts(weekend_only: bool = False, csv_path: str | None = None) -> list[dict]:
     """Загрузить контакты."""
     path = csv_path or CSV_PATH
     contacts = []
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             name = row.get("Название", "").strip()
@@ -791,7 +857,7 @@ def load_already_called() -> set:
     # Локальные файлы результатов
     for f in RESULTS_DIR.glob("results_*.csv"):
         try:
-            with open(f, "r", encoding="utf-8") as fh:
+            with open(f, encoding="utf-8") as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
                     if row.get("phone"):
@@ -800,7 +866,7 @@ def load_already_called() -> set:
             pass
     if ALREADY_CALLED_CSV.exists():
         try:
-            with open(ALREADY_CALLED_CSV, "r", encoding="utf-8") as fh:
+            with open(ALREADY_CALLED_CSV, encoding="utf-8") as fh:
                 for line in fh:
                     phone = line.strip()
                     if phone:
@@ -831,6 +897,7 @@ def save_already_called(phone: str):
 # TELEGRAM BOT HANDLERS
 # ============================================================
 
+
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     st = get_state(update.effective_chat.id)
     keyboard = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True, is_persistent=True)
@@ -854,7 +921,9 @@ async def cmd_ext(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"✅ Внутренний номер: <b>{ext_num}</b>", parse_mode="HTML")
     else:
         current = st.ext or os.getenv("MANGO_FROM_EXTENSION", "22")
-        await update.message.reply_text(f"Текущий номер: <b>{current}</b>\nИспользуй: /ext 100", parse_mode="HTML")
+        await update.message.reply_text(
+            f"Текущий номер: <b>{current}</b>\nИспользуй: /ext 100", parse_mode="HTML"
+        )
 
 
 async def cmd_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -927,6 +996,7 @@ async def _process_summary(update: Update, context: ContextTypes.DEFAULT_TYPE, t
     phone = data.get("phone", "")
     if not phone:
         import re
+
         m = re.search(r"(\+?7[- \d]?\d{3}[- \d]?\d{3}[- \d]?\d{2}[- \d]?\d{2})", transcript)
         if m:
             phone = m.group(1)
@@ -994,7 +1064,13 @@ async def _process_summary(update: Update, context: ContextTypes.DEFAULT_TYPE, t
         log.error("CRM API save from summary: %s", e)
 
     # Format response
-    status_emoji = {"lead": "🔥", "callback": "📞", "not_interested": "❌", "no_contact": "⚪", "other": "❓"}
+    status_emoji = {
+        "lead": "🔥",
+        "callback": "📞",
+        "not_interested": "❌",
+        "no_contact": "⚪",
+        "other": "❓",
+    }
     emoji = status_emoji.get(data.get("status", ""), "❓")
 
     text = (
@@ -1019,20 +1095,23 @@ async def _process_summary(update: Update, context: ContextTypes.DEFAULT_TYPE, t
 # CRM & REMINDERS
 # ============================================================
 
+
 def _load_results() -> list[dict]:
     results = []
     for f in sorted(RESULTS_DIR.glob("results_*.json")):
         try:
             with open(f) as fh:
                 results.extend(json.load(fh))
-        except: pass
+        except:
+            pass
     for f in sorted(RESULTS_DIR.glob("results_*.jsonl")):
         try:
             with open(f) as fh:
                 for line in fh:
                     if line.strip():
                         results.append(json.loads(line))
-        except: pass
+        except:
+            pass
     return results
 
 
@@ -1041,7 +1120,8 @@ def _load_reminders() -> list[dict]:
         try:
             with open(REMINDERS_PATH) as f:
                 return json.load(f)
-        except: pass
+        except:
+            pass
     return []
 
 
@@ -1059,10 +1139,12 @@ async def cmd_crm(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if not api_results:
                 await update.message.reply_text(f"Ничего не найдено по: {query}")
                 return
-            lines = [f"<b>{c.get('company_name', '?')}</b> +{c.get('phone', '?')}"
-                     f"\n  Статус: {c.get('status', '?')} | Товар: {c.get('product', '?')} | Объём: {c.get('volume', '?')}"
-                     f"\n  {c.get('notes', '')}"
-                     for c in api_results[:5]]
+            lines = [
+                f"<b>{c.get('company_name', '?')}</b> +{c.get('phone', '?')}"
+                f"\n  Статус: {c.get('status', '?')} | Товар: {c.get('product', '?')} | Объём: {c.get('volume', '?')}"
+                f"\n  {c.get('notes', '')}"
+                for c in api_results[:5]
+            ]
             await update.message.reply_text("\n".join(lines), parse_mode="HTML")
             return
 
@@ -1080,7 +1162,7 @@ async def cmd_crm(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return await _cmd_crm_local(update, results)
 
         total = stats.get("total", len(all_contacts))
-        lines = [f"📊 <b>CRM — сводка</b>\n"]
+        lines = ["📊 <b>CRM — сводка</b>\n"]
         lines.append(f"🔥 Лиды: {stats.get('leads', len(leads))}")
         lines.append(f"📞 Всего контактов: {total}")
         lines.append(f"📅 Звонков сегодня: {stats.get('today_calls', 0)}")
@@ -1088,7 +1170,9 @@ async def cmd_crm(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if leads:
             lines.append("\n<b>Горячие лиды:</b>")
             for l in leads[:5]:
-                lines.append(f"  🔥 {l.get('company_name','?')} +{l.get('phone','?')} — {l.get('product','?')} {l.get('volume','?')}")
+                lines.append(
+                    f"  🔥 {l.get('company_name','?')} +{l.get('phone','?')} — {l.get('product','?')} {l.get('volume','?')}"
+                )
         if callbacks:
             lines.append("\n<nontext>Ожидают перезвона:</b>")
             for c in callbacks[:5]:
@@ -1111,7 +1195,13 @@ async def _cmd_crm_local(update: Update, results: list):
         s = r.get("status", "other")
         statuses[s] = statuses.get(s, 0) + 1
     lines = ["📊 <b>CRM — сводка (локально)</b>\n"]
-    emoji_map = {"lead": "🔥", "callback": "📞", "not_interested": "❌", "no_contact": "⚪", "other": "❓"}
+    emoji_map = {
+        "lead": "🔥",
+        "callback": "📞",
+        "not_interested": "❌",
+        "no_contact": "⚪",
+        "other": "❓",
+    }
     for s in ["lead", "callback", "not_interested", "no_contact", "other"]:
         cnt = statuses.get(s, 0)
         if cnt:
@@ -1121,7 +1211,9 @@ async def _cmd_crm_local(update: Update, results: list):
     if leads:
         lines.append("\n<b>Горячие лиды:</b>")
         for l in leads:
-            lines.append(f"  🔥 {l.get('company_name','?')} +{l.get('phone','?')} — {l.get('product','?')} {l.get('volume','?')}")
+            lines.append(
+                f"  🔥 {l.get('company_name','?')} +{l.get('phone','?')} — {l.get('product','?')} {l.get('volume','?')}"
+            )
     callbacks = [r for r in results if r.get("status") == "callback"]
     if callbacks:
         lines.append("\n<b>Ожидают перезвона:</b>")
@@ -1153,7 +1245,9 @@ async def cmd_remind(update: Update, context: ContextTypes.DEFAULT_TYPE):
         lines = ["📌 <b>Напоминания:</b>"]
         for r in reminders:
             done = "✅" if r.get("done") else "⏳"
-            lines.append(f"{done} [{r.get('id','?')}] {r.get('phone','?')} до {r.get('due_date','?')} — {r.get('note','')}")
+            lines.append(
+                f"{done} [{r.get('id','?')}] {r.get('phone','?')} до {r.get('due_date','?')} — {r.get('note','')}"
+            )
         await update.message.reply_text("\n".join(lines), parse_mode="HTML")
         return
 
@@ -1192,7 +1286,7 @@ async def cmd_remind(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reminders.append({**rem_data, "created": datetime.now().isoformat(), "done": False})
         _save_reminders(reminders)
 
-    msg = f"✅ Напоминание создано"
+    msg = "✅ Напоминание создано"
     if due_date:
         msg += f" на {due_date}"
     if note:
@@ -1244,7 +1338,12 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     fname = doc.file_name.lower()
-    if not (fname.endswith(".csv") or fname.endswith(".xls") or fname.endswith(".xlsx") or fname.endswith(".txt")):
+    if not (
+        fname.endswith(".csv")
+        or fname.endswith(".xls")
+        or fname.endswith(".xlsx")
+        or fname.endswith(".txt")
+    ):
         await update.message.reply_text("⚠️ Отправь CSV, XLS(X) или TXT файл с контактами")
         return
 
@@ -1258,6 +1357,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if fname.endswith(".xls") or fname.endswith(".xlsx"):
         try:
             import pandas as pd
+
             df = pd.read_excel(raw_path)
             converted = raw_path.with_suffix(".csv")
             df.to_csv(converted, index=False, encoding="utf-8")
@@ -1273,7 +1373,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if fname.endswith(".txt"):
         try:
             phones = []
-            with open(raw_path, "r", encoding="utf-8") as f:
+            with open(raw_path, encoding="utf-8") as f:
                 for line in f:
                     p = norm_phone(line.strip())
                     if is_valid_phone(p):
@@ -1293,7 +1393,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     count = 0
     try:
-        with open(raw_path, "r", encoding="utf-8") as fh:
+        with open(raw_path, encoding="utf-8") as fh:
             count = sum(1 for _ in fh) - 1
     except Exception:
         pass
@@ -1353,21 +1453,40 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("🎠 Режим карусели включён", reply_markup=kb)
         else:
             await start_dialing(update, context, st, carousel=True)
-    elif text == "⏹ Стоп" or "конец" in text.lower() or "стоп" in text.lower() or "остановить" in text.lower():
+    elif (
+        text == "⏹ Стоп"
+        or "конец" in text.lower()
+        or "стоп" in text.lower()
+        or "остановить" in text.lower()
+    ):
         await stop_dialing(update, context, st)
-    elif text == "⏩ Пропустить" or "пропустить" in text.lower() or "скип" in text.lower() or "skip" in text.lower():
+    elif (
+        text == "⏩ Пропустить"
+        or "пропустить" in text.lower()
+        or "скип" in text.lower()
+        or "skip" in text.lower()
+    ):
         await skip_contact(update, context, st)
-    elif text == "⏭ Следующий" or "следующий" in text.lower() or "дальше" in text.lower() or "next" in text.lower():
+    elif (
+        text == "⏭ Следующий"
+        or "следующий" in text.lower()
+        or "дальше" in text.lower()
+        or "next" in text.lower()
+    ):
         await next_contact(update, context, st)
     elif text == "📊 Статус" or "статус" in text.lower() or "стат" in text.lower():
         await show_status(update, context, st)
     else:
         kb = ReplyKeyboardMarkup(
-            CAROUSEL_BUTTONS if st.carousel and st.active else
-            WAIT_BUTTONS if st.waiting_for_next else
-            DIALING_BUTTONS if st.active else
-            IDLE_BUTTONS,
-            resize_keyboard=True, is_persistent=True,
+            CAROUSEL_BUTTONS
+            if st.carousel and st.active
+            else WAIT_BUTTONS
+            if st.waiting_for_next
+            else DIALING_BUTTONS
+            if st.active
+            else IDLE_BUTTONS,
+            resize_keyboard=True,
+            is_persistent=True,
         )
         await update.message.reply_text(
             "Используй кнопки или команды: начать обзвон / карусель / стоп / пропустить / следующий / статус",
@@ -1375,7 +1494,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
-async def start_dialing(update: Update, context: ContextTypes.DEFAULT_TYPE, st: DialerState, carousel: bool = False):
+async def start_dialing(
+    update: Update, context: ContextTypes.DEFAULT_TYPE, st: DialerState, carousel: bool = False
+):
     """Начать цикл обзвона."""
     if st.active:
         await update.message.reply_text("⚠️ Обзвон уже идёт!")
@@ -1410,7 +1531,9 @@ async def start_dialing(update: Update, context: ContextTypes.DEFAULT_TYPE, st: 
     src_label = f"📁 {Path(csv_path).name}" if st.csv_path else "📁 общая база"
 
     mode_label = "🎠 Карусель" if carousel else "🔄 Ручной"
-    keyboard = ReplyKeyboardMarkup(CAROUSEL_BUTTONS if carousel else DIALING_BUTTONS, resize_keyboard=True, is_persistent=True)
+    keyboard = ReplyKeyboardMarkup(
+        CAROUSEL_BUTTONS if carousel else DIALING_BUTTONS, resize_keyboard=True, is_persistent=True
+    )
     await update.message.reply_text(
         f"🚀 <b>Обзвон запущен!</b>\n"
         f"Режим: {mode_label}\n"
@@ -1430,6 +1553,7 @@ async def cmd_stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /stop — остановить обзвон."""
     st = get_state(update.effective_chat.id)
     await stop_dialing(update, context, st)
+
 
 async def stop_dialing(update: Update, context: ContextTypes.DEFAULT_TYPE, st: DialerState):
     """Остановить обзвон."""
@@ -1497,7 +1621,9 @@ async def cmd_backfill(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 crm_update_contact(c["id"], {"transcript": summary})
                 done += 1
                 if done % 3 == 0:
-                    await msg.edit_text(f"🔄 Обработано: {done}/{len(contacts)}, пропущено: {skipped}")
+                    await msg.edit_text(
+                        f"🔄 Обработано: {done}/{len(contacts)}, пропущено: {skipped}"
+                    )
         except Exception as e:
             log.error("Backfill %s: %s", phone, e)
             errors += 1
@@ -1556,10 +1682,10 @@ async def show_status(update: Update, context: ContextTypes.DEFAULT_TYPE, st: Di
     await context.bot.send_message(chat_id=update.effective_chat.id, text=text, parse_mode="HTML")
 
 
-
 # ============================================================
 # BACKGROUND CALL PROCESSING
 # ============================================================
+
 
 async def process_call_background(
     bot, chat_id: str, contact: dict, call_start: float, st: DialerState
@@ -1573,9 +1699,8 @@ async def process_call_background(
     mango_transcript = None
     try:
         from mango_s2t import fetch_summary
-        mango_transcript = await asyncio.to_thread(
-            fetch_summary, contact["phone"], call_start, 60
-        )
+
+        mango_transcript = await asyncio.to_thread(fetch_summary, contact["phone"], call_start, 60)
     except Exception:
         pass
 
@@ -1617,28 +1742,46 @@ async def process_call_background(
 
     operator_ext = st.ext or os.getenv("MANGO_FROM_EXTENSION", "22")
     saved = save_to_crm(
-        contact, extracted, transcript or "", recording_id or "",
-        call_start=call_start, operator=operator_ext,
+        contact,
+        extracted,
+        transcript or "",
+        recording_id or "",
+        call_start=call_start,
+        operator=operator_ext,
     )
     st.stats[extracted.get("status", "no_contact")] += 1
     st.results.append(saved)
 
     # Авто-стоп-лист: если клиент попросил не звонить (ФЗ-152)
     STOP_WORDS = [
-        "не звоните", "вычеркните", "больше не беспокойте", "не беспокойте",
-        "не надо звонить", "перестаньте звонить", "уберите из базы",
-        "не звони", "вычеркни", "не буду с вами",
+        "не звоните",
+        "вычеркните",
+        "больше не беспокойте",
+        "не беспокойте",
+        "не надо звонить",
+        "перестаньте звонить",
+        "уберите из базы",
+        "не звони",
+        "вычеркни",
+        "не буду с вами",
     ]
     haystack = f"{transcript or ''}\n{extracted.get('notes', '')}\n{extracted.get('contact_name', '')}".lower()
     if any(w in haystack for w in STOP_WORDS):
         if add_to_stoplist(contact["phone"]):
             log.info("Стоп-лист: добавлен %s (клиент попросил не звонить)", contact["phone"])
             saved["status"] = "blocked"
-            saved["notes"] = (saved.get("notes", "") + "\n🛑 Клиент попросил не звонить — в стоп-листе").strip()
+            saved["notes"] = (
+                saved.get("notes", "") + "\n🛑 Клиент попросил не звонить — в стоп-листе"
+            ).strip()
 
     status_emoji = {
-        "lead": "🟢", "callback": "🟡", "rejected": "🔴",
-        "no_interest": "⚪", "no_contact": "⚫", "no_answer": "⚫", "other": "⚫",
+        "lead": "🟢",
+        "callback": "🟡",
+        "rejected": "🔴",
+        "no_interest": "⚪",
+        "no_contact": "⚫",
+        "no_answer": "⚫",
+        "other": "⚫",
         "blocked": "🛑",
     }
     emoji = status_emoji.get(saved["status"], "⚫")
@@ -1667,6 +1810,7 @@ async def process_call_background(
 # MAIN DIALING LOOP
 # ============================================================
 
+
 async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
     """Основной цикл обзвона."""
     chat_id = st.chat_id
@@ -1680,7 +1824,11 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
         contact = await _enrich_contact(contact)
 
         # Уведомляем о следующем звонке
-        kb = ReplyKeyboardMarkup(CAROUSEL_BUTTONS if st.carousel else DIALING_BUTTONS, resize_keyboard=True, is_persistent=True)
+        kb = ReplyKeyboardMarkup(
+            CAROUSEL_BUTTONS if st.carousel else DIALING_BUTTONS,
+            resize_keyboard=True,
+            is_persistent=True,
+        )
         address_line = f"🏠 {contact.get('address', '')[:60]}\n" if contact.get("address") else ""
         contact_line = f"👤 {contact['contact_name']}" if contact.get("contact_name") else ""
         enrich_line = f"💼 {contact['position']}" if contact.get("position") else ""
@@ -1719,9 +1867,7 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
 
         # Стартуем обработку в фоне (ждёт запись, STT, LLM, CRM)
         task = asyncio.create_task(
-            process_call_background(
-                context.bot, chat_id, contact, st.call_start, st
-            )
+            process_call_background(context.bot, chat_id, contact, st.call_start, st)
         )
         pending_tasks.append(task)
         pending_tasks = [t for t in pending_tasks if not t.done()]
@@ -1737,7 +1883,9 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
             st.next_event = asyncio.Event()
             st.waiting_for_next = True
             if st.carousel:
-                keyboard = ReplyKeyboardMarkup(CAROUSEL_BUTTONS, resize_keyboard=True, is_persistent=True)
+                keyboard = ReplyKeyboardMarkup(
+                    CAROUSEL_BUTTONS, resize_keyboard=True, is_persistent=True
+                )
                 await context.bot.send_message(
                     chat_id=chat_id,
                     text="⏸ Карусель: следующий через 5 сек",
@@ -1746,10 +1894,12 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
                 )
                 try:
                     await asyncio.wait_for(st.next_event.wait(), timeout=5)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     pass
             else:
-                keyboard = ReplyKeyboardMarkup(WAIT_BUTTONS, resize_keyboard=True, is_persistent=True)
+                keyboard = ReplyKeyboardMarkup(
+                    WAIT_BUTTONS, resize_keyboard=True, is_persistent=True
+                )
                 await context.bot.send_message(
                     chat_id=chat_id,
                     text="⏸ Нажми <b>⏭ Следующий</b> для продолжения",
@@ -1773,7 +1923,9 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE, st: DialerState):
         )
 
 
-def wait_for_disconnect_and_recording(phone: str, call_start: float, timeout: int = 120) -> Optional[str]:
+def wait_for_disconnect_and_recording(
+    phone: str, call_start: float, timeout: int = 120
+) -> str | None:
     """
     Ждать завершения звонка и появления записи.
     Timeout = 120 сек (макс длина звонка).
@@ -1789,21 +1941,27 @@ def wait_for_disconnect_and_recording(phone: str, call_start: float, timeout: in
 # MAIN
 # ============================================================
 
+
 def main():
     global MANGO_FROM_EXTENSION, TELEGRAM_CHAT_ID, MY_PHONE
 
     import argparse
+
     parser = argparse.ArgumentParser(description="Levitan Dialer Bot")
-    parser.add_argument("--ext", type=str, default=MANGO_FROM_EXTENSION,
-                        help="Mango extension (default: %(default)s)")
-    parser.add_argument("--chat-id", type=str, default=TELEGRAM_CHAT_ID,
-                        help="Telegram chat ID for notifications")
-    parser.add_argument("--phone", type=str, default=MY_PHONE,
-                        help="Operator phone number (default: %(default)s)")
-    parser.add_argument("--csv", type=str, default=None,
-                        help="Path to custom CSV contact file")
-    parser.add_argument("--start", action="store_true",
-                        help="Auto-start campaign on launch")
+    parser.add_argument(
+        "--ext",
+        type=str,
+        default=MANGO_FROM_EXTENSION,
+        help="Mango extension (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--chat-id", type=str, default=TELEGRAM_CHAT_ID, help="Telegram chat ID for notifications"
+    )
+    parser.add_argument(
+        "--phone", type=str, default=MY_PHONE, help="Operator phone number (default: %(default)s)"
+    )
+    parser.add_argument("--csv", type=str, default=None, help="Path to custom CSV contact file")
+    parser.add_argument("--start", action="store_true", help="Auto-start campaign on launch")
     args = parser.parse_args()
 
     MANGO_FROM_EXTENSION = args.ext
@@ -1831,7 +1989,15 @@ def main():
     # Выбираем работающий прокси автоматически. Если ни один не работает —
     # бот попытается подключиться напрямую (в РФ обычно не работает).
     saved_proxy = _pick_working_proxy()
-    for k in ("ALL_PROXY", "HTTP_PROXY", "HTTPS_PROXY", "TELEGRAM_PROXY", "all_proxy", "http_proxy", "https_proxy"):
+    for k in (
+        "ALL_PROXY",
+        "HTTP_PROXY",
+        "HTTPS_PROXY",
+        "TELEGRAM_PROXY",
+        "all_proxy",
+        "http_proxy",
+        "https_proxy",
+    ):
         os.environ.pop(k, None)
     proxy_msg = _mask_proxy_url(saved_proxy) if saved_proxy else "none"
     print(f"   Proxy: {proxy_msg}")
@@ -1862,12 +2028,14 @@ def main():
 
         async def auto_start(app):
             import asyncio
+
             await asyncio.sleep(2)
             st = get_state(chat_id)
             st.chat_id = str(chat_id)
             if Path(default_csv).exists():
                 st.csv_path = default_csv
             from telegram import ReplyKeyboardMarkup
+
             kb = ReplyKeyboardMarkup(IDLE_BUTTONS, resize_keyboard=True, is_persistent=True)
             await app.bot.send_message(
                 chat_id=chat_id,

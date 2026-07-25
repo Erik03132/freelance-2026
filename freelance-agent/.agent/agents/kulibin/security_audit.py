@@ -3,16 +3,18 @@
 from __future__ import annotations
 
 import os
-import re
 
 from .llm_client import call_llm
 from .perf_config import FILE_EXTENSIONS
 
 try:
-    from security import scan_leaks, security_audit as _static_audit
+    from security import scan_leaks
+    from security import security_audit as _static_audit
 except ImportError:
+
     def scan_leaks(code):
         return []
+
     def _static_audit(code):
         return {"score": 0, "passed": 0, "total": 0, "findings": [], "leaks": []}
 

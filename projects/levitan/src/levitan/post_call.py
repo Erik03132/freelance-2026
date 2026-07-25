@@ -33,10 +33,12 @@ class PostCallAnalyzer:
             with open(transcript_path, encoding="utf-8") as f:
                 transcript_data = json.load(f)
 
-            transcript_text = "\n".join([
-                f"{'Агент' if entry['role'] == 'agent' else 'Клиент'}: {entry['text']}"
-                for entry in transcript_data.get("transcript", [])
-            ])
+            transcript_text = "\n".join(
+                [
+                    f"{'Агент' if entry['role'] == 'agent' else 'Клиент'}: {entry['text']}"
+                    for entry in transcript_data.get("transcript", [])
+                ]
+            )
 
             # Анализ с помощью LLM
             analysis = await self._analyze_with_llm(transcript_text)
@@ -50,7 +52,7 @@ class PostCallAnalyzer:
                 "phone": transcript_data.get("phone"),
                 "analysis": analysis,
                 "new_faq": new_faq,
-                "analyzed_at": datetime.now().isoformat()
+                "analyzed_at": datetime.now().isoformat(),
             }
 
             # Сохраняем анализ
@@ -93,7 +95,7 @@ class PostCallAnalyzer:
             response = await self.llm_client.generate(
                 messages=[{"role": "user", "content": analysis_prompt}],
                 temperature=0.3,
-                max_tokens=500
+                max_tokens=500,
             )
 
             # Парсим JSON
@@ -125,9 +127,7 @@ class PostCallAnalyzer:
 
         try:
             response = await self.llm_client.generate(
-                messages=[{"role": "user", "content": faq_prompt}],
-                temperature=0.3,
-                max_tokens=300
+                messages=[{"role": "user", "content": faq_prompt}], temperature=0.3, max_tokens=300
             )
 
             # Парсим JSON
@@ -146,10 +146,7 @@ class PostCallAnalyzer:
         """Обновление базы знаний новыми FAQ."""
         for item in new_faq:
             if "question" in item and "answer" in item:
-                self.knowledge_base.add_faq_item(
-                    item["question"],
-                    item["answer"]
-                )
+                self.knowledge_base.add_faq_item(item["question"], item["answer"])
                 logger.info(f"Added new FAQ: {item['question']}")
 
     async def batch_analyze(self, transcript_dir: Path) -> list[dict]:
@@ -174,5 +171,6 @@ def get_post_call_analyzer() -> PostCallAnalyzer:
     global _analyzer
     if _analyzer is None:
         from .config import settings
+
         _analyzer = PostCallAnalyzer(llm_api_key=settings.openrouter.api_key)
     return _analyzer

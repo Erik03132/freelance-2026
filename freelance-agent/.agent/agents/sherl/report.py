@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from .research_config import GEO_MODELS
-
 
 def format_geo(result: dict) -> str:
     status = "✅ упомянут" if result.get("mentioned") else "❌ не найден"

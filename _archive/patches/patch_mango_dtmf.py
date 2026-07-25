@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-import re
 
 path = "/opt/mango_webhook.py"
 
-with open(path, "r") as f:
+with open(path) as f:
     content = f.read()
 
 old = '        dtmf = data.get("dtmf")\n        if dtmf is not None:\n            _forward_dtmf(\n                data.get("call_id", ""),\n                str(dtmf),\n                command_id,\n                str(entry_id),\n            )'

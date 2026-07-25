@@ -2,7 +2,6 @@
 
 import os
 import sys
-import tempfile
 
 _AGENTS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if _AGENTS not in sys.path:
@@ -20,8 +19,8 @@ from llm import (  # noqa: E402
     load_serper_key,
 )
 
-
 # ── Constants ───────────────────────────────────────────────────────────
+
 
 def test_default_model():
     assert DEFAULT_MODEL == "deepseek/deepseek-chat-v3-0324"
@@ -34,6 +33,7 @@ def test_route_has_simple_and_complex():
 
 
 # ── _find_env ───────────────────────────────────────────────────────────
+
 
 def test_find_env_with_dotenv(tmp_path):
     env_file = tmp_path / ".env"
@@ -48,6 +48,7 @@ def test_find_env_without_dotenv(tmp_path):
 
 
 # ── _load_key ───────────────────────────────────────────────────────────
+
 
 def test_load_key_from_dotenv(tmp_path):
     env_file = tmp_path / ".env"
@@ -76,6 +77,7 @@ def test_load_key_ignores_comments(tmp_path):
 
 # ── load_*_key convenience functions ────────────────────────────────────
 
+
 def test_load_openrouter_key_delegates_to_load_key(tmp_path):
     env_file = tmp_path / ".env"
     env_file.write_text("OPENROUTER_API_KEY=sk-or-test\n")
@@ -99,6 +101,7 @@ def test_load_perplexity_key(tmp_path):
 
 # ── _compress ───────────────────────────────────────────────────────────
 
+
 def test_compress_short_text_unchanged():
     assert _compress("hello") == "hello"
 
@@ -116,6 +119,7 @@ def test_compress_exact_boundary():
 
 
 # ── call_llm ────────────────────────────────────────────────────────────
+
 
 def test_call_llm_no_key_returns_none(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)

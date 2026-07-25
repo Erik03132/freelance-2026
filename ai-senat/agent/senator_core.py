@@ -2,9 +2,10 @@
 Ядро агента Senator AI (Мустай).
 Координирует: сканирование → анализ → генерация → доставка.
 """
+
+import json
 import os
 import sys
-import json
 from datetime import datetime
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -12,10 +13,10 @@ AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 sys.path.insert(0, AGENT_DIR)
 
-from llm_cascade import call_llm, call_llm_structured
-from scanner.rss_monitor import scan_all_feeds
-from scanner.deep_search import deep_search
 from generator.initiative_gen import generate_initiative, generate_on_topic
+from llm_cascade import call_llm, call_llm_structured
+from scanner.deep_search import deep_search
+from scanner.rss_monitor import scan_all_feeds
 
 # Загрузка базы знаний
 _kb_context = ""
@@ -23,7 +24,7 @@ KB_DIR = os.path.join(DATA_DIR, "bashkortostan_kb")
 if os.path.exists(KB_DIR):
     for fname in sorted(os.listdir(KB_DIR)):
         if fname.endswith(".md"):
-            with open(os.path.join(KB_DIR, fname), "r", encoding="utf-8") as f:
+            with open(os.path.join(KB_DIR, fname), encoding="utf-8") as f:
                 _kb_context += f.read() + "\n\n"
     print(f"✅ KB загружена: {len(_kb_context)} символов")
 
@@ -34,7 +35,7 @@ FOCUS_PATH = os.path.join(DATA_DIR, "current_focus.txt")
 def _get_focus_topic():
     """Возвращает текущую фокусную тему или None."""
     if os.path.exists(FOCUS_PATH):
-        with open(FOCUS_PATH, "r", encoding="utf-8") as f:
+        with open(FOCUS_PATH, encoding="utf-8") as f:
             topic = f.read().strip()
             return topic if topic else None
     return None
@@ -101,7 +102,9 @@ def get_answer(query, history=None, sender_id=None, sender_name=None):
         return _handle_initiative_request(query, history)
 
     # Если запрос на поиск
-    if any(kw in q_lower for kw in ["найди", "поищи", "что известно", "какой опыт", "мировой опыт"]):
+    if any(
+        kw in q_lower for kw in ["найди", "поищи", "что известно", "какой опыт", "мировой опыт"]
+    ):
         return _handle_search_request(query, history)
 
     # Если запрос на сравнение регионов
@@ -191,7 +194,7 @@ def run_daily_pipeline():
     2. Классификация и фильтрация
     3. Deep search по топ-темам
     4. Генерация инициативы
-    
+
     Returns:
         dict: Результат (инициатива + дайджест)
     """
@@ -208,10 +211,9 @@ def run_daily_pipeline():
         news_digest = "Свежих новостей из RSS нет."
     else:
         # Формируем дайджест
-        news_digest = "\n".join([
-            f"[{item['source_name']}] {item['title']}"
-            for item in news_items[:30]
-        ])
+        news_digest = "\n".join(
+            [f"[{item['source_name']}] {item['title']}" for item in news_items[:30]]
+        )
         print(f"  📋 Дайджест: {len(news_items)} записей")
 
     # 2. Классифицируем через LLM (быстрая фильтрация)
@@ -229,7 +231,7 @@ def run_daily_pipeline():
 {news_digest[:4000]}
 """
     classified = call_llm(classification_prompt, temperature=0.3)
-    print(f"  ✅ Классификация завершена")
+    print("  ✅ Классификация завершена")
 
     # 3. Deep search по топовой теме
     print("\n🌐 Шаг 3: Deep search по ключевой теме...")
@@ -280,7 +282,7 @@ def run_daily_pipeline():
         json.dump(digest_data, f, ensure_ascii=False, indent=2)
 
     print(f"\n{'='*60}")
-    print(f"✅ PIPELINE ЗАВЕРШЁН")
+    print("✅ PIPELINE ЗАВЕРШЁН")
     print(f"   Инициатива: {initiative.get('title', '?')}")
     print(f"   Дайджест: {digest_path}")
     print(f"{'='*60}\n")

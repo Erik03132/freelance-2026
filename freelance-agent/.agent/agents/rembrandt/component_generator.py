@@ -3,10 +3,19 @@
 from .brand_system import BrandSystem
 from .llm_client import call_llm
 
-
 COMPONENT_TYPES = [
-    "button", "card", "input", "nav", "hero", "section",
-    "badge", "stats", "footer", "modal", "form", "header",
+    "button",
+    "card",
+    "input",
+    "nav",
+    "hero",
+    "section",
+    "badge",
+    "stats",
+    "footer",
+    "modal",
+    "form",
+    "header",
 ]
 
 COMPONENT_PROMPT = """You are a UI developer. Generate a single HTML file with embedded CSS for a {component_type} component.
@@ -95,7 +104,9 @@ def generate_component(
         learned_context=learned_context or "",
     )
 
-    result = call_llm(prompt, complexity="simple", max_tokens=2000, temperature=0.2, api_key=api_key)
+    result = call_llm(
+        prompt, complexity="simple", max_tokens=2000, temperature=0.2, api_key=api_key
+    )
     if result:
         return result
     return _render_fallback(component_type, spec, brand)

@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-import json
-
 import requests
 
 from .llm_client import (
     call_llm,
-    load_openrouter_key,
     load_perplexity_key,
     load_serper_key,
 )
@@ -40,7 +37,10 @@ def search_perplexity(query: str, api_key: str | None = None) -> str | None:
     try:
         resp = requests.post(
             "https://api.perplexity.ai/chat/completions",
-            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+            headers={
+                "Authorization": f"Bearer {key}",
+                "Content-Type": "application/json",
+            },
             json={
                 "model": "sonar",
                 "messages": [{"role": "user", "content": query}],
@@ -56,11 +56,13 @@ def search_perplexity(query: str, api_key: str | None = None) -> str | None:
 def _serper_to_sources(data: dict) -> list[dict]:
     out = []
     for item in data.get("organic", [])[:8]:
-        out.append({
-            "title": item.get("title", ""),
-            "url": item.get("link", ""),
-            "snippet": item.get("snippet", ""),
-        })
+        out.append(
+            {
+                "title": item.get("title", ""),
+                "url": item.get("link", ""),
+                "snippet": item.get("snippet", ""),
+            }
+        )
     return out
 
 
@@ -76,7 +78,12 @@ def research(query: str, api_key: str | None = None, learned_context: str = "") 
         answer = data.get("answerBox", {}).get("answer") or "\n".join(
             s["snippet"] for s in sources[:3]
         )
-        return {"provider": "serper", "sources": sources, "answer": answer, "live": True}
+        return {
+            "provider": "serper",
+            "sources": sources,
+            "answer": answer,
+            "live": True,
+        }
 
     ptext = search_perplexity(query, api_key)
     if ptext:

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 
 
 @dataclass
@@ -57,7 +57,12 @@ INCUBIRD_DEFAULT = BrandSystem(
     colors=[
         DesignToken("Wheat", "#f5e6ca", "--color-wheat", "Page background, warm base"),
         DesignToken("Olive", "#7a9e5a", "--color-olive", "Primary accent, CTAs"),
-        DesignToken("Terracotta", "#c4724a", "--color-terracotta", "Secondary accent, highlights"),
+        DesignToken(
+            "Terracotta",
+            "#c4724a",
+            "--color-terracotta",
+            "Secondary accent, highlights",
+        ),
         DesignToken("Soil", "#4a3728", "--color-soil", "Body text, headings"),
         DesignToken("Cream", "#faf3e8", "--color-cream", "Card surfaces, elevated backgrounds"),
         DesignToken("Sage", "#b8c9a8", "--color-sage", "Borders, dividers, muted accents"),
@@ -70,17 +75,30 @@ INCUBIRD_DEFAULT = BrandSystem(
         "font_mono": "JetBrains Mono, monospace",
         "weights": {"light": 300, "regular": 400, "medium": 500, "bold": 700},
         "scale": {
-            "display": "72px", "h1": "48px", "h2": "32px",
-            "h3": "24px", "body": "16px", "body_sm": "14px", "caption": "12px",
+            "display": "72px",
+            "h1": "48px",
+            "h2": "32px",
+            "h3": "24px",
+            "body": "16px",
+            "body_sm": "14px",
+            "caption": "12px",
         },
     },
     spacing={
-        "base": 4, "scale": [4, 8, 12, 16, 24, 32, 48, 64, 96],
-        "card_padding": 24, "section_gap": 64, "element_gap": 8, "max_width": "1200px",
+        "base": 4,
+        "scale": [4, 8, 12, 16, 24, 32, 48, 64, 96],
+        "card_padding": 24,
+        "section_gap": 64,
+        "element_gap": 8,
+        "max_width": "1200px",
     },
     components={
         "button": {"radius": 8, "padding": "12px 24px", "font_weight": 500},
-        "card": {"radius": 12, "padding": 24, "shadow": "0 2px 8px rgba(74, 55, 40, 0.08)"},
+        "card": {
+            "radius": 12,
+            "padding": 24,
+            "shadow": "0 2px 8px rgba(74, 55, 40, 0.08)",
+        },
         "input": {"radius": 8, "padding": "12px 16px", "border": "1px solid #b8c9a8"},
         "badge": {"radius": 4, "padding": "2px 8px", "font_size": "12px"},
     },

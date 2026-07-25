@@ -13,14 +13,15 @@ from __future__ import annotations
 Используем ChromaDB для лаборатории (простой, локальный).
 В продакшне Анжелы — Neon/pgvector (облачный).
 """
-import os
 import json
+import os
 from pathlib import Path
 
 # ChromaDB — лёгкая локальная векторная БД
 try:
     import chromadb
     from chromadb.utils import embedding_functions
+
     HAS_CHROMA = True
 except ImportError:
     HAS_CHROMA = False
@@ -35,7 +36,7 @@ CHROMA_DIR = BASE_DIR / ".chroma_db"
 class RAGMemory:
     """
     База знаний агента.
-    
+
     Загружает .md и .json файлы из папки knowledge/ и делает их
     доступными для поиска. Агент использует инструмент search_knowledge()
     чтобы находить нужную информацию.
@@ -45,10 +46,10 @@ class RAGMemory:
         self.knowledge_dir = Path(knowledge_dir)
         self.documents: list[dict] = []  # [{content, source}]
         self._collection = None
-        
+
         # Загружаем документы
         self._load_documents()
-        
+
         # Инициализируем векторный поиск (если ChromaDB доступен)
         if HAS_CHROMA and self.documents:
             self._init_vector_store()
@@ -94,10 +95,12 @@ class RAGMemory:
 
         for section in sections:
             if len(section) > 20:  # Пропускаем слишком короткие
-                self.documents.append({
-                    "content": section,
-                    "source": path.name,
-                })
+                self.documents.append(
+                    {
+                        "content": section,
+                        "source": path.name,
+                    }
+                )
 
     def _load_json(self, path: Path):
         """Загружает .json файл (массив объектов с полем content)."""
@@ -107,10 +110,12 @@ class RAGMemory:
                 for item in data:
                     content = item.get("content", "")
                     if content and len(content) > 20:
-                        self.documents.append({
-                            "content": content,
-                            "source": path.name,
-                        })
+                        self.documents.append(
+                            {
+                                "content": content,
+                                "source": path.name,
+                            }
+                        )
         except Exception as e:
             print(f"⚠️ Ошибка чтения {path.name}: {e}")
 
@@ -120,10 +125,10 @@ class RAGMemory:
             os.makedirs(str(CHROMA_DIR), exist_ok=True)
             os.environ["CHROMA_CACHE_DIR"] = str(CHROMA_DIR / ".cache")
             client = chromadb.PersistentClient(path=str(CHROMA_DIR))
-            
+
             # Используем встроенные эмбеддинги (бесплатные, без API)
             ef = embedding_functions.DefaultEmbeddingFunction()
-            
+
             self._collection = client.get_or_create_collection(
                 name="knowledge",
                 embedding_function=ef,
@@ -139,7 +144,7 @@ class RAGMemory:
                 print(f"🔍 Векторный индекс создан: {len(self.documents)} документов")
             else:
                 print(f"🔍 Векторный индекс загружен: {self._collection.count()} документов")
-                
+
         except Exception as e:
             print(f"⚠️ ChromaDB init error: {e}")
             self._collection = None
@@ -147,7 +152,7 @@ class RAGMemory:
     def search(self, query: str, limit: int = 3) -> list[str]:
         """
         Ищет релевантную информацию.
-        
+
         Если ChromaDB доступен — семантический поиск.
         Иначе — простой текстовый поиск (fallback).
         """

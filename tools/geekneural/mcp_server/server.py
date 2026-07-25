@@ -8,6 +8,7 @@ GeekNeural MCP-сервер (уровень 2).
 
 Протокол: https://modelcontextprotocol.io (JSON-RPC 2.0, newline-delimited).
 """
+
 from __future__ import annotations
 
 import json
@@ -16,7 +17,7 @@ import sys
 import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from core.dedup import DedupEngine, session_from_env  # noqa: E402
+from core.dedup import DedupEngine  # noqa: E402
 
 PROTOCOL_VERSION = "2024-11-05"
 SESSION_ID = os.environ.get("GEEKNEURAL_SESSION") or ("mcp-" + uuid.uuid4().hex[:8])
@@ -40,8 +41,11 @@ TOOLS = [
             "type": "object",
             "properties": {
                 "path": {"type": "string", "description": "путь к файлу"},
-                "force": {"type": "boolean", "default": False,
-                          "description": "принудительно вернуть полное содержимое"},
+                "force": {
+                    "type": "boolean",
+                    "default": False,
+                    "description": "принудительно вернуть полное содержимое",
+                },
             },
             "required": ["path"],
         },
@@ -87,15 +91,19 @@ def _dispatch_tool(name: str, args: dict) -> dict:
         body = r.content if not r.deduped else f"{r.content}\n[ref={r.ref}]"
         return _tool_result(body)
     if name == "cached_read_text":
-        r = ENGINE.read_text(args.get("text", ""), args.get("key", ""),
-                             force=bool(args.get("force", False)))
+        r = ENGINE.read_text(
+            args.get("text", ""),
+            args.get("key", ""),
+            force=bool(args.get("force", False)),
+        )
         body = r.content if not r.deduped else f"{r.content}\n[ref={r.ref}]"
         return _tool_result(body)
     if name == "context_refs":
-        import sqlite3
         cur = ENGINE.conn.execute(
             "SELECT content_hash, path, ref_count FROM seen WHERE session_id=? "
-            "ORDER BY ref_count DESC", (ENGINE.session_id,))
+            "ORDER BY ref_count DESC",
+            (ENGINE.session_id,),
+        )
         rows = [{"ref": f"gn:{h}", "path": p, "seen": c} for h, p, c in cur.fetchall()]
         return _tool_result(json.dumps(rows, ensure_ascii=False, indent=2))
     if name == "session_stats":
@@ -103,7 +111,10 @@ def _dispatch_tool(name: str, args: dict) -> dict:
     if name == "clear_session":
         n = ENGINE.clear_session()
         return _tool_result(json.dumps({"cleared": n}, ensure_ascii=False))
-    return {"content": [{"type": "text", "text": f"unknown tool {name}"}], "isError": True}
+    return {
+        "content": [{"type": "text", "text": f"unknown tool {name}"}],
+        "isError": True,
+    }
 
 
 def _handle(msg: dict) -> dict | None:
@@ -113,7 +124,8 @@ def _handle(msg: dict) -> dict | None:
 
     if method == "initialize":
         return {
-            "jsonrpc": "2.0", "id": mid,
+            "jsonrpc": "2.0",
+            "id": mid,
             "result": {
                 "protocolVersion": PROTOCOL_VERSION,
                 "capabilities": {"tools": {}},
@@ -132,13 +144,18 @@ def _handle(msg: dict) -> dict | None:
         try:
             res = _dispatch_tool(name, args)
         except Exception as exc:  # noqa: BLE001
-            res = {"content": [{"type": "text", "text": f"error: {exc}"}],
-                   "isError": True}
+            res = {
+                "content": [{"type": "text", "text": f"error: {exc}"}],
+                "isError": True,
+            }
         return {"jsonrpc": "2.0", "id": mid, "result": res}
     # неизвестный метод
     if mid is not None:
-        return {"jsonrpc": "2.0", "id": mid,
-                "error": {"code": -32601, "message": f"method not found: {method}"}}
+        return {
+            "jsonrpc": "2.0",
+            "id": mid,
+            "error": {"code": -32601, "message": f"method not found: {method}"},
+        }
     return None
 
 

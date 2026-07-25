@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from pydantic import BaseModel
 
 ROOT = Path(__file__).parent.parent

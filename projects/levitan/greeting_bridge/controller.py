@@ -9,6 +9,7 @@
 
 Без приветствия. Оператор НЕ слышит гудков.
 """
+
 import asyncio
 import json
 import logging
@@ -34,7 +35,10 @@ class GreetingBridge:
     async def start_baresip(self):
         log.info("Запуск baresip...")
         self.process = await asyncio.create_subprocess_exec(
-            "baresip", "-f", str(BARESIP_DIR), "-d",
+            "baresip",
+            "-f",
+            str(BARESIP_DIR),
+            "-d",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
         )
@@ -54,12 +58,14 @@ class GreetingBridge:
     async def send_command(self, command: str, params: str = ""):
         if not self.writer:
             return
-        msg = json.dumps({
-            "type": "command",
-            "command": command,
-            "params": params,
-            "token": str(int(asyncio.get_event_loop().time() * 1000)),
-        })
+        msg = json.dumps(
+            {
+                "type": "command",
+                "command": command,
+                "params": params,
+                "token": str(int(asyncio.get_event_loop().time() * 1000)),
+            }
+        )
         self.writer.write((msg + "\n").encode())
         await self.writer.drain()
 
@@ -82,7 +88,7 @@ class GreetingBridge:
                         await self.handle_ended(data)
                 except json.JSONDecodeError:
                     log.info(f"Сырые данные: {line.decode().strip()}")
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
             except Exception as e:
                 log.error(f"Ошибка чтения: {e}")
@@ -101,7 +107,7 @@ class GreetingBridge:
         log.info(f"Перевожу на оператора {TRANSFER_TARGET}...")
         # Мгновенный перевод — без приветствия
         await self.send_command("/call/transfer", TRANSFER_TARGET)
-        log.info(f"Команда перевода отправлена")
+        log.info("Команда перевода отправлена")
 
     async def handle_ended(self, data: dict):
         log.info(f"Звонок завершён: {data}")

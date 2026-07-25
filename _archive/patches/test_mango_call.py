@@ -4,28 +4,30 @@
 
 Использование:
     python3 test_call.py <from_extension> <to_number> [line_number]
-    
+
 Пример:
     python3 test_call.py 100 79991234567 74951234567
 """
 
 import sys
-from mango_api import make_call, get_balance
+
+from mango_api import get_balance, make_call
+
 
 def main():
     print("=== Тест звонка Mango Office ===\n")
-    
+
     # Проверяем баланс
     print("1. Проверка баланса...")
     balance_result = get_balance()
-    if balance_result.get('result') == 1000:
+    if balance_result.get("result") == 1000:
         print(f"   Баланс: {balance_result['balance']} {balance_result['currency']}")
     else:
         print(f"   Ошибка получения баланса: {balance_result}")
         return
-    
+
     print()
-    
+
     # Параметры звонка
     if len(sys.argv) >= 3:
         from_extension = sys.argv[1]
@@ -37,31 +39,29 @@ def main():
         from_extension = input("   Внутренний номер сотрудника (from): ").strip()
         to_number = input("   Номер телефона клиента (to): ").strip()
         line_number = input("   Входящая линия (line_number, необязательно): ").strip() or None
-    
-    print(f"\n2. Инициация звонка:")
+
+    print("\n2. Инициация звонка:")
     print(f"   От сотрудника: {from_extension}")
     print(f"   Клиент: {to_number}")
     if line_number:
         print(f"   Линия: {line_number}")
-    
+
     try:
         result = make_call(
-            from_extension=from_extension,
-            to_number=to_number,
-            line_number=line_number
+            from_extension=from_extension, to_number=to_number, line_number=line_number
         )
-        
-        print(f"\n3. Результат:")
+
+        print("\n3. Результат:")
         print(f"   {result}")
-        
-        if result.get('result') == 1000:
+
+        if result.get("result") == 1000:
             print("\n✅ Звонок успешно инициирован!")
         else:
             print(f"\n❌ Ошибка: {result.get('result')}")
-            
+
     except Exception as e:
         print(f"\n❌ Ошибка: {e}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

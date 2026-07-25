@@ -9,11 +9,17 @@ Levitan Smart Dialer v2 — Автодозвон + автоCRM через зап
 Тест:   python3 scripts/smart_dialer.py --test
 """
 
-import csv, hashlib, json, os, re, sys, time, uuid
+import csv
+import hashlib
+import json
+import os
+import re
+import sys
+import time
+import uuid
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 try:
     import requests
@@ -45,7 +51,7 @@ if ENV_FILE.exists():
                 os.environ.setdefault(key.strip(), value.strip())
 
 # === CONFIG ===
-MANGO_API_KEY  = os.getenv("MANGO_VPBX_API_KEY", "")
+MANGO_API_KEY = os.getenv("MANGO_VPBX_API_KEY", "")
 MANGO_API_SALT = os.getenv("MANGO_VPBX_API_SALT", "")
 MANGO_API_BASE = "https://app.mango-office.ru/vpbx/"
 MANGO_FROM_EXTENSION = os.getenv("MANGO_FROM_EXTENSION", "22")
@@ -59,18 +65,41 @@ VPS_USER = os.getenv("LEVITAN_VPS_USER", "root")
 
 # === ФИЛЬТР КУЛЬТУР ===
 TARGET_KEYWORDS = [
-    "зерновые", "пшеница", "ячмень", "кукуруза",
-    "подсолнечник", "рапс", "соя",
-    "горох", "нут", "чечевица",
-    "масличные", "бобовые", "озимая", "яровая",
-    "зерно", "закупка зерновых",
+    "зерновые",
+    "пшеница",
+    "ячмень",
+    "кукуруза",
+    "подсолнечник",
+    "рапс",
+    "соя",
+    "горох",
+    "нут",
+    "чечевица",
+    "масличные",
+    "бобовые",
+    "озимая",
+    "яровая",
+    "зерно",
+    "закупка зерновых",
 ]
 
 EXCLUDE_ONLY = [
-    "крс", "молочный", "мясной", "овцы", "свиньи",
-    "птица", "рыба", "овощи", "картофель", "сахарная",
-    "хранение", "сооружений", "техника", "ремонт",
-    "торговля", "производство молочной",
+    "крс",
+    "молочный",
+    "мясной",
+    "овцы",
+    "свиньи",
+    "птица",
+    "рыба",
+    "овощи",
+    "картофель",
+    "сахарная",
+    "хранение",
+    "сооружений",
+    "техника",
+    "ремонт",
+    "торговля",
+    "производство молочной",
 ]
 
 # === LLM PROMPT ===
@@ -102,6 +131,7 @@ EXTRACTION_PROMPT = """Проанализируй транскрипт теле�
 # UTILS
 # ============================================================
 
+
 def norm_phone(num: str) -> str:
     d = re.sub(r"\D", "", num or "")
     if len(d) == 11 and d.startswith("8"):
@@ -119,6 +149,7 @@ def is_valid_phone(num: str) -> bool:
 # ============================================================
 # MANGO API
 # ============================================================
+
 
 def _mango_sign(payload: dict) -> str:
     j = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
@@ -146,7 +177,7 @@ def mango_callback(phone: str) -> dict:
         return {"error": str(e)}
 
 
-def mango_download_recording(recording_id: str) -> Optional[bytes]:
+def mango_download_recording(recording_id: str) -> bytes | None:
     """Скачать запись из Mango API."""
     payload = {"recording_id": recording_id, "action": "download"}
     j = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
@@ -169,11 +200,12 @@ def mango_download_recording(recording_id: str) -> Optional[bytes]:
 # RECORDING PROCESSING
 # ============================================================
 
-def process_recording_on_vps(recording_id: str) -> Optional[str]:
+
+def process_recording_on_vps(recording_id: str) -> str | None:
     """Скачать и транскрибировать запись на VPS."""
     import subprocess
 
-    script = f'''
+    script = f"""
 import os, hashlib, json, requests, sys
 from dotenv import load_dotenv
 load_dotenv("/opt/.env")
@@ -197,12 +229,14 @@ from faster_whisper import WhisperModel
 model = WhisperModel("base", device="cpu", compute_type="int8")
 segments, _ = model.transcribe(mp3_path, language="ru", beam_size=5, vad_filter=True)
 print(" ".join(s.text for s in segments).strip())
-'''
+"""
 
     try:
         result = subprocess.run(
             ["ssh", f"{VPS_USER}@{VPS_HOST}", f"python3 -c '{script}'"],
-            capture_output=True, text=True, timeout=180,
+            capture_output=True,
+            text=True,
+            timeout=180,
         )
         output = result.stdout.strip()
         if not output or output == "DOWNLOAD_FAILED":
@@ -213,7 +247,7 @@ print(" ".join(s.text for s in segments).strip())
         return None
 
 
-def wait_for_recording(phone: str, call_start: float, timeout: int = 90) -> Optional[str]:
+def wait_for_recording(phone: str, call_start: float, timeout: int = 90) -> str | None:
     """Ждать запись разговора."""
     import subprocess
 
@@ -226,9 +260,14 @@ def wait_for_recording(phone: str, call_start: float, timeout: int = 90) -> Opti
 
         try:
             result = subprocess.run(
-                ["ssh", f"{VPS_USER}@{VPS_HOST}",
-                 "grep 'recording_added' /var/log/voice-angela/events.jsonl 2>/dev/null | tail -5"],
-                capture_output=True, text=True, timeout=10,
+                [
+                    "ssh",
+                    f"{VPS_USER}@{VPS_HOST}",
+                    "grep 'recording_added' /var/log/voice-angela/events.jsonl 2>/dev/null | tail -5",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
             )
 
             for line in result.stdout.strip().split("\n"):
@@ -255,14 +294,20 @@ def wait_for_recording(phone: str, call_start: float, timeout: int = 90) -> Opti
     return None
 
 
-def get_last_recording() -> Optional[str]:
+def get_last_recording() -> str | None:
     """Последняя запись (fallback)."""
     import subprocess
+
     try:
         result = subprocess.run(
-            ["ssh", f"{VPS_USER}@{VPS_HOST}",
-             "grep 'recording_added' /var/log/voice-angela/events.jsonl 2>/dev/null | tail -1"],
-            capture_output=True, text=True, timeout=10,
+            [
+                "ssh",
+                f"{VPS_USER}@{VPS_HOST}",
+                "grep 'recording_added' /var/log/voice-angela/events.jsonl 2>/dev/null | tail -1",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
         )
         line = result.stdout.strip()
         if line:
@@ -276,6 +321,7 @@ def get_last_recording() -> Optional[str]:
 # ============================================================
 # LLM
 # ============================================================
+
 
 def extract_call_data(transcript: str) -> dict:
     """Извлечь данные из транскрипта через LLM."""
@@ -312,6 +358,7 @@ def extract_call_data(transcript: str) -> dict:
 # TELEGRAM
 # ============================================================
 
+
 def notify_telegram(text: str):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         return
@@ -329,6 +376,7 @@ def notify_telegram(text: str):
 # CRM
 # ============================================================
 
+
 def save_result(contact: dict, extracted: dict, transcript: str, recording_id: str):
     """Сохранить результат в CRM."""
     result = {
@@ -340,13 +388,17 @@ def save_result(contact: dict, extracted: dict, transcript: str, recording_id: s
         "status": extracted.get("status", "other"),
         "interest_level": extracted.get("interest_level", ""),
         "contact_name": extracted.get("contact_name", ""),
-        "crops": ", ".join(extracted.get("crops", [])) if isinstance(extracted.get("crops"), list) else str(extracted.get("crops", "")),
+        "crops": ", ".join(extracted.get("crops", []))
+        if isinstance(extracted.get("crops"), list)
+        else str(extracted.get("crops", "")),
         "volume": extracted.get("volume", ""),
         "basis": extracted.get("basis", ""),
         "delivery_time": extracted.get("delivery_time", ""),
         "preferred_contact": extracted.get("preferred_contact", ""),
         "callback_time": extracted.get("callback_time", ""),
-        "objections": ", ".join(extracted.get("objections", [])) if isinstance(extracted.get("objections"), list) else str(extracted.get("objections", "")),
+        "objections": ", ".join(extracted.get("objections", []))
+        if isinstance(extracted.get("objections"), list)
+        else str(extracted.get("objections", "")),
         "key_info": extracted.get("key_info", ""),
         "next_action": extracted.get("next_action", ""),
         "recording_id": recording_id,
@@ -377,10 +429,11 @@ def save_result(contact: dict, extracted: dict, transcript: str, recording_id: s
 # CONTACTS
 # ============================================================
 
+
 def load_contacts() -> list[dict]:
     """Загрузить контакты."""
     contacts = []
-    with open(CSV_PATH, "r", encoding="utf-8") as f:
+    with open(CSV_PATH, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             desc = (row.get("Описание", "") or "").lower()
@@ -396,15 +449,17 @@ def load_contacts() -> list[dict]:
             for phone in phone_list:
                 normalized = norm_phone(phone)
                 if is_valid_phone(normalized):
-                    contacts.append({
-                        "name": row.get("Название", "").strip(),
-                        "description": row.get("Описание", "").strip(),
-                        "region": row.get("Регион", "").strip(),
-                        "city": row.get("Город", "").strip(),
-                        "contact_name": row.get("Имя", "").strip(),
-                        "phone": normalized,
-                        "phone_display": phone.strip(),
-                    })
+                    contacts.append(
+                        {
+                            "name": row.get("Название", "").strip(),
+                            "description": row.get("Описание", "").strip(),
+                            "region": row.get("Регион", "").strip(),
+                            "city": row.get("Город", "").strip(),
+                            "contact_name": row.get("Имя", "").strip(),
+                            "phone": normalized,
+                            "phone_display": phone.strip(),
+                        }
+                    )
                     break
 
     return contacts
@@ -415,7 +470,7 @@ def load_already_called() -> set:
     called = set()
     for f in RESULTS_DIR.glob("results_*.csv"):
         try:
-            with open(f, "r", encoding="utf-8") as fh:
+            with open(f, encoding="utf-8") as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
                     if row.get("phone"):
@@ -428,6 +483,7 @@ def load_already_called() -> set:
 # ============================================================
 # UI
 # ============================================================
+
 
 def print_header():
     print("\n" + "=" * 60)
@@ -455,7 +511,7 @@ def print_contact(idx: int, total: int, contact: dict):
     print(f"  [{idx}/{total}]  {contact['name'][:40]}")
     print(f"  Описание:  {contact['description'][:50]}")
     print(f"  Регион:    {contact['region']}, {contact['city']}")
-    if contact['contact_name']:
+    if contact["contact_name"]:
         print(f"  Контакт:   {contact['contact_name']}")
     print(f"  Телефон:   {contact['phone_display']}  →  +{contact['phone']}")
     print(f"{'─' * 60}")
@@ -463,8 +519,12 @@ def print_contact(idx: int, total: int, contact: dict):
 
 def print_result(result: dict):
     status_emoji = {
-        "lead": "🟢", "callback": "🟡", "rejected": "🔴",
-        "no_interest": "⚪", "wrong_number": "❌", "other": "⚫",
+        "lead": "🟢",
+        "callback": "🟡",
+        "rejected": "🔴",
+        "no_interest": "⚪",
+        "wrong_number": "❌",
+        "other": "⚫",
     }
     emoji = status_emoji.get(result["status"], "⚫")
 
@@ -483,6 +543,7 @@ def print_result(result: dict):
 # MAIN
 # ============================================================
 
+
 def main():
     print_header()
 
@@ -496,10 +557,10 @@ def main():
         return
 
     print(f"  ✓ Mango API (ext: {MANGO_FROM_EXTENSION})")
-    print(f"  ✓ OpenRouter LLM")
+    print("  ✓ OpenRouter LLM")
     print(f"  ✓ VPS: {VPS_HOST}")
     if TELEGRAM_BOT_TOKEN:
-        print(f"  ✓ Telegram уведомления")
+        print("  ✓ Telegram уведомления")
 
     print("\n  Загрузка базы...")
     contacts = load_contacts()
@@ -591,7 +652,7 @@ def main():
             continue
 
         # === STT ===
-        print(f"  📝 Транскрибирую на VPS...")
+        print("  📝 Транскрибирую на VPS...")
         transcript = process_recording_on_vps(recording_id)
 
         if not transcript:
@@ -625,11 +686,13 @@ def main():
             )
 
         total = sum(stats.values())
-        print(f"\n  📊 [{total} звонков] "
-              f"Лиды:{stats['lead']} "
-              f"Перезвон:{stats['callback']} "
-              f"Отказ:{stats['rejected']+stats['no_interest']} "
-              f"Не взял:{stats['no_answer']}")
+        print(
+            f"\n  📊 [{total} звонков] "
+            f"Лиды:{stats['lead']} "
+            f"Перезвон:{stats['callback']} "
+            f"Отказ:{stats['rejected']+stats['no_interest']} "
+            f"Не взял:{stats['no_answer']}"
+        )
         if stats["lead"]:
             print(f"  Конверсия: {stats['lead']/total*100:.1f}%")
 
@@ -658,7 +721,7 @@ if __name__ == "__main__":
             if transcript:
                 print(f"  Транскрипт: {transcript[:300]}")
                 extracted = extract_call_data(transcript)
-                print(f"  Извлечено:")
+                print("  Извлечено:")
                 print(json.dumps(extracted, ensure_ascii=False, indent=4))
             else:
                 print("  Транскрибация не удалась")

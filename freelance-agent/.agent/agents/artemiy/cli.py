@@ -15,40 +15,56 @@ if _AGENTS not in sys.path:
 try:
     from learning import build_learned_context, capture_outcome, capture_start
 except ImportError:
+
     def build_learned_context(agent, min_samples=3):
         return ""
+
     def capture_start(*a, **k):
         return ""
+
     def capture_outcome(*a, **k):
         return False
+
 
 try:
     from security import scan_leaks
 except ImportError:
+
     def scan_leaks(code):
         return []
 
+
 try:
-    from memory import compact as mem_compact, enrich_context, recall, remember
+    from memory import compact as mem_compact
+    from memory import enrich_context, recall, remember
 except ImportError:
+
     def enrich_context(agent, query, ctx="", top_k=2):
         return ctx
+
     def recall(agent, query, top_k=3):
         return []
+
     def remember(agent, fact, kind):
         pass
+
     def mem_compact(agent, keep=500):
         return {"before": 0, "after": 0, "removed": 0}
+
 
 try:
     from soul import ensure_soul, evolve_soul, soul_context
 except ImportError:
+
     def ensure_soul(agent, name="", role=""):
         return ""
+
     def evolve_soul(agent, lessons):
         return False
+
     def soul_context(agent, max_chars=1500):
         return ""
+
 
 try:
     from healing import run_with_healing
@@ -87,11 +103,11 @@ def _validate_frontend(out) -> list:
         issues.append("output must contain markup (no HTML/JSX tags found)")
     return issues
 
+
 from . import (
     COMPONENT_TYPES,
     DEFAULTS,
     FRAMEWORKS,
-    audit_code,
     audit_file,
     audit_with_llm,
     fetch_brand_design,
@@ -136,35 +152,80 @@ def main():
         "  python3 -m artemiy --audit index.html\n",
     )
 
-    parser.add_argument("--component", "-c", type=str, default=None,
-                        choices=COMPONENT_TYPES + [None],
-                        help=f"Component type ({', '.join(COMPONENT_TYPES)})")
-    parser.add_argument("--page", "-p", type=str, default=None,
-                        help="Generate a full page from a brief")
-    parser.add_argument("--scaffold", "-s", type=str, default=None,
-                        help="Generate a project scaffold by name")
-    parser.add_argument("--slides", type=str, default=None,
-                        help="Generate an interactive slide deck by topic")
-    parser.add_argument("--audience", type=str, default="general",
-                        help="Target audience for slides (investors, team, clients)")
-    parser.add_argument("--brand-url", type=str, default=None,
-                        help="Domain/URL to fetch design tokens (DESIGN.md via designmd.supply)")
-    parser.add_argument("--audit", "-a", type=str, default=None,
-                        help="Audit a file (HTML/JSX) for SEO/CWV")
-    parser.add_argument("--spec", type=str, default="",
-                        help="Component specification (natural language)")
-    parser.add_argument("--framework", "-f", type=str, default="astro",
-                        choices=FRAMEWORKS,
-                        help="Target framework (default: astro)")
-    parser.add_argument("--list-components", action="store_true",
-                        help="List available component types")
-    parser.add_argument("--list-frameworks", action="store_true",
-                        help="List supported frameworks")
-    parser.add_argument("--deep-audit", action="store_true",
-                        help="Use LLM for deep audit (requires OpenRouter key)")
-    parser.add_argument("--feedback", type=str, default=None, nargs=2,
-                        metavar=("SID", "OUTCOME"),
-                        help="Record verdict for a signal: --feedback <sid> accepted|edited|rejected")
+    parser.add_argument(
+        "--component",
+        "-c",
+        type=str,
+        default=None,
+        choices=COMPONENT_TYPES + [None],
+        help=f"Component type ({', '.join(COMPONENT_TYPES)})",
+    )
+    parser.add_argument(
+        "--page", "-p", type=str, default=None, help="Generate a full page from a brief"
+    )
+    parser.add_argument(
+        "--scaffold",
+        "-s",
+        type=str,
+        default=None,
+        help="Generate a project scaffold by name",
+    )
+    parser.add_argument(
+        "--slides",
+        type=str,
+        default=None,
+        help="Generate an interactive slide deck by topic",
+    )
+    parser.add_argument(
+        "--audience",
+        type=str,
+        default="general",
+        help="Target audience for slides (investors, team, clients)",
+    )
+    parser.add_argument(
+        "--brand-url",
+        type=str,
+        default=None,
+        help="Domain/URL to fetch design tokens (DESIGN.md via designmd.supply)",
+    )
+    parser.add_argument(
+        "--audit",
+        "-a",
+        type=str,
+        default=None,
+        help="Audit a file (HTML/JSX) for SEO/CWV",
+    )
+    parser.add_argument(
+        "--spec",
+        type=str,
+        default="",
+        help="Component specification (natural language)",
+    )
+    parser.add_argument(
+        "--framework",
+        "-f",
+        type=str,
+        default="astro",
+        choices=FRAMEWORKS,
+        help="Target framework (default: astro)",
+    )
+    parser.add_argument(
+        "--list-components", action="store_true", help="List available component types"
+    )
+    parser.add_argument("--list-frameworks", action="store_true", help="List supported frameworks")
+    parser.add_argument(
+        "--deep-audit",
+        action="store_true",
+        help="Use LLM for deep audit (requires OpenRouter key)",
+    )
+    parser.add_argument(
+        "--feedback",
+        type=str,
+        default=None,
+        nargs=2,
+        metavar=("SID", "OUTCOME"),
+        help="Record verdict for a signal: --feedback <sid> accepted|edited|rejected",
+    )
 
     args = parser.parse_args()
 
@@ -180,7 +241,9 @@ def main():
                 print(f"🧬 Soul evolved: folded fresh lessons into {AGENT}.soul.md")
         _stats = mem_compact(AGENT)
         if _stats["removed"]:
-            print(f"🗜️  Memory compacted: {_stats['before']}→{_stats['after']} (-{_stats['removed']})")
+            print(
+                f"🗜️  Memory compacted: {_stats['before']}→{_stats['after']} (-{_stats['removed']})"
+            )
         return
 
     if args.list_components:
@@ -198,25 +261,39 @@ def main():
     if args.component:
         print(f"🔨 Generating {args.framework} component: {args.component}")
         ctx = _ctx(args.spec, args.brand_url or "")
-        sid = capture_start("artemiy", "generate_component", args.spec, {"framework": args.framework})
+        sid = capture_start(
+            "artemiy", "generate_component", args.spec, {"framework": args.framework}
+        )
         if run_with_healing:
             res = run_with_healing(
                 ctx,
-                lambda p: generate_component(args.component, args.spec, args.framework, learned_context=p),
+                lambda p: generate_component(
+                    args.component, args.spec, args.framework, learned_context=p
+                ),
                 _validate_frontend,
                 max_retries=1,
             )
             result = res.output
             if res.attempts > 1:
-                print(f"🩹 Self-healing: {res.attempts} attempts, {'clean' if res.ok else 'still had issues'}")
+                print(
+                    f"🩹 Self-healing: {res.attempts} attempts, {'clean' if res.ok else 'still had issues'}"
+                )
         else:
-            result = generate_component(args.component, args.spec, args.framework, learned_context=ctx)
+            result = generate_component(
+                args.component, args.spec, args.framework, learned_context=ctx
+            )
         if result:
             path = _save(f"{args.component}.{_ext(args.framework)}", result)
             print(f"✅ Saved to {path}")
             _guard(result, sid)
-            remember("artemiy", f"generated {args.framework} {args.component}: {args.spec}", kind="generation")
-            print(f"📡 Signal {sid} logged — later: python3 -m artemiy --feedback {sid} accepted|edited|rejected")
+            remember(
+                "artemiy",
+                f"generated {args.framework} {args.component}: {args.spec}",
+                kind="generation",
+            )
+            print(
+                f"📡 Signal {sid} logged — later: python3 -m artemiy --feedback {sid} accepted|edited|rejected"
+            )
         else:
             print("❌ Failed")
             sys.exit(1)
@@ -231,8 +308,14 @@ def main():
             path = _save(f"page.{_ext(args.framework)}", result)
             print(f"✅ Saved to {path}")
             _guard(result, sid)
-            remember("artemiy", f"generated {args.framework} page: {args.page[:100]}", kind="generation")
-            print(f"📡 Signal {sid} logged — later: python3 -m artemiy --feedback {sid} accepted|edited|rejected")
+            remember(
+                "artemiy",
+                f"generated {args.framework} page: {args.page[:100]}",
+                kind="generation",
+            )
+            print(
+                f"📡 Signal {sid} logged — later: python3 -m artemiy --feedback {sid} accepted|edited|rejected"
+            )
         else:
             print("❌ Failed")
             sys.exit(1)
@@ -259,7 +342,9 @@ def main():
             print(f"✅ Saved to {path}")
             _guard(result, sid)
             remember("artemiy", f"generated slides: {args.slides}", kind="generation")
-            print(f"📡 Signal {sid} logged — later: python3 -m artemiy --feedback {sid} accepted|edited|rejected")
+            print(
+                f"📡 Signal {sid} logged — later: python3 -m artemiy --feedback {sid} accepted|edited|rejected"
+            )
         else:
             print("❌ Failed")
             sys.exit(1)

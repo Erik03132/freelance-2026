@@ -32,11 +32,7 @@ class TelegramReporter:
         try:
             response = await self.client.post(
                 f"{self.base_url}/sendMessage",
-                json={
-                    "chat_id": self.chat_id,
-                    "text": text,
-                    "parse_mode": parse_mode
-                }
+                json={"chat_id": self.chat_id, "text": text, "parse_mode": parse_mode},
             )
 
             result = response.json()
@@ -60,7 +56,7 @@ class TelegramReporter:
         interest: bool,
         crops: list[str] = None,
         region: str = None,
-        notes: str = ""
+        notes: str = "",
     ):
         """Отправка отчета о звонке."""
         crops_text = ", ".join(crops) if crops else "не указано"
@@ -71,7 +67,7 @@ class TelegramReporter:
             "не_заинтересован": "🔴",
             "отказ": "❌",
             "completed": "✅",
-            "failed": "⚠️"
+            "failed": "⚠️",
         }.get(status, "📞")
 
         text = f"""{status_emoji} <b>Новый звонок завершен</b>
@@ -139,9 +135,9 @@ def get_telegram_reporter() -> TelegramReporter | None:
     global _reporter
     if _reporter is None:
         from .config import settings
+
         if settings.telegram.bot_token and settings.telegram.chat_id:
             _reporter = TelegramReporter(
-                bot_token=settings.telegram.bot_token,
-                chat_id=settings.telegram.chat_id
+                bot_token=settings.telegram.bot_token, chat_id=settings.telegram.chat_id
             )
     return _reporter

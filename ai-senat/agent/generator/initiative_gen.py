@@ -3,8 +3,9 @@
 На вход: дайджест новостей + база знаний.
 На выход: аргументированная инициатива дня.
 """
-import os
+
 import json
+import os
 import sys
 from datetime import datetime
 
@@ -18,6 +19,7 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 HISTORY_PATH = os.path.join(DATA_DIR, "initiatives_history.json")
 KB_DIR = os.path.join(DATA_DIR, "bashkortostan_kb")
 
+
 # --- Загрузка базы знаний о Башкортостане ---
 def _load_kb():
     """Загружает все .md файлы из базы знаний в единый контекст."""
@@ -26,7 +28,7 @@ def _load_kb():
         for fname in sorted(os.listdir(KB_DIR)):
             if fname.endswith(".md"):
                 fpath = os.path.join(KB_DIR, fname)
-                with open(fpath, "r", encoding="utf-8") as f:
+                with open(fpath, encoding="utf-8") as f:
                     parts.append(f"--- {fname} ---\n{f.read()}")
     return "\n\n".join(parts)
 
@@ -34,7 +36,7 @@ def _load_kb():
 def _load_history():
     """Загружает историю инициатив для проверки на дубли."""
     if os.path.exists(HISTORY_PATH):
-        with open(HISTORY_PATH, "r", encoding="utf-8") as f:
+        with open(HISTORY_PATH, encoding="utf-8") as f:
             return json.load(f)
     return []
 
@@ -53,7 +55,7 @@ def _load_senator_profile():
     """Загружает профиль сенатора."""
     profile_path = os.path.join(DATA_DIR, "senator_profile.md")
     if os.path.exists(profile_path):
-        with open(profile_path, "r", encoding="utf-8") as f:
+        with open(profile_path, encoding="utf-8") as f:
             return f.read()
     return "Сенатор от Республики Башкортостан. Комитеты: все."
 
@@ -131,12 +133,12 @@ GENERATOR_SYSTEM_PROMPT = """
 def generate_initiative(news_digest, deep_search_context="", focus_topic=None):
     """
     Генерирует инициативу дня на основе дайджеста.
-    
+
     Args:
         news_digest: Строка с дайджестом новостей (из RSS + скана)
         deep_search_context: Доп. контекст из deep search
         focus_topic: Опциональная фокусная тема от сенатора
-    
+
     Returns:
         dict: {
             "text": str,       # Полный текст инициативы
@@ -150,10 +152,16 @@ def generate_initiative(news_digest, deep_search_context="", focus_topic=None):
     history = _load_history()
 
     # Формируем список уже предложенных тем (для антидублей)
-    past_titles = "\n".join([
-        f"- [{h.get('date', '?')}] {h.get('title', 'без названия')}"
-        for h in history[-30:]  # Последние 30
-    ]) if history else "Пока не было."
+    past_titles = (
+        "\n".join(
+            [
+                f"- [{h.get('date', '?')}] {h.get('title', 'без названия')}"
+                for h in history[-30:]  # Последние 30
+            ]
+        )
+        if history
+        else "Пока не было."
+    )
 
     today = datetime.now().strftime("%d %B %Y")
 
@@ -179,9 +187,7 @@ def generate_initiative(news_digest, deep_search_context="", focus_topic=None):
 Сгенерируй инициативу дня. СТРОГО следуй формату из системного промпта.
 """
 
-    result_text = call_llm_structured(
-        GENERATOR_SYSTEM_PROMPT, user_prompt, temperature=0.6
-    )
+    result_text = call_llm_structured(GENERATOR_SYSTEM_PROMPT, user_prompt, temperature=0.6)
 
     if not result_text or "ИНИЦИАТИВА ДНЯ" not in result_text:
         print("⚠️ LLM не сгенерировал инициативу в нужном формате. Повторная попытка...")
@@ -219,6 +225,7 @@ def generate_on_topic(topic):
     """
     try:
         from scanner.deep_search import deep_search
+
         search_result = deep_search(topic, context="legislation")
         context = search_result.get("combined_context", "")
     except Exception as e:

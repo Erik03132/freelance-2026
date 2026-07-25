@@ -1,4 +1,3 @@
-import re
 path = "/opt/mango_webhook.py"
 with open(path) as f:
     c = f.read()
@@ -16,4 +15,4 @@ else:
     print("NOT FOUND, searching...")
     idx = c.find("Also log call disconnect")
     if idx >= 0:
-        print(repr(c[idx:idx+400]))
+        print(repr(c[idx : idx + 400]))

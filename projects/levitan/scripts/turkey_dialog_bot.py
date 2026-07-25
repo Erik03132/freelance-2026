@@ -20,16 +20,25 @@ Levitan Turkey Dialog Bot v2 — предиктивная схема + Битр�
 Запуск: python3 scripts/turkey_dialog_bot.py
 """
 
-import asyncio, csv, hashlib, json, logging, os, re, subprocess, sys, time, uuid
+import asyncio
+import csv
+import hashlib
+import json
+import logging
+import os
+import re
+import subprocess
+import sys
+import time
+import uuid
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 try:
     import requests
     from telegram import Update
-    from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+    from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 except ImportError:
     print("pip install python-telegram-bot requests")
     sys.exit(1)
@@ -65,7 +74,7 @@ if AI_EGGS_ENV.exists():
                 os.environ.setdefault(key.strip(), value.strip())
 
 # Убираем прокси — Битрикс и Mango это РФ-сервисы
-for v in ['HTTPS_PROXY','HTTP_PROXY','ALL_PROXY','https_proxy','http_proxy','all_proxy']:
+for v in ["HTTPS_PROXY", "HTTP_PROXY", "ALL_PROXY", "https_proxy", "http_proxy", "all_proxy"]:
     os.environ.pop(v, None)
 
 # === CONFIG ===
@@ -90,7 +99,9 @@ CALL_INTERVAL = int(os.getenv("CALL_INTERVAL", "5"))
 RECORDING_WAIT = int(os.getenv("RECORDING_WAIT", "120"))
 
 # === LOGGING ===
-logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s", datefmt="%H:%M:%S")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s", datefmt="%H:%M:%S"
+)
 log = logging.getLogger("turkey-bot")
 
 # === LLM PROMPT ===
@@ -124,6 +135,7 @@ class TurkeyState:
         self.stats = Counter()
         self.called_phones: set = set()
 
+
 state = TurkeyState()
 
 
@@ -132,8 +144,10 @@ state = TurkeyState()
 # ============================================================
 def norm_phone(num: str) -> str:
     d = re.sub(r"\D", "", num or "")
-    if len(d) == 11 and d.startswith("8"): d = "7" + d[1:]
-    elif len(d) == 10: d = "7" + d
+    if len(d) == 11 and d.startswith("8"):
+        d = "7" + d[1:]
+    elif len(d) == 10:
+        d = "7" + d
     return d
 
 
@@ -186,7 +200,7 @@ def bx_post(method: str, params: dict = None) -> dict:
         return {}
 
 
-def bx_create_lead(contact: dict, extracted: dict, transcript: str) -> Optional[str]:
+def bx_create_lead(contact: dict, extracted: dict, transcript: str) -> str | None:
     """Создать Лид в Битрикс24."""
     if not BITRIX_URL:
         return None
@@ -247,32 +261,41 @@ def bx_update_deal_stage(deal_id: str, stage: str) -> bool:
 # ============================================================
 # RECORDING & STT
 # ============================================================
-def wait_for_recording(call_start: float, timeout: int = RECORDING_WAIT) -> Optional[str]:
+def wait_for_recording(call_start: float, timeout: int = RECORDING_WAIT) -> str | None:
     start = time.time()
     while time.time() - start < timeout:
         time.sleep(5)
         try:
             result = subprocess.run(
-                ["ssh", f"{VPS_USER}@{VPS_HOST}",
-                 "grep 'recording_added' /var/log/voice-angela/events.jsonl 2>/dev/null | tail -5"],
-                capture_output=True, text=True, timeout=10,
+                [
+                    "ssh",
+                    f"{VPS_USER}@{VPS_HOST}",
+                    "grep 'recording_added' /var/log/voice-angela/events.jsonl 2>/dev/null | tail -5",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
             )
             for line in result.stdout.strip().split("\n"):
-                if not line: continue
+                if not line:
+                    continue
                 try:
                     event = json.loads(line)
                     ts = event.get("timestamp", "")
-                    if not ts: continue
+                    if not ts:
+                        continue
                     event_time = datetime.fromisoformat(ts).timestamp()
                     if event_time > call_start:
                         return event.get("recording_id", "")
-                except (json.JSONDecodeError, ValueError): continue
-        except Exception: pass
+                except (json.JSONDecodeError, ValueError):
+                    continue
+        except Exception:
+            pass
     return None
 
 
-def process_recording(recording_id: str) -> Optional[str]:
-    script = f'''
+def process_recording(recording_id: str) -> str | None:
+    script = f"""
 import os, hashlib, json, requests, sys
 from dotenv import load_dotenv
 load_dotenv("/opt/.env")
@@ -292,14 +315,17 @@ from faster_whisper import WhisperModel
 model = WhisperModel("base", device="cpu", compute_type="int8")
 segments, _ = model.transcribe(mp3_path, language="ru", beam_size=5, vad_filter=True)
 print(" ".join(s.text for s in segments).strip())
-'''
+"""
     try:
         result = subprocess.run(
             ["ssh", f"{VPS_USER}@{VPS_HOST}", f"python3 -c '{script}'"],
-            capture_output=True, text=True, timeout=180,
+            capture_output=True,
+            text=True,
+            timeout=180,
         )
         output = result.stdout.strip()
-        if not output or output == "DOWNLOAD_FAILED": return None
+        if not output or output == "DOWNLOAD_FAILED":
+            return None
         return output
     except Exception as e:
         log.error(f"VPS error: {e}")
@@ -318,13 +344,16 @@ def extract_crm_data(transcript: str) -> dict:
             json={
                 "model": "deepseek/deepseek-chat-v3-0324",
                 "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 500, "temperature": 0.1,
-            }, timeout=30,
+                "max_tokens": 500,
+                "temperature": 0.1,
+            },
+            timeout=30,
         )
         content = r.json()["choices"][0]["message"]["content"].strip()
         if "```" in content:
             content = content.split("```")[1]
-            if content.startswith("json"): content = content[4:]
+            if content.startswith("json"):
+                content = content[4:]
         return json.loads(content)
     except Exception as e:
         log.error(f"LLM: {e}")
@@ -334,7 +363,9 @@ def extract_crm_data(transcript: str) -> dict:
 # ============================================================
 # CRM
 # ============================================================
-def save_to_crm(contact: dict, extracted: dict, transcript: str, recording_id: str, bitrix_id: str = "") -> dict:
+def save_to_crm(
+    contact: dict, extracted: dict, transcript: str, recording_id: str, bitrix_id: str = ""
+) -> dict:
     result = {
         "timestamp": datetime.now().isoformat(),
         "deal_id": contact.get("deal_id", ""),
@@ -355,13 +386,16 @@ def save_to_crm(contact: dict, extracted: dict, transcript: str, recording_id: s
     file_exists = RESULTS_CSV.exists()
     with open(RESULTS_CSV, "a", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=list(result.keys()))
-        if not file_exists: writer.writeheader()
+        if not file_exists:
+            writer.writeheader()
         writer.writerow(result)
 
     results = []
     if RESULTS_JSON.exists():
-        try: results = json.loads(RESULTS_JSON.read_text())
-        except: results = []
+        try:
+            results = json.loads(RESULTS_JSON.read_text())
+        except:
+            results = []
     results.append({**result, "transcript": transcript})
     RESULTS_JSON.write_text(json.dumps(results, ensure_ascii=False, indent=2))
     return result
@@ -382,10 +416,12 @@ def load_already_called() -> set:
     called = set()
     for f in RESULTS_DIR.glob("turkey_*.csv"):
         try:
-            with open(f, "r", encoding="utf-8") as fh:
+            with open(f, encoding="utf-8") as fh:
                 for row in csv.DictReader(fh):
-                    if row.get("phone"): called.add(row["phone"])
-        except: pass
+                    if row.get("phone"):
+                        called.add(row["phone"])
+        except:
+            pass
     return called
 
 
@@ -528,8 +564,7 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE):
 
         # Ждём завершения (запись появится после disconnect)
         await context.bot.send_message(
-            chat_id=chat_id,
-            text="🎙 Разговор идёт... Ожидаю завершения."
+            chat_id=chat_id, text="🎙 Разговор идёт... Ожидаю завершения."
         )
 
         recording_id = await asyncio.to_thread(wait_for_recording, call_start, RECORDING_WAIT)
@@ -578,7 +613,13 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE):
         state.stats[status] += 1
 
         # === КАРТОЧКА ===
-        emoji = {"lead": "🟢", "callback": "🟡", "rejected": "🔴", "no_answer": "⚫", "other": "⚫"}.get(status, "⚫")
+        emoji = {
+            "lead": "🟢",
+            "callback": "🟡",
+            "rejected": "🔴",
+            "no_answer": "⚫",
+            "other": "⚫",
+        }.get(status, "⚫")
         card = (
             f"{emoji} <b>Результат #{sum(state.stats.values())}</b>\n\n"
             f"👤 {saved.get('contact_name') or saved.get('name') or '—'}\n"
@@ -597,7 +638,7 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE):
         total = sum(state.stats.values())
         await context.bot.send_message(
             chat_id=chat_id,
-            text=f"📊 [{total} звонков] 🟢{state.stats['lead']} 🟡{state.stats['callback']} 🔴{state.stats['rejected']} ⚫{state.stats['no_answer']} 📋{state.stats['bitrix']}"
+            text=f"📊 [{total} звонков] 🟢{state.stats['lead']} 🟡{state.stats['callback']} 🔴{state.stats['rejected']} ⚫{state.stats['no_answer']} 📋{state.stats['bitrix']}",
         )
 
         state.current_idx += 1

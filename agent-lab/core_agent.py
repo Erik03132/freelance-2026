@@ -37,8 +37,8 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -47,6 +47,7 @@ load_dotenv()
 # LangGraph
 try:
     from langgraph.prebuilt import create_react_agent
+
     HAS_LANGGRAPH = True
 except ImportError:
     HAS_LANGGRAPH = False
@@ -54,13 +55,15 @@ except ImportError:
 
 try:
     from langchain_openai import ChatOpenAI
+
     HAS_LANGCHAIN = True
 except ImportError:
     HAS_LANGCHAIN = False
 
-from tools import CORE_TOOLS
-from rag_memory import get_memory
 from llm_engine import call_llm
+from rag_memory import get_memory
+
+from tools import CORE_TOOLS
 
 
 # ============================================================
@@ -70,14 +73,15 @@ from llm_engine import call_llm
 class PermissionLevel:
     """
     Уровни автономности (идея из Goose AI):
-    
+
     ADVISORY  — агент только советует, ничего не делает сам
-    ASSISTED  — агент делает, но спрашивает разрешение  
+    ASSISTED  — агент делает, но спрашивает разрешение
     AUTONOMOUS — агент делает всё сам (осторожно!)
     """
-    ADVISORY = "advisory"       # Только рекомендации
-    ASSISTED = "assisted"       # Делает с подтверждением
-    AUTONOMOUS = "autonomous"   # Полная автономия
+
+    ADVISORY = "advisory"  # Только рекомендации
+    ASSISTED = "assisted"  # Делает с подтверждением
+    AUTONOMOUS = "autonomous"  # Полная автономия
 
 
 # ============================================================
@@ -87,10 +91,10 @@ class PermissionLevel:
 class PersistentMemory:
     """
     Постоянная память агента между сессиями.
-    
+
     Хранит: факты о пользователе, предпочтения, важные решения.
     Файл: memory.json рядом с агентом.
-    
+
     Пример:
       memory.remember("Клиент Иванов предпочитает КОББ-500")
       memory.remember("Доставка в Краснодар по четвергам")
@@ -167,15 +171,15 @@ class PersistentMemory:
 class HintsLoader:
     """
     Система подсказок (идея из Goose .goosehints).
-    
-    Подсказки — это .md файлы, которые автоматически добавляются 
+
+    Подсказки — это .md файлы, которые автоматически добавляются
     в промпт агента. Позволяют настроить поведение без кода.
-    
+
     Иерархия (от общего к частному):
       1. agent-lab/.hints/global.md   — для ВСЕХ агентов
       2. agent-lab/.hints/igorek.md   — для Игорька
       3. children/.hints/angela.md    — для Анжелы
-    
+
     Более конкретные подсказки имеют приоритет.
     """
 
@@ -212,12 +216,12 @@ class HintsLoader:
 class CoreAgent:
     """
     Игорёк — универсальное ядро AI-агента.
-    
+
     v0.2 "Goose Upgrade":
       + PersistentMemory — помнит факты между сессиями
       + HintsLoader — подгружает подсказки из .md файлов
       + PermissionLevel — 3 уровня автономности
-    
+
     Параметры:
       name:             Имя агента
       system_prompt:    Характер и правила
@@ -303,7 +307,7 @@ class CoreAgent:
             """Запоминает важный факт о пользователе или контексте.
             Используй, когда пользователь сообщает что-то, что стоит запомнить
             на будущее: имя, предпочтения, город, предыдущие заказы.
-            
+
             Args:
                 fact: Факт для запоминания (короткая фраза)
             """
@@ -351,7 +355,7 @@ class CoreAgent:
     async def run(self, user_message: str) -> str:
         """
         Обработать сообщение пользователя.
-        
+
         ReAct: агент сам выбирает инструменты.
         Simple: fallback (prompt → LLM → ответ).
         """

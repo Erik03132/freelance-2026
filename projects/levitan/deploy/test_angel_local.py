@@ -7,6 +7,7 @@
 
 Запуск: python3 deploy/test_angel_local.py
 """
+
 import sys
 from pathlib import Path
 
@@ -27,8 +28,10 @@ def main():
     got_phone = False
 
     # Приветствие
-    greeting = ("Здравствуйте! Это Азовский инкубатор, меня зовут Анжелла. "
-                "У нас сейчас суточные бройлеры Кобб и Росс от 75 рублей за голову. Вам это интересно?")
+    greeting = (
+        "Здравствуйте! Это Азовский инкубатор, меня зовут Анжелла. "
+        "У нас сейчас суточные бройлеры Кобб и Росс от 75 рублей за голову. Вам это интересно?"
+    )
     wav = a.synthesize_wav(greeting)
     print(f"\n🤖 Анжелла: {greeting}")
     print(f"   [TTS] {'✅' if wav else '❌'} WAV: {wav.name if wav else 'FAIL'}")

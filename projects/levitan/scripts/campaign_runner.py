@@ -21,11 +21,8 @@ import os
 import sys
 import time
 import uuid
-from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
-from urllib.parse import urlparse
 
 logging.basicConfig(
     level=logging.INFO,
@@ -59,6 +56,7 @@ CALL_INTERVAL = int(os.getenv("CALL_INTERVAL", "5"))
 
 def norm_phone(num: str) -> str:
     import re
+
     d = re.sub(r"\D", "", num or "")
     if len(d) == 11 and d.startswith("8"):
         d = "7" + d[1:]
@@ -72,7 +70,7 @@ def is_valid_phone(num: str) -> bool:
     return len(n) == 11 and n.startswith("7")
 
 
-def mango_callback(client_phone: str, from_ext: Optional[str] = None) -> dict:
+def mango_callback(client_phone: str, from_ext: str | None = None) -> dict:
     ext = from_ext or MANGO_FROM_EXTENSION
     command_id = f"cmp_{uuid.uuid4().hex[:8]}"
     payload = {
@@ -85,6 +83,7 @@ def mango_callback(client_phone: str, from_ext: Optional[str] = None) -> dict:
     sign = hashlib.sha256((MANGO_API_KEY + j + MANGO_API_SALT).encode()).hexdigest()
     try:
         import requests
+
         r = requests.post(
             f"{MANGO_API_BASE}commands/callback",
             data={"vpbx_api_key": MANGO_API_KEY, "json": j, "sign": sign},
@@ -102,24 +101,29 @@ def load_contacts(csv_path: str) -> list[dict]:
     if not path.exists():
         log.error("CSV not found: %s", csv_path)
         return contacts
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             phones = row.get("Телефоны", row.get("phone", "")) or ""
             import re
+
             phone_list = re.findall(r"[\d\-\(\)\+\s]{7,}", phones)
             for phone in phone_list:
                 normalized = norm_phone(phone)
                 if is_valid_phone(normalized):
-                    contacts.append({
-                        "name": row.get("Название", row.get("company_name", row.get("company", ""))).strip(),
-                        "phone": normalized,
-                    })
+                    contacts.append(
+                        {
+                            "name": row.get(
+                                "Название", row.get("company_name", row.get("company", ""))
+                            ).strip(),
+                            "phone": normalized,
+                        }
+                    )
                     break
     return contacts
 
 
-def run_campaign(csv_path: str, max_calls: int = 100, from_ext: Optional[str] = None) -> dict:
+def run_campaign(csv_path: str, max_calls: int = 100, from_ext: str | None = None) -> dict:
     contacts = load_contacts(csv_path)
     if not contacts:
         log.error("No valid contacts found in %s", csv_path)
@@ -133,8 +137,13 @@ def run_campaign(csv_path: str, max_calls: int = 100, from_ext: Optional[str] = 
 
     for i, contact in enumerate(contacts[:max_calls]):
         call_start = time.time()
-        log.info("[%d/%d] Calling %s (%s)", i + 1, min(max_calls, len(contacts)),
-                 contact["phone"], contact["name"][:30])
+        log.info(
+            "[%d/%d] Calling %s (%s)",
+            i + 1,
+            min(max_calls, len(contacts)),
+            contact["phone"],
+            contact["name"][:30],
+        )
 
         result = mango_callback(contact["phone"], from_ext)
         call_result = result.get("result")
@@ -184,8 +193,12 @@ def run_campaign(csv_path: str, max_calls: int = 100, from_ext: Optional[str] = 
         # lead_percent будет обновлён после LLM-обработки, пока placeholder
         "lead_percent_placeholder": 0,
         "avg_duration_sec": round(
-            sum(r["duration_sec"] for r in results if r["answer_status"] == "connected") / connected, 1
-        ) if connected else 0,
+            sum(r["duration_sec"] for r in results if r["answer_status"] == "connected")
+            / connected,
+            1,
+        )
+        if connected
+        else 0,
         "calls_per_hour": round(total_calls / hours, 1) if hours > 0 else total_calls,
     }
 
@@ -211,10 +224,13 @@ def run_campaign(csv_path: str, max_calls: int = 100, from_ext: Optional[str] = 
 def main():
     parser = argparse.ArgumentParser(description="Levitan Campaign Runner")
     parser.add_argument("--calls", type=int, default=100, help="Number of calls (default: 100)")
-    parser.add_argument("--csv", type=str, default=None,
-                        help="Path to CSV contact file")
-    parser.add_argument("--ext", type=str, default=MANGO_FROM_EXTENSION,
-                        help="Mango extension (default: %(default)s)")
+    parser.add_argument("--csv", type=str, default=None, help="Path to CSV contact file")
+    parser.add_argument(
+        "--ext",
+        type=str,
+        default=MANGO_FROM_EXTENSION,
+        help="Mango extension (default: %(default)s)",
+    )
     args = parser.parse_args()
 
     if args.csv:

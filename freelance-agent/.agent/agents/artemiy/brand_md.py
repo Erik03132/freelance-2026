@@ -82,18 +82,20 @@ def _try_meta_scrape(domain: str, timeout: int) -> str:
     fonts = set()
 
     for match in re.findall(r'<meta[^>]*name="theme-color"[^>]*content="([^"]+)"', html):
-        if re.match(r'^#[0-9a-fA-F]{3,8}$', match):
+        if re.match(r"^#[0-9a-fA-F]{3,8}$", match):
             colors.add(match)
-    for match in re.findall(r'<meta[^>]*name="msapplication-TileColor"[^>]*content="([^"]+)"', html):
-        if re.match(r'^#[0-9a-fA-F]{3,8}$', match):
+    for match in re.findall(
+        r'<meta[^>]*name="msapplication-TileColor"[^>]*content="([^"]+)"', html
+    ):
+        if re.match(r"^#[0-9a-fA-F]{3,8}$", match):
             colors.add(match)
 
     for match in re.findall(r'<link[^>]*href="[^"]*fonts\.googleapis[^"]*family=([^"&]+)', html):
         fonts.add(match.replace("+", " "))
 
-    for match in re.findall(r'--(?:primary|accent|brand|color-primary)[^:]*:\s*([^;}]+)', html):
+    for match in re.findall(r"--(?:primary|accent|brand|color-primary)[^:]*:\s*([^;}]+)", html):
         v = match.strip()
-        if re.match(r'^#[0-9a-fA-F]{3,8}$', v):
+        if re.match(r"^#[0-9a-fA-F]{3,8}$", v):
             colors.add(v)
 
     if colors:

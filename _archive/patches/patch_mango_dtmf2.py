@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 path = "/opt/mango_webhook.py"
-with open(path, "r") as f:
+with open(path) as f:
     content = f.read()
 
 old = '        dtmf = data.get("dtmf")\n        if dtmf is not None:\n            _forward_dtmf(\n                data.get("call_id", ""),\n                str(dtmf),\n                command_id,\n                str(entry_id),\n            )'
@@ -14,7 +14,6 @@ if old in content:
     print("DTMF events patched")
 else:
     print("NOT FOUND")
-    import re
     idx = content.find("dtmf = data.get")
     if idx >= 0:
-        print(repr(content[idx:idx+300]))
+        print(repr(content[idx : idx + 300]))

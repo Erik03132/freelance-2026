@@ -20,42 +20,60 @@ if _AGENTS not in sys.path:
 try:
     from learning import build_learned_context, capture_outcome, capture_start
 except ImportError:
+
     def build_learned_context(agent, min_samples=3):
         return ""
+
     def capture_start(*a, **k):
         return ""
+
     def capture_outcome(*a, **k):
         return False
 
+
 try:
-    from .security_audit import security_audit as _sec_scan, owasp_audit as _owasp_audit
+    from .security_audit import owasp_audit as _owasp_audit
+    from .security_audit import security_audit as _sec_scan
 except ImportError:
+
     def _sec_scan(path):
         return {"files_scanned": 0, "issues_by_file": {}, "summary": {}}
+
     def _owasp_audit(path, api_key=None, learned_context=""):
         return None
 
+
 try:
-    from memory import compact as mem_compact, enrich_context, recall, remember
+    from memory import compact as mem_compact
+    from memory import enrich_context, recall, remember
 except ImportError:
+
     def enrich_context(agent, query, ctx="", top_k=2):
         return ctx
+
     def recall(agent, query, top_k=3):
         return []
+
     def remember(agent, fact, kind):
         pass
+
     def mem_compact(agent, keep=500):
         return {"before": 0, "after": 0, "removed": 0}
+
 
 try:
     from soul import ensure_soul, evolve_soul, soul_context
 except ImportError:
+
     def ensure_soul(agent, name="", role=""):
         return ""
+
     def evolve_soul(agent, lessons):
         return False
+
     def soul_context(agent, max_chars=1500):
         return ""
+
 
 AGENT = "kulibin"
 _base_learned = build_learned_context
@@ -67,6 +85,7 @@ def build_learned_context(agent, min_samples=3):  # noqa: F811 — wrap to injec
     if s:
         return s + ("\n\n" + base if base else "")
     return base
+
 
 from . import (
     EVAL_CRITERIA,
@@ -98,31 +117,64 @@ def main():
         "  python3 -m kulibin --scout 'image optimization pipeline'\n"
         "  python3 -m kulibin --proto 'WebSocket reconnect with backoff'\n",
     )
-    parser.add_argument("--audit", "-a", type=str, default=None,
-                        help="Static analysis of a file/dir (Python/JS/TS)")
-    parser.add_argument("--deep-audit", type=str, default=None,
-                        help="LLM deep audit (requires OpenRouter key)")
-    parser.add_argument("--scout", "-s", type=str, default=None,
-                        help="Recommend libraries for a task")
-    parser.add_argument("--evaluate", "-e", type=str, default=None,
-                        help="Evaluate a specific library")
-    parser.add_argument("--proto", "-p", type=str, default=None,
-                        help="Generate a proof-of-concept")
-    parser.add_argument("--lang", type=str, default="python",
-                        choices=LANGUAGES, help="Language for --proto")
-    parser.add_argument("--benchmark", "-b", type=str, default=None,
-                        help="Benchmark suggestions for a code snippet file")
-    parser.add_argument("--list-languages", action="store_true",
-                        help="List supported languages")
-    parser.add_argument("--list-criteria", action="store_true",
-                        help="List library evaluation criteria")
-    parser.add_argument("--sec-audit", type=str, default=None,
-                        help="Static security audit (leaks/OWASP smells)")
-    parser.add_argument("--owasp", type=str, default=None,
-                        help="LLM OWASP review (requires OpenRouter key)")
-    parser.add_argument("--feedback", type=str, default=None, nargs=2,
-                        metavar=("SID", "OUTCOME"),
-                        help="Record verdict for a signal: --feedback <sid> accepted|edited|rejected")
+    parser.add_argument(
+        "--audit",
+        "-a",
+        type=str,
+        default=None,
+        help="Static analysis of a file/dir (Python/JS/TS)",
+    )
+    parser.add_argument(
+        "--deep-audit",
+        type=str,
+        default=None,
+        help="LLM deep audit (requires OpenRouter key)",
+    )
+    parser.add_argument(
+        "--scout", "-s", type=str, default=None, help="Recommend libraries for a task"
+    )
+    parser.add_argument(
+        "--evaluate", "-e", type=str, default=None, help="Evaluate a specific library"
+    )
+    parser.add_argument("--proto", "-p", type=str, default=None, help="Generate a proof-of-concept")
+    parser.add_argument(
+        "--lang",
+        type=str,
+        default="python",
+        choices=LANGUAGES,
+        help="Language for --proto",
+    )
+    parser.add_argument(
+        "--benchmark",
+        "-b",
+        type=str,
+        default=None,
+        help="Benchmark suggestions for a code snippet file",
+    )
+    parser.add_argument("--list-languages", action="store_true", help="List supported languages")
+    parser.add_argument(
+        "--list-criteria", action="store_true", help="List library evaluation criteria"
+    )
+    parser.add_argument(
+        "--sec-audit",
+        type=str,
+        default=None,
+        help="Static security audit (leaks/OWASP smells)",
+    )
+    parser.add_argument(
+        "--owasp",
+        type=str,
+        default=None,
+        help="LLM OWASP review (requires OpenRouter key)",
+    )
+    parser.add_argument(
+        "--feedback",
+        type=str,
+        default=None,
+        nargs=2,
+        metavar=("SID", "OUTCOME"),
+        help="Record verdict for a signal: --feedback <sid> accepted|edited|rejected",
+    )
 
     args = parser.parse_args()
 
@@ -138,7 +190,9 @@ def main():
                 print(f"🧬 Soul evolved: folded fresh lessons into {AGENT}.soul.md")
         _stats = mem_compact(AGENT)
         if _stats["removed"]:
-            print(f"🗜️  Memory compacted: {_stats['before']}→{_stats['after']} (-{_stats['removed']})")
+            print(
+                f"🗜️  Memory compacted: {_stats['before']}→{_stats['after']} (-{_stats['removed']})"
+            )
         return
 
     if args.sec_audit:
@@ -153,7 +207,9 @@ def main():
                 print(f"  ⚠ {name}: {n}")
         else:
             print("✅ No obvious leaks")
-        print(f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected")
+        print(
+            f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected"
+        )
         return
 
     if args.owasp:
@@ -164,7 +220,9 @@ def main():
         if report:
             path = _save("owasp_report.md", report)
             print(f"✅ Saved to {path}")
-            print(f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected")
+            print(
+                f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected"
+            )
         else:
             print("❌ LLM unavailable")
             sys.exit(1)
@@ -199,7 +257,9 @@ def main():
         if report:
             path = _save("audit_report.md", report)
             print(f"✅ Saved to {path}")
-            print(f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected")
+            print(
+                f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected"
+            )
         else:
             print("❌ LLM unavailable")
             sys.exit(1)
@@ -213,7 +273,9 @@ def main():
         if out:
             path = _save("scout.md", out)
             print(f"✅ Saved to {path}")
-            print(f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected")
+            print(
+                f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected"
+            )
         else:
             print("❌ LLM unavailable")
             sys.exit(1)
@@ -227,7 +289,9 @@ def main():
         if out:
             path = _save("evaluate.md", out)
             print(f"✅ Saved to {path}")
-            print(f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected")
+            print(
+                f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected"
+            )
         else:
             print("❌ LLM unavailable")
             sys.exit(1)
@@ -242,7 +306,9 @@ def main():
             ext = "py" if args.lang == "python" else ("ts" if args.lang == "ts" else "js")
             path = _save(f"prototype.{ext}", out)
             print(f"✅ Saved to {path}")
-            print(f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected")
+            print(
+                f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected"
+            )
         else:
             print("❌ LLM unavailable")
             sys.exit(1)
@@ -262,7 +328,9 @@ def main():
         if out:
             path = _save("benchmark.md", out)
             print(f"✅ Saved to {path}")
-            print(f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected")
+            print(
+                f"📡 Signal {sid} logged — later: python3 -m kulibin --feedback {sid} accepted|edited|rejected"
+            )
         else:
             print("❌ LLM unavailable")
             sys.exit(1)

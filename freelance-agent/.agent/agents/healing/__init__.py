@@ -13,21 +13,22 @@ callbacks, so this is fully testable and reusable across every agent.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, List, Optional
+from typing import List, Optional
 
 __all__ = ["run_with_healing", "heal_prompt", "HealResult"]
 
 
 @dataclass
 class HealResult:
-    output: Optional[str]
+    output: str | None
     ok: bool
     attempts: int
-    issues: List[str] = field(default_factory=list)
+    issues: list[str] = field(default_factory=list)
 
 
-def heal_prompt(prompt: str, issues: List[str]) -> str:
+def heal_prompt(prompt: str, issues: list[str]) -> str:
     """Augment a prompt with corrective directives derived from validation issues."""
     if not issues:
         return prompt
@@ -39,7 +40,7 @@ def heal_prompt(prompt: str, issues: List[str]) -> str:
     )
 
 
-def _safe_validate(validate: Callable[[Optional[str]], List[str]], out: Optional[str]) -> List[str]:
+def _safe_validate(validate: Callable[[str | None], list[str]], out: str | None) -> list[str]:
     try:
         return list(validate(out) or [])
     except Exception as e:  # validator crash = a healable signal, never a hard crash
@@ -48,8 +49,8 @@ def _safe_validate(validate: Callable[[Optional[str]], List[str]], out: Optional
 
 def run_with_healing(
     prompt: str,
-    generate: Callable[[str], Optional[str]],
-    validate: Callable[[Optional[str]], List[str]],
+    generate: Callable[[str], str | None],
+    validate: Callable[[str | None], list[str]],
     max_retries: int = 2,
 ) -> HealResult:
     """Run generate->validate, healing the prompt between attempts.
@@ -63,7 +64,7 @@ def run_with_healing(
     Returns a HealResult; self-terminates on first clean validation.
     """
     current = prompt
-    issues: List[str] = []
+    issues: list[str] = []
     attempts = 0
     for _ in range(max_retries + 1):
         attempts += 1
