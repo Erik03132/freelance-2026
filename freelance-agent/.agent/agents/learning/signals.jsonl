@@ -58,3 +58,5 @@
 {"sid": "05667a083544", "ts": 1785018114.359048, "phase": "outcome", "agent": "sherlock", "outcome": "accepted", "note": ""}
 {"sid": "b82dc476203e", "ts": 1785018114.435117, "phase": "start", "agent": "sherlock", "action": "task 4 GEO audit", "spec": {"model": "sonnet"}, "meta": {}, "result_ref": "", "outcome": null}
 {"sid": "b82dc476203e", "ts": 1785018114.50455, "phase": "outcome", "agent": "sherlock", "outcome": "accepted", "note": ""}
+{"sid": "0fecf552656d", "ts": 1785018444.522362, "phase": "start", "agent": "shakespeare", "action": "Write landing for Levitan voice agents", "spec": {"model": "fable"}, "meta": {}, "result_ref": "", "outcome": null}
+{"sid": "0fecf552656d", "ts": 1785018444.59246, "phase": "outcome", "agent": "shakespeare", "outcome": "accepted", "note": ""}

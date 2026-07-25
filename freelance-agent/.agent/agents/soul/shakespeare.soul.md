@@ -11,7 +11,5 @@
 ## Evolving Lessons
 > Machine-owned. Auto-folded from usage signals + memory. Do not edit by hand.
 
-<!-- SOUL:AUTO:BEGIN -->
-_(no lessons yet)_
-- Users prefer bullet-point reports
+<!-- SOUL:AUTO:BEGIN -->- Levitan audience prefers concrete numbers over fluff
 <!-- SOUL:AUTO:END -->
