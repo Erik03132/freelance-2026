@@ -74,5 +74,14 @@ git add -A
 git commit -m "chore: daily checkpoint $(date +%Y-%m-%d)"
 git push
 
+# External Backup (if disk mounted)
+if [ -d "/Volumes/ExternalBackup" ]; then
+  rsync -av --exclude='.git' --exclude='node_modules' --exclude='.venv' \
+    /Users/igorvasin/freelance-2026/ /Volumes/ExternalBackup/freelance-2026/
+  echo "✅ Backup to external disk done"
+else
+  echo "⚠️ External backup disk not mounted, skipping"
+fi
+
 echo "Day finished successfully! Session checkpoint created."
 ```
