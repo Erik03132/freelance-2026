@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "extends": "~/.config/opencode/opencode.jsonc",
+  "skill": {
+    "paths": [
+      ".opencode/skills"
+    ]
+  }
+}
