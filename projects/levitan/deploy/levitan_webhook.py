@@ -71,7 +71,7 @@ def mango_api(endpoint: str, payload: dict) -> dict:
         r = requests.post(
             f"{MANGO_API_BASE}{endpoint}",
             data={"vpbx_api_key": API_KEY, "json": j, "sign": _mango_sign(payload)},
-            timeout=20,
+            timeout=5,
         )
         return r.json()
     except Exception as e:
@@ -126,9 +126,15 @@ def play_audio(call_id: str, audio_id: int, label: str = "msg") -> dict:
         "internal_id": audio_id,
     }
 
-    result = mango_api("play/start", payload)
-    log.info("🎵 play/%s id=%s → call=%s: %s", label, audio_id, call_id[:20], result.get("result"))
-    return result
+    try:
+        result = mango_api("play/start", payload)
+        log.info(
+            "🎵 play/%s id=%s → call=%s: %s", label, audio_id, call_id[:20], result.get("result")
+        )
+        return result
+    except Exception as e:
+        log.error("play_audio failed: %s", e, exc_info=True)
+        return {}
 
 
 def notify_telegram(text: str):
@@ -148,8 +154,11 @@ def _schedule_greeting_play(call_id: str, delay: float = 2.0):
     """Play greeting after a delay."""
 
     def _run():
-        time.sleep(delay)
-        play_audio(call_id, 1000550776, label="greeting")  # Kore greeting
+        try:
+            time.sleep(delay)
+            play_audio(call_id, 1000550776, label="greeting")  # Kore greeting
+        except Exception as e:
+            log.error("Greeting play failed: %s", e, exc_info=True)
 
     threading.Thread(target=_run, daemon=True).start()
 
@@ -204,7 +213,7 @@ class LevitanHandler(BaseHTTPRequestHandler):
             self._ok({"command_id": cmd_id, "phone": phone})
             return
 
-        # Mango webhook events
+        # Mango webhook events (non-blocking)
         try:
             params = parse_qs(raw)
             json_str = params.get("json", ["{}"])[0]
@@ -214,7 +223,14 @@ class LevitanHandler(BaseHTTPRequestHandler):
 
         self._ok()
 
-        self._process_mango_event(data, path)
+        # Process Mango events in a separate thread to avoid blocking
+        def _safe_process(data, path):
+            try:
+                self._process_mango_event(data, path)
+            except Exception as e:
+                log.error("Error processing Mango event: %s", e, exc_info=True)
+
+        threading.Thread(target=_safe_process, args=(data, path), daemon=True).start()
 
     def _process_mango_event(self, data: dict, path: str):
         """Process Mango event."""
@@ -235,7 +251,13 @@ class LevitanHandler(BaseHTTPRequestHandler):
                 ctx = pending_calls[key]
                 break
 
-        client_phone = _norm_phone(from_num) if callback_initiator != "API" else _norm_phone(to_num)
+        # Use phone from pending_calls context if available, otherwise derive from event
+        if ctx and ctx.get("phone"):
+            client_phone = ctx["phone"]
+        elif callback_initiator != "API":
+            client_phone = _norm_phone(from_num)
+        else:
+            client_phone = _norm_phone(to_num)
 
         log.info(
             "📥 %s | %s | %s→%s | cmd=%s call=%s",
