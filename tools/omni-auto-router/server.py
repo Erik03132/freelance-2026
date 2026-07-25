@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Omni Auto-Router v2 — multi-factor classification + fallback chain."""
+"""Omni Auto-Router v3 — multi-factor classification + VPS/fallback + vision."""
 
 import json, os, re, threading, urllib.request, urllib.error, time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from dataclasses import dataclass, field
 from typing import Optional
 
-OMNI_URL = os.environ.get("OMNI_URL", "http://217.149.23.113:20128/v1/chat/completions")
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
+OMNIR_VPS_URL = os.environ.get("OMNIR_VPS_URL", "http://217.149.23.113:20128/v1")
+OMNIR_VPS_KEY = os.environ.get("OMNIR_VPS_KEY")
+OPENROUTER_FALLBACK_URL = os.environ.get("OPENROUTER_FALLBACK_URL", "https://openrouter.ai/api/v1")
 PORT = int(os.environ.get("PORT", 8123))
 
 CODE_BLOCK_RX = re.compile(r"```\w*\n")
@@ -16,14 +19,14 @@ FUNC_RX = re.compile(
 )
 IMPERATIVE_RX = re.compile(
     r"\b(напиши|сделай|реализуй|создай|добавь|исправь|перепиши"
-    r"|refactor|write|implement|create|add|fix|rewrite|build|develop"
+    r"|refactor|write|implement|create|add|fix|rewrite|build|develop|design"
     r"|рефактори|оптимизируй|оптимизировать|настрой|разработай)\b",
     re.IGNORECASE,
 )
 ANALYSIS_RX = re.compile(
     r"\b(почему|объясни|сравни|проанализируй|оцени|найди\s+ошибк"
     r"|explain|analyze|why|compare|evaluate|review|audit"
-    r"|спланируй|архитектура|спроектируй|plan|design|architect)\b",
+    r"|спланируй|архитектур|спроектируй|plan|design|architect)\b",
     re.IGNORECASE,
 )
 SIMPLE_RX = re.compile(
@@ -33,16 +36,15 @@ SIMPLE_RX = re.compile(
     re.IGNORECASE,
 )
 ARCHITECTURE_RX = re.compile(
-    r"\b(спроектируй|архитектур|design.*system|architect"
-    r"|спланируй|plan.*architecture|project.*structure)\b",
+    r"\b(спроектируй|архитектур|architect|architecture"
+    r"|спланируй|design.*(system|architecture|microservice)"
+    r"|plan.*architecture|project.*structure)\b",
     re.IGNORECASE,
 )
 TOOL_PAT = re.compile(r"\"function\"\s*:|tool_calls|\"tools\"\s*:")
 
-# Все платные модели временно недоступны (OpenRouter: 402 Insufficient credits).
-# Работают только :free модели. После пополнения OpenRouter — вернуть платные.
 SHORT_NAME_MAP = {
-    "auto": None,  # trigger classification
+    "auto": None,
 
     "ds-chat": "openrouter/deepseek/deepseek-chat",
     "ds-v31": "openrouter/deepseek/deepseek-chat-v3.1",
@@ -62,7 +64,6 @@ SHORT_NAME_MAP = {
     "gpt4o": "openrouter/openai/gpt-4o",
     "gpt4o-mini": "openrouter/openai/gpt-4o-mini",
     "gpt5": "openrouter/openai/gpt-5",
-    "gpt5-chat": "openrouter/openai/gpt-5-chat",
     "gpt5-pro": "openrouter/openai/gpt-5-pro",
     "gpt5-mini": "openrouter/openai/gpt-5-mini",
     "gpt5-nano": "openrouter/openai/gpt-5-nano",
@@ -74,6 +75,10 @@ SHORT_NAME_MAP = {
     "gpt52-pro": "openrouter/openai/gpt-5.2-pro",
     "gpt54": "openrouter/openai/gpt-5.4",
     "gpt54-pro": "openrouter/openai/gpt-5.4-pro",
+    "gpt56-sol": "openrouter/openai/gpt-5.6-sol",
+    "gpt56-sol-pro": "openrouter/openai/gpt-5.6-sol-pro",
+    "gpt56-terra": "openrouter/openai/gpt-5.6-terra",
+    "gpt56-luna": "openrouter/openai/gpt-5.6-luna",
 
     "o1-pro": "openrouter/openai/o1-pro",
     "o3": "openrouter/openai/o3",
@@ -116,8 +121,6 @@ SHORT_NAME_MAP = {
     "mistral-small": "openrouter/mistralai/mistral-small-3.2-24b-instruct",
     "codestral": "openrouter/mistralai/codestral-2508",
     "command-a": "openrouter/cohere/command-a",
-    "sonar-pro": "openrouter/perplexity/sonar-pro",
-    "sonar-reason": "openrouter/perplexity/sonar-reasoning-pro",
     "nova-pro": "openrouter/amazon/nova-pro-v1",
     "nova-lite": "openrouter/amazon/nova-lite-v1",
     "glm5": "openrouter/z-ai/glm-5",
@@ -129,7 +132,6 @@ SHORT_NAME_MAP = {
     "nemotron-nano": "openrouter/nvidia/nemotron-nano-9b-v2:free",
     "gemma4-31b": "openrouter/google/gemma-4-31b-it:free",
     "gemma4-26b": "openrouter/google/gemma-4-26b-a4b-it:free",
-    "gemma3-27b": "openrouter/google/gemma-3-27b-it:free",
     "gptoss-20b": "openrouter/openai/gpt-oss-20b:free",
     "gptoss-120b": "openrouter/openai/gpt-oss-120b:free",
     "north-mini": "openrouter/cohere/north-mini-code:free",
@@ -137,7 +139,6 @@ SHORT_NAME_MAP = {
     "laguna-m1": "openrouter/poolside/laguna-m.1:free",
 }
 
-# Fallback AI models for auto-classification
 FREE_MODELS = [
     "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
     "openrouter/openai/gpt-oss-20b:free",
@@ -159,11 +160,44 @@ PRO_MODELS = [
     "openrouter/google/gemma-4-31b-it:free",
 ]
 
+# Vision-capable chains: Gemma 4 31B is free + supports images.
+# Paid models (Sonnet 4.6, GPT-4o) support vision when credits available.
+VISION_FREE = [
+    "openrouter/google/gemma-4-31b-it:free",
+    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+]
+VISION_CHEAP = [
+    "openrouter/google/gemma-4-31b-it:free",
+    "openrouter/openai/gpt-4o-mini",
+    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+]
+VISION_SMART = [
+    "openrouter/anthropic/claude-sonnet-4.6",
+    "openrouter/openai/gpt-4o",
+    "openrouter/google/gemini-2.5-pro",
+    "openrouter/google/gemma-4-31b-it:free",
+    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+]
+VISION_PRO = [
+    "openrouter/anthropic/claude-sonnet-5",
+    "openrouter/openai/gpt-5.6-sol",
+    "openrouter/anthropic/claude-fable-5",
+    "openrouter/anthropic/claude-opus-4.8",
+    "openrouter/google/gemma-4-31b-it:free",
+    "openrouter/nvidia/nemotron-3-ultra-550b-a55b:free",
+]
+
 TIER_CHAINS = {
     0: FREE_MODELS,
     1: CHEAP_MODELS,
     2: SMART_MODELS,
     3: PRO_MODELS,
+}
+VISION_CHAINS = {
+    0: VISION_FREE,
+    1: VISION_CHEAP,
+    2: VISION_SMART,
+    3: VISION_PRO,
 }
 TIER_LABELS = {0: "Free", 1: "Cheap", 2: "Smart", 3: "Pro"}
 TIER_COST_PER_M = {
@@ -192,6 +226,7 @@ class Features:
     has_analysis: bool = False
     has_simple_q: bool = False
     has_architecture: bool = False
+    has_image: bool = False
     has_tools: bool = False
     has_system: bool = False
     msg_count: int = 0
@@ -208,9 +243,11 @@ class Features:
         if self.has_imperative:
             s += 1.5
         if self.has_analysis:
-            s += 2
+            s += 1.5
         if self.has_architecture:
             s += 2.5
+        if self.has_image:
+            s += 2
         if self.has_tools:
             s += 3
         if self.has_system:
@@ -230,18 +267,15 @@ class Features:
         return max(s, 0)
 
     def classify_tier(self) -> int:
-        # Simple question → Free
         if self.has_simple_q and not self.has_imperative and not self.has_code_block:
             if self.total_chars < 300:
                 return 0
 
-        # Planning/architecture with analysis → Pro (Tier 3)
         if self.has_architecture and (self.has_analysis or self.has_tools):
             return 3
         if self.has_architecture and self.has_imperative:
             return 3
 
-        # Multi-turn planning → Pro
         if self.msg_count >= 6 and self.has_analysis:
             return 3
 
@@ -263,9 +297,16 @@ def extract_features(messages: list) -> Features:
         role = (m.get("role") or "").lower()
         content = m.get("content") or ""
         if isinstance(content, list):
-            content = " ".join(
-                c.get("text", "") for c in content if isinstance(c, dict) and c.get("type") in ("text", "text_delta")
-            )
+            parts = []
+            for block in content:
+                if not isinstance(block, dict):
+                    continue
+                bt = block.get("type", "")
+                if bt in ("image_url", "image"):
+                    f.has_image = True
+                if bt in ("text", "text_delta"):
+                    parts.append(block.get("text", ""))
+            content = " ".join(parts)
         texts.append(content)
         if CODE_BLOCK_RX.search(content):
             f.has_code_block = True
@@ -310,38 +351,73 @@ def classify(messages: list) -> tuple:
         details.append("analysis")
     if f.has_architecture:
         details.append("arch")
+    if f.has_image:
+        details.append("img")
     if f.has_tools:
         details.append("tools")
     if f.has_simple_q:
         details.append("simple")
     if f.msg_count > 4:
         details.append(f"multi({f.msg_count})")
-    return tier, f"{TIER_LABELS[tier]} [{','.join(details) if details else 'chat'}]"
+    return tier, f"{TIER_LABELS[tier]} [{','.join(details) if details else 'chat'}]", f.has_image
+
+
+def _no_proxy_context():
+    saved = {}
+    for k in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"):
+        saved[k] = os.environ.pop(k, None)
+    return saved
+
+
+def _restore_proxy(saved: dict):
+    for k, v in saved.items():
+        if v is not None:
+            os.environ[k] = v
+
+
+def _do_request(url: str, body: dict, api_key: Optional[str], timeout: int = 120) -> tuple:
+    model = body["model"]
+    body.setdefault("stream", False)
+    data = json.dumps(body).encode()
+    req = urllib.request.Request(f"{url}/chat/completions", data=data, method="POST")
+    req.add_header("Content-Type", "application/json")
+    if api_key:
+        req.add_header("Authorization", api_key if api_key.startswith("Bearer ") else f"Bearer {api_key}")
+    req.add_header("User-Agent", "omni-auto-router/3.0")
+    saved = {}
+    if "217.149.23.113" in url:
+        saved = _no_proxy_context()
+    try:
+        resp = urllib.request.urlopen(req, timeout=timeout)
+        return resp, model, None
+    except urllib.error.HTTPError as e:
+        return None, model, e.read().decode()
+    except Exception as e:
+        return None, model, str(e)
+    finally:
+        _restore_proxy(saved)
 
 
 def call_omni(model: str, body: dict, auth_header: Optional[str], retries=1) -> tuple:
-    body["model"] = model
-    data = json.dumps(body).encode()
-    req = urllib.request.Request(OMNI_URL, data=data, method="POST")
-    req.add_header("Content-Type", "application/json")
-    if auth_header:
-        req.add_header("Authorization", auth_header)
-    req.add_header("User-Agent", "omni-auto-router/2.0")
+    vps_key = OMNIR_VPS_KEY or OPENROUTER_API_KEY or auth_header
     for attempt in range(retries + 1):
-        try:
-            resp = urllib.request.urlopen(req, timeout=120)
-            return resp, model, False
-        except urllib.error.HTTPError as e:
-            body_text = e.read().decode()
-            if attempt < retries:
-                time.sleep(1)
-                continue
-            return None, model, body_text
-        except Exception as e:
-            if attempt < retries:
-                time.sleep(1)
-                continue
-            return None, model, str(e)
+        vps_model = f"openrouter/{model}" if "/" in model and not model.startswith("openrouter/") else model
+        vps_model = vps_model.lstrip("/")
+        body["model"] = vps_model
+        resp, mdl, err = _do_request(OMNIR_VPS_URL, body, vps_key, timeout=30)
+        if resp:
+            return resp, mdl, False
+        if attempt < retries:
+            time.sleep(1)
+            continue
+        import sys
+        print(f"[omni-auto] ❌ VPS: {err[:80]}. Fallback direct OpenRouter...", file=sys.stderr, flush=True)
+        body["model"] = model.lstrip("/").replace("openrouter/", "", 1)
+        fallback_key = OPENROUTER_API_KEY or auth_header
+        resp2, mdl2, err2 = _do_request(OPENROUTER_FALLBACK_URL, body, fallback_key, timeout=120)
+        if resp2:
+            return resp2, mdl2, True
+        return None, mdl, err2
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -379,48 +455,73 @@ class Handler(BaseHTTPRequestHandler):
         auth = self.headers.get("Authorization")
         model_name = body.get("model", "auto")
 
-        # Resolve short name or use classification
-        if model_name == "auto" or model_name not in SHORT_NAME_MAP:
-            tier, reason = classify(messages)
-            chain = TIER_CHAINS[tier]
+        tier = None
+        if model_name == "free-only" or model_name == "free":
+            tier = 0
+            chain = TIER_CHAINS[0]
             used_model = chain[0]
             fallback_used = False
             errors = []
-
             for model in chain:
                 resp, used_model, err = call_omni(model, body, auth, retries=1)
                 if resp is not None:
                     break
-                errors.append(f"{model}: {err[:100]}")
+                errors.append(f"{model}: {(err or '')[:100]}")
                 fallback_used = True
                 with stats_lock:
                     stats["fallbacks"] += 1
-
             if resp is None:
                 with stats_lock:
                     stats["errors"] += 1
-                return self.send_json(
-                    {"error": f"All models failed: {'; '.join(errors)}"},
-                    502,
-                )
-
+                return self.send_json({"error": f"All free models failed: {'; '.join(errors)}"}, 502)
             full_model = used_model
             label = f"T{tier}→{used_model}"
             if fallback_used:
                 label += f" [FB: {'→'.join(e.split(':')[0] for e in errors)}]"
-            print(f"[omni-auto] {label} ({reason})")
-        else:
-            # Direct model mapping
-            full_model = SHORT_NAME_MAP[model_name]
-            resp, full_model, err = call_omni(full_model, body, auth, retries=2)
+            print(f"[omni-auto] {label} (Free [forced])", flush=True)
+        elif model_name == "auto" or model_name not in SHORT_NAME_MAP:
+            tier, reason, has_image = classify(messages)
+            chain = VISION_CHAINS[tier] if has_image else TIER_CHAINS[tier]
+            used_model = chain[0]
+            fallback_used = False
+            errors = []
+            for model in chain:
+                resp, used_model, err = call_omni(model, body, auth, retries=1)
+                if resp is not None:
+                    break
+                errors.append(f"{model}: {(err or '')[:100]}")
+                fallback_used = True
+                with stats_lock:
+                    stats["fallbacks"] += 1
+            if resp is None and tier > 0:
+                print(f"[omni-auto] ⚠️  T{tier} chain failed, falling back to free chain", flush=True)
+                fallback_chain = VISION_CHAINS[0] if has_image else TIER_CHAINS[0]
+                for model in fallback_chain:
+                    resp, used_model, err = call_omni(model, body, auth, retries=1)
+                    if resp is not None:
+                        fallback_used = True
+                        with stats_lock:
+                            stats["fallbacks"] += 1
+                        break
+                    errors.append(f"{model}: {(err or '')[:100]}")
             if resp is None:
                 with stats_lock:
                     stats["errors"] += 1
-                return self.send_json(
-                    {"error": f"Model {model_name} ({full_model}) failed: {err}"},
-                    502,
-                )
-            print(f"[omni-auto] {model_name} → {full_model}")
+                return self.send_json({"error": f"All models failed: {'; '.join(errors)}"}, 502)
+            full_model = used_model
+            label = f"T{tier}→{used_model}"
+            if fallback_used:
+                label += f" [FB: {'→'.join(e.split(':')[0] for e in errors)}]"
+            print(f"[omni-auto] {label} ({reason})", flush=True)
+        else:
+            tier = -1
+            full_model = SHORT_NAME_MAP[model_name]
+            resp, full_model, err = call_omni(full_model, body, auth, retries=2)
+            if resp is None:
+                print(f"[omni-auto] ⚠️  Direct model {model_name} failed, falling back to auto", flush=True)
+                body["model"] = "auto"
+                return self.do_POST()
+            print(f"[omni-auto] {model_name} → {full_model}", flush=True)
 
         if stream:
             self.send_response(200)
@@ -441,11 +542,10 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:
             resp_body = {"error": "bad upstream response"}
         resp_body["model"] = full_model
-        self._log_stats(full_model, in_tokens=sum(len(m.get("content", "") or "") for m in messages) // 2, resp_body=resp_body)
+        self._log_stats(full_model, tier if tier else 0, in_tokens=sum(len(m.get("content", "") or "") for m in messages) // 2, resp_body=resp_body)
         self.send_json(resp_body)
 
-    def _log_stats(self, model: str, in_tokens: int, resp_body: dict):
-        tier = 0
+    def _log_stats(self, model: str, tier: int, in_tokens: int, resp_body: dict):
         out_tokens = (resp_body.get("usage", {}).get("completion_tokens", 0) or 0)
         c = TIER_COST_PER_M.get(tier, {"in": 0, "out": 0})
         cost = in_tokens / 1e6 * c["in"] + out_tokens / 1e6 * c["out"]
@@ -488,14 +588,18 @@ class ThreadedHTTPServer(HTTPServer):
 
 if __name__ == "__main__":
     server = ThreadedHTTPServer(("127.0.0.1", PORT), Handler)
-    print(f"[omni-auto] v2 on http://127.0.0.1:{PORT}")
-    print(f"[omni-auto] Tiers: {TIER_LABELS}")
+    print(f"[omni-auto] v3 on http://127.0.0.1:{PORT}", flush=True)
+    print(f"[omni-auto] Tiers: {TIER_LABELS}", flush=True)
     for t, models in TIER_CHAINS.items():
-        print(f"  {TIER_LABELS[t]}: {' → '.join(models)}")
-    print(f"[omni-auto] Stats: /stats")
-    print(f"[omni-auto] Backend: {OMNI_URL}")
+        print(f"  {TIER_LABELS[t]}: {' → '.join(models)}", flush=True)
+    print(f"[omni-auto] Vision-capable models:", flush=True)
+    for t, models in VISION_CHAINS.items():
+        print(f"  {TIER_LABELS[t]}: {' → '.join(models)}", flush=True)
+    print(f"[omni-auto] Stats: /stats", flush=True)
+    print(f"[omni-auto] Backend VPS: {OMNIR_VPS_URL} | Fallback: {OPENROUTER_FALLBACK_URL}", flush=True)
+    print(f"[omni-auto] Key set: {bool(OPENROUTER_API_KEY)}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\n[omni-auto] shutdown")
+        print("\n[omni-auto] shutdown", flush=True)
         server.server_close()
