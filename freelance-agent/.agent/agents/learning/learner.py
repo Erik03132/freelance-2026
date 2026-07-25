@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from collections import Counter
 
-from .signal import read_signals
+from learning_signal import read_signals
 
 STOPWORDS = {
     "the",
@@ -82,7 +82,10 @@ def build_learned_context(agent: str, min_samples: int = 3) -> str:
     acc_words: Counter = Counter()
     rej_words: Counter = Counter()
     for s, o in judged:
-        toks = _tokenize(s.get("spec", ""))
+        spec = s.get("spec", "")
+        if isinstance(spec, dict):
+            spec = " ".join(str(v) for v in spec.values())
+        toks = _tokenize(spec)
         if o["outcome"] in ("accepted", "edited"):
             acc_words.update(toks)
         elif o["outcome"] == "rejected":

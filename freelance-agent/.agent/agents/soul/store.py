@@ -42,8 +42,8 @@ def write(agent: str, text: str) -> str:
 
 
 def scaffold(name: str, role: str) -> str:
-    """Return an initial soul.md body with both zones."""
-    return (
+    """Create an initial soul.md file with both zones."""
+    content = (
         f"# {name} — Soul\n\n"
         f"## Constitution\n"
         f"> Human-owned. The unchanging identity & hard rules of this agent.\n\n"
@@ -56,6 +56,8 @@ def scaffold(name: str, role: str) -> str:
         f"_(no lessons yet)_\n"
         f"{AUTO_END}\n"
     )
+    write(name, content)
+    return soul_path(name)
 
 
 def replace_auto_zone(text: str, lessons: str) -> str:
@@ -67,3 +69,24 @@ def replace_auto_zone(text: str, lessons: str) -> str:
         return head + block + tail
     sep = "" if text.endswith("\n") else "\n"
     return text + sep + "\n## Evolving Lessons\n\n" + block + "\n"
+
+
+def fold(agent: str, lesson: str) -> str:
+    """Append a lesson to the AUTO zone of agent's soul.md."""
+    path = soul_path(agent)
+    current = read(agent)
+    if not current:
+        current = scaffold(agent, "Unknown")
+    # Find AUTO zone, append lesson
+    if AUTO_BEGIN in current and AUTO_END in current:
+        head = current.split(AUTO_BEGIN)[0]
+        auto_content = current.split(AUTO_BEGIN)[1].split(AUTO_END)[0]
+        tail = current.split(AUTO_END, 1)[1]
+        # Remove placeholder
+        auto_content = auto_content.replace("_(no lessons yet)_", "").strip()
+        new_auto = auto_content + f"\n- {lesson}\n" if auto_content else f"- {lesson}\n"
+        new_content = head + AUTO_BEGIN + new_auto + AUTO_END + tail
+    else:
+        new_content = replace_auto_zone(current, f"- {lesson}")
+    write(agent, new_content)
+    return new_content

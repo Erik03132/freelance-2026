@@ -88,6 +88,41 @@ def _find_agent_by_sid(sid: str) -> str:
     return ""
 
 
+def capture_outcome_latest(agent: str, outcome: str, note: str = "") -> bool:
+    """Capture outcome for the most recent start signal for `agent`."""
+    _ensure_store()
+    outcome = outcome.lower()
+    if outcome not in ("accepted", "edited", "rejected"):
+        return False
+    # Find latest start for this agent
+    latest_sid = None
+    if os.path.exists(SIGNAL_FILE):
+        with open(SIGNAL_FILE, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except Exception:
+                    continue
+                if rec.get("phase") == "start" and rec.get("agent") == agent:
+                    latest_sid = rec.get("sid")
+    if not latest_sid:
+        return False
+    rec = {
+        "sid": latest_sid,
+        "ts": time.time(),
+        "phase": "outcome",
+        "agent": agent,
+        "outcome": outcome,
+        "note": note,
+    }
+    with open(SIGNAL_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    return True
+
+
 def read_signals(agent: str | None = None) -> list[dict]:
     """Return all signal records, optionally filtered by agent.
 

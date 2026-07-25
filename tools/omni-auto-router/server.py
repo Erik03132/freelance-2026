@@ -28,10 +28,10 @@ TIER_CHAINS = {
 }
 
 VISION_CHAINS = {
-    0: ["openrouter/google/gemini-2.5-flash", "openrouter/openai/gpt-4o-mini"],
-    1: ["openrouter/google/gemini-2.5-flash", "openrouter/openai/gpt-4o-mini"],
-    2: ["openrouter/anthropic/claude-sonnet-4.6", "openrouter/openai/gpt-4o", "openrouter/google/gemini-2.5-pro"],
-    3: ["openrouter/anthropic/claude-sonnet-5", "openrouter/openai/gpt-5.6-sol", "openrouter/anthropic/claude-opus-4.8"],
+    0: ["local:gemma3:4b", "openrouter/google/gemini-2.5-flash", "openrouter/openai/gpt-4o-mini"],
+    1: ["local:gemma3:4b", "openrouter/google/gemini-2.5-flash", "openrouter/openai/gpt-4o-mini"],
+    2: ["local:gemma3:4b", "openrouter/anthropic/claude-sonnet-4.6", "openrouter/openai/gpt-4o", "openrouter/google/gemini-2.5-pro"],
+    3: ["local:gemma3:4b", "openrouter/anthropic/claude-sonnet-5", "openrouter/openai/gpt-5.6-sol", "openrouter/anthropic/claude-opus-4.8"],
 }
 
 TIER_LABELS = {0: "Free", 1: "Cheap", 2: "Smart", 3: "Pro"}
@@ -181,6 +181,23 @@ def call_omni(model: str, body: dict, auth_header: Optional[str], retries=1) -> 
         if resp2: return resp2, mdl2, True
         return None, mdl, err2
 
+def _call_local(model: str, body: dict) -> tuple:
+    """Call Ollama directly for local vision models."""
+    ollama_url = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434/api/chat")
+    ollama_model = "gemma3:4b"
+    body["model"] = ollama_model
+    data = json.dumps(body).encode()
+    req = urllib.request.Request(ollama_url, data=data, method="POST")
+    req.add_header("Content-Type", "application/json")
+    req.add_header("User-Agent", "omni-auto-router/3.0")
+    try:
+        resp = urllib.request.urlopen(req, timeout=120)
+        return resp, ollama_model, None
+    except urllib.error.HTTPError as e:
+        return None, ollama_model, e.read().decode()
+    except Exception as e:
+        return None, ollama_model, str(e)
+
 class Handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200); self.end_headers()
@@ -211,7 +228,10 @@ class Handler(BaseHTTPRequestHandler):
         if model_name == "free-only" or model_name == "free":
             tier = 0; chain = TIER_CHAINS[0]; used_model = chain[0]; fallback_used = False; errors = []
             for model in chain:
-                resp, used_model, err = call_omni(model, body, auth, retries=1)
+                if model.startswith("local:"):
+                    resp, used_model, err = _call_local(model, body)
+                else:
+                    resp, used_model, err = call_omni(model, body, auth, retries=1)
                 if resp is not None: break
                 errors.append(f"{model}: {(err or '')[:100]}"); fallback_used = True
                 with stats_lock: stats["fallbacks"] += 1
@@ -227,7 +247,10 @@ class Handler(BaseHTTPRequestHandler):
             chain = VISION_CHAINS[tier] if has_image else TIER_CHAINS[tier]
             used_model = chain[0]; fallback_used = False; errors = []
             for model in chain:
-                resp, used_model, err = call_omni(model, body, auth, retries=1)
+                if model.startswith("local:"):
+                    resp, used_model, err = _call_local(model, body)
+                else:
+                    resp, used_model, err = call_omni(model, body, auth, retries=1)
                 if resp is not None: break
                 errors.append(f"{model}: {(err or '')[:100]}"); fallback_used = True
                 with stats_lock: stats["fallbacks"] += 1
@@ -235,7 +258,10 @@ class Handler(BaseHTTPRequestHandler):
                 print(f"[omni-auto] T{tier} chain failed, falling back to free chain", flush=True)
                 fallback_chain = VISION_CHAINS[0] if has_image else TIER_CHAINS[0]
                 for model in fallback_chain:
-                    resp, used_model, err = call_omni(model, body, auth, retries=1)
+                    if model.startswith("local:"):
+                        resp, used_model, err = _call_local(model, body)
+                    else:
+                        resp, used_model, err = call_omni(model, body, auth, retries=1)
                     if resp is not None:
                         fallback_used = True
                         with stats_lock: stats["fallbacks"] += 1
