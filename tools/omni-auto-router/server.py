@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Omni Auto-Router v3 — multi-factor classification + VPS/fallback + vision."""
+"""Omni Auto-Router v4 — fixed local Ollama (OpenAI-compatible) + free OpenRouter vision."""
 
 import json, os, re, threading, urllib.request, urllib.error, time
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -11,6 +11,8 @@ OMNIR_VPS_URL = os.environ.get("OMNIR_VPS_URL", "https://openrouter.ai/api/v1")
 OMNIR_VPS_KEY = os.environ.get("OMNIR_VPS_KEY")
 OPENROUTER_FALLBACK_URL = os.environ.get("OPENROUTER_FALLBACK_URL", "https://openrouter.ai/api/v1")
 PORT = int(os.environ.get("PORT", 8123))
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434/v1/chat/completions")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "gemma3:4b")
 
 CODE_BLOCK_RX = re.compile(r"```\w*\n")
 FUNC_RX = re.compile(r"\b(def |function |class |async def |fn |=>\s*\{|import\s+|from\s+\w+\s+import|useState|useEffect|export\s+default)")
@@ -21,21 +23,21 @@ ARCHITECTURE_RX = re.compile(r"\b(спроектируй|архитектур|ar
 TOOL_PAT = re.compile(r"\"function\"\s*:|tool_calls|\"tools\"\s*:")
 
 TIER_CHAINS = {
-    0: ["openrouter/deepseek/deepseek-chat", "openrouter/google/gemini-2.5-flash", "openrouter/moonshotai/kimi-k2"],
-    1: ["openrouter/deepseek/deepseek-chat", "openrouter/google/gemini-2.5-flash", "openrouter/moonshotai/kimi-k2"],
-    2: ["openrouter/anthropic/claude-sonnet-4.6", "openrouter/openai/gpt-4o", "openrouter/google/gemini-2.5-pro"],
-    3: ["openrouter/anthropic/claude-opus-4.8", "openrouter/anthropic/claude-fable-5", "openrouter/openai/gpt-5.6-sol"],
+    0: [f"local:{OLLAMA_MODEL}", "openrouter/deepseek/deepseek-chat", "openrouter/google/gemini-2.5-flash", "openrouter/moonshotai/kimi-k2"],
+    1: [f"local:{OLLAMA_MODEL}", "openrouter/deepseek/deepseek-chat", "openrouter/google/gemini-2.5-flash", "openrouter/moonshotai/kimi-k2"],
+    2: [f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-sonnet-4.6", "openrouter/openai/gpt-4o", "openrouter/google/gemini-2.5-pro"],
+    3: [f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-opus-4.8", "openrouter/anthropic/claude-fable-5", "openrouter/openai/gpt-5.6-sol"],
 }
 
 VISION_CHAINS = {
-    0: ["local:gemma3:4b", "openrouter/google/gemini-2.5-flash", "openrouter/openai/gpt-4o-mini"],
-    1: ["local:gemma3:4b", "openrouter/google/gemini-2.5-flash", "openrouter/openai/gpt-4o-mini"],
-    2: ["local:gemma3:4b", "openrouter/anthropic/claude-sonnet-4.6", "openrouter/openai/gpt-4o", "openrouter/google/gemini-2.5-pro"],
-    3: ["local:gemma3:4b", "openrouter/anthropic/claude-sonnet-5", "openrouter/openai/gpt-5.6-sol", "openrouter/anthropic/claude-opus-4.8"],
+    0: [f"local:{OLLAMA_MODEL}", "openrouter/google/gemma-4-26b-a4b-it:free", "openrouter/google/gemma-4-31b-it:free", "openrouter/nvidia/nemotron-nano-12b-v2-vl:free"],
+    1: [f"local:{OLLAMA_MODEL}", "openrouter/google/gemma-4-26b-a4b-it:free", "openrouter/google/gemini-2.5-flash", "openrouter/openai/gpt-4o-mini"],
+    2: [f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-sonnet-4.6", "openrouter/openai/gpt-4o", "openrouter/google/gemini-2.5-pro"],
+    3: [f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-sonnet-5", "openrouter/openai/gpt-5.6-sol", "openrouter/anthropic/claude-opus-4.8"],
 }
 
 TIER_LABELS = {0: "Free", 1: "Cheap", 2: "Smart", 3: "Pro"}
-TIER_COST_PER_M = {0: {"in": 0.14, "out": 0.28}, 1: {"in": 0.14, "out": 0.28}, 2: {"in": 3, "out": 15}, 3: {"in": 15, "out": 75}}
+TIER_COST_PER_M = {0: {"in": 0.0, "out": 0.0}, 1: {"in": 0.14, "out": 0.28}, 2: {"in": 3, "out": 15}, 3: {"in": 15, "out": 75}}
 
 stats_lock = threading.Lock()
 stats = {"total_cost": 0.0, "total_requests": 0, "by_tier": {0: 0, 1: 0, 2: 0, 3: 0}, "by_model": {}, "fallbacks": 0, "errors": 0}
@@ -150,7 +152,7 @@ def _do_request(url: str, body: dict, api_key: Optional[str], timeout: int = 120
     req.add_header("Content-Type", "application/json")
     if api_key:
         req.add_header("Authorization", api_key if api_key.startswith("Bearer ") else f"Bearer {api_key}")
-    req.add_header("User-Agent", "omni-auto-router/3.0")
+    req.add_header("User-Agent", "omni-auto-router/4.0")
     saved = {}
     if "217.149.23.113" in url: saved = _no_proxy_context()
     try:
@@ -181,22 +183,20 @@ def call_omni(model: str, body: dict, auth_header: Optional[str], retries=1) -> 
         if resp2: return resp2, mdl2, True
         return None, mdl, err2
 
-def _call_local(model: str, body: dict) -> tuple:
-    """Call Ollama directly for local vision models."""
-    ollama_url = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434/api/chat")
-    ollama_model = "gemma3:4b"
-    body["model"] = ollama_model
+def _call_local(body: dict) -> tuple:
+    """Call Ollama via OpenAI-compatible endpoint (/v1/chat/completions)."""
+    body["model"] = OLLAMA_MODEL
     data = json.dumps(body).encode()
-    req = urllib.request.Request(ollama_url, data=data, method="POST")
+    req = urllib.request.Request(OLLAMA_URL, data=data, method="POST")
     req.add_header("Content-Type", "application/json")
-    req.add_header("User-Agent", "omni-auto-router/3.0")
+    req.add_header("User-Agent", "omni-auto-router/4.0")
     try:
         resp = urllib.request.urlopen(req, timeout=120)
-        return resp, ollama_model, None
+        return resp, OLLAMA_MODEL, None
     except urllib.error.HTTPError as e:
-        return None, ollama_model, e.read().decode()
+        return None, OLLAMA_MODEL, e.read().decode()
     except Exception as e:
-        return None, ollama_model, str(e)
+        return None, OLLAMA_MODEL, str(e)
 
 class Handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -229,7 +229,7 @@ class Handler(BaseHTTPRequestHandler):
             tier = 0; chain = TIER_CHAINS[0]; used_model = chain[0]; fallback_used = False; errors = []
             for model in chain:
                 if model.startswith("local:"):
-                    resp, used_model, err = _call_local(model, body)
+                    resp, used_model, err = _call_local(body)
                 else:
                     resp, used_model, err = call_omni(model, body, auth, retries=1)
                 if resp is not None: break
@@ -248,7 +248,7 @@ class Handler(BaseHTTPRequestHandler):
             used_model = chain[0]; fallback_used = False; errors = []
             for model in chain:
                 if model.startswith("local:"):
-                    resp, used_model, err = _call_local(model, body)
+                    resp, used_model, err = _call_local(body)
                 else:
                     resp, used_model, err = call_omni(model, body, auth, retries=1)
                 if resp is not None: break
@@ -259,7 +259,7 @@ class Handler(BaseHTTPRequestHandler):
                 fallback_chain = VISION_CHAINS[0] if has_image else TIER_CHAINS[0]
                 for model in fallback_chain:
                     if model.startswith("local:"):
-                        resp, used_model, err = _call_local(model, body)
+                        resp, used_model, err = _call_local(body)
                     else:
                         resp, used_model, err = call_omni(model, body, auth, retries=1)
                     if resp is not None:
@@ -318,12 +318,14 @@ class ThreadedHTTPServer(HTTPServer):
 
 if __name__ == "__main__":
     server = ThreadedHTTPServer(("0.0.0.0", PORT), Handler)
-    print(f"[omni-auto] v3 on http://0.0.0.0:{PORT}", flush=True)
+    print(f"[omni-auto] v4 on http://0.0.0.0:{PORT}", flush=True)
     print(f"[omni-auto] Tiers: {TIER_LABELS}", flush=True)
     for t, models in TIER_CHAINS.items():
         print(f"  {TIER_LABELS[t]}: {' -> '.join(models)}", flush=True)
+    print(f"[omni-auto] Vision chains (free tier): {VISION_CHAINS[0]}", flush=True)
     print(f"[omni-auto] Stats: /stats", flush=True)
     print(f"[omni-auto] Backend VPS: {OMNIR_VPS_URL} | Fallback: {OPENROUTER_FALLBACK_URL}", flush=True)
+    print(f"[omni-auto] Ollama: {OLLAMA_URL} (model: {OLLAMA_MODEL})", flush=True)
     print(f"[omni-auto] Key set: {bool(OPENROUTER_API_KEY)}", flush=True)
     try: server.serve_forever()
     except KeyboardInterrupt: print("\n[omni-auto] shutdown", flush=True); server.server_close()
