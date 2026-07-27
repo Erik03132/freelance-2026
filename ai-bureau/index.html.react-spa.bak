@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI BUREAU | Архитектура Интеллекта</title>
+    <meta name="description" content="AI BUREAU — инженерное бюро по проектированию автономных ИИ-систем: AI-агенты с базой знаний (RAG), голосовой ИИ, приватные LLM и GEO-оптимизация для нейропоиска." />
+    <link rel="canonical" href="https://ai-bureau.pro/" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:site_name" content="AI Bureau" />
+    <meta property="og:title" content="AI BUREAU | Архитектура Интеллекта" />
+    <meta property="og:description" content="Проектируем автономные ИИ-агенты и RAG-системы, которые берут рутину на себя и работают 24/7." />
+    <meta property="og:url" content="https://ai-bureau.pro/" />
+    <meta property="og:image" content="https://ai-bureau.pro/logo.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI BUREAU | Архитектура Интеллекта" />
+    <meta name="twitter:description" content="Проектируем автономные ИИ-агенты и RAG-системы для автоматизации бизнеса." />
+    <meta name="twitter:image" content="https://ai-bureau.pro/logo.png" />
+
+    <!-- Schema.org JSON-LD: Organization (каноничный, единый) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "AI Bureau",
+      "url": "https://ai-bureau.pro",
+      "logo": "https://ai-bureau.pro/logo.png",
+      "description": "Инженерное бюро по проектированию автономных интеллектуальных систем, RAG-инфраструктур и приватных LLM.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "RU"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": "architect@ai-bureau.pro"
+      },
+      "makesOffer": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Автономные AI-Агенты с базой знаний (RAG)",
+            "description": "Разработка ботов-консультантов, обученных на регламентах бизнеса. Интеграция в Telegram, VK, Web и CRM."
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Private Model Ops",
+            "description": "Развёртывание локальных LLM (Gemma 2, Llama 3) внутри закрытого периметра компании."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Schema.org JSON-LD: FAQPage (для GEO — прямые ответы на вопросы) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Сколько стоит разработка AI-агента для бизнеса?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Разработка автономного AI-агента с базой знаний (RAG) начинается от 150 000 ₽, срок внедрения — около 3 недель. Точная стоимость зависит от количества интеграций и сложности регламентов."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Что такое RAG-система и зачем она бизнесу?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "RAG (Retrieval-Augmented Generation) — нейросетевая база знаний, которая отвечает на вопросы клиентов на основе ваших регламентов и документов, а не на общих знаниях. Стоимость внедрения — от 80 000 ₽."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Можно ли развернуть ИИ внутри компании без доступа в интернет?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Да. Мы разворачиваем локальные модели (Gemma 2, Llama 3) через Ollama или vLLM внутри закрытого периметра — данные не покидают компанию. Это подходит для клиник, юристов и промышленных холдингов."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

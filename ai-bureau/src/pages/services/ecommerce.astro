@@ -1,0 +1,94 @@
+---
+/**
+ * Страница услуги: eCommerce Intelligence
+ */
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  title="AI для маркетплейсов и eCommerce | AI Bureau"
+  description="Автоматизация товарных матриц, SEO-текстов и карточек товаров на маркетплейсах через LLM от 50 000 ₽/мес. Wildberries, Ozon, Яндекс.Маркет."
+>
+  <header class="header">
+    <div class="logo-group">
+      <svg class="neural-logo" width="40" height="40" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>
+        <circle class="dot d1" cx="50" cy="20" r="3" fill="#00f0ff" />
+        <circle class="dot d2" cx="80" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d3" cx="50" cy="80" r="3" fill="#00f0ff" />
+        <circle class="dot d4" cx="20" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d5" cx="50" cy="50" r="5" fill="#00f0ff" />
+        <line x1="50" y1="20" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="80" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="50" y1="80" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="20" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+      </svg>
+      <div class="logo-text">AI BUREAU</div>
+    </div>
+    <nav class="nav">
+      <a href="/">Главная</a>
+      <a href="/services">Решения</a>
+      <a href="/faq">FAQ</a>
+      <a href="/#inquiry" class="btn-contact">Запрос</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" style="padding: 12rem 10% 6rem;">
+      <div class="hero-content">
+        <span class="hero-pre">Услуга</span>
+        <h1>eCommerce Интеллект</h1>
+        <p style="max-width: 600px; color: #888; line-height: 1.6;">
+          Масштабируемая генерация SEO-текстов и карточек товаров для маркетплейсов.
+          LLM пишет, оптимизирует и обновляет контент без копирайтера.
+        </p>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%;">
+      <h2>Что автоматизируем</h2>
+      <div class="architect-grid">
+        <div class="architect-card">
+          <h3>SEO-тексты</h3>
+          <p>Генерация уникальных описаний товаров с ключевыми словами для Wildberries, Ozon, Яндекс.Маркет. Тысячи карточек за часы.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Обновление контента</h3>
+          <p>Актуализация цен, характеристик и описаний при поступлении новых данных от поставщика.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Аналитика конкурентов</h3>
+          <p>Мониторинг позиций, цен и отзывов конкурентов через AI-агрегацию данных.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Масштаб</h3>
+          <p>От 50 до 50 000 карточек. LLM работает линейно — объём растёт без потери качества.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%; background: #050505; border-radius: 40px;">
+      <div class="architect-card" style="max-width: 700px;">
+        <h4>Сколько стоит?</h4>
+        <p>От 50 000 ₽/мес — зависит от объёма карточек и количества маркетплейсов.</p>
+      </div>
+    </section>
+
+    <section id="inquiry" class="hero" style="height: auto; padding: 8rem 10%;">
+      <div class="hero-content">
+        <h2>Обсудить проект</h2>
+        <a href="mailto:architect@ai-bureau.pro" class="btn-primary" style="margin-top: 2rem; display: inline-block;">Запросить Консультацию</a>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "eCommerce Интеллект",
+  "description": "Автоматизация SEO-текстов и карточек товаров на маркетплейсах через LLM.",
+  "provider": { "@type": "Organization", "name": "AI Bureau", "url": "https://ai-bureau.pro" },
+  "areaServed": "Russia",
+  "offers": { "@type": "Offer", "price": "50000", "priceCurrency": "RUB", "description": "от 50 000 ₽/мес" }
+})} />

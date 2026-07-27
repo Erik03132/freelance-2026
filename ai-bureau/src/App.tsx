@@ -1,37 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import './index.css';
 import BureauBot from './components/BureauBot';
 
+// Organization + FAQPage JSON-LD теперь разметкой живёт в index.html (статично,
+// доступно поисковикам и нейропоиску сразу при загрузке — лучше для GEO).
+
 const App = () => {
-  useEffect(() => {
-    const schema = {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "AI Bureau",
-      "url": "https://ai-bureau.pro",
-      "logo": "https://ai-bureau.pro/logo.png",
-      "description": "Специализированное инженерное бюро по проектированию автономных интеллектуальных систем и RAG-инфраструктур.",
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "email": "architect@ai-bureau.pro",
-        "contactType": "customer support"
-      },
-      "offers": {
-        "@type": "AggregateOffer",
-        "description": "AI Agents, RAG Systems, Private LLM Deployment"
-      }
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.text = JSON.stringify(schema);
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
-
   return (
     <div className="app-container">
       <div className="bg-gradient"></div>

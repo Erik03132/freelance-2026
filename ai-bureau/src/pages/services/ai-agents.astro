@@ -1,0 +1,118 @@
+---
+/**
+ * Страница услуги: AI-Агенты.
+ * Для GEO: каждая страница услуги = ответ на конкретный вопрос.
+ */
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  title="AI-Агенты для бизнеса | AI Bureau"
+  description="Разработка автономных AI-агентов с базой знаний (RAG) от 150 000 ₽. Боты-консультанты, квалификация лидов, интеграция с Telegram, VK, CRM. Срок внедрения — 3 недели."
+>
+  <header class="header">
+    <div class="logo-group">
+      <svg class="neural-logo" width="40" height="40" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>
+        <circle class="dot d1" cx="50" cy="20" r="3" fill="#00f0ff" />
+        <circle class="dot d2" cx="80" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d3" cx="50" cy="80" r="3" fill="#00f0ff" />
+        <circle class="dot d4" cx="20" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d5" cx="50" cy="50" r="5" fill="#00f0ff" />
+        <line x1="50" y1="20" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="80" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="50" y1="80" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="20" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+      </svg>
+      <div class="logo-text">AI BUREAU</div>
+    </div>
+    <nav class="nav">
+      <a href="/">Главная</a>
+      <a href="/services">Решения</a>
+      <a href="/faq">FAQ</a>
+      <a href="/#inquiry" class="btn-contact">Запрос</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" style="padding: 12rem 10% 6rem;">
+      <div class="hero-content">
+        <span class="hero-pre">Услуга</span>
+        <h1>Автономные AI-Агенты</h1>
+        <p style="max-width: 600px; color: #888; line-height: 1.6;">
+          Кастомные ИИ-сотрудники, которые квалифицируют лидов, консультируют клиентов и работают 24/7.
+          Обучаются на ваших регламентах через RAG-базу знаний.
+        </p>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%;">
+      <h2>Что умеет AI-агент</h2>
+      <div class="architect-grid">
+        <div class="architect-card">
+          <h3>Консультирует</h3>
+          <p>Отвечает на вопросы клиентов на основе ваших регламентов и прайс-листов. Не галлюцинирует — опирается на RAG.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Квалифицирует лидов</h3>
+          <p>Узнаёт тип бизнеса, задачу и бюджет через естественный диалог. Передаёт готовый лид менеджеру с ИИ-выжимкой.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Smart Fallback</h3>
+          <p>При непонимании задаёт наводящие вопросы, а не говорит «я глупый робот». Сложных клиентов бесшовно переводит на живого менеджера.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Интеграция</h3>
+          <p>Telegram, VK, WhatsApp, Web-виджет, CRM (amoCRM, Bitrix24). Работает там, где ваши клиенты.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%; background: #050505; border-radius: 40px;">
+      <h2>Частые вопросы</h2>
+      <div style="max-width: 700px;">
+        <div class="architect-card" style="margin-bottom: 1rem;">
+          <h4>Сколько стоит AI-агент для бизнеса?</h4>
+          <p>От 150 000 ₽. Срок внедрения — 3 недели. Точная стоимость зависит от количества интеграций и сложности регламентов.</p>
+        </div>
+        <div class="architect-card" style="margin-bottom: 1rem;">
+          <h4>Чем ваш агент лучше обычного чат-бота?</h4>
+          <p>Обычный бот — меню из кнопок. Наш агент ведёт естественный диалог, понимает контекст, qualified лиды и при непонимании не сбрасывает клиента, а задаёт наводящие вопросы (Smart Fallback).</p>
+        </div>
+        <div class="architect-card">
+          <h4>На каких платформах работает?</h4>
+          <p>Telegram, VK, WhatsApp, Web-виджет, amoCRM, Bitrix24. Подключаем туда, где ваши клиенты.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="inquiry" class="hero" style="height: auto; padding: 8rem 10%;">
+      <div class="hero-content">
+        <h2>Обсудить внедрение</h2>
+        <p>Опишите ваш кейс — мы предложим архитектуру и точную стоимость.</p>
+        <a href="mailto:architect@ai-bureau.pro" class="btn-primary" style="margin-top: 2rem; display: inline-block;">
+          Запросить Консультацию
+        </a>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Автономные AI-Агенты с базой знаний (RAG)",
+  "description": "Разработка кастомных ИИ-агентов, квалифицирующих лидов и консультирующих клиентов 24/7. Интеграция в Telegram, VK, Web и CRM.",
+  "provider": { "@type": "Organization", "name": "AI Bureau", "url": "https://ai-bureau.pro" },
+  "areaServed": "Russia",
+  "offers": { "@type": "Offer", "price": "150000", "priceCurrency": "RUB", "description": "от 150 000 ₽, срок 3 недели" }
+})} />
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Сколько стоит AI-агент для бизнеса?", "acceptedAnswer": { "@type": "Answer", "text": "От 150 000 ₽. Срок внедрения — 3 недели. Зависит от количества интеграций и сложности регламентов." } },
+    { "@type": "Question", "name": "Чем ваш AI-агент лучше обычного чат-бота?", "acceptedAnswer": { "@type": "Answer", "text": "Обычный бот — меню из кнопок. Наш агент ведёт естественный диалог, понимает контекст и при непонимании задаёт наводящие вопросы (Smart Fallback)." } },
+    { "@type": "Question", "name": "На каких платформах работает AI-агент?", "acceptedAnswer": { "@type": "Answer", "text": "Telegram, VK, WhatsApp, Web-виджет, amoCRM, Bitrix24." } }
+  ]
+})} />

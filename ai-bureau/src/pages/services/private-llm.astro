@@ -1,0 +1,97 @@
+---
+/**
+ * Страница услуги: Private Model Ops (локальные LLM)
+ */
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  title="Локальные LLM внутри компании | Private Model Ops | AI Bureau"
+  description="Развёртывание приватных LLM (Gemma 2, Llama 3) через Ollama/vLLM внутри закрытого периметра. Данные не покидают компанию. Для клиник, юристов, промышленных холдингов."
+>
+  <header class="header">
+    <div class="logo-group">
+      <svg class="neural-logo" width="40" height="40" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>
+        <circle class="dot d1" cx="50" cy="20" r="3" fill="#00f0ff" />
+        <circle class="dot d2" cx="80" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d3" cx="50" cy="80" r="3" fill="#00f0ff" />
+        <circle class="dot d4" cx="20" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d5" cx="50" cy="50" r="5" fill="#00f0ff" />
+        <line x1="50" y1="20" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="80" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="50" y1="80" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="20" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+      </svg>
+      <div class="logo-text">AI BUREAU</div>
+    </div>
+    <nav class="nav">
+      <a href="/">Главная</a>
+      <a href="/services">Решения</a>
+      <a href="/faq">FAQ</a>
+      <a href="/#inquiry" class="btn-contact">Запрос</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" style="padding: 12rem 10% 6rem;">
+      <div class="hero-content">
+        <span class="hero-pre">Услуга</span>
+        <h1>Private Model Ops</h1>
+        <p style="max-width: 600px; color: #888; line-height: 1.6;">
+          Развёртывание локальных LLM внутри закрытого периметра компании.
+          Ваши данные не покидают сервер — абсолютная конфиденциальность.
+        </p>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%;">
+      <h2>Почему локальные модели</h2>
+      <div class="architect-grid">
+        <div class="architect-card">
+          <h3>Air-Gapped</h3>
+          <p>Никакого доступа к внешней сети. Модель работает на вашем сервере — медицинские, юридические и коммерческие данные остаются внутри компании.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Ollama & vLLM</h3>
+          <p>Мы оптимизируем развёртывание Gemma 2, Llama 3 и других open-source моделей для максимальной производительности на вашем железе.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Fine-Tuning</h3>
+          <p>Дообучение модели на ваших данных — специфичная терминология, внутренние процессы, корпоративный стиль общения.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Интеграция</h3>
+          <p>API-совместимость с OpenAI — подключается к вашим существующим системам без переписывания кода.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%; background: #050505; border-radius: 40px;">
+      <h2>Кому нужен Private LLM</h2>
+      <div class="architect-grid">
+        <div class="architect-card"><h4>Медицинские клиники</h4><p>Обработка данных пациентов без нарушения 152-ФЗ. Врачебные протоколы не покидают периметр.</p></div>
+        <div class="architect-card"><h4>Юридические фирмы</h4><p>Анализ договоров и запросов клиентов в условиях адвокатской тайны.</p></div>
+        <div class="architect-card"><h4>Промышленные холдинги</h4><p>Конфиденциальные чертежи, технологические процессы — ничего не уходит наружу.</p></div>
+        <div class="architect-card"><h4>Финансовый сектор</h4><p>Внутренняя аналитика и поддержка без отправки данных в облака.</p></div>
+      </div>
+    </section>
+
+    <section id="inquiry" class="hero" style="height: auto; padding: 8rem 10%;">
+      <div class="hero-content">
+        <h2>Обсудить развёртывание</h2>
+        <p>Расскажите о вашем железе и задачах — подберём модель и архитектуру.</p>
+        <a href="mailto:architect@ai-bureau.pro" class="btn-primary" style="margin-top: 2rem; display: inline-block;">Запросить Консультацию</a>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Private Model Ops — Локальные LLM",
+  "description": "Развёртывание приватных LLM (Gemma 2, Llama 3) внутри закрытого периметра компании через Ollama и vLLM.",
+  "provider": { "@type": "Organization", "name": "AI Bureau", "url": "https://ai-bureau.pro" },
+  "areaServed": "Russia"
+})} />

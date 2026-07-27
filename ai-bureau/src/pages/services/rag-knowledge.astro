@@ -1,0 +1,104 @@
+---
+/**
+ * Страница услуги: RAG-базы знаний (Нейронные Базы Знаний)
+ */
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  title="RAG-базы знаний для бизнеса | AI Bureau"
+  description="Нейронная база знаний (RAG) для автоматизации консультаций от 80 000 ₽. Бот обучается на ваших регламентах, законах и прайсах. HR, консалтинг, клиники, e-commerce."
+>
+  <header class="header">
+    <div class="logo-group">
+      <svg class="neural-logo" width="40" height="40" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>
+        <circle class="dot d1" cx="50" cy="20" r="3" fill="#00f0ff" />
+        <circle class="dot d2" cx="80" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d3" cx="50" cy="80" r="3" fill="#00f0ff" />
+        <circle class="dot d4" cx="20" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d5" cx="50" cy="50" r="5" fill="#00f0ff" />
+        <line x1="50" y1="20" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="80" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="50" y1="80" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="20" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+      </svg>
+      <div class="logo-text">AI BUREAU</div>
+    </div>
+    <nav class="nav">
+      <a href="/">Главная</a>
+      <a href="/services">Решения</a>
+      <a href="/faq">FAQ</a>
+      <a href="/#inquiry" class="btn-contact">Запрос</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" style="padding: 12rem 10% 6rem;">
+      <div class="hero-content">
+        <span class="hero-pre">Услуга</span>
+        <h1>Нейронные Базы Знаний</h1>
+        <p style="max-width: 600px; color: #888; line-height: 1.6;">
+          RAG (Retrieval-Augmented Generation) — семантическая память вашего бизнеса.
+          Бот отвечает на основе ваших документов, а не галлюцинирует.
+        </p>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%;">
+      <h2>Как работает RAG</h2>
+      <div class="architect-grid">
+        <div class="architect-card">
+          <h3>1. Загрузка знаний</h3>
+          <p>Ваши регламенты, прайс-листы, законы, инструкции загружаются в векторную базу. Текст разбивается на чанки и векторизуется.</p>
+        </div>
+        <div class="architect-card">
+          <h3>2. Семантический поиск</h3>
+          <p>Когда клиент задаёт вопрос, система находит релевантные фрагменты не по ключевым словам, а по смыслу запроса.</p>
+        </div>
+        <div class="architect-card">
+          <h3>3. Генерация ответа</h3>
+          <p>LLM получает найденные фрагменты как контекст и формулирует точный ответ со ссылками на ваши документы.</p>
+        </div>
+        <div class="architect-card">
+          <h3>4. Обновление</h3>
+          <p>База знаний пополняется: новые регламенты, цены, акции — бот всегда актуален без переписывания логики.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%; background: #050505; border-radius: 40px;">
+      <h2>Кому нужна RAG-система</h2>
+      <div class="architect-grid">
+        <div class="architect-card"><h4>HR и рекрутинг</h4><p>Автоответы на типовые вопросы кандидатов и сотрудников по внутренним регламентам.</p></div>
+        <div class="architect-card"><h4>Консалтинг и юристы</h4><p>Мгновенный поиск по сотням документов для предварительной консультации клиента.</p></div>
+        <div class="architect-card"><h4>Клиники</h4><p>Информирование пациентов по протоколам, подготовка к процедурам, цены.</p></div>
+        <div class="architect-card"><h4>eCommerce</h4><p>Консультации по ассортименту, доставка, возврат — без участия оператора.</p></div>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%;">
+      <div class="architect-card" style="max-width: 700px;">
+        <h4>Сколько стоит RAG-система?</h4>
+        <p>От 80 000 ₽. Включает настройку векторной базы, загрузку знаний, интеграцию с вашим мессенджером и обучение команды.</p>
+      </div>
+    </section>
+
+    <section id="inquiry" class="hero" style="height: auto; padding: 8rem 10%;">
+      <div class="hero-content">
+        <h2>Обсудить внедрение</h2>
+        <a href="mailto:architect@ai-bureau.pro" class="btn-primary" style="margin-top: 2rem; display: inline-block;">Запросить Консультацию</a>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Нейронные Базы Знаний (RAG)",
+  "description": "RAG-система для автоматизации консультаций на основе регламентов и документов бизнеса.",
+  "provider": { "@type": "Organization", "name": "AI Bureau", "url": "https://ai-bureau.pro" },
+  "areaServed": "Russia",
+  "offers": { "@type": "Offer", "price": "80000", "priceCurrency": "RUB", "description": "от 80 000 ₽" }
+})} />
