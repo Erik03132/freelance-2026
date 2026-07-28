@@ -97,7 +97,7 @@ async function callLLM(messages) {
     method: "POST",
     headers: { Authorization: `Bearer ${OPENROUTER_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-pro-1.5",
+      model: "openai/gpt-4o-mini",
       messages,
     }),
   });
