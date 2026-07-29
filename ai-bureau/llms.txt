@@ -6,10 +6,11 @@ AI Bureau is a specialized engineering agency focused on designing and deploying
 - **Autonomous AI Agents**: Development of reasoning-capable agents for CRM/ERP integration.
 - **Neural Knowledge Bases**: Enterprise-grade RAG (Retrieval-Augmented Generation) systems.
 - **Private Model Ops**: Local deployment of LLMs (Gemma, Llama) within secure perimeters.
-- **AIO (AI Optimization)**: Enhancing web presence for Generative Engine Optimization (GEO).
+- **GEO (Generative Engine Optimization)**: Web presence optimization for AI search (ChatGPT, Perplexity, Google AI Overviews).
 
 ## Services
 - AI Audit & Strategy
+- GEO — Generative Engine Optimization
 - Custom LLM Integration
 - Automated Lead Generation Systems
 - Private AI Infrastructure Deployment

@@ -53,11 +53,15 @@ import Base from '../layouts/Base.astro';
     <!-- ═══ НАШИ УСЛУГИ ═══ -->
     <section id="solutions" class="reveal">
       <span class="section-tag">Ключевые Компетенции / 2026</span>
-      <h2>5 Решений для Вашего Бизнеса</h2>
+      <h2>6 Решений для Вашего Бизнеса</h2>
       <div class="architect-grid stagger-children" style="grid-template-columns: repeat(3, 1fr);">
         <a href="/services/ai-agents" class="architect-card" style="padding-left: 1.5rem;">
           <h3>AI-Агенты с RAG</h3>
           <p>Автономные боты-консультанты для Telegram, VK, Web, WhatsApp. Обучаются на ваших документах без галлюцинаций. От 150 000 ₽.</p>
+        </a>
+        <a href="/services/geo" class="architect-card" style="padding-left: 1.5rem;">
+          <h3>GEO — AI-поиск</h3>
+          <p>Подготовка сайта к цитированию в ChatGPT, Perplexity, Google AI Overviews, Яндекс Нейро. Аудит, контент-стратегия, мониторинг. От 50 000 ₽.</p>
         </a>
         <a href="/services/voice-bots" class="architect-card" style="padding-left: 1.5rem;">
           <h3>Голосовые AI-Боты</h3>
@@ -165,6 +169,14 @@ import Base from '../layouts/Base.astro';
         "@type": "Service",
         "name": "Автономные AI-Агенты с базой знаний (RAG)",
         "description": "Разработка ботов-консультантов, обученных на регламентах бизнеса. Интеграция в Telegram, VK, Web и CRM."
+      }
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "GEO — оптимизация для AI-поиска (Generative Engine Optimization)",
+        "description": "Подготовка сайта и контента к цитированию в ChatGPT, Perplexity, Google AI Overviews и Яндекс Нейро."
       }
     },
     {
