@@ -1,0 +1,62 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Связаться с AI Bureau | Запрос консультации"
+  description="Оставьте заявку на консультацию по AI-агентам, голосовым ботам и RAG-системам."
+>
+  <header class="header">
+    <div class="logo-group">
+      <svg class="neural-logo" width="40" height="40" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>
+        <circle class="dot d1" cx="50" cy="20" r="3" fill="#00f0ff" />
+        <circle class="dot d2" cx="80" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d3" cx="50" cy="80" r="3" fill="#00f0ff" />
+        <circle class="dot d4" cx="20" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d5" cx="50" cy="50" r="5" fill="#00f0ff" />
+        <line x1="50" y1="20" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="80" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="50" y1="80" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="20" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+      </svg>
+      <div class="logo-text">AI BUREAU</div>
+    </div>
+    <nav class="nav">
+      <a href="/">Главная</a>
+      <a href="/services">Услуги</a>
+      <a href="/cases">Кейсы</a>
+      <a href="/faq">FAQ</a>
+      <a href="/contact" class="btn-contact">Запрос</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" style="padding: 12rem 10% 6rem;">
+      <div class="hero-content">
+        <span class="hero-pre">Контакты</span>
+        <h1>Связаться с Нами</h1>
+        <p style="max-width: 600px; color: #888; line-height: 1.6;">
+          Опишите задачу — мы предложим архитектуру и точную стоимость в течение 1 дня.
+        </p>
+      </div>
+    </section>
+
+    <section style="padding: 4rem 10% 8rem;" class="reveal">
+      <div style="max-width: 600px; margin: 0 auto;">
+        <div class="architect-card" style="padding: 2rem; margin-bottom: 2rem;">
+          <h4>Email</h4>
+          <p style="color: var(--cyan);"><a href="mailto:architect@ai-bureau.pro" style="color: var(--cyan); text-decoration: none;">architect@ai-bureau.pro</a></p>
+        </div>
+        <div class="architect-card" style="padding: 2rem; margin-bottom: 2rem;">
+          <h4>Telegram</h4>
+          <p style="color: #999;">@ai_bureau — ответим в течение часа в рабочее время</p>
+        </div>
+        <div class="architect-card" style="padding: 2rem;">
+          <h4>Или спросите BureauBot</h4>
+          <p style="color: #999;">Нажмите на иконку в правом нижнем углу — AI-ассистент ответит на любые вопросы об услугах за 10 секунд.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>

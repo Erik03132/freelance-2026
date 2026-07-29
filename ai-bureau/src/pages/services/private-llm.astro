@@ -27,7 +27,8 @@ import Base from '../../layouts/Base.astro';
     </div>
     <nav class="nav">
       <a href="/">Главная</a>
-      <a href="/services">Решения</a>
+      <a href="/services">Услуги</a>
+      <a href="/cases">Кейсы</a>
       <a href="/faq">FAQ</a>
       <a href="/#inquiry" class="btn-contact">Запрос</a>
     </nav>
@@ -45,9 +46,9 @@ import Base from '../../layouts/Base.astro';
       </div>
     </section>
 
-    <section style="padding: 6rem 10%;">
+    <section style="padding: 6rem 10%;" class="reveal">
       <h2>Почему локальные модели</h2>
-      <div class="architect-grid">
+      <div class="architect-grid stagger-children">
         <div class="architect-card">
           <h3>Air-Gapped</h3>
           <p>Никакого доступа к внешней сети. Модель работает на вашем сервере — медицинские, юридические и коммерческие данные остаются внутри компании.</p>
@@ -67,9 +68,9 @@ import Base from '../../layouts/Base.astro';
       </div>
     </section>
 
-    <section style="padding: 6rem 10%; background: #050505; border-radius: 40px;">
+    <section style="padding: 6rem 10%; background: #050505; border-radius: 40px;" class="reveal reveal-delay-1">
       <h2>Кому нужен Private LLM</h2>
-      <div class="architect-grid">
+      <div class="architect-grid stagger-children">
         <div class="architect-card"><h4>Медицинские клиники</h4><p>Обработка данных пациентов без нарушения 152-ФЗ. Врачебные протоколы не покидают периметр.</p></div>
         <div class="architect-card"><h4>Юридические фирмы</h4><p>Анализ договоров и запросов клиентов в условиях адвокатской тайны.</p></div>
         <div class="architect-card"><h4>Промышленные холдинги</h4><p>Конфиденциальные чертежи, технологические процессы — ничего не уходит наружу.</p></div>
@@ -77,7 +78,7 @@ import Base from '../../layouts/Base.astro';
       </div>
     </section>
 
-    <section id="inquiry" class="hero" style="height: auto; padding: 8rem 10%;">
+    <section id="inquiry" class="hero reveal" style="height: auto; padding: 8rem 10%;">
       <div class="hero-content">
         <h2>Обсудить развёртывание</h2>
         <p>Расскажите о вашем железе и задачах — подберём модель и архитектуру.</p>

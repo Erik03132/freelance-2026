@@ -1,37 +1,31 @@
 # AI Bureau
 
-> AI Bureau is a specialized engineering agency focused on designing and deploying autonomous intelligent systems, RAG-based knowledge infrastructures, and custom AI agent ecosystems for business automation.
+> AI Bureau — инженерное бюро по проектированию автономных AI-систем, голосовых агентов, RAG-инфраструктур и приватных LLM для российского бизнеса.
 
-## Core Expertise
-- **Autonomous AI Agents**: Development of reasoning-capable agents for CRM/ERP integration, lead qualification, and 24/7 customer support. From 150,000 RUB.
-- **Neural Knowledge Bases**: Enterprise-grade RAG (Retrieval-Augmented Generation) systems for HR, consulting, clinics, and e-commerce. From 80,000 RUB.
-- **eCommerce Intelligence**: Automated SEO content and product card generation for marketplaces (Wildberries, Ozon, Yandex.Market). From 50,000 RUB/mo.
-- **Private Model Ops**: Local deployment of LLMs (Gemma 2, Llama 3) within secure perimeters via Ollama and vLLM. Air-gapped solutions for healthcare, legal, and industrial sectors.
-- **Smart Fallback**: Proprietary dialog logic — when the bot doesn't know the answer, it asks clarifying questions instead of saying "I don't understand", and seamlessly hands off to a human manager with an AI-generated conversation summary.
-- **AIO (AI Optimization)**: Enhancing web presence for Generative Engine Optimization (GEO) — making your business citable by Yandex.Neuro, Google AI Overview, and Perplexity.
+## Услуги
+- **AI-агенты с RAG**: Автономные боты-консультанты для Telegram, VK, Web. Обучаются на документах. От 150 000 ₽.
+- **Голосовые AI-боты**: Автообзвон, квалификация лидов по телефону, голосовая поддержка 24/7. Mango Office, SIP. От 100 000 ₽.
+- **Чат-боты с базой знаний**: RAG-системы. Бот отвечает на основе регламентов, не галлюцинирует. От 80 000 ₽.
+- **Private LLM**: Локальные модели внутри закрытого периметра. Air-gapped решения для клиник, юристов, промышленности.
+- **AI-консалтинг**: Аудит процессов, прототип за 1 неделю, дорожная карта. От 50 000 ₽.
 
-## Services
-- AI Audit & Strategy
-- Custom LLM Integration
-- Automated Lead Generation Systems
-- Private AI Infrastructure Deployment
-- GEO/AIO Optimization
+## Технологии
+- Google Gemini, Anthropic Claude, Gemma 2, Llama 3
+- Ollama, vLLM, RAG, Vector Stores
+- Whisper STT, Qwen Audio 3.0 TTS
+- Mango Office API, SIP (pjsua, baresip)
 
-## Technology Stack
-- Google Gemini, Anthropic Claude, Open-source LLMs (Gemma 2, Llama 3)
-- Ollama, vLLM for local deployment
-- LangChain, Vector Stores (ChromaDB, Pinecone)
-- RAG pipelines, Fine-tuning
-
-## Contact
+## Контакты
 - Email: architect@ai-bureau.pro
-- Website: https://ai-bureau.pro
-- Response time: within 24 hours
+- Сайт: https://ai-bureau.pro
 
-## Pages
-- / — Homepage: company overview, key competencies, CTA
-- /services/ai-agents — Autonomous AI Agents service page
-- /services/rag-knowledge — RAG Neural Knowledge Bases service page
-- /services/ecommerce — eCommerce Intelligence service page
-- /services/private-llm — Private Model Ops service page
-- /faq — Frequently Asked Questions (8 Q&A pairs)
+## Страницы
+- / — Главная: обзор услуг, процесс работы, кейсы, CTA
+- /services/ai-agents — AI-агенты с RAG
+- /services/voice-bots — Голосовые AI-боты
+- /services/rag-knowledge — Чат-боты с базой знаний (RAG)
+- /services/private-llm — Private LLM
+- /services/audit — AI-консалтинг и аудит
+- /cases — Кейсы и портфолио
+- /contact — Контакты
+- /faq — Частые вопросы (8 Q&A)

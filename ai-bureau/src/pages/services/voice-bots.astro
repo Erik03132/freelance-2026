@@ -1,0 +1,115 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  title="Голосовые AI-боты для бизнеса | AI Bureau"
+  description="Голосовые агенты для обзвона, поддержки и квалификации лидов. Интеграция с Mango Office, SIP, Telegram. От 100 000 ₽."
+>
+  <header class="header">
+    <div class="logo-group">
+      <svg class="neural-logo" width="40" height="40" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>
+        <circle class="dot d1" cx="50" cy="20" r="3" fill="#00f0ff" />
+        <circle class="dot d2" cx="80" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d3" cx="50" cy="80" r="3" fill="#00f0ff" />
+        <circle class="dot d4" cx="20" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d5" cx="50" cy="50" r="5" fill="#00f0ff" />
+        <line x1="50" y1="20" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="80" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="50" y1="80" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="20" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+      </svg>
+      <div class="logo-text">AI BUREAU</div>
+    </div>
+    <nav class="nav">
+      <a href="/">Главная</a>
+      <a href="/services">Услуги</a>
+      <a href="/cases">Кейсы</a>
+      <a href="/faq">FAQ</a>
+      <a href="/#inquiry" class="btn-contact">Запрос</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" style="padding: 12rem 10% 6rem;">
+      <div class="hero-content">
+        <span class="hero-pre">Услуга</span>
+        <h1>Голосовые AI-Боты</h1>
+        <p style="max-width: 600px; color: #888; line-height: 1.6;">
+          Автоматический обзвон, квалификация лидов и голосовая поддержка 24/7.
+          Интеграция с Mango Office, SIP-телефонией, Telegram. Распознавание речи + AI-диалог.
+        </p>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%;" class="reveal">
+      <h2>Где применяем</h2>
+      <div class="architect-grid stagger-children">
+        <div class="architect-card">
+          <h3>Подтверждение заказов</h3>
+          <p>Автодозвон клиенту: подтверждение адреса, времени, состава заказа. Экономия 90% времени операторов.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Квалификация лидов</h3>
+          <p>AI задаёт вопросы, определяет бюджет и готовность к покупке. Тёплые лиды передаются менеджеру.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Исходящий обзвон</h3>
+          <p>Массовый обзвон клиентов по базе с голосовым сценарием. Интеграция с CRM и расписанием.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Входящая поддержка</h3>
+          <p>AI-агент принимает входящие звонки, отвечает на частые вопросы, переключает на живого оператора при необходимости.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%; background: #050505; border-radius: 40px;" class="reveal reveal-delay-1">
+      <h2>Технологии</h2>
+      <div class="architect-grid stagger-children">
+        <div class="architect-card">
+          <h4>Распознавание речи</h4>
+          <p>Whisper, Yandex SpeechKit — транскрибация любой речи в текст с высокой точностью.</p>
+        </div>
+        <div class="architect-card">
+          <h4>Синтез речи</h4>
+          <p>Qwen Audio 3.0, Yandex TTS — естественные голоса с эмоциональными интонациями.</p>
+        </div>
+        <div class="architect-card">
+          <h4>SIP-интеграция</h4>
+          <p>pjsua, baresip — прямая интеграция с Mango Office и любой SIP-телефонией.</p>
+        </div>
+        <div class="architect-card">
+          <h4>AI-диалог</h4>
+          <p>LLM с RAG-контекстом — ведёт осмысленный диалог по вашему сценарию.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%;" class="reveal">
+      <div class="architect-card" style="max-width: 700px;">
+        <h4>Сколько стоит голосовой бот?</h4>
+        <p>От 100 000 ₽ за базовую конфигурацию. Включает: настройку SIP, голосовой сценарий, STT/TTS, 1 месяц поддержки.</p>
+      </div>
+    </section>
+
+    <section id="inquiry" class="hero reveal" style="height: auto; padding: 8rem 10%;">
+      <div class="hero-content">
+        <h2>Обсудить внедрение</h2>
+        <p>Расскажите о ваших задачах по обзвону — подберём решение и точную стоимость.</p>
+        <a href="mailto:architect@ai-bureau.pro" class="btn-primary" style="margin-top: 2rem; display: inline-block;">Запросить Консультацию</a>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Голосовые AI-боты для бизнеса",
+  "description": "Автоматический обзвон, квалификация лидов и голосовая поддержка 24/7 через AI-агентов.",
+  "provider": { "@type": "Organization", "name": "AI Bureau", "url": "https://ai-bureau.pro" },
+  "areaServed": "Russia",
+  "offers": { "@type": "Offer", "price": "100000", "priceCurrency": "RUB", "description": "от 100 000 ₽" }
+})} />

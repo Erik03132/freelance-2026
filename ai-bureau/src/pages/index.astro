@@ -25,10 +25,11 @@ import Base from '../layouts/Base.astro';
       <div class="logo-text">AI BUREAU</div>
     </div>
     <nav class="nav">
-      <a href="/services">Решения</a>
-      <a href="/security">Безопасность</a>
-      <a href="/hub">Хаб</a>
-      <a href="#inquiry" class="btn-contact">Запрос</a>
+      <a href="/">Главная</a>
+      <a href="/services">Услуги</a>
+      <a href="/cases">Кейсы</a>
+      <a href="/faq">FAQ</a>
+      <a href="/#inquiry" class="btn-contact">Запрос</a>
     </nav>
   </header>
 
@@ -49,63 +50,79 @@ import Base from '../layouts/Base.astro';
       </div>
     </section>
 
-    <!-- ═══ КЛЮЧЕВЫЕ КОМПЕТЕНЦИИ ═══ -->
+    <!-- ═══ НАШИ УСЛУГИ ═══ -->
     <section id="solutions" class="reveal">
       <span class="section-tag">Ключевые Компетенции / 2026</span>
-      <h2>Инженерные Решения</h2>
-      <div class="architect-grid stagger-children">
-        <a href="/services/ai-agents" class="architect-card">
-          <h3>Автономные AI-Агенты</h3>
-          <p>Разработка агентов-исполнителей, способных к самостоятельному логическому выводу и интеграции в CRM/ERP контуры без внешнего контроля.</p>
+      <h2>5 Решений для Вашего Бизнеса</h2>
+      <div class="architect-grid stagger-children" style="grid-template-columns: repeat(3, 1fr);">
+        <a href="/services/ai-agents" class="architect-card" style="padding-left: 1.5rem;">
+          <h3>AI-Агенты с RAG</h3>
+          <p>Автономные боты-консультанты для Telegram, VK, Web, WhatsApp. Обучаются на ваших документах без галлюцинаций. От 150 000 ₽.</p>
         </a>
-        <a href="/services/rag-knowledge" class="architect-card">
-          <h3>Нейронные Базы Знаний</h3>
-          <p>RAG-системы корпоративного уровня. Семантическая память вашего бизнеса, обеспечивающая мгновенный доступ к экспертизе.</p>
+        <a href="/services/voice-bots" class="architect-card" style="padding-left: 1.5rem;">
+          <h3>Голосовые AI-Боты</h3>
+          <p>Автообзвон, квалификация лидов по телефону, голосовая поддержка 24/7. Интеграция с Mango Office и SIP. От 100 000 ₽.</p>
         </a>
-        <a href="/services/ecommerce" class="architect-card">
-          <h3>eCommerce Интеллект</h3>
-          <p>Автоматизация товарных матриц и SEO-доминирования на маркетплейсах через масштабируемую генерацию на базе LLM.</p>
+        <a href="/services/rag-knowledge" class="architect-card" style="padding-left: 1.5rem;">
+          <h3>Чат-боты с Базой Знаний</h3>
+          <p>RAG-системы. Бот отвечает на основе ваших регламентов, а не галлюцинирует. Готовность за 2 недели. От 80 000 ₽.</p>
         </a>
-        <a href="/services/private-llm" class="architect-card">
-          <h3>Private Model Ops</h3>
-          <p>Развертывание локальных моделей (Gemma 2, Llama 3) внутри закрытого периметра компании для абсолютной безопасности данных.</p>
+        <a href="/services/private-llm" class="architect-card" style="padding-left: 1.5rem;">
+          <h3>Private LLM</h3>
+          <p>Локальные модели (Gemma 2, Llama 3) внутри закрытого периметра. Данные не покидают компанию. Абсолютная конфиденциальность.</p>
+        </a>
+        <a href="/services/audit" class="architect-card" style="padding-left: 1.5rem;">
+          <h3>AI-Консалтинг</h3>
+          <p>Аудит процессов, прототип за 1 неделю, дорожная карта внедрения. Стоимость аудита вычитается из счёта при заказе. От 50 000 ₽.</p>
         </a>
       </div>
     </section>
 
-    <!-- ═══ БЕЗОПАСНОСТЬ ═══ -->
-    <section id="governance" style="background: #050505; border-radius: 40px;" class="reveal reveal-delay-1">
-      <span class="section-tag">Governance & Security</span>
-      <h2>Суверенитет Данных</h2>
+    <!-- ═══ КАК МЫ РАБОТАЕМ ═══ -->
+    <section id="process" style="background: #050505; border-radius: 40px;" class="reveal reveal-delay-1">
+      <span class="section-tag">Process</span>
+      <h2>Как Мы Работаем</h2>
       <div class="architect-grid stagger-children">
         <div class="architect-card">
-          <h3>Air-Gapped Deployment</h3>
-          <p>Мы специализируемся на решениях, которые не требуют доступа к внешней сети. Ваша интеллектуальная собственность остается вашей.</p>
+          <h3>1. Анализ</h3>
+          <p>Изучаем ваши бизнес-процессы, данные и задачи. Определяем, какой AI-инструмент даст максимальный ROI.</p>
         </div>
         <div class="architect-card">
-          <h3>Ollama & vLLM Infrastructure</h3>
-          <p>Экспертиза в оптимизации локальных моделей для максимальной производительности на корпоративном оборудовании.</p>
+          <h3>2. Прототип</h3>
+          <p>Создаём работающий прототип за 1–2 недели. Вы видите результат до полноценного внедрения.</p>
+        </div>
+        <div class="architect-card">
+          <h3>3. Внедрение</h3>
+          <p>Запускаем решение в продакшн. Обучаем команду. Предоставляем поддержку и доработки.</p>
         </div>
       </div>
     </section>
 
-    <!-- ═══ ХАБ ЭКСПЕРТИЗЫ ═══ -->
-    <section id="hub" class="reveal">
-      <span class="section-tag">Хаб Экспертизы</span>
-      <h2>Нейронные Инсайты</h2>
-      <p style="color: #888; margin-bottom: 4rem; max-width: 600px;">
-        Наш контент-завод транслирует экспертизу через Яндекс.Дзен и VK,
-        формируя экосистему знаний в области прикладного интеллекта.
-      </p>
+    <!-- ═══ ОТЗЫВЫ ═══ -->
+    <section id="testimonials" class="reveal">
+      <span class="section-tag">Клиенты</span>
+      <h2>Нам Доверяют</h2>
       <div class="architect-grid stagger-children">
         <div class="architect-card">
-          <h4>Образовательный Контент</h4>
-          <p>Технические гайды и архитектурные разборы внедрения AI-агентов.</p>
+          <h4>Служба доставки, г. Азов</h4>
+          <p>«Голосовой агент совершает 200 звонков в день — операторы занимаются только сложными случаями. Окупился за 2 месяца.»</p>
         </div>
         <div class="architect-card">
-          <h4>Кейсы и Аналитика</h4>
-          <p>Демонстрация измеримых бизнес-результатов перехода от ручного труда к AI-автономии.</p>
+          <h4>Агентство недвижимости</h4>
+          <p>«Telegram-бот квалифицирует 80% входящих лидов до передачи менеджеру. Экономия 100 часов в месяц.»</p>
         </div>
+      </div>
+    </section>
+
+    <!-- ═══ CTA ═══ -->
+    <section id="inquiry" class="hero reveal" style="height: auto; padding: 10rem 0;">
+      <div class="hero-content">
+        <span class="hero-pre">Начать Работу</span>
+        <h2>Нужен AI-агент?</h2>
+        <p>Опишите задачу — мы предложим архитектуру и точную стоимость за 1 день.</p>
+        <a href="mailto:architect@ai-bureau.pro" class="btn-primary" style="margin-top: 2rem; display: inline-block;">
+          Запросить Консультацию
+        </a>
       </div>
     </section>
 
@@ -154,8 +171,32 @@ import Base from '../layouts/Base.astro';
       "@type": "Offer",
       "itemOffered": {
         "@type": "Service",
+        "name": "Голосовые AI-боты для обзвона и поддержки",
+        "description": "Автоматический обзвон, квалификация лидов и голосовая поддержка 24/7 через AI-агентов. Интеграция с Mango Office."
+      }
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Чат-боты с RAG-базой знаний",
+        "description": "Нейронная база знаний для автоматизации консультаций на основе документов и регламентов бизнеса."
+      }
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
         "name": "Private Model Ops",
         "description": "Развёртывание локальных LLM (Gemma 2, Llama 3) внутри закрытого периметра компании."
+      }
+    },
+    {
+      "@type": "Offer",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "AI-консалтинг и аудит",
+        "description": "Аудит бизнес-процессов, оценка потенциала AI, прототип и дорожная карта внедрения."
       }
     }
   ]

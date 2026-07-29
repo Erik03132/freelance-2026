@@ -1,0 +1,93 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+
+<Base
+  title="AI-консалтинг и аудит для бизнеса | AI Bureau"
+  description="Аудит текущих процессов, оценка потенциала внедрения AI, стратегия и план внедрения. От 50 000 ₽."
+>
+  <header class="header">
+    <div class="logo-group">
+      <svg class="neural-logo" width="40" height="40" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>
+        <circle class="dot d1" cx="50" cy="20" r="3" fill="#00f0ff" />
+        <circle class="dot d2" cx="80" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d3" cx="50" cy="80" r="3" fill="#00f0ff" />
+        <circle class="dot d4" cx="20" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d5" cx="50" cy="50" r="5" fill="#00f0ff" />
+        <line x1="50" y1="20" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="80" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="50" y1="80" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="20" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+      </svg>
+      <div class="logo-text">AI BUREAU</div>
+    </div>
+    <nav class="nav">
+      <a href="/">Главная</a>
+      <a href="/services">Услуги</a>
+      <a href="/cases">Кейсы</a>
+      <a href="/faq">FAQ</a>
+      <a href="/#inquiry" class="btn-contact">Запрос</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" style="padding: 12rem 10% 6rem;">
+      <div class="hero-content">
+        <span class="hero-pre">Услуга</span>
+        <h1>AI-Консалтинг и Аудит</h1>
+        <p style="max-width: 600px; color: #888; line-height: 1.6;">
+          Определяем, как AI может принести измеримую пользу вашему бизнесу.
+          Аудит процессов, оценка стоимости внедрения, дорожная карта.
+        </p>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%;" class="reveal">
+      <h2>Что входит в аудит</h2>
+      <div class="architect-grid stagger-children">
+        <div class="architect-card">
+          <h3>Анализ процессов</h3>
+          <p>Изучаем ваши бизнес-процессы и находим точки, где AI даст максимальный ROI: поддержка, продажи, документооборот.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Оценка данных</h3>
+          <p>Анализируем качество и объём данных, доступных для обучения. Определяем необходимость RAG, fine-tuning или готовых решений.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Прототип</h3>
+          <p>Создаём работающий прототип AI-агента за 1 неделю — чтобы вы увидели результат до полноценного внедрения.</p>
+        </div>
+        <div class="architect-card">
+          <h3>Дорожная карта</h3>
+          <p>План внедрения: этапы, сроки, стоимость. Без лишних обещаний — только прагматичные решения.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding: 6rem 10%; background: #050505; border-radius: 40px;" class="reveal reveal-delay-1">
+      <div class="architect-card" style="max-width: 700px;">
+        <h4>Сколько стоит аудит?</h4>
+        <p>От 50 000 ₽. Включает: интервью с командой, анализ данных, прототип, дорожную карту. Если после аудита заказываете внедрение — стоимость аудита вычитается из счёта.</p>
+      </div>
+    </section>
+
+    <section id="inquiry" class="hero reveal" style="height: auto; padding: 8rem 10%;">
+      <div class="hero-content">
+        <h2>Заказать аудит</h2>
+        <p>Опишите вашу задачу — мы оценим стоимость и сроки аудита за 1 день.</p>
+        <a href="mailto:architect@ai-bureau.pro" class="btn-primary" style="margin-top: 2rem; display: inline-block;">Запросить</a>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "AI-консалтинг и аудит",
+  "description": "Аудит бизнес-процессов, оценка потенциала AI, прототип и дорожная карта внедрения.",
+  "provider": { "@type": "Organization", "name": "AI Bureau", "url": "https://ai-bureau.pro" },
+  "areaServed": "Russia",
+  "offers": { "@type": "Offer", "price": "50000", "priceCurrency": "RUB", "description": "от 50 000 ₽" }
+})} />

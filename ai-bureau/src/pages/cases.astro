@@ -1,0 +1,72 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Кейсы AI Bureau | Внедрения AI-агентов"
+  description="Примеры внедрения AI-агентов, голосовых ботов и RAG-систем для бизнеса."
+>
+  <header class="header">
+    <div class="logo-group">
+      <svg class="neural-logo" width="40" height="40" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>
+        <circle class="dot d1" cx="50" cy="20" r="3" fill="#00f0ff" />
+        <circle class="dot d2" cx="80" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d3" cx="50" cy="80" r="3" fill="#00f0ff" />
+        <circle class="dot d4" cx="20" cy="50" r="3" fill="#00f0ff" />
+        <circle class="dot d5" cx="50" cy="50" r="5" fill="#00f0ff" />
+        <line x1="50" y1="20" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="80" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="50" y1="80" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+        <line x1="20" y1="50" x2="50" y2="50" stroke="rgba(0,240,255,0.3)" />
+      </svg>
+      <div class="logo-text">AI BUREAU</div>
+    </div>
+    <nav class="nav">
+      <a href="/">Главная</a>
+      <a href="/services">Услуги</a>
+      <a href="/cases" style="color: var(--cyan);">Кейсы</a>
+      <a href="/faq">FAQ</a>
+      <a href="/#inquiry" class="btn-contact">Запрос</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" style="padding: 12rem 10% 6rem;">
+      <div class="hero-content">
+        <span class="hero-pre">Портфолио</span>
+        <h1>Наши Кейсы</h1>
+        <p style="max-width: 600px; color: #888; line-height: 1.6;">
+          Реальные проекты внедрения AI-агентов, голосовых ботов и RAG-систем.
+        </p>
+      </div>
+    </section>
+
+    <section style="padding: 4rem 10% 8rem;" class="reveal">
+      <div style="max-width: 800px; display: flex; flex-direction: column; gap: 3rem;">
+        <div class="architect-card" style="padding: 2rem;">
+          <span class="section-tag" style="margin-bottom: 0.5rem;">Голосовой агент</span>
+          <h3 style="margin-bottom: 1rem;">Автообзвон для службы доставки</h3>
+          <p style="color: #999;">AI-агент совершает исходящие звонки клиентам для подтверждения заказов. Экономия 90% времени операторов кол-центра. Интеграция с Mango Office и CRM.</p>
+        </div>
+        <div class="architect-card" style="padding: 2rem;">
+          <span class="section-tag" style="margin-bottom: 0.5rem;">RAG-система</span>
+          <h3 style="margin-bottom: 1rem;">База знаний для HR-отдела</h3>
+          <p style="color: #999;">Чат-бот на основе внутренних регламентов компании. Отвечает на вопросы сотрудников по кадровым документам, отпускам и компенсациям.</p>
+        </div>
+        <div class="architect-card" style="padding: 2rem;">
+          <span class="section-tag" style="margin-bottom: 0.5rem;">AI-агент</span>
+          <h3 style="margin-bottom: 1rem;">Квалификация лидов для агентства</h3>
+          <p style="color: #999;">Telegram-бот собирает и квалифицирует входящие заявки: определяет тип бизнеса, задачу и бюджет. Передаёт тёплые лиды менеджерам с ИИ-выжимкой.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Кейсы AI Bureau",
+  "description": "Примеры внедрения AI-агентов, голосовых ботов и RAG-систем."
+})} />

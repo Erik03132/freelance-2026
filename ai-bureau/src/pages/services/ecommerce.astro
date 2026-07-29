@@ -27,7 +27,8 @@ import Base from '../../layouts/Base.astro';
     </div>
     <nav class="nav">
       <a href="/">Главная</a>
-      <a href="/services">Решения</a>
+      <a href="/services">Услуги</a>
+      <a href="/cases">Кейсы</a>
       <a href="/faq">FAQ</a>
       <a href="/#inquiry" class="btn-contact">Запрос</a>
     </nav>
@@ -45,9 +46,9 @@ import Base from '../../layouts/Base.astro';
       </div>
     </section>
 
-    <section style="padding: 6rem 10%;">
+    <section style="padding: 6rem 10%;" class="reveal">
       <h2>Что автоматизируем</h2>
-      <div class="architect-grid">
+      <div class="architect-grid stagger-children">
         <div class="architect-card">
           <h3>SEO-тексты</h3>
           <p>Генерация уникальных описаний товаров с ключевыми словами для Wildberries, Ozon, Яндекс.Маркет. Тысячи карточек за часы.</p>
@@ -67,14 +68,14 @@ import Base from '../../layouts/Base.astro';
       </div>
     </section>
 
-    <section style="padding: 6rem 10%; background: #050505; border-radius: 40px;">
+    <section style="padding: 6rem 10%; background: #050505; border-radius: 40px;" class="reveal reveal-delay-1">
       <div class="architect-card" style="max-width: 700px;">
         <h4>Сколько стоит?</h4>
         <p>От 50 000 ₽/мес — зависит от объёма карточек и количества маркетплейсов.</p>
       </div>
     </section>
 
-    <section id="inquiry" class="hero" style="height: auto; padding: 8rem 10%;">
+    <section id="inquiry" class="hero reveal" style="height: auto; padding: 8rem 10%;">
       <div class="hero-content">
         <h2>Обсудить проект</h2>
         <a href="mailto:architect@ai-bureau.pro" class="btn-primary" style="margin-top: 2rem; display: inline-block;">Запросить Консультацию</a>
