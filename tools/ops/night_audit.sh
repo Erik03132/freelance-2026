@@ -2,15 +2,11 @@
 # ============================================================
 # 🌙 night_audit.sh — Ночной код-аудитор Antigravity v2
 # ============================================================
-# ПРИНЦИП: Cross-Model Peer Review
-#   Код пишет Gemini 2.5 Pro → Проверяет Claude (через OpenRouter)
-#   Два профессора из разных школ = максимум найденных багов
+# ПРИНЦИП: Машинный аудит + Gemini AI-ревью
 #
 # Архитектура:
 #   Фаза 1: ruff + секреты + git diff (машина, 100% точность)
 #   Фаза 2: Gemini CLI 2.5 Pro — глубокий аудит (бесплатно)
-#   Фаза 3: Claude через OpenRouter — cross-model ревью
-#   Fallback: Gemma 4 через Ollama (если нет интернета)
 #
 # Использование:
 #   bash tools/night_audit.sh                     # ai-eggs, только отчёт
@@ -42,12 +38,8 @@ TG_BOT_TOKEN=$(grep "ANGELOCHKA_BOT_TOKEN" "${AI_EGGS_DIR}/.env" 2>/dev/null | c
 TG_ADMIN_ID="176203333"
 TG_PROXY=$(grep "TELEGRAM_PROXY" "${AI_EGGS_DIR}/.env" 2>/dev/null | cut -d= -f2 || echo "")
 
-# API ключи
-OPENROUTER_KEY=$(grep "OPENROUTER_API_KEY" "${AI_EGGS_DIR}/.env" 2>/dev/null | cut -d= -f2)
-
-# Модели
+# Инструменты
 GEMINI_CLI=$(which gemini 2>/dev/null || echo "")
-OLLAMA_MODEL="gemma4:e2b"  # Fallback только
 
 # Флаги запуска
 PHASE1_ONLY=false
@@ -130,43 +122,6 @@ send_telegram() {
             -d "parse_mode=Markdown" \
             > /dev/null 2>&1 || true
     fi
-}
-
-# Вызов Claude через OpenRouter API
-call_claude() {
-    local prompt="$1"
-    local max_tokens="${2:-4096}"
-    
-    if [ -z "$OPENROUTER_KEY" ]; then
-        echo "❌ OPENROUTER_API_KEY не найден"
-        return 1
-    fi
-    
-    # Экранируем prompt для JSON
-    local escaped_prompt
-    escaped_prompt=$(echo "$prompt" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))")
-    
-    local response
-    response=$(curl -s --max-time 120 \
-        -H "Authorization: Bearer ${OPENROUTER_KEY}" \
-        -H "Content-Type: application/json" \
-        -H "HTTP-Referer: https://antigravity.local" \
-        -d "{
-            \"model\": \"anthropic/claude-sonnet-4\",
-            \"max_tokens\": ${max_tokens},
-            \"messages\": [{\"role\": \"user\", \"content\": ${escaped_prompt}}]
-        }" \
-        "https://openrouter.ai/api/v1/chat/completions" 2>/dev/null)
-    
-    # Извлекаем текст ответа
-    echo "$response" | python3 -c "
-import sys, json
-try:
-    r = json.load(sys.stdin)
-    print(r['choices'][0]['message']['content'])
-except Exception as e:
-    print(f'❌ Ошибка Claude API: {e}')
-" 2>/dev/null
 }
 
 # ============ ИНИЦИАЛИЗАЦИЯ ============
@@ -352,7 +307,6 @@ if [ "$PHASE1_ONLY" = true ]; then
     echo "⏭️ AI-фазы пропущены (--phase1-only)" >> "$REPORT_FILE"
     # Прыгаем к итогам
     GEMINI_FOUND=0
-    CLAUDE_FOUND=0
 else
 
 # ============================================================
@@ -401,87 +355,6 @@ else
     log "  Фаза 2 пропущена (нет gemini)"
 fi
 
-# ============================================================
-# ФАЗА 3: CLAUDE — CROSS-MODEL REVIEW (ключевая!)
-# ============================================================
-
-echo "" >> "$REPORT_FILE"
-echo "---" >> "$REPORT_FILE"
-echo "" >> "$REPORT_FILE"
-echo "## 🧠 Фаза 3: Claude — Cross-Model Peer Review" >> "$REPORT_FILE"
-echo "" >> "$REPORT_FILE"
-
-CLAUDE_FOUND=0
-if [ -n "$OPENROUTER_KEY" ]; then
-    log "🧠 Фаза 3: Claude cross-model review..."
-
-    CLAUDE_PROMPT="Ты — независимый код-аудитор. Другой AI (Gemini) написал этот код. Твоя задача — найти ошибки, которые Gemini мог пропустить.
-
-ПРОЕКТ: AI-агент «Анжелочка» для птицефабрики (Python, aiogram, Bitrix24 CRM, Ollama/Gemini API).
-VPS: Timeweb, PM2, Node.js + Python.
-
-ВОТ ДИФФ КОДА ЗА ДЕНЬ:
-
-\`\`\`diff
-${CODE_DIFF}
-\`\`\`
-
-ФОКУС (ищи именно это):
-1. 🐛 Логические баги — неправильные условия, off-by-one, необработанные edge cases
-2. 🔒 Безопасность — ключи в коде, path traversal, unsanitized input в SQL/API
-3. ⚡ Async-проблемы — блокирующие вызовы в async, незакрытые соединения, race conditions
-4. 🧟 Мёртвый код — импорты без использования, закомментированные блоки, TODO забытые
-5. 💣 Потенциальные крэши — необработанные исключения, None.attribute, деление на 0
-
-ФОРМАТ ОТВЕТА:
-Для каждого найденного бага:
-- **Файл:строка** — описание проблемы
-- **Критичность:** 🔴 Критично / 🟡 Важно / 🟢 Минорно
-- **Исправление:** конкретная рекомендация
-
-Если код чист — честно скажи «✅ Код чист, серьёзных проблем не обнаружено».
-НЕ ПРИДУМЫВАЙ проблемы если их нет. Только реальные."
-
-    CLAUDE_RESPONSE=$(call_claude "$CLAUDE_PROMPT" 4096)
-
-    if [ -n "$CLAUDE_RESPONSE" ] && ! echo "$CLAUDE_RESPONSE" | grep -q "❌ Ошибка"; then
-        echo "$CLAUDE_RESPONSE" >> "$REPORT_FILE"
-        CLAUDE_FOUND=1
-        
-        # Считаем найденные баги
-        CLAUDE_CRITICAL=$(echo "$CLAUDE_RESPONSE" | grep -c "🔴" || echo "0")
-        CLAUDE_IMPORTANT=$(echo "$CLAUDE_RESPONSE" | grep -c "🟡" || echo "0")
-        CLAUDE_MINOR=$(echo "$CLAUDE_RESPONSE" | grep -c "🟢" || echo "0")
-        
-        log "  Claude нашёл: 🔴${CLAUDE_CRITICAL} 🟡${CLAUDE_IMPORTANT} 🟢${CLAUDE_MINOR}"
-    else
-        echo "⚠️ Claude API недоступен: ${CLAUDE_RESPONSE}" >> "$REPORT_FILE"
-        CLAUDE_CRITICAL=0; CLAUDE_IMPORTANT=0; CLAUDE_MINOR=0
-        log "  ⚠️ Claude API ошибка"
-        
-        # === FALLBACK: Gemma 4 ===
-        if command -v ollama &> /dev/null && ollama list 2>/dev/null | grep -q "$OLLAMA_MODEL"; then
-            log "  🔄 Fallback: Gemma 4..."
-            echo "" >> "$REPORT_FILE"
-            echo "### 🔄 Fallback: Gemma 4 (локальная)" >> "$REPORT_FILE"
-            
-            GEMMA_PROMPT="Кратко проанализируй дифф Python-кода. Найди баги, проблемы безопасности, неоптимальный код. Ответь на русском, макс 30 строк.
-
-\`\`\`diff
-$(echo "$CODE_DIFF" | head -150)
-\`\`\`"
-            
-            GEMMA_RESPONSE=$(timeout 180 ollama run "$OLLAMA_MODEL" "$GEMMA_PROMPT" 2>/dev/null || echo "⏰ Таймаут Gemma 4")
-            echo "$GEMMA_RESPONSE" >> "$REPORT_FILE"
-            log "  Fallback Gemma завершён"
-        fi
-    fi
-else
-    echo "⚠️ OPENROUTER_API_KEY не найден — Claude-ревью пропущено" >> "$REPORT_FILE"
-    CLAUDE_CRITICAL=0; CLAUDE_IMPORTANT=0; CLAUDE_MINOR=0
-    log "  Фаза 3 пропущена (нет ключа)"
-fi
-
 fi  # конец проверки --phase1-only
 
 # ============================================================
@@ -505,26 +378,16 @@ cat >> "$REPORT_FILE" << EOF
 | ⚡ ruff ошибок (E,F,S,B) | ${RUFF_ERRORS:-0} |
 | 🔐 Hardcoded секретов | ${SECRET_HITS:-0} |
 | 🔬 Gemini аудит | $([ "${GEMINI_FOUND:-0}" -eq 1 ] && echo "✅" || echo "⏭️") |
-| 🧠 Claude cross-review | $([ "${CLAUDE_FOUND:-0}" -eq 1 ] && echo "✅" || echo "⏭️") |
-| 🔴 Критичных (Claude) | ${CLAUDE_CRITICAL:-0} |
-| 🟡 Важных (Claude) | ${CLAUDE_IMPORTANT:-0} |
-| 🟢 Минорных (Claude) | ${CLAUDE_MINOR:-0} |
 
 ### Метод аудита
 \`\`\`
-Код писали: Gemini 2.5 Pro + Claude Opus (через Antigravity)
-Проверяли:
-  Фаза 1: ruff 0.15 (машина, 100% точность)
+  Фаза 1: ruff (машина, 100% точность)
   Фаза 2: Gemini CLI 2.5 Pro (глубокий анализ, бесплатно)
-  Фаза 3: Claude Sonnet 4 (cross-model review, OpenRouter)
-  
-Cross-Model Peer Review: два профессора из разных школ
-проверяют код друг друга → максимум найденных багов
 \`\`\`
 
 ---
 
-> 🤖 Сгенерировано: \`tools/night_audit.sh v2\` — Cross-Model Peer Review
+> 🤖 Сгенерировано: \`tools/night_audit.sh v2\`
 EOF
 
 log "✅ Ночной аудит завершён: ${TIME_END}"
@@ -533,13 +396,8 @@ log "📄 Отчёт: ${REPORT_FILE}"
 # ============ TELEGRAM ============
 
 # Определяем критичность
-TOTAL_ISSUES=$((${CLAUDE_CRITICAL:-0} + ${CLAUDE_IMPORTANT:-0}))
 if [ "${SECRET_HITS:-0}" -gt 0 ]; then
     SEVERITY="🔴 КРИТИЧНО — hardcoded секреты!"
-elif [ "${CLAUDE_CRITICAL:-0}" -gt 0 ]; then
-    SEVERITY="🔴 Claude нашёл ${CLAUDE_CRITICAL} критичных багов!"
-elif [ "${CLAUDE_IMPORTANT:-0}" -gt 0 ]; then
-    SEVERITY="🟡 Claude нашёл ${CLAUDE_IMPORTANT} важных замечаний"
 elif [ "${RUFF_ERRORS:-0}" -gt 20 ]; then
     SEVERITY="🟡 ruff: ${RUFF_ERRORS} ошибок"
 else
@@ -554,7 +412,6 @@ ${SEVERITY}
 • ruff: ${RUFF_ERRORS:-0} ошибок
 • Секретов: ${SECRET_HITS:-0}
 • Gemini: $([ "${GEMINI_FOUND:-0}" -eq 1 ] && echo "✅" || echo "⏭️")
-• Claude: 🔴${CLAUDE_CRITICAL:-0} 🟡${CLAUDE_IMPORTANT:-0} 🟢${CLAUDE_MINOR:-0}
 • Файлов проверено: ${CHANGED_COUNT}
 
 📄 \`reports/night_audit_${DATE}.md\`"

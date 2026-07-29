@@ -6,6 +6,18 @@
   --accent: #d4af37;
   --cyan: #00f0ff;
   --glass: rgba(255, 255, 255, 0.02);
+
+  /* Apple Design — Animation Vocabulary */
+  --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --spring-light: cubic-bezier(0.34, 1.2, 0.64, 1);
+
+  --duration-micro: 150ms;
+  --duration-fast: 250ms;
+  --duration-normal: 400ms;
+  --duration-slow: 600ms;
 }
 
 * {
@@ -38,6 +50,50 @@ body {
   z-index: 1000;
 }
 
+/* ═══ Scroll-Reveal (Apple-style entrance) ═══ */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity var(--duration-slow) var(--ease-out),
+              transform var(--duration-slow) var(--ease-out);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ═══ Stagger для карточек ═══ */
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity var(--duration-normal) var(--ease-out),
+              transform var(--duration-normal) var(--ease-out);
+}
+
+.stagger-children.visible > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(2) { transition-delay: 0.12s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(3) { transition-delay: 0.19s; opacity: 1; transform: translateY(0); }
+.stagger-children.visible > *:nth-child(4) { transition-delay: 0.26s; opacity: 1; transform: translateY(0); }
+
+/* prefers-reduced-motion — отключаем анимации */
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .stagger-children > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .stagger-children.visible > * {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Header & Logo */
 .header {
   padding: 2rem 5%;
@@ -50,6 +106,12 @@ body {
   z-index: 100;
   background: rgba(0,0,0,0.5);
   backdrop-filter: blur(10px);
+  animation: headerFadeIn var(--duration-slow) var(--ease-out) both;
+}
+
+@keyframes headerFadeIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .logo-group {
@@ -60,10 +122,15 @@ body {
 
 .neural-logo {
   filter: drop-shadow(0 0 5px var(--cyan));
+  transition: filter var(--duration-normal) var(--ease-out);
+}
+
+.logo-group:hover .neural-logo {
+  filter: drop-shadow(0 0 15px var(--cyan));
 }
 
 .dot {
-  animation: dot-pulse 3s infinite alternate ease-in-out;
+  animation: dot-pulse 3s infinite alternate var(--ease-out);
 }
 
 .d1 { animation-delay: 0.2s; }
@@ -92,11 +159,34 @@ body {
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-left: 2.5rem;
-  transition: 0.3s;
+  transition: color var(--duration-fast) var(--ease-out),
+              opacity var(--duration-fast) var(--ease-out);
+  position: relative;
+}
+
+.nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--cyan);
+  transition: width var(--duration-normal) var(--ease-out);
 }
 
 .nav a:hover {
   color: var(--cyan);
+}
+
+.nav a:hover::after {
+  width: 100%;
+}
+
+.nav a:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+  border-radius: 2px;
 }
 
 .btn-contact {
@@ -104,7 +194,17 @@ body {
   padding: 0.5rem 1.2rem;
   border-radius: 4px;
   color: var(--cyan) !important;
+  transition: background var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out) !important;
 }
+
+.btn-contact:hover {
+  background: var(--cyan);
+  color: #000 !important;
+}
+
+.btn-contact::after { display: none; }
 
 /* Hero Section */
 .hero {
@@ -130,6 +230,12 @@ body {
   margin-bottom: 2rem;
   display: block;
   opacity: 0.7;
+  animation: heroPreFadeIn var(--duration-slow) var(--ease-out) 0.3s both;
+}
+
+@keyframes heroPreFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 0.7; transform: translateY(0); }
 }
 
 .hero h1 {
@@ -138,6 +244,12 @@ body {
   letter-spacing: -0.04em;
   line-height: 1;
   margin-bottom: 2.5rem;
+  animation: heroTitleFadeIn var(--duration-slow) var(--ease-out) 0.5s both;
+}
+
+@keyframes heroTitleFadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .hero p {
@@ -146,12 +258,24 @@ body {
   max-width: 550px;
   margin: 0 auto 4rem;
   font-weight: 300;
+  animation: heroPFadeIn var(--duration-slow) var(--ease-out) 0.7s both;
+}
+
+@keyframes heroPFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .cta-group {
   display: flex;
   gap: 1.5rem;
   justify-content: center;
+  animation: ctaFadeIn var(--duration-slow) var(--ease-out) 0.9s both;
+}
+
+@keyframes ctaFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .btn-primary {
@@ -164,12 +288,25 @@ body {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 2px;
-  transition: 0.3s;
+  transition: background var(--duration-fast) var(--ease-out),
+              transform var(--duration-micro) var(--spring-light),
+              box-shadow var(--duration-fast) var(--ease-out);
+  display: inline-block;
 }
 
 .btn-primary:hover {
   background: var(--cyan);
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 240, 255, 0.2);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
 }
 
 .btn-secondary {
@@ -182,6 +319,27 @@ body {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 2px;
+  transition: background var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out),
+              transform var(--duration-micro) var(--spring-light),
+              box-shadow var(--duration-fast) var(--ease-out);
+  display: inline-block;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.2);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.4);
+  outline-offset: 4px;
 }
 
 /* Section Common */
@@ -216,6 +374,22 @@ h2 {
   border-left: 1px solid rgba(0, 240, 255, 0.1);
   padding-left: 3rem;
   padding-bottom: 4rem;
+  transition: border-color var(--duration-normal) var(--ease-out),
+              transform var(--duration-fast) var(--spring-light);
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.architect-card:hover {
+  border-left-color: var(--cyan);
+  transform: translateX(4px);
+}
+
+.architect-card:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
 .architect-card h3 {
@@ -249,11 +423,17 @@ h2 {
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
-  transition: 0.3s;
+  transition: transform var(--duration-micro) var(--spring),
+              box-shadow var(--duration-fast) var(--ease-out);
 }
 
 .chat-trigger:hover {
   transform: scale(1.1);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
+}
+
+.chat-trigger:active {
+  transform: scale(0.95);
 }
 
 .chat-window {
@@ -270,6 +450,13 @@ h2 {
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  transform-origin: bottom right;
+  animation: chatOpen var(--duration-normal) var(--ease-out) both;
+}
+
+@keyframes chatOpen {
+  from { opacity: 0; transform: scale(0.9) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .chat-header {
@@ -280,6 +467,9 @@ h2 {
   text-transform: uppercase;
   color: var(--cyan);
   border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .chat-messages {
@@ -297,18 +487,26 @@ h2 {
   border-radius: 8px;
   font-size: 0.85rem;
   line-height: 1.4;
+  animation: msgIn var(--duration-normal) var(--ease-out) both;
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .msg.bot {
   align-self: flex-start;
   background: rgba(255,255,255,0.05);
   color: #ccc;
+  animation-delay: 0.1s;
 }
 
 .msg.user {
   align-self: flex-end;
   background: var(--cyan);
   color: #000;
+  animation-delay: 0.15s;
 }
 
 .chat-inputbar {
@@ -327,20 +525,38 @@ h2 {
   outline: none;
 }
 
+.chat-inputbar input:focus-visible {
+  outline: 1px solid var(--cyan);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
 .chat-inputbar button {
   background: none;
   border: none;
   color: var(--cyan);
   font-size: 1.2rem;
   cursor: pointer;
+  transition: transform var(--duration-micro) var(--spring),
+              opacity var(--duration-fast) var(--ease-out);
 }
 
-/* ── Недостающие классы чат-виджета BureauBot ───────────────────────────
-   Раньше эти классы использовались в BureauBot.tsx, но не были определены
-   в CSS — чат отрисовывался «полуголым».
-   ────────────────────────────────────────────────────────────────────── */
+.chat-inputbar button:hover {
+  transform: scale(1.15);
+}
 
-/* Пульсация вокруг плавающей кнопки-триггера */
+.chat-inputbar button:active {
+  transform: scale(0.9);
+}
+
+.chat-inputbar button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* ── Недостающие классы чат-виджета BureauBot ── */
+
 .trigger-pulse {
   position: absolute;
   top: 0;
@@ -349,20 +565,13 @@ h2 {
   height: 60px;
   border-radius: 50%;
   border: 2px solid var(--cyan);
-  animation: triggerPulse 2s infinite;
+  animation: triggerPulse 2s infinite var(--ease-out);
   pointer-events: none;
 }
 
 @keyframes triggerPulse {
   0% { transform: scale(1); opacity: 0.8; }
   100% { transform: scale(1.6); opacity: 0; }
-}
-
-/* Заголовок окна чата: индикатор статуса + имя */
-.chat-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .header-info {
@@ -379,7 +588,6 @@ h2 {
   color: var(--cyan);
 }
 
-/* Зелёная точка «онлайн» */
 .status-indicator {
   width: 8px;
   height: 8px;
@@ -396,14 +604,21 @@ h2 {
   cursor: pointer;
   padding: 0 4px;
   line-height: 1;
-  transition: color 0.2s;
+  transition: color var(--duration-fast) var(--ease-out),
+              transform var(--duration-micro) var(--spring);
 }
 
 .close-btn:hover {
   color: #fff;
+  transform: scale(1.2);
 }
 
-/* Полоса прогресса воронки квалификации */
+.close-btn:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
 .bot-progress {
   display: flex;
   justify-content: space-between;
@@ -419,6 +634,7 @@ h2 {
   gap: 4px;
   position: relative;
   flex: 1;
+  transition: opacity var(--duration-normal) var(--ease-out);
 }
 
 .progress-step::before {
@@ -441,7 +657,7 @@ h2 {
   border-radius: 50%;
   background: #333;
   z-index: 1;
-  transition: all 0.3s;
+  transition: all var(--duration-normal) var(--ease-out);
 }
 
 .progress-step.done .step-dot {
@@ -460,7 +676,7 @@ h2 {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   color: #555;
-  transition: color 0.3s;
+  transition: color var(--duration-normal) var(--ease-out);
 }
 
 .progress-step.done .step-label,
@@ -468,14 +684,11 @@ h2 {
   color: var(--cyan);
 }
 
-/* Содержимое сообщения (выделено отдельно для будущей типографики) */
 .msg-content {
   word-wrap: break-word;
   white-space: pre-wrap;
 }
 
-/* Индикатор «бот печатает» — три точки.
-   Внимание: НЕ используем класс .dot — он занят анимацией логотипа. */
 .msg.typing {
   display: flex;
   gap: 4px;
@@ -489,7 +702,7 @@ h2 {
   border-radius: 50%;
   background: var(--cyan);
   opacity: 0.4;
-  animation: typingBounce 1.4s infinite;
+  animation: typingBounce 1.4s infinite var(--ease-out);
 }
 
 .msg.typing span:nth-child(2) { animation-delay: 0.2s; }

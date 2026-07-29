@@ -55,6 +55,33 @@ const {
       <slot />
       <BureauBot client:load />
     </div>
+
+    <script>
+      // Scroll-Reveal (Intersection Observer)
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            if (entry.target.classList.contains('stagger-children')) {
+              entry.target.classList.add('visible');
+              requestAnimationFrame(() => {
+                Array.from(entry.target.children).forEach((child, i) => {
+                  child.style.transitionDelay = `${0.05 + i * 0.07}s`;
+                  child.style.opacity = '1';
+                  child.style.transform = 'translateY(0)';
+                });
+              });
+            } else {
+              entry.target.classList.add('visible');
+            }
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.reveal, .stagger-children').forEach(el => observer.observe(el));
+      });
+    </script>
   </body>
 </html>
 
