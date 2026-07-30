@@ -303,8 +303,8 @@ class LevitanHandler(BaseHTTPRequestHandler):
                 active_calls[call_id]["phone"] = client_phone
                 active_calls[call_id]["connected_at"] = datetime.now().isoformat()
 
-                # Schedule greeting play
-                _schedule_greeting_play(call_id)
+                # Schedule greeting play — отключено: baresip играет через aufile (37s файл с lead-in)
+                # _schedule_greeting_play(call_id)
 
                 # Telegram notification
                 notify_telegram(

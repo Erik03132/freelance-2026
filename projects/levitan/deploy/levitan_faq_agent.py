@@ -1025,6 +1025,75 @@ class FAQDialog:
             set_baresip_audio(GREETING_WAV)
 
 
+# === BUILD ANSWER WAV ===
+def build_answer_wav(text: str) -> Path | None:
+    wav = synthesize_wav(text)
+    if not wav or not wav.exists():
+        log.error(f"TTS failed for: {text[:50]}")
+        return None
+    try:
+        with wave.open(str(wav), "rb") as w:
+            params = w.getparams()
+            frames = w.readframes(w.getnframes())
+        thanks = synthesize_wav("Спасибо за ответ, до свидания!")
+        thanks_frames = b""
+        if thanks and thanks.exists():
+            with wave.open(str(thanks), "rb") as w:
+                thanks_frames = w.readframes(w.getnframes())
+
+        def _silence(sec):
+            return b"\x00" * int(params.framerate * sec) * params.sampwidth * params.nchannels
+
+        full = _silence(2) + frames + _silence(7) + thanks_frames
+        with wave.open(str(BARESIP_AUFILE_PATH), "wb") as w:
+            w.setparams(params)
+            w.writeframes(full)
+        log.info(
+            f"Answer WAV built: {BARESIP_AUFILE_PATH} ({round(len(full)/(params.framerate*params.sampwidth*params.nchannels),1)}s)"
+        )
+        return BARESIP_AUFILE_PATH
+    except Exception as e:
+        log.error(f"Build answer WAV error: {e}")
+        return None
+
+
+# === PROCESS CALL END ===
+def process_call_end(event: dict):
+    phone = event.get("phone", "")
+    if not phone or len(phone) < 11:
+        return
+    if phone in ("4400161137", "1"):
+        return
+    log.info(f"Call ended for {phone}, processing STT...")
+    rec = get_latest_recording(after_timestamp=0)
+    if not rec:
+        log.info(f"No recording found for {phone}")
+        return
+    text = transcribe(str(rec))
+    if not text or len(text.strip()) < 3:
+        log.info(f"Empty STT for {phone}")
+        return
+    interested = not any(p in text.lower() for p in REJECTION_PHRASES)
+    if interested:
+        log.info(f"INTEREST DETECTED: {phone}")
+        notify_telegram(f"🔥 <b>Горячий лид!</b>\nТелефон: {phone}\nСказал: {text[:200]}")
+        answer = faq_lookup(text)
+        if answer:
+            log.info(f"FAQ answer: {answer[:80]}")
+            build_answer_wav(answer)
+            time.sleep(1)
+            mango_callback(phone, f"levitan_answer_{uuid.uuid4().hex[:8]}")
+        else:
+            build_answer_wav(
+                "Спасибо за интерес! Наш менеджер свяжется с вами для уточнения деталей."
+            )
+            time.sleep(1)
+            mango_callback(phone, f"levitan_answer_{uuid.uuid4().hex[:8]}")
+    else:
+        log.info(f"NOT interested: {phone}")
+        notify_telegram(f"❌ <b>Не заинтересован</b>\nТелефон: {phone}")
+
+
 # === EVENT WATCHER ===
 def watch_for_calls():
     seen = set()
@@ -1053,13 +1122,12 @@ def watch_for_calls():
                             continue
                         if event.get("type") == "callback_connected":
                             phone = event.get("phone", "")
-                            call_id = event.get("call_id", "")
                             if not phone or len(phone) < 11:
                                 continue
                             if phone in active_phones:
                                 continue
                             cmd_id = event.get("command_id", "")
-                            if "levitan_t" in cmd_id or "levitan_close" in cmd_id:
+                            if "levitan_turn_" in cmd_id or "levitan_close" in cmd_id:
                                 continue
                             log.info(f"New call detected: {phone}")
                             active_phones.add(phone)
@@ -1073,6 +1141,15 @@ def watch_for_calls():
 
                             t = threading.Thread(target=run_dialog, args=(phone,), daemon=True)
                             t.start()
+
+                        elif event.get("type") == "call_end":
+                            phone = event.get("phone", "")
+                            if phone and len(phone) >= 11 and phone not in active_phones:
+                                ev_copy = dict(event)
+                                t = threading.Thread(
+                                    target=process_call_end, args=(ev_copy,), daemon=True
+                                )
+                                t.start()
             time.sleep(1)
         except Exception as e:
             log.error(f"Watch error: {e}")
