@@ -23,8 +23,14 @@ if __name__ == "__main__":
     if wav:
         target = a.GREETING_WAV
         import shutil
+        from pathlib import Path
 
-        shutil.copy2(str(wav), str(target))
+        # Добавляем lead-in тишину (1.5с), чтобы RTP-канал успел открыться
+        # до начала приветствия — иначе первые секунды «съедаются».
+        with_lead = Path(str(target).replace(".wav", "_lead.wav"))
+        a._add_lead_silence(wav, with_lead, seconds=1.5)
+        final = with_lead if with_lead.exists() else wav
+        shutil.copy2(str(final), str(target))
         print(f"Greeting saved: {target}")
     else:
         print("ERROR: failed to synthesize greeting")

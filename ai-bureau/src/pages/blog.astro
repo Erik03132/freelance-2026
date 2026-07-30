@@ -1,0 +1,118 @@
+---
+import Base from '../layouts/Base.astro';
+
+const posts = Object.values(import.meta.glob('../content/blog/*.md', { eager: true })).map((p, i) => ({
+  ...p.frontmatter,
+  slug: Object.keys(import.meta.glob('../content/blog/*.md', { eager: true }))[i].split('/').pop().replace('.md', ''),
+}));
+---
+
+<Base title="Блог AI Bureau | Статьи об AI-агентах и RAG" description="Кейсы, гайды и экспертиза по AI-агентам, голосовым ботам, RAG-системам и приватным LLM.">
+  <header id="site-header">
+    <div class="max-w-content px-4 sm:px-6 lg:px-8">
+      <nav class="nav-transparent">
+        <div class="nav-inner">
+          <a href="/" class="flex items-center gap-2.5" style="text-decoration: none; color: inherit;">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="15" stroke="url(#logo-grad)" stroke-width="1.5"/>
+              <circle cx="16" cy="16" r="4" fill="url(#logo-grad)"/>
+              <line x1="16" y1="4" x2="16" y2="10" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="16" y1="22" x2="16" y2="28" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="4" y1="16" x2="10" y2="16" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="22" y1="16" x2="28" y2="16" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="7.5" y1="7.5" x2="11.5" y2="11.5" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20.5" y1="20.5" x2="24.5" y2="24.5" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="7.5" y1="24.5" x2="11.5" y2="20.5" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="20.5" y1="11.5" x2="24.5" y2="7.5" stroke="url(#logo-grad)" stroke-width="1.5" stroke-linecap="round"/>
+              <defs><linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#00f0ff"/><stop offset="100%" stop-color="#C9A227"/></linearGradient></defs>
+            </svg>
+            <span class="font-['Manrope',sans-serif] text-sm font-semibold uppercase tracking-tight">AI BUREAU</span>
+          </a>
+          <div class="nav-links hidden md:flex">
+            <a href="/services" class="nav-link">Услуги</a>
+            <a href="/cases" class="nav-link">Кейсы</a>
+            <a href="/faq" class="nav-link">FAQ</a>
+          </div>
+          <a href="mailto:architect@ai-bureau.pro" class="nav-cta">Связаться</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="hero" style="min-height: 60vh;">
+      <div class="hero-backdrop"><span>BLOG</span></div>
+      <div class="hero-grid" style="grid-template-columns: 1fr;">
+        <div class="gs-hero-copy" style="text-align: center;">
+          <div class="hero-tag" style="margin: 0 auto 1.5rem;">
+            <span class="dot"></span>
+            Блог AI Bureau
+          </div>
+          <h1 id="hero-title">
+            <span class="block overflow-hidden"><span class="hero-word block">Экспертиза</span></span>
+            <span class="block overflow-hidden"><span class="hero-word block">в каждой статье</span></span>
+          </h1>
+          <p style="max-width: 600px; margin: 1.75rem auto 0;">Кейсы, гайды и разборы по AI-агентам, голосовым ботам, RAG и приватным LLM.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: var(--bg-light); padding-top: 2rem;">
+      <div class="max-w-content">
+        <div class="services-grid" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));">
+          {posts.map(post => (
+            <article class="service-card gs-fade-up" style="cursor: pointer;" onclick={`location.href='/blog/${post.slug}/'`}>
+              <div class="accent-line"></div>
+              <div class="card-top">
+                <div class="card-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+                </div>
+                <div class="card-number">// {String(posts.indexOf(post) + 1).padStart(2, '0')}</div>
+              </div>
+              <h3>{post.title}</h3>
+              <p>{post.description}</p>
+              {post.tags && <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                {post.tags.map(t => <span style="padding: 0.2rem 0.5rem; border-radius: 0.25rem; background: rgba(0,240,255,0.1); color: var(--accent-cyan); font-size: 0.7rem;">{t}</span>)}
+              </div>}
+              <span class="card-cta" style="margin-top: 1.5rem;">
+                Читать →
+              </span>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-main">
+        <div style="max-width: 24rem;">
+          <div class="footer-brand">AI Bureau</div>
+          <p class="footer-desc">Инженерное бюро по проектированию автономных AI-систем.</p>
+        </div>
+        <div class="footer-links" style="flex: 1;">
+          <div>
+            <h4>Услуги</h4>
+            <a href="/services/ai-agents">AI-Агенты</a>
+            <a href="/services/voice-bots">Голосовые боты</a>
+            <a href="/services/rag-knowledge">RAG</a>
+          </div>
+          <div>
+            <h4>Ресурсы</h4>
+            <a href="/blog">Блог</a>
+            <a href="/cases">Кейсы</a>
+            <a href="/faq">FAQ</a>
+          </div>
+          <div>
+            <h4>Контакты</h4>
+            <a href="mailto:architect@ai-bureau.pro">architect@ai-bureau.pro</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>AI BUREAU © 2026</p>
+      </div>
+    </div>
+  </footer>
+</Base>

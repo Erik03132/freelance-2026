@@ -1,9 +1,4 @@
 ---
-/**
- * BaseLayout — обёртка для всех страниц AI Bureau.
- * В head уже включены: meta, OG, JSON-LD (из index.html Спринта 1).
- * BureauBot (React-остров) подключается здесь — доступен на каждой странице.
- */
 import BureauBot from '../components/BureauBot';
 
 interface Props {
@@ -43,10 +38,17 @@ const {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="https://ai-bureau.pro/logo.png" />
 
-    <!-- Fonts -->
+    <!-- Fonts: Inter + Manrope -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- GSAP + ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+
+    <!-- Lenis smooth scroll -->
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js" defer></script>
   </head>
   <body>
     <div class="app-container">
@@ -57,30 +59,70 @@ const {
     </div>
 
     <script>
-      // Scroll-Reveal (Intersection Observer)
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            if (entry.target.classList.contains('stagger-children')) {
-              entry.target.classList.add('visible');
-              requestAnimationFrame(() => {
-                Array.from(entry.target.children).forEach((child, i) => {
-                  child.style.transitionDelay = `${0.05 + i * 0.07}s`;
-                  child.style.opacity = '1';
-                  child.style.transform = 'translateY(0)';
-                });
-              });
-            } else {
-              entry.target.classList.add('visible');
+      // Smooth scroll + GSAP animations (загружаются после Lenis)
+      function initAnimations() {
+        if (typeof Lenis === 'undefined' || typeof gsap === 'undefined') {
+          setTimeout(initAnimations, 200);
+          return;
+        }
+
+        // Lenis smooth scroll
+        const lenis = new Lenis({
+          duration: 1.15,
+          easing: function(t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+          smoothWheel: true
+        });
+        function lenisFrame(time) { lenis.raf(time); requestAnimationFrame(lenisFrame); }
+        requestAnimationFrame(lenisFrame);
+
+        // GSAP + ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+        lenis.on('scroll', ScrollTrigger.update);
+
+        // Hero timeline (слово за словом)
+        const heroTl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+        heroTl.from('#site-header nav', { y: -24, opacity: 0, duration: 0.9 })
+          .from('.hero-word', { yPercent: 105, duration: 1.1, stagger: 0.12 }, '-=0.45')
+          .from('.gs-hero-copy p, .gs-hero-copy a', { y: 24, opacity: 0, duration: 0.75, stagger: 0.08 }, '-=0.55')
+          .from('.gs-hero-panel', { y: 40, opacity: 0, scale: 0.96, duration: 1 }, '-=0.75');
+
+        // Scroll-reveal: fade + translate
+        gsap.utils.toArray('.gs-fade-up').forEach(function(el) {
+          gsap.fromTo(el,
+            { y: 42, opacity: 0 },
+            {
+              y: 0, opacity: 1, duration: 0.9, ease: 'power3.out',
+              scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none reverse' }
             }
-            observer.unobserve(entry.target);
+          );
+        });
+
+        // Glass cards floating
+        gsap.to('.glass-card', {
+          y: -18, duration: 2.8, ease: 'sine.inOut', stagger: 0.25, repeat: -1, yoyo: true
+        });
+
+        // Hero parallax
+        gsap.to('#hero-title', {
+          yPercent: -8, ease: 'none',
+          scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 1 }
+        });
+
+        // Header scroll color change
+        window.addEventListener('scroll', function() {
+          const nav = document.querySelector('#site-header nav');
+          if (!nav) return;
+          if (window.scrollY > 40) {
+            nav.classList.remove('nav-transparent');
+            nav.classList.add('nav-solid');
+          } else {
+            nav.classList.add('nav-transparent');
+            nav.classList.remove('nav-solid');
           }
         });
-      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+      }
 
-      document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.reveal, .stagger-children').forEach(el => observer.observe(el));
-      });
+      document.addEventListener('DOMContentLoaded', initAnimations);
     </script>
   </body>
 </html>

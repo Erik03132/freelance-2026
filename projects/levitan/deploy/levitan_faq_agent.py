@@ -240,9 +240,22 @@ def _norm_phone(num: str) -> str:
 
 
 # === BARESIP AUDIO ===
-def set_baresip_audio(wav_path: Path):
+def set_baresip_audio(wav_path: Path, lead_silence: float = 0.0):
+    """Скопировать WAV в aufile-путь baresip.
+
+    lead_silence > 0 добавляет тишину в начало (lead-in), чтобы RTP-канал
+    успел открыться до начала речи — иначе первые секунды съедаются.
+    Для приветствия (greeting) использовать 1.5с; для ответов TTS lead-in
+    уже добавлен в synthesize_wav().
+    """
     try:
-        shutil.copy2(str(wav_path), str(BARESIP_AUFILE_PATH))
+        src = wav_path
+        if lead_silence > 0:
+            tmp = TTS_OUTPUT_DIR / f"{wav_path.stem}_lead{int(lead_silence * 10)}.wav"
+            _add_lead_silence(wav_path, tmp, seconds=lead_silence)
+            if tmp.exists():
+                src = tmp
+        shutil.copy2(str(src), str(BARESIP_AUFILE_PATH))
         log.info(f"Baresip audio set: {wav_path.name} → {BARESIP_AUFILE_PATH}")
         return True
     except Exception as e:
@@ -683,7 +696,8 @@ class FAQDialog:
             log.error(f"Greeting WAV not found: {GREETING_WAV}")
             self.active = False
             return
-        set_baresip_audio(GREETING_WAV)
+        # lead_silence=1.5с — чтобы RTP-канал успел открыться до приветствия
+        set_baresip_audio(GREETING_WAV, lead_silence=1.5)
         time.sleep(0.5)
         self.last_call_time = time.time()
         result = mango_callback(self.phone, f"levitan_greet_{self.session_id}")
