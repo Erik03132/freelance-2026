@@ -1,0 +1,16 @@
+{
+  "project": "src",
+  "target": "freelance-agent/src",
+  "date": "2026-08-02T20:10:43.073617+00:00",
+  "files_scanned": 3,
+  "by_severity": {
+    "CRITICAL": 0,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0
+  },
+  "findings": [],
+  "meta": {
+    "static_by_pattern": {}
+  }
+}

@@ -163,3 +163,20 @@ ai-grant-consalt/bot/.env
 
 ## Дата создания списка: 07.07.2026
 ## Статус: ТРЕБУЕТСЯ РОТАЦИЯ ВСЕХ КЛЮЧЕЙ
+
+---
+
+## ➕ Дополнение от аудита 2026-08-02 (ai-defender + gitleaks)
+
+> Живые секреты закоммичены в GitHub. Считаются скомпрометированными → ротация обязательна.
+
+| Ключ | Где | Опасность | Действие |
+|------|-----|-----------|----------|
+| 🔴 Funpay API-ключ (`Funpay_MYbt...`) | `opencode.json` (в дереве + история) | Доступ к платным LLM, сжигание денег | Ротация в Funpay + вынести в `.env` |
+| 🔴 OmniRoute JWT_SECRET | `tools/omni-auto-router/omniroute-recover.sh` | Подделка JWT шлюза :20128 | `openssl rand -hex 32` + обновить сервис |
+| 🔴 OmniRoute API_KEY_SECRET | там же | Доступ к API шлюза | Ротация + обновить `.env` на VPS |
+| 🔴 OmniRoute INITIAL_PASSWORD | там же (`Levitan2026!`) | Пароль доступа к шлюзу | Сменить пароль |
+| 🟠 GCP API-ключи | `.cursor/rules/...`, `CHRONICLE.md` (история) | Платный GCP | Ротация в GCP Console |
+| 🟠 Mango ключ+salt | `mango_api.py` (история) | Телефония | Ротация в кабинете Mango |
+
+**Проверить:** публичность репозитория `github.com/Erik03132/freelance-2026` (Settings → Danger Zone).

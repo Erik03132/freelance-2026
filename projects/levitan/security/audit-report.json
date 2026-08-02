@@ -1,0 +1,125 @@
+{
+  "project": "levitan",
+  "target": "projects/levitan",
+  "date": "2026-08-02T20:10:42.457307+00:00",
+  "files_scanned": 102,
+  "by_severity": {
+    "CRITICAL": 0,
+    "HIGH": 0,
+    "MEDIUM": 13,
+    "LOW": 0
+  },
+  "findings": [
+    {
+      "file": "projects/levitan/deploy/levitan_dialog.py",
+      "line": 89,
+      "pattern": "shell_true",
+      "severity": "MEDIUM",
+      "label": "shell=True (риск инъекции)",
+      "snippet": "subprocess.run(\"pkill -f 'sile...'\", shell=True)"
+    },
+    {
+      "file": "projects/levitan/deploy/levitan_faq_agent.py",
+      "line": 1142,
+      "pattern": "path_traversal",
+      "severity": "MEDIUM",
+      "label": "Возможный path traversal / недоверенный путь",
+      "snippet": "t = threading.Thread(target=run_dialog, args=(phone,), daemon=True)"
+    },
+    {
+      "file": "projects/levitan/deploy/levitan_turnbased.py",
+      "line": 743,
+      "pattern": "path_traversal",
+      "severity": "MEDIUM",
+      "label": "Возможный path traversal / недоверенный путь",
+      "snippet": "t = threading.Thread(target=run_dialog, args=(phone,), daemon=True)"
+    },
+    {
+      "file": "projects/levitan/deploy/levitan_webhook.py",
+      "line": 233,
+      "pattern": "path_traversal",
+      "severity": "MEDIUM",
+      "label": "Возможный path traversal / недоверенный путь",
+      "snippet": "threading.Thread(target=_saf..., args=(data, path), daemon=True).start()"
+    },
+    {
+      "file": "projects/levitan/scripts/dialer_bot.py",
+      "line": 779,
+      "pattern": "path_traversal",
+      "severity": "MEDIUM",
+      "label": "Возможный path traversal / недоверенный путь",
+      "snippet": "qs = \"?\" + \"&\".join(params) if params else \"\""
+    },
+    {
+      "file": "projects/levitan/scripts/dialer_bot.py",
+      "line": 933,
+      "pattern": "path_traversal",
+      "severity": "MEDIUM",
+      "label": "Возможный path traversal / недоверенный путь",
+      "snippet": "transcript = \" \".join(context.args)"
+    },
+    {
+      "file": "projects/levitan/scripts/dialer_bot.py",
+      "line": 1136,
+      "pattern": "path_traversal",
+      "severity": "MEDIUM",
+      "label": "Возможный path traversal / недоверенный путь",
+      "snippet": "query = \" \".join(context.args) if context.args else \"\""
+    },
+    {
+      "file": "projects/levitan/scripts/dialer_bot.py",
+      "line": 1275,
+      "pattern": "path_traversal",
+      "severity": "MEDIUM",
+      "label": "Возможный path traversal / недоверенный путь",
+      "snippet": "note = \" \".join(args[2:]) if len(args) > 2 else \"\""
+    },
+    {
+      "file": "projects/levitan/scripts/dialer_bot.py",
+      "line": 1415,
+      "pattern": "path_traversal",
+      "severity": "MEDIUM",
+      "label": "Возможный path traversal / недоверенный путь",
+      "snippet": "phone = \" \".join(args)"
+    },
+    {
+      "file": "projects/levitan/scripts/smart_dialer_zadarma_old.py",
+      "line": 182,
+      "pattern": "path_traversal",
+      "severity": "MEDIUM",
+      "label": "Возможный path traversal / недоверенный путь",
+      "snippet": "query = \"&\".join(f\"{k}={v}\" for k, v in sort...)"
+    },
+    {
+      "file": "projects/levitan/test_all.py",
+      "line": 28,
+      "pattern": "secret_in_log",
+      "severity": "MEDIUM",
+      "label": "Секрет пишется в лог",
+      "snippet": "print(f\"   ✅ Mango API Key: {settings.mango.api_key[:15]}...\")"
+    },
+    {
+      "file": "projects/levitan/test_all.py",
+      "line": 29,
+      "pattern": "secret_in_log",
+      "severity": "MEDIUM",
+      "label": "Секрет пишется в лог",
+      "snippet": "print(f\"   ✅ OpenRouter Key: {settings.openrouter.api_key[:15]}...\")"
+    },
+    {
+      "file": "projects/levitan/test_all.py",
+      "line": 30,
+      "pattern": "secret_in_log",
+      "severity": "MEDIUM",
+      "label": "Секрет пишется в лог",
+      "snippet": "print(f\"   ✅ Telegram Token: {settings.telegram.bot_token[:15]}...\")"
+    }
+  ],
+  "meta": {
+    "static_by_pattern": {
+      "shell_true": 1,
+      "path_traversal": 9,
+      "secret_in_log": 3
+    }
+  }
+}
