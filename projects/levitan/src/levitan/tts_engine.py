@@ -22,7 +22,7 @@ class TTSEngine:
 
     def _get_cache_key(self, text: str) -> str:
         """Генерация хеша текста для кэша."""
-        return hashlib.md5(f"{text}_{self.voice}_{self.rate}".encode()).hexdigest()
+        return hashlib.sha256(f"{text}_{self.voice}_{self.rate}".encode()).hexdigest()
 
     def _get_cached_path(self, text: str) -> Path:
         """Путь к кэшированному аудиофайлу."""

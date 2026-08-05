@@ -49,7 +49,7 @@ def upload_audio():
     import hashlib
 
     filename = WAV_FILE.name
-    command_id = f"levitan_upload_{hashlib.md5(filename.encode()).hexdigest()[:8]}"
+    command_id = f"levitan_upload_{hashlib.sha256(filename.encode()).hexdigest()[:8]}"
 
     print(f"📤 Uploading {filename} ({WAV_FILE.stat().st_size // 1024} KB)...")
 

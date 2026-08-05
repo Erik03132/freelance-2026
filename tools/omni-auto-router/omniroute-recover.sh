@@ -1,13 +1,32 @@
 #!/usr/bin/env bash
 # OmniRoute VPS Recovery Script
-# Usage: ssh root@217.149.23.113 'bash -s' < omniroute-recover.sh
-# Or: scp ... && ssh root@... 'bash omniroute-recover.sh'
+# Секреты НЕ хранятся в репо — подтягиваются из tools/omni-auto-router/.env (gitignored).
+#
+# Локальная подготовка (один раз):
+#   cp tools/omni-auto-router/.env.example tools/omni-auto-router/.env
+#   # вписать реальные JWT_SECRET / API_KEY_SECRET / INITIAL_PASSWORD / прокси
+#
+# Запуск с VPS:
+#   scp tools/omni-auto-router/.env root@217.149.23.113:/root/.omniroute/.env.secrets
+#   ssh root@217.149.23.113 'OMNIR_SECRETS=/root/.omniroute/.env.secrets bash -s' < omniroute-recover.sh
+# Альтернатива: OMNIR_SECRETS=<путь> bash omniroute-recover.sh
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || echo '.')"
+SECRETS_FILE="${OMNIR_SECRETS:-${SCRIPT_DIR}/.env}"
+if [ -f "$SECRETS_FILE" ]; then
+    set -a
+    . "$SECRETS_FILE"
+    set +a
+fi
+
 OMNIR_DIR="${OMNIR_DIR:-$HOME/.omniroute}"
 OPENROUTER_KEY="${OPENROUTER_KEY:-}"
-OMNIR_VPS_KEY="${OMNIR_VPS_KEY:-sk-c7a0aac80f1d23cf-7fafe9-1d83e9bf}"
+
+: "${JWT_SECRET:?JWT_SECRET не задан (см. $SECRETS_FILE или .env.example)}"
+: "${API_KEY_SECRET:?API_KEY_SECRET не задан (см. $SECRETS_FILE или .env.example)}"
+: "${INITIAL_PASSWORD:?INITIAL_PASSWORD не задан (см. $SECRETS_FILE или .env.example)}"
 
 echo "=== OmniRoute VPS Recovery ==="
 
@@ -28,10 +47,10 @@ echo "OmniRoute: $(npx omniroute --version 2>/dev/null || echo 'installed')"
 
 # 3. Create .env
 mkdir -p "$OMNIR_DIR"
-cat > "$OMNIR_DIR/.env" << 'ENV'
-JWT_SECRET=cDU8Ayydab5H+i/rMUP4pLH59lXvbSDcQ+xCK5ymTuXlG8cgkONpqsyIGuVTk+9m
-API_KEY_SECRET=9e095e95e209d79c1674d443fe34689c7698da496646ce68a69940f3014c11d0
-INITIAL_PASSWORD=Levitan2026!
+cat > "$OMNIR_DIR/.env" << ENV
+JWT_SECRET=${JWT_SECRET}
+API_KEY_SECRET=${API_KEY_SECRET}
+INITIAL_PASSWORD=${INITIAL_PASSWORD}
 PORT=20128
 NODE_ENV=production
 ENABLE_SOCKS5_PROXY=false
@@ -41,8 +60,8 @@ APP_LOG_LEVEL=info
 APP_LOG_TO_FILE=true
 CALL_LOG_RETENTION_DAYS=3
 REQUIRE_API_KEY=false
-HTTP_PROXY=http://Q3NeJXTY:dsBaWh2L@172.120.21.141:64468
-HTTPS_PROXY=http://Q3NeJXTY:dsBaWh2L@172.120.21.141:64468
+HTTP_PROXY=${HTTP_PROXY}
+HTTPS_PROXY=${HTTPS_PROXY}
 NO_PROXY=localhost,127.0.0.1,::1
 ENV
 
@@ -64,8 +83,8 @@ pm2 delete omniroute 2>/dev/null || true
 # Create start script with proxy env vars
 cat > /root/start-omniroute.sh << STARTEOF
 #!/bin/bash
-export HTTP_PROXY=http://Q3NeJXTY:dsBaWh2L@172.120.21.141:64468
-export HTTPS_PROXY=http://Q3NeJXTY:dsBaWh2L@172.120.21.141:64468
+export HTTP_PROXY=${HTTP_PROXY}
+export HTTPS_PROXY=${HTTPS_PROXY}
 export NO_PROXY=localhost,127.0.0.1,::1,217.149.23.113
 export OPENROUTER_API_KEY=${OPENROUTER_KEY:-YOUR_OPENROUTER_KEY_HERE}
 sqlite3 /root/.omniroute/storage.sqlite "UPDATE provider_connections SET test_status='unknown',error_code=NULL,last_error=NULL,last_error_at=NULL,last_error_type=NULL,last_error_source=NULL,backoff_level=0,rate_limited_until=NULL,consecutive_use_count=0,updated_at=datetime('now') WHERE 1=1;"
@@ -100,9 +119,9 @@ chmod +x /root/healthcheck-omniroute.sh
 echo ""
 echo "=== Recovery complete ==="
 echo "OmniRoute should be running on port 20128"
-echo "Check: curl http://localhost:20128/health"
+echo "Check: curl http://localhost:20128/v1/models"
 echo "Create API key via dashboard: http://217.149.23.113:20128"
-echo "Password: Levitan2026!"
+echo "Password: ${INITIAL_PASSWORD}"
 echo "Then add OpenRouter provider and configure combo 'free-cascade'"
 echo ""
 echo "Healthcheck cron installed (every 5 min)"

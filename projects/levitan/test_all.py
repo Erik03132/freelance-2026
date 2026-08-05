@@ -25,9 +25,9 @@ async def test_all():
     # 1. Config
     print("\n1. Testing Config...")
     try:
-        print(f"   ✅ Mango API Key: {settings.mango.api_key[:15]}...")
-        print(f"   ✅ OpenRouter Key: {settings.openrouter.api_key[:15]}...")
-        print(f"   ✅ Telegram Token: {settings.telegram.bot_token[:15]}...")
+        print(f"   ✅ Mango API Key: {'set' if settings.mango.api_key else 'MISSING'}")
+        print(f"   ✅ OpenRouter Key: {'set' if settings.openrouter.api_key else 'MISSING'}")
+        print(f"   ✅ Telegram Token: {'set' if settings.telegram.bot_token else 'MISSING'}")
         results.append(("Config", True))
     except Exception as e:
         print(f"   ❌ Config failed: {e}")

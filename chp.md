@@ -1,3 +1,32 @@
+## 🛡️ 2026-08-03 — Security rotation: SEC-1..9 закрыты
+
+**Статус:** Сессия завершена (продолжение позже).
+
+### Критичный блок (SEC-1..3) — ЗАКРЫТ
+- **SEC-1** — Funpay/wellflow провайдер БОЛЬШЕ НЕ существует в opencode → ключ `Funpay_MYbt...` мёртв, ротация не нужна. Провайдер удалён из `opencode.json`.
+- **SEC-2** — OmniRoute JWT_SECRET + API_KEY_SECRET + INITIAL_PASSWORD ротированы (`openssl rand -hex 32`), обновлены `omniroute-recover.sh` и `/root/.omniroute/.env` на VPS 217.149.23.113, pm2 restart, `/v1/models`=200. **Новый dashboard-пароль — в recover-скрипте**.
+- **SEC-3** — репозиторий был **PUBLIC** → теперь **PRIVATE** (`gh repo edit`). Secret scanning недоступен (422).
+
+### Высокий блок (SEC-4..7) — ЗАКРЫТ
+- **SEC-4** — секреты вынесены в gitignored `.env`: `omniroute-recover.sh` (+`.env.example`), `night_audit_vps.sh`, `watchdog.py`. 🔴 находка: в `watchdog.py` был захардкожен TG-токен `8336409939:AAHr2wbu...` — оказался СТАРЫМ отозванным токеном Анжелочки (401), ротация не нужна; следы убраны из `watchdog.py`, `send_report_today.py`, `angel-backend/.env.sandbox`.
+- **SEC-5** — levitan SQLi ×4 (`crm/app.py`): whitelist `_SAFE_CONDITIONS` + `CONTACT_COLUMNS` + бонусом path traversal в `/api/import`.
+- **SEC-6** — levitan: FIFO `0o777`→`0o600`, MD5→SHA256 (tts_engine, upload_greeting). Zadarma-скрипт не трогал (MD5 по протоколу).
+- **SEC-7** — levitan `test_all.py` больше не печатает ключи (только set/MISSING).
+
+### Средний блок (SEC-8..9) — ЗАКРЫТ, SEC-10 — В ПРОЦЕССЕ
+- **SEC-8** — `.gitleaks.toml` закоммичен, no-secrets через pre-commit (проверено: ловит секреты).
+- **SEC-9** — хук-скрипты перенесены в версионируемые `githooks/`, `.pre-commit-config.yaml` обновлён, создан корневой `README.md` (шаг `pre-commit install`).
+- **SEC-10** — ai-defender `llm --frame mcp` по `freelance-agent/src/mcp-servers` выдал **0 файлов просканировано** (отчёт пуст) — разбор причины НЕ ЗАВЕРШЁН (смотреть `cli.py:59`/`report.py` — счётчик files_scanned).
+
+### Осталось (блокеры/план)
+1. **SEC-10**: разобраться, почему `llm_audit` дал 0 файлов (report gen), пересканировать MCP-серверы
+2. **OMNIR_VPS_KEY** `sk-c7a0aac...` в git-истории → ротация API-ключа шлюза + обновить потребителей
+3. **SEC-11**: чистка git-истории (mango_api.py, .cursor/rules, CHRONICLE.md, checkpoints — проверить мертвость)
+4. Прокси-креды хардкод в `ai-senat/agent/*.py`, `ai-eggs/agent/*.py`, `sinergy/src/**` + build-артефакты `sinergy/.next` → параметризовать
+5. **НЕ ЗАКОММИЧЕНО** (все изменения сессии): `opencode.json`, трекеры, `crm/app.py`, `tts_engine.py`, `upload_greeting.py`, `test_all.py`, `githooks/`, `.pre-commit-config.yaml`, `README.md`, `.env.example` — нужен Two-axis review + коммит
+
+---
+
 ## 🛡️ 2026-08-02 — Создан ai-defender + аудит + РОТАЦИЯ НУЖНА
 
 **⚠️ НАПОМНИТЬ В ЭТОЙ СЕССИИ — СРОЧНО (SEC-1..3):**

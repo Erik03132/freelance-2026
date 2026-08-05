@@ -1,0 +1,16 @@
+{
+  "project": "mcp-servers",
+  "target": "freelance-agent/src/mcp-servers",
+  "date": "2026-08-03T10:28:03.468830+00:00",
+  "files_scanned": 0,
+  "by_severity": {
+    "CRITICAL": 0,
+    "HIGH": 0,
+    "MEDIUM": 0,
+    "LOW": 0
+  },
+  "findings": [],
+  "meta": {
+    "static_by_pattern": {}
+  }
+}

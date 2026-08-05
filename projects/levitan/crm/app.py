@@ -36,6 +36,37 @@ STATUS_LABELS = {
     "overdue": "просрочено",
 }
 
+CONTACT_COLUMNS = {
+    "timestamp",
+    "phone",
+    "company_name",
+    "region",
+    "contact_name",
+    "product",
+    "volume",
+    "ready_date",
+    "price_info",
+    "status",
+    "notes",
+    "transcript",
+    "recording_id",
+}
+
+_SAFE_CONDITIONS = {
+    "(phone LIKE ? OR company_name LIKE ? OR contact_name LIKE ? OR notes LIKE ?)",
+    "(phone LIKE ? OR company_name LIKE ? OR contact_name LIKE ?)",
+    "status=?",
+}
+
+
+def build_where(conditions):
+    if not conditions:
+        return ""
+    for cond in conditions:
+        if cond not in _SAFE_CONDITIONS:
+            raise ValueError("Unsafe WHERE condition")
+    return "WHERE " + " AND ".join(conditions)
+
 
 def render(name: str, **context):
     context.setdefault("status_labels", STATUS_LABELS)
@@ -179,7 +210,7 @@ async def contacts_page(
         conditions.append("status=?")
         params.append(status)
 
-    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+    where = build_where(conditions)
     offset = (page - 1) * per_page
 
     count_row = await db.execute(f"SELECT COUNT(*) FROM contacts {where}", params)
@@ -319,7 +350,7 @@ async def api_contacts(search: str = "", status: str = "", limit: int = 100, off
     if status:
         conditions.append("status=?")
         params.append(status)
-    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+    where = build_where(conditions)
     rows = await db.execute(
         f"SELECT * FROM contacts {where} ORDER BY created_at DESC LIMIT ? OFFSET ?",
         params + [limit, offset],
@@ -384,6 +415,7 @@ async def api_update_contact(contact_id: int, data: ContactUpdate):
         await db.close()
         raise HTTPException(404, "Contact not found")
     updates = data.model_dump(exclude_none=True)
+    updates = {k: v for k, v in updates.items() if k in CONTACT_COLUMNS}
     if not updates:
         await db.close()
         return dict(row)
@@ -460,7 +492,10 @@ async def api_delete_reminder(reminder_id: int):
 
 @app.post("/api/import")
 async def api_import(filename: str = Query(...)):
-    filepath = DATA_DIR / filename
+    safe_name = Path(filename).name
+    if safe_name != filename or not safe_name.endswith(".json"):
+        raise HTTPException(400, "Invalid filename")
+    filepath = DATA_DIR / safe_name
     if not filepath.exists():
         raise HTTPException(404, f"File not found: {filename}")
     with open(filepath) as f:

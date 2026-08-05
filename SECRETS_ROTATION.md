@@ -172,11 +172,21 @@ ai-grant-consalt/bot/.env
 
 | Ключ | Где | Опасность | Действие |
 |------|-----|-----------|----------|
-| 🔴 Funpay API-ключ (`Funpay_MYbt...`) | `opencode.json` (в дереве + история) | Доступ к платным LLM, сжигание денег | Ротация в Funpay + вынести в `.env` |
-| 🔴 OmniRoute JWT_SECRET | `tools/omni-auto-router/omniroute-recover.sh` | Подделка JWT шлюза :20128 | `openssl rand -hex 32` + обновить сервис |
-| 🔴 OmniRoute API_KEY_SECRET | там же | Доступ к API шлюза | Ротация + обновить `.env` на VPS |
-| 🔴 OmniRoute INITIAL_PASSWORD | там же (`Levitan2026!`) | Пароль доступа к шлюзу | Сменить пароль |
+| 🔴 Funpay API-ключ (`Funpay_MYbt...`) | `opencode.json` (в дереве + история) | Доступ к платным LLM, сжигание денег | ✅ ЗАКРЫТ (02.08): провайдер wellflow/funpay больше НЕ существует в opencode — ключ мёртв, ротация не нужна. Провайдер удалён из `opencode.json`. Ключ остался только в git-истории (см. SEC-11). |
+| 🔴 OmniRoute JWT_SECRET | `tools/omni-auto-router/omniroute-recover.sh` | Подделка JWT шлюза :20128 | ✅ РОТИРОВАН (02.08): `openssl rand -hex 32`, обновлён скрипт + VPS `.env`, pm2 restarted, `/v1/models` = 200. Бэкап VPS `.env.bak-2026-08-03` |
+| 🔴 OmniRoute API_KEY_SECRET | там же | Доступ к API шлюза | ✅ РОТИРОВАН (02.08): новый `openssl rand -hex 32` в скрипте + VPS |
+| 🔴 OmniRoute INITIAL_PASSWORD | там же (`Levitan2026!`) | Пароль доступа к шлюзу | ✅ РОТИРОВАН (02.08): новый пароль — в gitignored `tools/omni-auto-router/.env` (INITIAL_PASSWORD), dashboard-логин с новым паролем |
 | 🟠 GCP API-ключи | `.cursor/rules/...`, `CHRONICLE.md` (история) | Платный GCP | Ротация в GCP Console |
 | 🟠 Mango ключ+salt | `mango_api.py` (история) | Телефония | Ротация в кабинете Mango |
+| 🔴 Watchdog TG-токен (`8336409939:AAHr2wbu...`) | `tools/scripts/watchdog.py` (в дереве + история) | Спам в TG от имени бота | ✅ ЗАКРЫТ (02.08): токен МЁРТВ (getMe → 401, это старый токен Анжелочки; активный `AAH8fos...`). Ротация не нужна. Код параметризован (SEC-4), следы убраны из `watchdog.py`, `send_report_today.py`, `angel-backend/.env.sandbox`. В истории остался → SEC-11 |
 
-**Проверить:** публичность репозитория `github.com/Erik03132/freelance-2026` (Settings → Danger Zone).
+**Проверить:** публичность репозитория `github.com/Erik03132/freelance-2026` → ✅ **СДЕЛАНО (02.08): репо был PUBLIC → теперь PRIVATE** (`gh repo edit --visibility private`). Экспозиция секретов была публичной до этой даты. Secret scanning недоступен для аккаунта (422).
+
+## ➕ SEC-5 (02.08): levitan SQLi ×4 + path traversal — ИСПРАВЛЕНЫ
+`crm/app.py` — whitelist `_SAFE_CONDITIONS` (статич. шаблоны WHERE), whitelist `CONTACT_COLUMNS` (UPDATE SET), `/api/import` защищён от path traversal (`Path(filename).name`). ruff/py_compile чисты.
+
+## ➕ SEC-6 (02.08): levitan chmod + MD5 — ИСПРАВЛЕНЫ
+FIFO `0o777`→`0o600` (fifo_bridge.py), MD5→SHA256 (tts_engine.py кэш-ключ, upload_greeting.py command_id). `smart_dialer_zadarma_old.py` не трогал — MD5 требует протокол Zadarma.
+
+## ➕ SEC-8/9 (02.08): gitleaks + переносимые хуки — ГОТОВО
+`.gitleaks.toml` закоммичен, `no-secrets` через pre-commit. Хук-скрипты перенесены из `.git/hooks/` в версионируемые `githooks/`, `.pre-commit-config.yaml` обновлён, корневой `README.md` с шагом `pre-commit install`.

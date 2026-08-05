@@ -13,9 +13,9 @@ import sys
 import time
 from datetime import datetime
 
-BOT_TOKEN = "8336409939:AAHr2wbuOfED5woCzCokKKM9JnkVRYepfms"
-ADMIN_ID = "176203333"
-PROXY = "socks5h://Q3NeJXTY:dsBaWh2L@172.120.21.141:64469"
+BOT_TOKEN = os.environ.get("WATCHDOG_BOT_TOKEN", os.environ.get("ANGELOCHKA_BOT_TOKEN", ""))
+ADMIN_ID = os.environ.get("WATCHDOG_ADMIN_ID", "176203333")
+PROXY = os.environ.get("WATCHDOG_PROXY", os.environ.get("ALL_PROXY", ""))
 STATE_FILE = "/tmp/watchdog_state"
 LOG_FILE = "/var/log/watchdog.log"
 
@@ -29,6 +29,9 @@ def log(msg):
 
 
 def tg(msg):
+    if not BOT_TOKEN:
+        log("  TG: BOT_TOKEN не задан (WATCHDOG_BOT_TOKEN/ANGELOCHKA_BOT_TOKEN) — алерт пропущен")
+        return
     try:
         payload = json.dumps({"chat_id": ADMIN_ID, "text": msg, "parse_mode": "Markdown"})
         r = subprocess.run(

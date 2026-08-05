@@ -185,7 +185,7 @@ class FifoWriter:
         if self.fifo.exists():
             self.fifo.unlink()
         os.mkfifo(str(self.fifo))
-        os.chmod(str(self.fifo), 0o777)
+        os.chmod(str(self.fifo), 0o600)
         log.info(f"FIFO created: {self.fifo}")
         self.fd = os.open(str(self.fifo), os.O_WRONLY)
         log.info("FIFO opened for writing")

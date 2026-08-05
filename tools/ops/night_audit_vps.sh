@@ -22,8 +22,14 @@ REPORT_FILE="${REPORTS_DIR}/night_audit_vps_${DATE}.md"
 TG_BOT_TOKEN=$(grep "ANGELOCHKA_BOT_TOKEN" "${PROJECT_DIR}/.env" 2>/dev/null | cut -d= -f2)
 OPENROUTER_KEY=$(grep "OPENROUTER_API_KEY" "${PROJECT_DIR}/.env" 2>/dev/null | cut -d= -f2)
 TG_ADMIN_ID="176203333"
-# OpenRouter из РФ — только через прокси
-PROXY_URL="socks5h://Q3NeJXTY:dsBaWh2L@172.120.21.141:64469"
+# OpenRouter из РФ — только через прокси (берём из env/$HOME/.env, не хардкод)
+PROXY_URL="${PROXY_URL:-}"
+if [ -z "$PROXY_URL" ] && [ -f "$HOME/.env" ]; then
+    PROXY_URL=$(grep -E '^(ALL_PROXY|PROXY_URL)=' "$HOME/.env" 2>/dev/null | head -1 | cut -d= -f2)
+fi
+if [ -z "$PROXY_URL" ]; then
+    echo "⚠️ PROXY_URL не задан (env или \$HOME/.env) — OpenRouter/Telegram могут не работать" >&2
+fi
 
 mkdir -p "$REPORTS_DIR"
 

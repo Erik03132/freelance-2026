@@ -2,11 +2,12 @@
 """Отправка отчёта за 21 апреля Андрею в ТГ"""
 
 import json
+import os
 import time
 import urllib.parse
 import urllib.request
 
-BOT_TOKEN = "8336409939:AAHr2wbuOfED5woCzCokKKM9JnkVRYepfms"
+BOT_TOKEN = os.environ.get("ANGELOCHKA_BOT_TOKEN", "CHANGE_ME")
 API = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 ANDREY_ID = 444248782
 
