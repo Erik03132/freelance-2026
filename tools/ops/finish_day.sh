@@ -260,6 +260,20 @@ echo -e "    🌐 GitHub      → $(git -C "$BACKUP_ROOT" remote | grep -q origi
 echo -e "    🏠 NAS DS720   → $([[ \"$NAS_OK\" == 'true' ]] && echo '✅ синхронизирован' || echo '⚠️  недоступен')"
 echo -e "    💾 Внешний диск→ $([[ -d \"$EXT_MOUNT\" ]] && echo '✅ синхронизирован' || echo '⚠️  не подключён')"
 echo ""
+
+# ========================= ФАЗА 6: TEST-RESTORE (метрика успешности) =====
+
+echo ""
+echo -e "  ${BOLD}✅ ФАЗА 6: Test-restore (пробное восстановление)...${NC}"
+
+TEST_RESTORE_SCRIPT="$WORKSPACE/tools/backup/test_restore.sh"
+if [[ -f "$TEST_RESTORE_SCRIPT" ]]; then
+    bash "$TEST_RESTORE_SCRIPT" 2>&1 | tail -3
+else
+    echo -e "  ${YELLOW}⚠️  test_restore.sh не найден — метрика недоступна${NC}"
+fi
+
+echo ""
 echo -e "  ${BOLD}${YELLOW}👉 Для чистого старта: нажми Cmd+N в Antigravity${NC}"
 echo -e "  ${BOLD}${YELLOW}   Затем напиши: \"Прочитай chp.md и продолжим\"${NC}"
 echo ""

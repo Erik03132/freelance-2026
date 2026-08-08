@@ -19,7 +19,7 @@ if _AGENTS not in sys.path:
     sys.path.insert(0, _AGENTS)
 
 from .deps_scan import scan_all  # noqa: E402
-from .llm_audit import deep_audit  # noqa: E402
+from .llm_audit import count_files, deep_audit  # noqa: E402
 from .report import build_report, save_report  # noqa: E402
 from .scan import scan_path  # noqa: E402
 
@@ -56,18 +56,24 @@ def main():
         sys.exit(1)
 
     project = os.path.basename(os.path.abspath(target)) or "project"
-    static = scan_path(target) if (args.audit or args.full) else {"files_scanned": 0, "findings": []}
+    if args.audit or args.full:
+        static = scan_path(target)
+    elif args.llm:
+        static = {"files_scanned": count_files(target), "findings": [], "by_pattern": {}}
+    else:
+        static = {"files_scanned": 0, "findings": []}
     ext = scan_all(target) if (args.deps or args.full) else []
     report = build_report(project, target, static, ext)
 
-    if args.full:
-        llm_md = deep_audit(target, frame="owasp")
+    if args.full or args.llm:
+        frame = "mcp" if args.frame == "mcp" else "owasp"
+        llm_md = deep_audit(target, frame=frame)
         if llm_md:
             out = _out_dir(args.out, target)
             os.makedirs(out, exist_ok=True)
             with open(os.path.join(out, "llm-deep-audit.md"), "w", encoding="utf-8") as f:
                 f.write(llm_md)
-            print("🧠 LLM deep audit saved.")
+            print(f"🧠 LLM deep audit saved ({frame} frame).")
 
     md_path, json_path = save_report(report, _out_dir(args.out, target))
     print(f"📄 Отчёт: {md_path}")

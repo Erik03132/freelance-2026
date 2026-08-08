@@ -101,3 +101,30 @@ const html = post.compiledContent();
     </div>
   </footer>
 </Base>
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": post.frontmatter.title,
+  "description": post.frontmatter.description,
+  "datePublished": post.frontmatter.pubDate,
+  "dateModified": post.frontmatter.pubDate,
+  "image": post.frontmatter.image || "/logo.png",
+  "inLanguage": "ru",
+  "author": {
+    "@type": "Person",
+    "name": "Игорь Васин",
+    "jobTitle": "AI-архитектор",
+    "url": "https://ai-bureau.pro/",
+    "sameAs": ["https://github.com/Erik03132"]
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AI Bureau",
+    "url": "https://ai-bureau.pro/"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": `https://ai-bureau.pro/blog/${post.frontmatter.title}`
+  }
+})} />

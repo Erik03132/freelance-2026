@@ -7,29 +7,41 @@ import {
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
 import * as dotenv from "dotenv";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import * as crypto from "crypto";
 
 dotenv.config();
 
 const AVITO_CLIENT_ID = process.env.AVITO_CLIENT_ID;
 const AVITO_CLIENT_SECRET = process.env.AVITO_CLIENT_SECRET;
+const AVITO_USER_ID = process.env.AVITO_USER_ID || process.env.AVITO_ACCOUNT_ID;
+const PROXY_URL = process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
+const MAX_PROXY_ROTATIONS = 3;
+const MAX_SESSION_ROTATIONS = 2;
+
+interface EnvironmentState {
+  proxyIndex: number;
+  sessionRotations: number;
+  lastError: string | null;
+}
 
 class AvitoMcpServer {
   private server: Server;
   private token: string | null = null;
+  private tokenExpiry: number = 0;
+  private envState: EnvironmentState = { proxyIndex: 0, sessionRotations: 0, lastError: null };
 
   constructor() {
     this.server = new Server(
-      { name: "avito-mcp", version: "1.0.0" },
+      { name: "avito-mcp", version: "1.1.0" },
       { capabilities: { tools: {} } }
     );
     this.setupHandlers();
   }
 
-  // Авторизация и получение токена
   private async getAuthToken(): Promise<string> {
-    if (this.token) return this.token; // Простейшее кэширование (в бою нужно проверять срок действия)
-    
+    if (this.token && Date.now() < this.tokenExpiry) return this.token;
+
     if (!AVITO_CLIENT_ID || !AVITO_CLIENT_SECRET) {
       throw new Error("AVITO_CLIENT_ID and AVITO_CLIENT_SECRET required in .env");
     }
@@ -41,29 +53,97 @@ class AvitoMcpServer {
         client_secret: AVITO_CLIENT_SECRET,
       });
       this.token = response.data.access_token;
+      this.tokenExpiry = Date.now() + ((response.data.expires_in || 86400) - 300) * 1000;
       return this.token!;
     } catch (error: any) {
       throw new McpError(ErrorCode.InternalError, `Avito Auth Error: ${error.message}`);
     }
   }
 
-  // Обёртка для API запросов Авито
-  private async callAvito(method: "GET" | "POST", endpoint: string, data?: any) {
+  // При 403: сначала меняем окружение (прокси → сессия), НЕ селекторы
+  private async resolve403Environment(): Promise<boolean> {
+    this.envState.lastError = "403";
+
+    if (PROXY_URL && this.envState.proxyIndex < MAX_PROXY_ROTATIONS) {
+      this.envState.proxyIndex++;
+      console.error(`[avito] 403: rotating proxy (attempt ${this.envState.proxyIndex}/${MAX_PROXY_ROTATIONS})`);
+      return true;
+    }
+
+    if (this.envState.sessionRotations < MAX_SESSION_ROTATIONS) {
+      this.envState.sessionRotations++;
+      this.token = null;
+      this.tokenExpiry = 0;
+      this.envState.proxyIndex = 0;
+      console.error(`[avito] 403: rotating session (attempt ${this.envState.sessionRotations}/${MAX_SESSION_ROTATIONS})`);
+      return true;
+    }
+
+    console.error("[avito] 403: environment rotations exhausted — NOT trying different selectors");
+    return false;
+  }
+
+  private resetEnvironment(): void {
+    this.envState = { proxyIndex: 0, sessionRotations: 0, lastError: null };
+  }
+
+  private async callAvito(method: "GET" | "POST", endpoint: string, data?: any, retryCount: number = 0): Promise<any> {
     const token = await this.getAuthToken();
+    const maxRetries = MAX_PROXY_ROTATIONS + MAX_SESSION_ROTATIONS + 1;
+
+    let effectiveEndpoint = endpoint;
+    if (AVITO_USER_ID) {
+      effectiveEndpoint = effectiveEndpoint.replace("{user_id}", AVITO_USER_ID);
+    }
+
+    const requestConfig: any = {
+      method,
+      url: `https://api.avito.ru${effectiveEndpoint}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      data,
+    };
+
+    if (this.envState.proxyIndex > 0 && PROXY_URL) {
+      requestConfig.proxy = {
+        protocol: "http",
+        host: new URL(PROXY_URL).hostname,
+        port: parseInt(new URL(PROXY_URL).port) || 8080,
+      };
+    }
+
     try {
-      const response = await axios({
-        method,
-        url: `https://api.avito.ru${endpoint}`,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        data,
-      });
+      const response = await axios(requestConfig);
+      if (retryCount > 0) {
+        console.error(`[avito] ${effectiveEndpoint}: recovered after ${retryCount} environment rotations`);
+      }
       return response.data;
     } catch (error: any) {
-      console.error(`Avito API Error (${endpoint}):`, error.response?.data || error.message);
-      throw new McpError(ErrorCode.InternalError, `Avito API error: ${error.message}`);
+      const axiosError = error as AxiosError;
+      const status = axiosError.response?.status || 0;
+      const message = axiosError.message || "unknown";
+
+      // 403 — проблема окружения, не селектора
+      if (status === 403 || status === 429) {
+        console.error(`[avito] ${status} on ${effectiveEndpoint}: environment issue, not selector`);
+        if (retryCount < maxRetries && this.resolve403Environment()) {
+          return this.callAvito(method, endpoint, data, retryCount + 1);
+        }
+      }
+
+      // 5xx — retryable
+      if (status >= 500 && retryCount < 2) {
+        console.error(`[avito] ${status} on ${effectiveEndpoint}: retryable, attempt ${retryCount + 1}`);
+        return this.callAvito(method, endpoint, data, retryCount + 1);
+      }
+
+      console.error(`Avito API Error (${effectiveEndpoint}):`, axiosError.response?.data || message);
+      throw new McpError(
+        ErrorCode.InternalError,
+        `Avito API ${status ? `(${status}) ` : ""}on ${effectiveEndpoint}: ${message}`
+      );
     }
   }
 
@@ -134,37 +214,55 @@ class AvitoMcpServer {
     // 2. Обработка вызовов инструментов
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
-      
+
       try {
+        this.resetEnvironment();
+
         if (name === "get_chats") {
-          // Заглушка до получения реального user_id
-          // const data = await this.callAvito("GET", `/messenger/v3/accounts/{user_id}/chats?limit=${args?.limit}`);
-          return { content: [{ type: "text", text: JSON.stringify({ status: "success", data: "Здесь будет список чатов" }) }] };
-        } 
-        
+          if (AVITO_USER_ID) {
+            const data = await this.callAvito("GET", `/messenger/v3/accounts/{user_id}/chats?limit=${args?.limit || 10}`);
+            return { content: [{ type: "text", text: JSON.stringify(data) }] };
+          }
+          return { content: [{ type: "text", text: JSON.stringify({ status: "no_user_id", message: "AVITO_USER_ID not set" }) }] };
+        }
+
         else if (name === "get_messages") {
-          // const data = await this.callAvito("GET", `/messenger/v3/accounts/{user_id}/chats/${args?.chat_id}/messages`);
-          return { content: [{ type: "text", text: JSON.stringify({ status: "success", data: `Сообщения чата ${args?.chat_id}` }) }] };
+          if (AVITO_USER_ID) {
+            const data = await this.callAvito("GET", `/messenger/v3/accounts/{user_id}/chats/${args?.chat_id}/messages?limit=${args?.limit || 20}`);
+            return { content: [{ type: "text", text: JSON.stringify(data) }] };
+          }
+          return { content: [{ type: "text", text: JSON.stringify({ status: "no_user_id", message: "AVITO_USER_ID not set" }) }] };
         }
-        
+
         else if (name === "send_message") {
-          // const data = await this.callAvito("POST", `/messenger/v1/accounts/{user_id}/chats/${args?.chat_id}/messages`, { message: { text: args?.text }});
-          return { content: [{ type: "text", text: `Отправлено в Авито: ${args?.text}` }] };
+          if (AVITO_USER_ID) {
+            const data = await this.callAvito("POST", `/messenger/v1/accounts/{user_id}/chats/${args?.chat_id}/messages`, { message: { text: args?.text }});
+            return { content: [{ type: "text", text: JSON.stringify(data) }] };
+          }
+          return { content: [{ type: "text", text: `[NO USER ID] Would send to chat ${args?.chat_id}: ${args?.text}` }] };
         }
-        
+
         else if (name === "get_items") {
-          // const data = await this.callAvito("GET", `/core/v1/items`);
-          return { content: [{ type: "text", text: JSON.stringify({ status: "success", data: "Список активных объявлений Авито" }) }] };
+          const data = await this.callAvito("GET", `/core/v1/items?status=${args?.status || "active"}`);
+          return { content: [{ type: "text", text: JSON.stringify(data) }] };
         }
-        
+
         else if (name === "create_item") {
-          // Логика автопостинга объявлений
-          return { content: [{ type: "text", text: `Объявление создано: ${args?.title}` }] };
+          const data = await this.callAvito("POST", "/core/v1/items", {
+            title: args?.title,
+            description: args?.description,
+            price: args?.price,
+          });
+          return { content: [{ type: "text", text: JSON.stringify(data) }] };
         }
 
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
       } catch (error: any) {
-        return { content: [{ type: "text", text: `Ошибка инструмента: ${error.message}` }], isError: true };
+        const status = error.message?.match(/\((\d+)\)/)?.[1] || "unknown";
+        return {
+          content: [{ type: "text", text: `Error (${status}): ${error.message}` }],
+          isError: true
+        };
       }
     });
   }

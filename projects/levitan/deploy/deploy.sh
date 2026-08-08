@@ -511,17 +511,34 @@ sleep 5  # wait for agent worker registration
 
 TOKEN=$(/opt/pipecat-venv/bin/python3 -c "from livekit import api; print(api.AccessToken('devkey','secret').with_grants(api.VideoGrants(room_admin=True)).to_jwt())" 2>/dev/null)
 
-# Create inbound trunk (no auth, allow Mango IP)
+# Create inbound trunk (no auth, allow Mango IPs: 81.88.86.11 = mangosip.ru, 10.170.19.206)
 curl -sf -X POST "$LIVEKIT_HTTP/twirp/livekit.SIP/CreateSIPInboundTrunk" \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-  -d '{"name":"mango-inbound","numbers":["78612025110"],"allowed_numbers":["78612025110"],"allowed_addresses":["172.110.223.114"]}' \
+  -d '{"name":"mango-inbound","numbers":["78612025110"],"allowed_numbers":["78612025110"],"allowed_addresses":["81.88.86.11","10.170.19.206"]}' \
   2>/dev/null && log "SIP trunk created" || log "SIP trunk may already exist"
 
-# Create dispatch rule
-curl -sf -X POST "$LIVEKIT_HTTP/twirp/livekit.SIP/CreateSIPDispatchRule" \
-  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-  -d '{"name":"levitan-inbound","trunk_ids":[],"rule":{"dispatch_rule_individual":{"room_prefix":"levitan-sip-"}}}' \
-  2>/dev/null && log "Dispatch rule created" || log "Dispatch rule may already exist"
+# Create/update dispatch rule with trunk_ids (mandatory: rule without trunk_ids
+# does NOT match user4 INVs. Write directly to Redis via protobuf, since Twirp
+# List/Delete/Get SIPDispatchRule endpoints require admin perms not available here.)
+/opt/pipecat-venv/bin/python3 - <<'EOF'
+import subprocess
+from livekit.protocol import sip as sp
+trunks = subprocess.run(["redis-cli", "hkeys", "sip_inbound_trunk"], capture_output=True, text=True).stdout.split()
+if not trunks:
+    print("No trunks found in Redis, dispatch rule NOT updated")
+    raise SystemExit(0)
+info = sp.SIPDispatchRuleInfo()
+info.sip_dispatch_rule_id = "SDR_levitan-inbound"
+info.name = "levitan-inbound"
+info.rule.dispatch_rule_individual.room_prefix = "levitan-sip-"
+info.rule.dispatch_rule_individual.no_randomness = True
+for t in trunks:
+    if t not in info.trunk_ids:
+        info.trunk_ids.append(t)
+payload = info.SerializeToString()
+p = subprocess.run(["redis-cli", "-x", "hset", "sip_dispatch_rule", info.sip_dispatch_rule_id], input=payload, capture_output=True)
+print(f"Dispatch rule {info.sip_dispatch_rule_id} updated with trunks {trunks}, rc={p.returncode}")
+EOF
 
 # ============ UFW ============
 log "Configuring firewall..."

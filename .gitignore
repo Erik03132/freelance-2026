@@ -102,3 +102,9 @@ projects/levitan/data/campaigns/csv/PING_PARTITION.json
 projects/levitan/speaker.wav
 projects/levitan/data/campaigns/csv/adygea_grain_*.csv
 projects/levitan/data/adygea_leads/
+
+# Obsidian workspace state (не коммитим — личные раскладки)
+vault/.obsidian/workspace.json
+vault/.obsidian/workspace-mobile.json
+vault/.obsidian/cache
+vault/.trash/

@@ -14,6 +14,7 @@
 import argparse
 import html
 import json
+import os
 import re
 import sys
 import urllib.request
@@ -24,7 +25,23 @@ SEARCH_URL = "http://search.pravo.gov.ru/api/Search/NewSearch"
 BASE_URL = "http://publication.pravo.gov.ru"
 
 
+def _strip_proxies() -> None:
+    """ADR-002: РФ-сервисы напрямую. Срезаем *_PROXY, чтобы DNS шёл локально."""
+    for name in [
+        "HTTP_PROXY",
+        "HTTPS_PROXY",
+        "ALL_PROXY",
+        "http_proxy",
+        "https_proxy",
+        "all_proxy",
+        "NO_PROXY",
+        "no_proxy",
+    ]:
+        os.environ.pop(name, None)
+
+
 def fetch(url: str, timeout: int = 20) -> str:
+    _strip_proxies()
     req = urllib.request.Request(url, headers={"User-Agent": "pravo-check/1.0"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read().decode("utf-8", errors="replace")

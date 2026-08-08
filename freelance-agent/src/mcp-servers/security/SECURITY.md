@@ -1,8 +1,8 @@
 # 🔐 Security Audit — mcp-servers
 
-- **Дата:** 2026-08-03T10:28:03.468830+00:00
-- **Цель:** `freelance-agent/src/mcp-servers`
-- **Файлов просканировано:** 0
+- **Дата:** 2026-08-08T12:32:10.970435+00:00
+- **Цель:** `/Users/igorvasin/freelance-2026/freelance-agent/src/mcp-servers`
+- **Файлов просканировано:** 2
 
 ## Сводка по severity
 

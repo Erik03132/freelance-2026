@@ -96,32 +96,145 @@ pm2 start /root/start-omniroute.sh --name omniroute
 pm2 save
 pm2 startup systemd -u root --hp /root 2>/dev/null || true
 
-# 5. Healthcheck cron (every 5 min)
-cat > /root/healthcheck-omniroute.sh << 'HCEOF'
-#!/bin/bash
-HEALTH=$(curl -sf -o /dev/null -w "%{http_code}" http://127.0.0.1:20128/v1/models 2>/dev/null)
-if [ "$HEALTH" != "200" ]; then
-    echo "[$(date)] OmniRoute down (HTTP $HEALTH). Restarting..."
-    pm2 restart omniroute 2>/dev/null
-    sleep 3
-    HEALTH2=$(curl -sf -o /dev/null -w "%{http_code}" http://127.0.0.1:20128/v1/models 2>/dev/null)
-    if [ "$HEALTH2" != "200" ]; then
-        echo "[$(date)] Still down. Hard reset..."
-        pm2 stop omniroute 2>/dev/null
-        sleep 1
-        pm2 start /root/start-omniroute.sh --name omniroute 2>/dev/null
-    fi
+# 5. Install Python3 (for watchdog)
+if ! command -v python3 &>/dev/null; then
+    echo "Installing Python3..."
+    apt-get install -y python3
 fi
-HCEOF
-chmod +x /root/healthcheck-omniroute.sh
-(crontab -l 2>/dev/null | grep -v healthcheck-omniroute; echo "*/5 * * * * /root/healthcheck-omniroute.sh >> /root/.pm2/logs/healthcheck.log 2>&1") | crontab -
+
+# 6. Watchdog systemd service
+mkdir -p /root/.omniroute/logs
+
+cat > /etc/systemd/system/omniroute-watchdog.service << WDSVC
+[Unit]
+Description=OmniRoute Watchdog
+After=network.target
+Before=omniroute.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /root/omniroute-watchdog.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/root/.omniroute/logs/watchdog.log
+StandardError=append:/root/.omniroute/logs/watchdog.log
+
+[Install]
+WantedBy=multi-user.target
+WDSVC
+
+systemctl daemon-reload
+systemctl enable omniroute-watchdog.service
+systemctl restart omniroute-watchdog.service 2>/dev/null || true
+
+echo "Watchdog systemd service installed and started"
+
+# 7. Old healthcheck cron replaced by watchdog — remove
+crontab -l 2>/dev/null | grep -v healthcheck-omniroute | crontab - 2>/dev/null || true
+echo "Old healthcheck cron removed (watchdog takes over)"
+
+# 8. Deploy watchdog script to VPS
+cat > /root/omniroute-watchdog.py << 'WDOGEOF'
+#!/usr/bin/env python3
+import os, sys, time, json, logging, subprocess, urllib.request, urllib.error
+from pathlib import Path
+
+HEALTH_URL    = "http://127.0.0.1:20128/v1/models"
+CHECK_INTERVAL = 30
+REBOOT_AFTER   = 600
+LOG_DIR        = "/root/.omniroute/logs"
+TG_TOKEN       = os.environ.get("OMNIROUTE_WATCHDOG_TG_TOKEN", "")
+TG_CHAT        = os.environ.get("OMNIROUTE_WATCHDOG_TG_CHAT_ID", "")
+
+for k in list(os.environ):
+    if k.endswith("_PROXY") or k.endswith("_proxy"): os.environ.pop(k, None)
+
+Path(LOG_DIR).mkdir(parents=True, exist_ok=True)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.FileHandler(os.path.join(LOG_DIR, "watchdog.log")), logging.StreamHandler()])
+log = logging.getLogger("wd")
+
+def tg(msg):
+    if not TG_TOKEN or not TG_CHAT: return
+    try:
+        u = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
+        r = urllib.request.Request(u, data=json.dumps({"chat_id":TG_CHAT,"text":msg}).encode(), method="POST")
+        r.add_header("Content-Type","application/json")
+        urllib.request.urlopen(r, timeout=10)
+    except: pass
+
+def healthy():
+    try:
+        r = urllib.request.urlopen(urllib.request.Request(HEALTH_URL), timeout=10)
+        return r.status == 200
+    except: return False
+
+def recover(fail_s):
+    log.info(f"Step 1: PM2 restart (fail={fail_s:.0f}s)")
+    subprocess.run("pm2 restart omniroute", shell=True, timeout=30)
+    time.sleep(5)
+    if healthy():
+        log.info("OK: pm2_restart")
+        tg(f"\u2b06\ufe0f OmniRoute UP (pm2 restart, down {fail_s:.0f}s)")
+        return "pm2_restart"
+    log.info("Step 2: hard restart")
+    subprocess.run("pm2 stop omniroute; pkill -f omniroute || true", shell=True, timeout=15)
+    time.sleep(3)
+    subprocess.run("bash /root/start-omniroute.sh &", shell=True, timeout=10)
+    time.sleep(20)
+    for _ in range(3):
+        if healthy():
+            log.info("OK: hard_restart")
+            tg(f"\u2b06\ufe0f OmniRoute UP (hard restart)")
+            return "hard_restart"
+        time.sleep(10)
+    log.info("Step 3: SQLite reset")
+    subprocess.run("sqlite3 /root/.omniroute/storage.sqlite \"UPDATE provider_connections SET test_status='unknown',error_code=NULL,last_error=NULL,backoff_level=0,rate_limited_until=NULL WHERE 1=1;\"", shell=True, timeout=10)
+    subprocess.run("pm2 stop omniroute; pkill -f omniroute || true", shell=True, timeout=15)
+    time.sleep(3)
+    subprocess.run("bash /root/start-omniroute.sh &", shell=True, timeout=10)
+    time.sleep(20)
+    if healthy():
+        log.info("OK: sqlite_reset")
+        tg(f"\u2b06\ufe0f OmniRoute UP (SQLite reset)")
+        return "sqlite_reset"
+    if fail_s > REBOOT_AFTER:
+        log.warning("REBOOT")
+        tg(f"\U0001f534 OmniRoute DEAD {fail_s:.0f}s — REBOOT")
+        subprocess.run("sync && reboot", shell=True, timeout=10)
+        return "reboot"
+    log.warning(f"All failed, waiting (fail={fail_s:.0f}s < {REBOOT_AFTER}s)")
+    tg(f"\U0001f534 OmniRoute DOWN {fail_s/60:.1f}min")
+    return "waiting"
+
+def main():
+    log.info("Watchdog started"); tg("\U0001f7e2 Watchdog started")
+    first_fail = None
+    while True:
+        if healthy():
+            first_fail = None; time.sleep(CHECK_INTERVAL); continue
+        now = time.time()
+        if first_fail is None:
+            first_fail = now
+            log.warning("DOWN"); tg("\U0001f534 OmniRoute DOWN — recovering")
+        recover(now - first_fail)
+        time.sleep(CHECK_INTERVAL)
+
+if __name__ == "__main__":
+    main()
+WDOGEOF
+chmod +x /root/omniroute-watchdog.py
+echo "Watchdog deployed to /root/omniroute-watchdog.py"
 
 echo ""
 echo "=== Recovery complete ==="
 echo "OmniRoute should be running on port 20128"
+echo "Watchdog: systemd omniroute-watchdog.service (every 30s)"
 echo "Check: curl http://localhost:20128/v1/models"
 echo "Create API key via dashboard: http://217.149.23.113:20128"
 echo "Password: ${INITIAL_PASSWORD}"
-echo "Then add OpenRouter provider and configure combo 'free-cascade'"
 echo ""
-echo "Healthcheck cron installed (every 5 min)"
+echo "After login, add OpenRouter provider and create 'free-cascade' combo:"
+echo "  Strategy: priority, Models: 14 free OpenRouter models"
+echo "  Glitch tip: if models dropped by context filter, set 'context-optimized' strategy"
+echo ""

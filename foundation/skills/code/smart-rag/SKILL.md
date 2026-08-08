@@ -90,6 +90,39 @@ results = collection.query(
 - Не храни эмбеддинги в памяти для больших коллекций
 - Не забывай про batch processing для скорости
 
+## Contextual Retrieval (C7, 08.08.2026)
+
+LLM-контекст для каждого чанка повышает recall (Anthropic: −67% failure rate).
+
+**Идея:** голый чанк «Цена 90₽» нерелевантен без контекста «Кобб-500, цены 2026».
+Добавляем LLM-сгенерированный контекст к чанку перед эмбеддингом.
+
+```python
+CONTEXT_PROMPT = """Напиши 1-2 предложения контекста для этого чанка документа.
+Укажи: о чём документ, к какому разделу относится чанк, ключевые сущности.
+{chunk}"""
+
+def generate_context(chunk: str, llm_fn) -> str:
+    # llm_fn — дешёвая модель (Haiku/Flash) с prompt caching
+    return llm_fn(CONTEXT_PROMPT.format(chunk=chunk))
+
+def enriched_chunk(chunk: str, context: str) -> str:
+    # Эмбеддинг обогащённого чанка (контекст + чанк), НЕ только чанка
+    return f"{context}\n\n{chunk}"
+```
+
+**Пайплайн:**
+1. Чанки → `generate_context()` (1 раз на чанк, кэш)
+2. `enriched_chunk()` → эмбеддинг обогащённого текста
+3. Поиск по обогащённым чанкам
+4. Baseline до/после: Recall@K, failure rate
+
+**Правила:**
+- Дешёвая модель для контекста (не трать Tier 3)
+- Prompt caching для повторных чанков (кэш префикса)
+- Контекст генерируется ОДИН раз при индексации, не при каждом поиске
+- Замер: baseline ДО обогащения, потом после — цель −30%+ failure
+
 ## Сравнение с keyword search
 
 **Keyword search:**
