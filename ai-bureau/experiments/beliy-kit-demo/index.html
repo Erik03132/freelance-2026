@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Белый Кит — Стоматология в Москве | Лечение зубов, имплантация</title>
+<meta name="description" content="Стоматология Белый Кит в Москве. Лечение зубов, имплантация, протезирование. Опытные врачи, современное оборудование, доступные цены. Запись онлайн и по телефону.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dentist",
+  "name": "Стоматология Белый Кит",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "ул. Лётчика Бабушкина, 32к1",
+    "addressLocality": "Москва",
+    "postalCode": "129344"
+  },
+  "telephone": "+7 (499) 123-45-67",
+  "openingHours": "Mo-Fr 09:00-21:00, Sa 10:00-18:00",
+  "medicalSpecialty": "Dentist",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "reviewCount": "127"
+  }
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --cream: #FAF7F2;
+  --navy: #1A2332;
+  --teal: #2A7F7F;
+  --teal-light: #E8F4F4;
+  --gold: #C4A265;
+  --gold-light: #F7F0E5;
+  --gray: #6B7280;
+  --gray-light: #F3F4F6;
+  --white: #FFFFFF;
+  --shadow-sm: 0 1px 3px rgba(26,35,50,0.08);
+  --shadow-md: 0 4px 24px rgba(26,35,50,0.10);
+  --shadow-lg: 0 12px 48px rgba(26,35,50,0.12);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--cream);
+  color: var(--navy);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; }
+h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 1.15; }
+h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.25; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* Header */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(250,247,242,0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(26,35,50,0.06);
+  padding: 16px 0;
+}
+.header .container { display: flex; align-items: center; justify-content: space-between; }
+.logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--navy); text-decoration: none; letter-spacing: -0.5px; }
+.logo span { color: var(--teal); }
+.header-phone { font-weight: 500; color: var(--navy); text-decoration: none; font-size: 0.95rem; transition: color var(--transition); }
+.header-phone:hover { color: var(--teal); }
+.header-cta {
+  background: var(--teal); color: var(--white); border: none;
+  padding: 10px 24px; border-radius: 50px; font-size: 0.9rem;
+  font-weight: 500; cursor: pointer; transition: all var(--transition);
+  font-family: 'Inter', sans-serif;
+}
+.header-cta:hover { background: #236d6d; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+/* Hero */
+.hero {
+  padding: 160px 0 100px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--teal-light); color: var(--teal); padding: 8px 18px;
+  border-radius: 50px; font-size: 0.85rem; font-weight: 500; margin-bottom: 24px;
+}
+.hero-badge::before { content: ''; width: 8px; height: 8px; background: var(--teal); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.hero h1 { margin-bottom: 20px; }
+.hero h1 em { font-style: italic; font-weight: 400; color: var(--teal); }
+.hero p { font-size: 1.1rem; color: var(--gray); margin-bottom: 36px; max-width: 480px; }
+
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--navy); color: var(--white); border: none;
+  padding: 16px 32px; border-radius: 50px; font-size: 1rem;
+  font-weight: 500; cursor: pointer; transition: all var(--transition);
+  font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 10px;
+}
+.btn-primary:hover { background: #2a3748; transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.btn-outline {
+  background: transparent; color: var(--navy); border: 2px solid rgba(26,35,50,0.15);
+  padding: 16px 32px; border-radius: 50px; font-size: 1rem;
+  font-weight: 500; cursor: pointer; transition: all var(--transition);
+  font-family: 'Inter', sans-serif;
+}
+.btn-outline:hover { border-color: var(--navy); }
+
+.hero-visual {
+  position: relative;
+  background: linear-gradient(135deg, #E8F4F4 0%, #F7F0E5 100%);
+  border-radius: 24px; padding: 40px; min-height: 400px;
+  display: flex; align-items: center; justify-content: center;
+}
+.hero-visual-inner { text-align: center; }
+.hero-tooth-icon { font-size: 5rem; margin-bottom: 16px; filter: drop-shadow(0 8px 24px rgba(42,127,127,0.2)); }
+.hero-stat { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 700; color: var(--teal); line-height: 1; }
+.hero-stat-label { font-size: 0.9rem; color: var(--gray); margin-top: 4px; }
+.hero-stats { display: flex; gap: 40px; margin-top: 24px; }
+
+/* Features strip */
+.features-strip {
+  background: var(--navy); padding: 48px 0;
+}
+.features-strip .container { display: grid; grid-template-columns: repeat(4,1fr); gap: 32px; }
+.feature-item { color: var(--white); }
+.feature-item-icon { font-size: 1.8rem; margin-bottom: 12px; }
+.feature-item h4 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 6px; }
+.feature-item p { color: rgba(255,255,255,0.6); font-size: 0.88rem; }
+
+/* Services */
+.services { padding: 100px 0; }
+.section-header { text-align: center; margin-bottom: 60px; }
+.section-header p { color: var(--gray); margin-top: 12px; font-size: 1.05rem; }
+.services-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+.service-card {
+  background: var(--white); border-radius: var(--radius); padding: 32px;
+  box-shadow: var(--shadow-sm); transition: all var(--transition);
+  border: 1px solid transparent;
+}
+.service-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--teal-light); }
+.service-card-icon { font-size: 2.4rem; margin-bottom: 16px; }
+.service-card h3 { font-size: 1.2rem; margin-bottom: 8px; }
+.service-card p { color: var(--gray); font-size: 0.92rem; margin-bottom: 16px; }
+.service-card-price { font-weight: 600; color: var(--teal); }
+.service-card a { color: var(--navy); font-weight: 500; text-decoration: none; font-size: 0.9rem; transition: color var(--transition); }
+.service-card a:hover { color: var(--teal); }
+
+/* Doctors */
+.doctors { padding: 80px 0; background: var(--white); }
+.doctors-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+.doctor-card {
+  text-align: center; padding: 32px 24px;
+  background: var(--cream); border-radius: var(--radius);
+  transition: all var(--transition);
+}
+.doctor-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.doctor-avatar {
+  width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, var(--teal-light), var(--gold-light));
+  margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 2.4rem;
+}
+.doctor-card h3 { font-size: 1.1rem; margin-bottom: 4px; }
+.doctor-spec { color: var(--teal); font-size: 0.85rem; font-weight: 500; }
+.doctor-exp { color: var(--gray); font-size: 0.85rem; margin-top: 6px; }
+
+/* Reviews */
+.reviews { padding: 100px 0; }
+.reviews-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+.review-card {
+  background: var(--white); border-radius: var(--radius); padding: 28px;
+  box-shadow: var(--shadow-sm);
+}
+.review-stars { color: var(--gold); font-size: 1.1rem; margin-bottom: 12px; }
+.review-text { font-size: 0.95rem; color: var(--navy); margin-bottom: 16px; font-style: italic; line-height: 1.7; }
+.review-author { font-weight: 600; font-size: 0.9rem; }
+.review-source { color: var(--gray); font-size: 0.8rem; }
+
+/* CTA Section */
+.cta-section {
+  padding: 100px 0; text-align: center;
+  background: linear-gradient(135deg, var(--navy) 0%, #2a3f54 100%);
+  border-radius: var(--radius); margin: 0 24px 100px;
+}
+.cta-section h2 { color: var(--white); margin-bottom: 16px; }
+.cta-section p { color: rgba(255,255,255,0.7); font-size: 1.1rem; margin-bottom: 36px; max-width: 500px; margin-left: auto; margin-right: auto; }
+.cta-section .btn-primary { background: var(--teal); }
+.cta-section .btn-primary:hover { background: #236d6d; }
+
+/* Footer */
+.footer { background: var(--navy); color: var(--white); padding: 60px 0 32px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer h4 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 16px; }
+.footer a, .footer p { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem; display: block; margin-bottom: 8px; transition: color var(--transition); }
+.footer a:hover { color: var(--white); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; display: flex; justify-content: space-between; color: rgba(255,255,255,0.4); font-size: 0.85rem; }
+
+/* Voice Bot Widget */
+.voice-bot {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+}
+.voice-bot-btn {
+  width: 64px; height: 64px; border-radius: 50%; border: none;
+  background: var(--teal); color: var(--white); font-size: 1.6rem;
+  cursor: pointer; box-shadow: 0 8px 32px rgba(42,127,127,0.35);
+  transition: all var(--transition); display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.voice-bot-btn::after {
+  content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--teal);
+  animation: ripple 2s infinite;
+}
+@keyframes ripple { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.5); opacity: 0; } }
+.voice-bot-btn:hover { transform: scale(1.08); background: #236d6d; }
+.voice-bot-btn.recording { background: #e53e3e; animation: pulse-rec 1.5s infinite; }
+@keyframes pulse-rec { 0%,100% { box-shadow: 0 0 0 0 rgba(229,62,62,0.4); } 50% { box-shadow: 0 0 0 16px rgba(229,62,62,0); } }
+.voice-bot-panel {
+  position: absolute; bottom: 80px; right: 0; width: 360px;
+  background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  padding: 24px; display: none; flex-direction: column; gap: 16px;
+}
+.voice-bot-panel.open { display: flex; }
+.voice-bot-panel h3 { font-size: 1.1rem; margin-bottom: 4px; }
+.voice-bot-panel .bot-status {
+  font-size: 0.85rem; color: var(--gray); display: flex; align-items: center; gap: 6px;
+}
+.voice-bot-panel .bot-status .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; }
+.voice-bot-chat {
+  background: var(--cream); border-radius: var(--radius-sm); padding: 16px; min-height: 120px;
+  font-size: 0.9rem; color: var(--gray); max-height: 200px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.bot-msg { background: var(--teal-light); padding: 10px 14px; border-radius: 12px 12px 12px 4px; font-size: 0.88rem; color: var(--navy); align-self: flex-start; max-width: 85%; }
+.user-msg { background: var(--navy); padding: 10px 14px; border-radius: 12px 12px 4px 12px; font-size: 0.88rem; color: var(--white); align-self: flex-end; max-width: 85%; }
+.voice-bot-actions { display: flex; gap: 10px; }
+.voice-bot-actions button {
+  flex: 1; padding: 12px; border-radius: 50px; border: none; font-size: 0.9rem;
+  font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all var(--transition);
+}
+.btn-voice {
+  background: var(--teal); color: var(--white); display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-voice:hover { background: #236d6d; }
+.btn-text { background: var(--gray-light); color: var(--navy); }
+.btn-text:hover { background: #e5e7eb; }
+
+/* Voice Recorder interface */
+.voice-recorder {
+  display: none; flex-direction: column; align-items: center; gap: 12px; padding: 20px;
+}
+.voice-recorder.active { display: flex; }
+.voice-recorder .recording-indicator {
+  width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--teal);
+  display: flex; align-items: center; justify-content: center; font-size: 2rem;
+  animation: pulse-rec 1.5s infinite;
+}
+.voice-recorder .recording-indicator.red { border-color: #e53e3e; color: #e53e3e; }
+.voice-recorder p { color: var(--gray); font-size: 0.85rem; }
+
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; padding: 120px 0 60px; gap: 40px; }
+  .hero-visual { min-height: 280px; }
+  .services-grid, .doctors-grid, .reviews-grid { grid-template-columns: 1fr; }
+  .features-strip .container { grid-template-columns: repeat(2,1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .voice-bot-panel { width: calc(100vw - 56px); right: -14px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="container">
+    <a href="#" class="logo">Белый <span>Кит</span></a>
+    <a href="tel:+74991234567" class="header-phone">+7 (499) 123-45-67</a>
+    <button class="header-cta" onclick="document.getElementById('booking-form').scrollIntoView({behavior:'smooth'})">Записаться</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero container">
+    <div>
+      <div class="hero-badge">Работаем прямо сейчас</div>
+      <h1>Стоматология,<br>которой вы <em>доверяете</em></h1>
+      <p>Современное лечение зубов без боли и страха. 12 лет опыта, 4 врача-эксперта, оборудование экспертного класса.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="openVoiceBot()">🎤 Записаться голосом</button>
+        <button class="btn-outline" onclick="document.getElementById('booking-form').scrollIntoView({behavior:'smooth'})">Запись онлайн</button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-visual-inner">
+        <div class="hero-tooth-icon">🦷</div>
+        <div class="hero-stats">
+          <div><div class="hero-stat">4.8</div><div class="hero-stat-label">Рейтинг на Яндекс</div></div>
+          <div><div class="hero-stat">12</div><div class="hero-stat-label">Лет работы</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="features-strip">
+    <div class="container">
+      <div class="feature-item">
+        <div class="feature-item-icon">🔬</div>
+        <h4>Лечение под микроскопом</h4>
+        <p>Ювелирная точность при работе с каналами</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-item-icon">📱</div>
+        <h4>Запись онлайн 24/7</h4>
+        <p>Голосом или через форму — как удобно</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-item-icon">💳</div>
+        <h4>Рассрочка 0%</h4>
+        <p>Лечение без удара по бюджету</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-item-icon">🛡️</div>
+        <h4>Гарантия 2 года</h4>
+        <p>На все виды лечения и протезирования</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="services container" id="services">
+    <div class="section-header">
+      <h2>Услуги и цены</h2>
+      <p>Прозрачные цены без скрытых доплат</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-card-icon">🪥</div>
+        <h3>Лечение кариеса</h3>
+        <p>Современные пломбы, лечение без боли с анестезией</p>
+        <div class="service-card-price">от 4 500 ₽</div>
+        <br><a href="#">Подробнее →</a>
+      </div>
+      <div class="service-card">
+        <div class="service-card-icon">🦷</div>
+        <h3>Имплантация зубов</h3>
+        <p>Импланты премиум-класса, приживляемость 98%</p>
+        <div class="service-card-price">от 35 000 ₽</div>
+        <br><a href="#">Подробнее →</a>
+      </div>
+      <div class="service-card">
+        <div class="service-card-icon">✨</div>
+        <h3>Профгигиена</h3>
+        <p>Ультразвуковая чистка, Air Flow, снятие налёта</p>
+        <div class="service-card-price">от 3 500 ₽</div>
+        <br><a href="#">Подробнее →</a>
+      </div>
+      <div class="service-card">
+        <div class="service-card-icon">🦴</div>
+        <h3>Протезирование</h3>
+        <p>Коронки, мосты, съёмные протезы — любые решения</p>
+        <div class="service-card-price">от 12 000 ₽</div>
+        <br><a href="#">Подробнее →</a>
+      </div>
+      <div class="service-card">
+        <div class="service-card-icon">😬</div>
+        <h3>Брекеты и элайнеры</h3>
+        <p>Исправление прикуса у взрослых и детей</p>
+        <div class="service-card-price">от 80 000 ₽</div>
+        <br><a href="#">Подробнее →</a>
+      </div>
+      <div class="service-card">
+        <div class="service-card-icon">👶</div>
+        <h3>Детская стоматология</h3>
+        <p>Бережное лечение без страха, адаптация к врачу</p>
+        <div class="service-card-price">от 3 000 ₽</div>
+        <br><a href="#">Подробнее →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="doctors" id="doctors">
+    <div class="container">
+      <div class="section-header">
+        <h2>Наши врачи</h2>
+        <p>Команда экспертов с опытом от 8 до 20 лет</p>
+      </div>
+      <div class="doctors-grid">
+        <div class="doctor-card">
+          <div class="doctor-avatar">👨‍⚕️</div>
+          <h3>Смирнов Андрей Петрович</h3>
+          <div class="doctor-spec">Главный врач, стоматолог-ортопед</div>
+          <div class="doctor-exp">Стаж 20 лет</div>
+        </div>
+        <div class="doctor-card">
+          <div class="doctor-avatar">👩‍⚕️</div>
+          <h3>Волкова Елена Сергеевна</h3>
+          <div class="doctor-spec">Стоматолог-терапевт</div>
+          <div class="doctor-exp">Стаж 14 лет</div>
+        </div>
+        <div class="doctor-card">
+          <div class="doctor-avatar">👨‍⚕️</div>
+          <h3>Ибрагимов Руслан Маратович</h3>
+          <div class="doctor-spec">Хирург-имплантолог</div>
+          <div class="doctor-exp">Стаж 12 лет</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="reviews container" id="reviews">
+    <div class="section-header">
+      <h2>Что говорят пациенты</h2>
+      <p>127 отзывов · средняя оценка 4.8</p>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-text">«Боялась стоматологов с детства. В Белом Ките первый раз лечила зубы без страха. Андрей Петрович — волшебник. Теперь хожу только сюда.»</div>
+        <div class="review-author">Марина К.</div>
+        <div class="review-source">Яндекс Карты</div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-text">«Ставил имплант у Руслана Маратовича. Всё прошло отлично, даже отёка не было. Отдельное спасибо администратору — напомнили о приёме за день.»</div>
+        <div class="review-author">Дмитрий А.</div>
+        <div class="review-source">Google Maps</div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-text">«Пришли с ребёнком 6 лет, дочка боялась. Елена Сергеевна нашла подход за 5 минут. Вылечили два зуба, ребёнок даже не пикнул. Спасибо!»</div>
+        <div class="review-author">Анна С.</div>
+        <div class="review-source">Яндекс Карты</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section" id="booking-form">
+    <h2>Запишитесь на бесплатную консультацию</h2>
+    <p>Оставьте номер — перезвоним за 5 минут. Или используйте голосового ассистента — просто скажите, когда вам удобно.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:500px;margin:0 auto;">
+      <input type="tel" placeholder="+7 (___) ___-__-__" style="flex:1;min-width:200px;padding:16px 20px;border-radius:50px;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:white;font-size:1rem;font-family:'Inter',sans-serif;outline:none;" value="+7 (916) 123-45-67">
+      <button class="btn-primary" onclick="this.innerHTML='✓ Отправлено!';setTimeout(()=>this.innerHTML='Записаться',2000)">Записаться</button>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4>Белый Кит</h4>
+        <p>Стоматология в Москве<br>Лечение, имплантация, протезирование</p>
+        <p style="margin-top:12px">© 2014–2026</p>
+      </div>
+      <div>
+        <h4>Услуги</h4>
+        <a href="#">Лечение зубов</a>
+        <a href="#">Имплантация</a>
+        <a href="#">Протезирование</a>
+        <a href="#">Гигиена</a>
+      </div>
+      <div>
+        <h4>Пациентам</h4>
+        <a href="#">Цены</a>
+        <a href="#">Отзывы</a>
+        <a href="#">Рассрочка</a>
+        <a href="#">Контакты</a>
+      </div>
+      <div>
+        <h4>Контакты</h4>
+        <a href="tel:+74991234567">+7 (499) 123-45-67</a>
+        <a href="mailto:hello@beliykit.ru">hello@beliykit.ru</a>
+        <p>Москва, ул. Лётчика Бабушкина, 32к1</p>
+        <p>Пн-Пт 9:00–21:00<br>Сб 10:00–18:00</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Все права защищены</span>
+      <span>Политика конфиденциальности</span>
+    </div>
+  </div>
+</footer>
+
+<div class="voice-bot" id="voiceBot">
+  <div class="voice-bot-panel" id="voicePanel">
+    <h3>🎤 Голосовой ассистент</h3>
+    <div class="bot-status"><span class="dot"></span> Готов вас услышать</div>
+    <div class="voice-bot-chat" id="botChat">
+      <div class="bot-msg">Здравствуйте! Я помогу записаться на приём. Скажите, к какому врачу вы хотели бы попасть и в какое время?</div>
+    </div>
+    <div class="voice-recorder" id="voiceRecorder">
+      <div class="recording-indicator" id="recIndicator">🎙️</div>
+      <p id="recStatus">Нажмите и говорите</p>
+      <button class="btn-outline" onclick="stopRecording()" style="width:100%">Завершить запись</button>
+    </div>
+    <div class="voice-bot-actions">
+      <button class="btn-voice" id="btnVoice" onclick="startVoiceRecording()">🎙️ Голосом</button>
+      <button class="btn-text" onclick="simulateTextBooking()">💬 Текстом</button>
+    </div>
+  </div>
+  <button class="voice-bot-btn" id="voiceBotBtn" onclick="toggleBot()">🎤</button>
+</div>
+
+<script>
+function toggleBot() {
+  document.getElementById('voicePanel').classList.toggle('open');
+}
+
+function openVoiceBot() {
+  document.getElementById('voicePanel').classList.add('open');
+  document.getElementById('voicePanel').scrollIntoView({behavior:'smooth'});
+}
+
+function addMessage(text, isUser) {
+  const chat = document.getElementById('botChat');
+  const div = document.createElement('div');
+  div.className = isUser ? 'user-msg' : 'bot-msg';
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function botReply(text) {
+  setTimeout(() => addMessage(text, false), 600);
+}
+
+function simulateTextBooking() {
+  addMessage('Запишите меня к терапевту на среду, после 15:00', true);
+  botReply('Хорошо! Смотрю расписание...');
+  setTimeout(() => {
+    botReply('Есть окно у Елены Сергеевны в среду в 16:00. Подтверждаете запись?');
+  }, 1500);
+}
+
+function startVoiceRecording() {
+  const recorder = document.getElementById('voiceRecorder');
+  const btn = document.getElementById('btnVoice');
+  const indicator = document.getElementById('recIndicator');
+  const status = document.getElementById('recStatus');
+
+  recorder.classList.add('active');
+  btn.style.display = 'none';
+  indicator.classList.add('red');
+  status.textContent = 'Говорите...';
+
+  // Simulate voice recognition
+  setTimeout(() => {
+    addMessage('Запишите меня на чистку зубов в субботу утром', true);
+    stopRecording();
+    botReply('Понял! Чистка зубов в субботу. Свободное время: 10:00 или 11:30. Какое удобнее?');
+  }, 2500);
+}
+
+function stopRecording() {
+  const recorder = document.getElementById('voiceRecorder');
+  const btn = document.getElementById('btnVoice');
+  const indicator = document.getElementById('recIndicator');
+  recorder.classList.remove('active');
+  btn.style.display = '';
+  indicator.classList.remove('red');
+}
+</script>
+
+</body>
+</html>

@@ -15,10 +15,20 @@ import argparse
 import json
 import os
 import re
+import ssl
 import sys
 import urllib.request
 from datetime import datetime
 from pathlib import Path
+
+# SSL: homebrew Python не находит корневые сертификаты macOS → CERTIFICATE_VERIFY_FAILED.
+# Используем certifi, если доступен (иначе дефолтный контекст).
+try:
+    import certifi
+
+    _SSL_CTX = ssl.create_default_context(cafile=certifi.where())
+except Exception:  # noqa: BLE001
+    _SSL_CTX = ssl.create_default_context()
 
 FREE_MODELS = [
     "nvidia/nemotron-3-super-120b-a12b:free",
@@ -99,8 +109,18 @@ def call_llm(prompt: str, max_tokens: int = 4000) -> str | None:
                     "Content-Type": "application/json",
                 },
             )
-            with urllib.request.urlopen(req, timeout=240) as r:
-                data = json.loads(r.read().decode())
+            proxy = os.getenv("BOOK_DIGEST_PROXY") or os.getenv("HTTPS_PROXY") or ""
+            if proxy and "127.0.0.1" not in proxy and "localhost" not in proxy:
+                proxy = ""  # системный прокси РФ не годится для OpenRouter
+            if proxy:
+                opener = urllib.request.build_opener(
+                    urllib.request.ProxyHandler({"http": proxy, "https": proxy})
+                )
+                with opener.open(req, timeout=240) as r:
+                    data = json.loads(r.read().decode())
+            else:
+                with urllib.request.urlopen(req, timeout=240, context=_SSL_CTX) as r:
+                    data = json.loads(r.read().decode())
             md = data["choices"][0]["message"]["content"].strip()
             if md:
                 return md
@@ -161,7 +181,7 @@ def push_to_claude_mem(title: str, digest: str) -> None:
                 "Content-Type": "application/json",
             },
         )
-        with urllib.request.urlopen(req, timeout=15) as r:
+        with urllib.request.urlopen(req, timeout=15, context=_SSL_CTX) as r:
             print(f"[book_digest] claude-mem: {r.status}")
     except Exception as e:
         print(f"[book_digest] claude-mem push failed: {e}", file=sys.stderr)

@@ -31,6 +31,8 @@ INBOX_DIR="${VAULT_DIR}/00-Inbox"
 LIBRARY_DIR="${VAULT_DIR}/06-Library"
 REPORTS_DIR="${PROJECT_ROOT}/reports"
 BOOK_DIGEST="${PROJECT_ROOT}/tools/book_digest.py"
+# US-прокси для OpenRouter (локальный форвард через VPS; без него free-модели 403)
+BOOK_PROXY="http://Q3NeJXTY:dsBaWh2L@127.0.0.1:64468"
 
 # Личный инбокс Obsidian (iCloud)
 PERSONAL_BASE="/Users/igorvasin/Library/Mobile Documents/iCloud~md~obsidian/Documents/Личное"
@@ -42,19 +44,21 @@ LOG_FILE="/tmp/night_reader_${DATE}.log"
 REPORT_FILE="${REPORTS_DIR}/night_reader_${DATE}.md"
 
 # Telegram (тот же бот, что и ночной аудит)
-TG_BOT_TOKEN=$(grep "ANGELOCHKA_BOT_TOKEN" "${PROJECT_ROOT}/ai-eggs/.env" 2>/dev/null | cut -d= -f2)
+ENV_FILE="${PROJECT_ROOT}/projects/ai-eggs/.env"
+[ -f "${PROJECT_ROOT}/ai-eggs/.env" ] && ENV_FILE="${PROJECT_ROOT}/ai-eggs/.env"  # fallback на старое место
+TG_BOT_TOKEN=$(grep "ANGELOCHKA_BOT_TOKEN" "$ENV_FILE" 2>/dev/null | cut -d= -f2)
 TG_ADMIN_ID="176203333"
-TG_PROXY=$(grep "TELEGRAM_PROXY" "${PROJECT_ROOT}/ai-eggs/.env" 2>/dev/null | cut -d= -f2 || echo "")
+TG_PROXY=$(grep "TELEGRAM_PROXY" "$ENV_FILE" 2>/dev/null | cut -d= -f2 || echo "")
 
 # VPS-инбокс (мост)
 VPS_INBOX="/opt/vault_inbox"
 VPS_HOST=""
 VPS_USER=""
 VPS_KEY=""
-if [ -f "${PROJECT_ROOT}/ai-eggs/.env" ]; then
-    VPS_HOST=$(grep "^VPS_HOST=" "${PROJECT_ROOT}/ai-eggs/.env" | cut -d= -f2)
-    VPS_USER=$(grep "^VPS_USER=" "${PROJECT_ROOT}/ai-eggs/.env" | cut -d= -f2)
-    VPS_KEY=$(grep "^VPS_SSH_KEY=" "${PROJECT_ROOT}/ai-eggs/.env" | cut -d= -f2)
+if [ -f "$ENV_FILE" ]; then
+    VPS_HOST=$(grep "^VPS_HOST=" "$ENV_FILE" | cut -d= -f2)
+    VPS_USER=$(grep "^VPS_USER=" "$ENV_FILE" | cut -d= -f2)
+    VPS_KEY=$(grep "^VPS_SSH_KEY=" "$ENV_FILE" | cut -d= -f2)
     [ -z "$VPS_HOST" ] && VPS_HOST="72.56.38.19"
     [ -z "$VPS_USER" ] && VPS_USER="root"
 fi
@@ -159,6 +163,11 @@ FAILED=0
 convert_inbox() {
     local inbox_dir="$1"
     [ -d "$inbox_dir" ] || return
+    if [ ! -r "$inbox_dir" ]; then
+        log "  ⚠️ НЕТ ДОСТУПА к ${inbox_dir} (TCC?) — проверьте Full Disk Access для launchd-процесса"
+        echo "• НЕТ ДОСТУПА (TCC?): ${inbox_dir}" >> "$REPORT_FILE"
+        return
+    fi
     local tmp_list
     tmp_list=$(mktemp /tmp/night_reader_files_$$.XXXXXX)
     find "$inbox_dir" -maxdepth 1 -type f \( -iname "*.doc" -o -iname "*.docx" -o -iname "*.pdf" -o -iname "*.epub" -o -iname "*.txt" -o -iname "*.html" \) 2>/dev/null | sort > "$tmp_list"
@@ -236,6 +245,10 @@ SORT_FAILED=0
 SORT_CANDIDATES=0
 
 if [ -d "$PERSONAL_INBOX" ]; then
+    if [ ! -r "$PERSONAL_INBOX" ]; then
+        log "  ⚠️ НЕТ ДОСТУПА к ${PERSONAL_INBOX} (TCC?) — пропускаю раскладку личных заметок"
+        echo "• НЕТ ДОСТУПА (TCC?): ${PERSONAL_INBOX} — раскладка личных заметок пропущена" >> "$REPORT_FILE"
+    else
     log "🗂️ Фаза 1b: раскладка личного инбокса ($(find "$PERSONAL_INBOX" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ') md-заметок)..."
 
     # Мусор: временные файлы (*.base, ~$*) — удаляем
@@ -268,8 +281,10 @@ if [ -d "$PERSONAL_INBOX" ]; then
                 echo "Хочу все знать" ;;
             *здоров*|*массаж*|*косметик*|*уход*|*лиц*)
                 echo "Здоровье" ;;
-            *книг*|*роман*|*произведен*)
+            *книг*|*роман*|*произведен*|*book*|*books*)
                 echo "КНИГИ" ;;
+            *кино*|*фильм*|*сериал*|*боевик*|*нетфликс*|*netflix*|*сезон*)
+                echo "Кино" ;;
             *банк*|*кредит*|*вклад*|*деньг*|*налог*)
                 echo "Банки" ;;
             *автомобил*|*машин*|*авто*|*ослик*)
@@ -330,6 +345,7 @@ if [ -d "$PERSONAL_INBOX" ]; then
         echo "• Без категории (осталось во Входящих): ${UNSORTED}" >> "$REPORT_FILE"
         find "$PERSONAL_INBOX" -maxdepth 1 -type f -name "*.md" ! -name ".*" -exec basename {} \; 2>/dev/null | sed 's/^/  - /' >> "$REPORT_FILE"
     fi
+    fi  # конец else (нет доступа к личному инбоксу)
 else
     log "  ⏭️ Личный инбокс не найден: ${PERSONAL_INBOX}"
 fi
@@ -369,7 +385,7 @@ else
             log "  (dry-run: пропуск)"
             continue
         fi
-        if OPENROUTER_API_KEY="${OPENROUTER_API_KEY:-$(grep '^OPENROUTER_API_KEY=' "${PROJECT_ROOT}/.env" 2>/dev/null | cut -d= -f2)}" \
+        if OPENROUTER_API_KEY="${OPENROUTER_API_KEY:-$(grep '^OPENROUTER_API_KEY=' "${PROJECT_ROOT}/.env" 2>/dev/null | cut -d= -f2)}" BOOK_DIGEST_PROXY="$BOOK_PROXY" \
             python3 "$BOOK_DIGEST" --input "$f" --slug "$slug" --title "$base" 2>>"$LOG_FILE"; then
             BOOKS_READ=$((BOOKS_READ+1))
             rm -f "$f"
@@ -396,7 +412,7 @@ else
                 log "  (dry-run: пропуск)"
                 continue
             fi
-            if OPENROUTER_API_KEY="${OPENROUTER_API_KEY:-$(grep '^OPENROUTER_API_KEY=' "${PROJECT_ROOT}/.env" 2>/dev/null | cut -d= -f2)}" \
+            if OPENROUTER_API_KEY="${OPENROUTER_API_KEY:-$(grep '^OPENROUTER_API_KEY=' "${PROJECT_ROOT}/.env" 2>/dev/null | cut -d= -f2)}" BOOK_DIGEST_PROXY="$BOOK_PROXY" \
                 python3 "$BOOK_DIGEST" --input "$f" --slug "$slug" --title "$base" \
                 --out "${PERSONAL_BASE}/КНИГИ/${slug}" 2>>"$LOG_FILE"; then
                 BOOKS_READ=$((BOOKS_READ+1))
@@ -455,6 +471,53 @@ CATALOG="${LIBRARY_DIR}/_catalog.md"
 
 log "✅ Каталог обновлён: ${CATALOG}"
 
+# ============================================================
+# ФАЗА 4: NOTEBOOKLM (сканирование блокнотов)
+# ============================================================
+
+NB_READ=0
+NB_FAILED=0
+NB_SCAN_DIR="/tmp/notebooklm_scan"
+NB_SCAN_SCRIPT="${PROJECT_ROOT}/tools/ops/notebooklm_scan.py"
+NB_LLM_KEY="${OPENROUTER_API_KEY:-$(grep '^OPENROUTER_API_KEY=' "${PROJECT_ROOT}/.env" 2>/dev/null | cut -d= -f2)}"
+
+echo "" >> "$REPORT_FILE"
+echo "## 🧠 Фаза 4: NotebookLM" >> "$REPORT_FILE"
+
+if [ "$PHASE1_ONLY" = true ] || [ "$DRY_RUN" = true ]; then
+    log "⏭️ Сканирование NotebookLM пропущено"
+    echo "⏭️ Сканирование NotebookLM пропущено" >> "$REPORT_FILE"
+else
+    rm -rf "$NB_SCAN_DIR"
+    mkdir -p "$NB_SCAN_DIR"
+    log "🔍 Фаза 4: сканирование блокнотов NotebookLM..."
+    NB_FILES=$(python3 "$NB_SCAN_SCRIPT" --outdir "$NB_SCAN_DIR" 2>>"$LOG_FILE" || true)
+    if [ -z "$NB_FILES" ]; then
+        log "  ⏭️ Новых источников нет (или прокси недоступны)"
+        echo "• NotebookLM: новых источников нет" >> "$REPORT_FILE"
+    else
+        while IFS= read -r f; do
+            [ -f "$f" ] || continue
+            base=$(basename "$f" .md)
+            slug=$(echo "$base" | tr '[:upper:]' '[:lower:]' | tr ' /' '--' | tr -cd 'a-z0-9_-')
+            [ -z "$slug" ] && slug="nblm-$(date +%s)"
+            log "  📖 Читаю из NotebookLM: ${base}..."
+            if OPENROUTER_API_KEY="$NB_LLM_KEY" BOOK_DIGEST_PROXY="$BOOK_PROXY" \
+                python3 "$BOOK_DIGEST" --input "$f" --slug "$slug" --title "$base" \
+                --out "${LIBRARY_DIR}/books/${slug}" 2>>"$LOG_FILE"; then
+                NB_READ=$((NB_READ+1))
+                rm -f "$f"
+            else
+                log "  ❌ Ошибка чтения: ${base}"
+                NB_FAILED=$((NB_FAILED+1))
+            fi
+        done <<< "$NB_FILES"
+        log "✅ NotebookLM: прочитано ${NB_READ}, ошибок ${NB_FAILED}"
+        echo "• NotebookLM: прочитано ${NB_READ}, ошибок ${NB_FAILED}" >> "$REPORT_FILE"
+    fi
+    rm -rf "$NB_SCAN_DIR"
+fi
+
 TIME_END=$(date +%H:%M:%S)
 
 cat >> "$REPORT_FILE" << EOF
@@ -471,6 +534,7 @@ cat >> "$REPORT_FILE" << EOF
 | ⚡ Конвертировано | ${CONVERTED} |
 | ❌ Ошибок конвертации | ${FAILED} |
 | 📖 Книг прочитано | ${BOOKS_READ} |
+| 🧠 NotebookLM | ${NB_READ} |
 | ❌ Ошибок чтения | ${BOOKS_FAILED} |
 
 > 🤖 Сгенерировано: \`tools/ops/night_reader.sh\` (по аналогии с night_audit.sh)
@@ -485,16 +549,18 @@ if [ "${BOOKS_READ}" -gt 0 ]; then
     TG_MSG="📚 *Ночной читатель — ${DATE}*
 
 📖 Прочитано книг: *${BOOKS_READ}*
+🧠 Из NotebookLM: *${NB_READ}*
 ⚡ Конвертировано: ${CONVERTED}
-❌ Ошибок: $((FAILED + BOOKS_FAILED))
+❌ Ошибок: $((FAILED + BOOKS_FAILED + NB_FAILED))
 
 📄 \`reports/night_reader_${DATE}.md\`"
 else
     TG_MSG="📚 *Ночной читатель — ${DATE}*
 
 ⏳ Книг не было (инбокс пуст)
+🧠 Из NotebookLM: *${NB_READ}*
 ⚡ Конвертировано: ${CONVERTED}
-❌ Ошибок: $((FAILED + BOOKS_FAILED))"
+❌ Ошибок: $((FAILED + BOOKS_FAILED + NB_FAILED))"
 fi
 
 send_telegram "$TG_MSG"
