@@ -109,11 +109,6 @@ class CallCost:
 
     def report(self, days: int = 7, include_tests: bool = False) -> dict:
         """Сводка себестоимости за N дней (по статьям, не по звонкам)."""
-        since = (
-            datetime.now()
-            .isoformat(timespec="seconds")
-            .replace(datetime.now().strftime("%H:%M:%S"), f"{datetime.now().strftime('%H:%M:%S')}")
-        )
         from datetime import timedelta
 
         since_dt = datetime.now() - timedelta(days=days)
@@ -130,13 +125,6 @@ class CallCost:
                     FROM calls WHERE {where}""",
                 params,
             ).fetchone()
-        total = (
-            float(rows["mango"] or 0)
-            + float(rows["stt"] or 0)
-            + float(rows["llm"] or 0)
-            + float(rows["tts"] or 0)
-            + float(rows["sms"] or 0)
-        )
         return {
             "days": days,
             "calls": rows["n"],

@@ -68,6 +68,9 @@ scratch/
 temp_voices/
 tts_cache/
 
+# Production snapshots (contain real API keys from VPS) - keep local only, backups live on VPS
+checkpoints/baseline_*/
+
 # Large data files
 data/campaigns/2026/*.xlsx
 data/voice_cache/
