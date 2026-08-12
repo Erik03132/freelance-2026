@@ -1,0 +1,50 @@
+[
+  {
+    "task_name": "date_picker",
+    "lines_of_code": 23,
+    "cost_usd": 0.0036,
+    "latency_seconds": 9.0,
+    "safety_issues": 0,
+    "timestamp": "2026-08-11 12:47:38"
+  },
+  {
+    "task_name": "color_picker",
+    "lines_of_code": 23,
+    "cost_usd": 0.0026,
+    "latency_seconds": 6.4,
+    "safety_issues": 0,
+    "timestamp": "2026-08-11 12:47:38"
+  },
+  {
+    "task_name": "simple_form",
+    "lines_of_code": 48,
+    "cost_usd": 0.0009,
+    "latency_seconds": 2.6,
+    "safety_issues": 0,
+    "timestamp": "2026-08-11 12:47:38"
+  },
+  {
+    "task_name": "api_endpoint",
+    "lines_of_code": 82,
+    "cost_usd": 0.0017,
+    "latency_seconds": 4.2,
+    "safety_issues": 0,
+    "timestamp": "2026-08-11 12:47:38"
+  },
+  {
+    "task_name": "auth_middleware",
+    "lines_of_code": 112,
+    "cost_usd": 0.0022,
+    "latency_seconds": 5.3,
+    "safety_issues": 0,
+    "timestamp": "2026-08-11 12:47:38"
+  },
+  {
+    "task_name": "data_transform",
+    "lines_of_code": 94,
+    "cost_usd": 0.0015,
+    "latency_seconds": 3.7,
+    "safety_issues": 0,
+    "timestamp": "2026-08-11 12:47:38"
+  }
+]
