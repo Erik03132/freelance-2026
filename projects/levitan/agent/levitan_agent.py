@@ -230,6 +230,17 @@ def _phone_from_text(text):
     return None
 
 
+def _fmt_phone_spoken(p: str) -> str:
+    """Format a phone number for TTS so it is read digit-by-digit,
+    not as a single magnitude (e.g. '79859234644' -> '7 9 8 5 9 2 3 4 6 4 4')."""
+    digits = re.sub(r"\D", "", p or "")
+    if len(digits) == 11 and digits.startswith("8"):
+        digits = "7" + digits[1:]
+    if not digits:
+        return p or ""
+    return " ".join(digits)
+
+
 _session_holder = {"session": None}
 _FAREWELL_MARKERS = (
     "всего хорошего",
@@ -271,6 +282,19 @@ async def _terminate_after_speech(reason: str) -> None:
         await asyncio.sleep(0.5)
         sess.shutdown()
         print(f"[CALL] {reason}: shutdown ok", flush=True)
+        try:
+            _m = _session_holder.get("agent")
+            _mm = getattr(_m, "_metrics", None) if _m else None
+            if _mm:
+                _avg = (sum(_mm["resp_lat"]) / len(_mm["resp_lat"])) if _mm["resp_lat"] else 0
+                print(
+                    f"[METRICS] summary: greet_dur={_mm['greet_dur']:.1f} "
+                    f"turns={_mm['turns']} resp_lat={[round(x,1) for x in _mm['resp_lat']]} "
+                    f"avg_resp_lat={_avg:.1f}",
+                    flush=True,
+                )
+        except Exception as _me:
+            print(f"[METRICS] summary fail {_me!r}", flush=True)
     except Exception as e:
         print(f"[CALL] {reason}: error {e!r}", flush=True)
 
@@ -297,7 +321,7 @@ class YandexTTS(tts.TTS):
 
     def __init__(self, api_key: str, folder_id: str, voice: str = "alena", speed: float = 1.0):
         super().__init__(
-            capabilities=tts.TTSCapabilities(streaming=False, aligned_transcript=False),
+            capabilities=tts.TTSCapabilities(streaming=True, aligned_transcript=False),
             sample_rate=48000,
             num_channels=1,
         )
@@ -313,80 +337,97 @@ class YandexTTS(tts.TTS):
     @asynccontextmanager
     async def synthesize(self, text: str, *, conn_options: APIConnectOptions = None):
         import time as _t
+        import re as _re
 
         _t0 = _t.time()
         print(f"[TTS] START len={len(text)} text={text[:60]!r}", flush=True)
         if not text.strip():
             yield
             return
-        request_id = str(self._req_id)
-        self._req_id += 1
-        form = aiohttp.FormData()
-        form.add_field("text", text)
-        form.add_field("folderId", self._folder_id)
-        form.add_field("lang", "ru-RU")
-        form.add_field("voice", self._voice)
-        form.add_field("emotion", self._emotion)
-        form.add_field("format", "lpcm")
-        form.add_field("sampleRateHertz", "48000")
-        form.add_field("speed", str(self._speed))
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize",
-                headers={"Authorization": f"Api-Key {self._api_key}"},
-                data=form,
-                timeout=aiohttp.ClientTimeout(total=30),
-            ) as resp:
-                data = await resp.read()
-                if resp.status != 200 or len(data) < 1000:
-                    raise RuntimeError(f"Yandex TTS {resp.status}: {data[:200]}")
-        print(f"[TTS] DONE {len(data)} bytes in {_t.time()-_t0:.1f}s", flush=True)
-        if not self._lead_done and self._lead_sec > 0:
-            self._lead_done = True
-            import math as _m
 
-            _sr = 48000
-            _dur = min(self._lead_sec, 0.3)
-            _n = int(_dur * _sr)
-            _amp = int(32767 * 0.20)
-            _tone = bytearray()
-            for _i in range(_n):
-                _env = 0.5 - 0.5 * _m.cos(2 * _m.pi * _i / max(_n - 1, 1))
-                _s = int(_amp * _env * _m.sin(2 * _m.pi * 700 * _i / _sr))
-                _tone += int(_s).to_bytes(2, "little", signed=True)
-            data = bytes(_tone) + data
-            print(f"[TTS] lead-tone {_dur:.2f}s prepended (first synthesis)", flush=True)
+        # Split into sentences so the first sentence's audio starts as soon as
+        # its TTS is ready, instead of waiting for the whole reply to be synthesised.
+        _sentences = [s for s in _re.split(r"(?<=[.!?…])\s+", text.strip()) if s.strip()]
+        if not _sentences:
+            _sentences = [text]
+
+        async def _synth_one(sentence: str, lead: bool) -> bytes:
+            form = aiohttp.FormData()
+            form.add_field("text", sentence)
+            form.add_field("folderId", self._folder_id)
+            form.add_field("lang", "ru-RU")
+            form.add_field("voice", self._voice)
+            form.add_field("emotion", self._emotion)
+            form.add_field("format", "lpcm")
+            form.add_field("sampleRateHertz", "48000")
+            form.add_field("speed", str(self._speed))
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize",
+                    headers={"Authorization": f"Api-Key {self._api_key}"},
+                    data=form,
+                    timeout=aiohttp.ClientTimeout(total=30),
+                ) as resp:
+                    data = await resp.read()
+                    if resp.status != 200 or len(data) < 1000:
+                        raise RuntimeError(f"Yandex TTS {resp.status}: {data[:200]}")
+            if lead and not self._lead_done and self._lead_sec > 0:
+                self._lead_done = True
+                import math as _m
+
+                _sr = 48000
+                _dur = min(self._lead_sec, 1.5)
+                _n = int(_dur * _sr)
+                _amp = int(32767 * 0.20)
+                _tone = bytearray()
+                for _i in range(_n):
+                    _env = 0.5 - 0.5 * _m.cos(2 * _m.pi * _i / max(_n - 1, 1))
+                    _s = int(_amp * _env * _m.sin(2 * _m.pi * 700 * _i / _sr))
+                    _tone += int(_s).to_bytes(2, "little", signed=True)
+                data = bytes(_tone) + data
+                print(f"[TTS] lead-tone {_dur:.2f}s prepended (first synthesis)", flush=True)
+            return data
 
         async def _stream():
             _chunk = 48000 * 20 // 1000  # 20ms @ 48k = 960 samples
-            _n = len(data) // 2
-            _off = 0
-            _i = 0
-            while _off < _n:
-                _end = min(_off + _chunk, _n)
-                _seg = data[_off * 2 : _end * 2]
-                _f = rtc.AudioFrame(
-                    data=_seg,
-                    sample_rate=48000,
-                    num_channels=1,
-                    samples_per_channel=len(_seg) // 2,
+            for _si, _s in enumerate(_sentences):
+                _req = f"{self._req_id}-{_si}"
+                _t1 = _t.time()
+                _audio = await _synth_one(_s, lead=(_si == 0))
+                print(
+                    f"[TTS] sentence {_si+1}/{len(_sentences)} {len(_audio)}b in {_t.time()-_t1:.1f}s",
+                    flush=True,
                 )
-                yield tts.SynthesizedAudio(
-                    frame=_f,
-                    request_id=request_id,
-                    segment_id=request_id,
-                    is_final=(_end >= _n),
-                    delta_text=text if _i == 0 else "",
-                )
-                _off = _end
-                _i += 1
+                _n = len(_audio) // 2
+                _off = 0
+                _i = 0
+                while _off < _n:
+                    _end = min(_off + _chunk, _n)
+                    _seg = _audio[_off * 2 : _end * 2]
+                    _f = rtc.AudioFrame(
+                        data=_seg,
+                        sample_rate=48000,
+                        num_channels=1,
+                        samples_per_channel=len(_seg) // 2,
+                    )
+                    yield tts.SynthesizedAudio(
+                        frame=_f,
+                        request_id=_req,
+                        segment_id=_req,
+                        is_final=(_si == len(_sentences) - 1 and _end >= _n),
+                        delta_text=_s if _i == 0 else "",
+                    )
+                    _off = _end
+                    _i += 1
 
+        self._req_id += 1
+        print(f"[TTS] sentence-split: {len(_sentences)} parts in {_t.time()-_t0:.1f}s", flush=True)
         yield _stream()
 
 
 SYSTEM_PROMPT = """Голосовой менеджер Азовского инкубатора (IncuBird). Отвечаешь клиентам по телефону про суточных цыплят бройлеров.
 
-ТЫ ЗВОНИШЬ КЛИЕНТУ НА НОМЕР {caller_phone}. Не запрашивай его — он УЖЕ известен. Только уточни: тот ли это номер или клиент хочет изменить.
+ТЫ ЗВОНИШЬ КЛИЕНТУ ПО ЕГО НОМЕРУ ТЕЛЕФОНА (он уже известен — НЕ называй его вслух). Просто уточни: «Место доставки прежнее?»
 
 ТЫ ЗВОНИШЬ ПОСТОЯННОМУ КЛИЕНТУ, который ранее заказывал цыплят. Его город и телефон уже есть в базе — НЕ спрашивай «откуда вы», просто уточни «место доставки прежнее?».
 
@@ -416,10 +457,10 @@ SYSTEM_PROMPT = """Голосовой менеджер Азовского инк
 
 ВОРОНКА (строго по шагам, НЕ перескакивай):
 1) Ты уже представился клиенту и предложил цыплят. Если клиент ответил «Алло» или поздоровался — повтори кратко: «Здравствуйте, это Азовский инкубатор! Предлагаем Росс-308 от 75 рублей. Вам интересно?»
-2) Если клиент сказал «ДА»: скажи «Отлично!» и спроси «Сколько голов вам нужно?». Узнав количество — назови только цену за голову для этого объёма (до 100 — 90₽, 101–300 — 85₽, 301–999 — 80₽, от 1000 — 75₽), НЕ считай и НЕ называй общую сумму — итог рассчитает менеджер. Затем ОДНОЙ фразой спроси: «Номер телефона этот же? Место доставки цыплят прежнее?»
+2) Если клиент сказал «ДА»: скажи «Отлично!» и спроси «Сколько голов вам нужно?». Узнав количество — назови только цену за голову для этого объёма (до 100 — 90₽, 101–300 — 85₽, 301–999 — 80₽, от 1000 — 75₽), НЕ считай и НЕ называй общую сумму — итог рассчитает менеджер. Затем ОДНОЙ фразой спроси: «Место доставки цыплят прежнее?»
 3) Если клиент сказал «НЕТ» или не заинтересован: скажи «Спасибо за внимание, всего хорошего!». Больше ничего не добавляй.
-4) Если клиент подтвердил (телефон тот же, место прежнее): вызови save_lead(phone="{caller_phone}", quantity=количество, city=город_из_диалога, comment=краткий_итог) ОТДЕЛЬНЫМ вызовом БЕЗ текста в этом сообщении. После результата скажи ОДНОЙ фразой: «С вами свяжется менеджер для уточнения заказа, всего хорошего!» — и закончи ответ, больше ничего не добавляй.
-5) Если телефон или место другие: запиши новые данные через save_lead ОТДЕЛЬНЫМ вызовом БЕЗ текста. После результата скажи ОДНОЙ фразой: «Записали ваши данные, с вами свяжется менеджер, всего хорошего!» — и закончи ответ.
+4) Если клиент подтвердил (место доставки прежнее): вызови save_lead(phone="{caller_phone}", quantity=количество, city=город_из_диалога, comment=краткий_итог) ОТДЕЛЬНЫМ вызовом БЕЗ текста в этом сообщении. После результата скажи ОДНОЙ фразой: «С вами свяжется менеджер для уточнения заказа, всего хорошего!» — и закончи ответ, больше ничего не добавляй.
+5) Если место доставки другое: запиши новые данные через save_lead ОТДЕЛЬНЫМ вызовом БЕЗ текста. После результата скажи ОДНОЙ фразой: «Записали ваши данные, с вами свяжется менеджер, всего хорошего!» — и закончи ответ.
 6) ОТВЕЧАЙ КОРОТКО: 1-2 предложения. НЕ повторяйся. НЕ спрашивай слишком много за раз.
 7) ВАЖНО: финальную фразу (прощание/подтверждение) произнеси ОДНИМ полным предложением и закончи ответ. НЕ вызывай end_call и НЕ добавляй текст после прощания — звонок завершится автоматически."""
 
@@ -659,6 +700,7 @@ class LevitanAgent(Agent):
         self._transcripts: list[str] = []
         self._caller_phone: str = caller_phone
         self._farewell_fired: bool = False
+        self._metrics = {"greet_dur": None, "turns": 0, "resp_lat": [], "last_user_t": None}
 
     async def _warmup_llm(self):
         try:
@@ -726,8 +768,8 @@ class LevitanAgent(Agent):
                     # Mango accepts the SIP leg while the phone is still ringing
                     # and only forwards the agent's audio AFTER the callee answers,
                     # so speaking immediately truncates the greeting.
-                    await asyncio.sleep(5.0)
-                    print("[AGENT] 5s pre-greeting delay done, saying greeting", flush=True)
+                    await asyncio.sleep(7.0)
+                    print("[AGENT] 7s pre-greeting delay done, saying greeting", flush=True)
                 else:
                     print("[AGENT] room never connected in 15s", flush=True)
             except Exception as e:
@@ -735,7 +777,8 @@ class LevitanAgent(Agent):
         print("[AGENT] on_enter called, saying greeting", flush=True)
         _t0 = _t.time()
         await self.session.say(GREETING, allow_interruptions=False)
-        print(f"[AGENT] greeting said in {_t.time()-_t0:.1f}s", flush=True)
+        self._metrics["greet_dur"] = _t.time() - _t0
+        print(f"[AGENT] greeting said in {self._metrics['greet_dur']:.1f}s", flush=True)
 
     def _on_transcribed(self, ev) -> None:
         print(f"[STT] transcript={ev.transcript!r} final={ev.is_final}", flush=True)
@@ -754,6 +797,7 @@ class LevitanAgent(Agent):
                 return
             self._transcripts.append(ev.transcript)
             self._transcripts = self._transcripts[-20:]
+            self._metrics["last_user_t"] = time.time()
             phone = _phone_from_text(ev.transcript)
             if phone and not (
                 _last_lead["phone"] == phone and time.time() - _last_lead["ts"] < 300
@@ -786,6 +830,15 @@ class LevitanAgent(Agent):
         print(f"[ITEM] {role}: {str(text)[:200]}", flush=True)
         if role == "assistant" and not self._farewell_fired:
             low = text.lower()
+            _lu = self._metrics.get("last_user_t")
+            if _lu:
+                self._metrics["resp_lat"].append(time.time() - _lu)
+                self._metrics["last_user_t"] = None
+                self._metrics["turns"] += 1
+                print(
+                    f"[METRICS] turn {self._metrics['turns']} resp_lat={self._metrics['resp_lat'][-1]:.1f}s",
+                    flush=True,
+                )
             if any(m in low for m in _FAREWELL_MARKERS):
                 self._farewell_fired = True
                 print(f"[CALL] farewell marker detected: {text[:80]!r}", flush=True)
@@ -817,7 +870,8 @@ async def entrypoint(ctx):
         print(f"[AGENT] WARNING: no caller phone in room={ctx.room.name}", flush=True)
 
     dynamic_prompt = SYSTEM_PROMPT.format(
-        caller_phone=caller_phone if caller_phone else "неизвестен"
+        caller_phone=caller_phone if caller_phone else "неизвестен",
+        caller_phone_spoken=_fmt_phone_spoken(caller_phone) if caller_phone else "неизвестен",
     )
 
     load_faq_cache()
@@ -835,6 +889,7 @@ async def entrypoint(ctx):
     session.on("conversation_item_added", agent._on_item)
     session.on("error", agent._on_error)
     _session_holder["session"] = session
+    _session_holder["agent"] = agent
     await session.start(agent=agent, room=ctx.room)
 
 
