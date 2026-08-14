@@ -26,6 +26,8 @@ import aiohttp
 import httpx
 from livekit import rtc
 from livekit.agents import Agent, AgentServer, AgentSession, llm, tts
+from livekit.agents.tts import StreamAdapter
+from livekit.agents import tokenize
 from livekit.agents.types import NOT_GIVEN, APIConnectOptions
 from livekit.agents.worker import ServerOptions
 from livekit.plugins import deepgram, openai
@@ -694,13 +696,57 @@ class LevitanAgent(Agent):
                     ),
                 ),
             ),
-            tts=YandexTTS(api_key=YC_API_KEY, folder_id=YC_FOLDER_ID, voice=TTS_VOICE),
+            tts=StreamAdapter(
+                tts=YandexTTS(api_key=YC_API_KEY, folder_id=YC_FOLDER_ID, voice=TTS_VOICE),
+                sentence_tokenizer=tokenize.basic.SentenceTokenizer(retain_format=True),
+            ),
         )
 
         self._transcripts: list[str] = []
         self._caller_phone: str = caller_phone
         self._farewell_fired: bool = False
+        self._asked_quantity: bool = False
         self._metrics = {"greet_dur": None, "turns": 0, "resp_lat": [], "last_user_t": None}
+
+    @staticmethod
+    def _msg_text(msg) -> str:
+        content = getattr(msg, "content", None)
+        if content is None:
+            return ""
+        if isinstance(content, str):
+            return content
+        parts = []
+        for c in content:
+            if isinstance(c, str):
+                parts.append(c)
+            elif isinstance(c, dict) and "text" in c:
+                parts.append(str(c["text"]))
+        return " ".join(parts)
+
+    async def on_user_turn_completed(self, turn_ctx, new_message) -> None:
+        text = self._msg_text(new_message)
+        norm = normalize(text)
+        words = norm.split()
+        if norm and not self._farewell_fired:
+            # НЕТ / отказ -> мгновенное прощание (без LLM)
+            _neg = re.fullmatch(r"(нет|не надо|не интересно|не хочу|отказ[а-я]*)", norm) or (
+                norm.startswith("нет") and len(words) <= 2
+                and not re.search(r"(доставк|город|адрес|улиц|в )", norm)
+            )
+            if _neg:
+                print(f"[FAST] negative intent -> instant farewell: {text!r}", flush=True)
+                await self.session.say("Спасибо за внимание, всего хорошего!")
+                return
+            # ДА / интересно (первый раз, до уточнения количества) -> мгновенно "Сколько голов?"
+            _pos = re.fullmatch(r"(да|да да|конечно|интересно|беру|хорошо|ну да|да интересно)", norm) or (
+                norm.startswith("да") and len(words) <= 2
+            )
+            if _pos and not self._asked_quantity:
+                print(f"[FAST] positive intent -> instant ask quantity: {text!r}", flush=True)
+                self._asked_quantity = True
+                await self.session.say("Отлично! Сколько голов вам нужно?")
+                return
+        await super().on_user_turn_completed(turn_ctx, new_message)
 
     async def _warmup_llm(self):
         try:
@@ -880,7 +926,7 @@ async def entrypoint(ctx):
     _session_holder["session"] = None
     session = AgentSession(
         turn_handling={
-            "endpointing": {"min_delay": 0.25, "max_delay": 3.0},
+            "endpointing": {"min_delay": 0.2, "max_delay": 1.2},
         }
     )
     session.on("user_input_transcribed", agent._on_transcribed)
