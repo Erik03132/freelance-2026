@@ -1,5 +1,20 @@
 # Context — последняя сессия
 
+## 🔧 2026-08-15 (ночь) — sinergy: фид восстановлен (110 новостей), блендер жив (VPS Open Code), осталось обогащение
+
+**Статус:** Сессия завершена (finish-day).
+
+### Сделано (Fixed + Verified)
+1. **Фид новостей восстановлен и доказан** (коммит `88dc7c8`): cron сохраняет сырые новости сразу (`saveRawItems`, критический путь), LLM-обогащение best-effort с дедлайном 120s. Прод-cron: HTTP 200, `added=110`, `ideas since 14.08 UTC = 110` (независимо подтверждено БД). Решена проблема 0 вставок с 12.08.
+2. **Блендер провайдер = VPS Open Code** (omni.ts каскад `free-cascade`/`auto/best-free`/...): диагностика ИЗ VERCEL подтвердила — все 5 бесплатных моделей отвечают 200 за 1.5–6s. VPS `217.149.23.113:20128` доступен из Vercel (firewall пропускает). `OMNIROUTE_ENABLED=false` в Vercel УДАЛЁН → VPS primary (коммит `a7b9284`).
+3. **Блендер перестал виснуть** (коммит `48dedd4`): `orchestrator.ts` ограничен 3 парами + `break` после первой синергии. Было до 30 LLM-вызовов/150s таймаут (HTTP 000), стало 45s HTTP 200.
+4. **Endpoint обогащения** `/api/sinergy/admin/enrich-raw` (auth `CRON_SECRET`, коммит `8a405cf`): батч-извлечение через VPS `core_tech`/`vertical`(реальная)/`business_model`/`target_audience`/`pain_point`. Задеплоен.
+
+### Осталось (следующая сессия)
+1. **Запустить обогащение 110 сырых новостей** (пользователь выбрал «Обогатить через VPS»): вызвать `/api/sinergy/admin/enrich-raw?limit=20` батчами (~6 вызовов по ~100s) для заполнения `core_tech`. Без этого блендер возвращает `no_more_synergy` (скоринг требует `core_tech.length>0`, а у 100% новых он пустой — проверено БД).
+2. **Перепроверить блендер** после обогащения: `POST /api/sinergy/find-next` должен вернуть `synergy_found` (сейчас `no_more_synergy` только из-за пустых данных, не провайдера).
+3. **Vercel env:** `OMNIROUTE_URL=http://217.149.23.113:20128`, `OPENROUTER_API_KEY` есть, `GEMINI_API_KEY` отсутствует (блендер идёт VPS→OpenRouter, минуя Gemini).
+
 ## 🔧 2026-08-13 (вечер) — sinergy: cron новостей починен (CRON_SECRET), блендер vs LLM rate-limit
 
 **Статус:** Сессия завершена (finish-day).
