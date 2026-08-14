@@ -321,7 +321,7 @@ class YandexTTS(tts.TTS):
 
     def __init__(self, api_key: str, folder_id: str, voice: str = "alena", speed: float = 1.0):
         super().__init__(
-            capabilities=tts.TTSCapabilities(streaming=True, aligned_transcript=False),
+            capabilities=tts.TTSCapabilities(streaming=False, aligned_transcript=False),
             sample_rate=48000,
             num_channels=1,
         )
