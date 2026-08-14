@@ -139,6 +139,13 @@ def _fast_path_reply(chat_ctx, llm_obj) -> str | None:
                 )
             return "С вами свяжется менеджер для уточнения заказа, всего хорошего!"
         return None
+    if _asked and not _delivery:
+        # клиент назвал количество -> цена по шкале считается локально (мгновенно)
+        _q = _qty_from_text(norm)
+        if _q:
+            _price = _price_for_qty(_q)
+            return f"Для {_q} голов цена {_price} рублей за голову. Место доставки цыплят прежнее?"
+        return None
     if not _asked:
         _pos = (
             re.fullmatch(
@@ -175,6 +182,31 @@ def _extract_quantity(chat_ctx) -> str:
         if m:
             return m.group(1)
     return ""
+
+
+def _qty_from_text(norm: str) -> int | None:
+    """Извлекает количество голов из текущей реплики (цифры или слова)."""
+    m = re.search(r"(\d+)\s*(?:голов|цыпл)", norm)
+    if m:
+        return int(m.group(1))
+    digits = _text_to_digits(norm)
+    if digits:
+        try:
+            return int(digits)
+        except ValueError:
+            return None
+    return None
+
+
+def _price_for_qty(q: int) -> int:
+    """Ступенчатая шкала цен (см. SYSTEM_PROMPT): до 100→90, 101-300→85, 301-999→80, от 1000→75."""
+    if q >= 1000:
+        return 75
+    if q >= 301:
+        return 80
+    if q >= 101:
+        return 85
+    return 90
 
 
 @llm.function_tool
