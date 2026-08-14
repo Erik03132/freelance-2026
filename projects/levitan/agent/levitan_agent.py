@@ -28,6 +28,7 @@ from livekit import rtc
 from livekit.agents import Agent, AgentServer, AgentSession, llm, tts
 from livekit.agents.tts import StreamAdapter
 from livekit.agents import tokenize
+from livekit.agents.llm import ChatChunk, ChoiceDelta
 from livekit.agents.types import NOT_GIVEN, APIConnectOptions
 from livekit.agents.worker import ServerOptions
 from livekit.plugins import deepgram, openai
@@ -83,6 +84,97 @@ def faq_lookup(transcript_text: str) -> str | None:
     if best_score >= 0.72:
         return best_reply
     return None
+
+
+def _last_user_text(chat_ctx) -> str:
+    if chat_ctx is None:
+        return ""
+    items = getattr(chat_ctx, "items", None) or []
+    for it in reversed(items):
+        if getattr(it, "role", None) == "user":
+            c = getattr(it, "content", None)
+            if isinstance(c, str):
+                return c
+            if isinstance(c, list):
+                return " ".join(
+                    p if isinstance(p, str) else (p.get("text", "") if isinstance(p, dict) else "")
+                    for p in c
+                )
+            return ""
+    return ""
+
+
+def _make_fast_chunk(text: str) -> "ChatChunk":
+    return ChatChunk(id="fast", delta=ChoiceDelta(role="assistant", content=text))
+
+
+def _fast_path_reply(chat_ctx, llm_obj) -> str | None:
+    """Детерминированные ветки ДА/НЕТ -> канонический ответ без обращения к LLM.
+    Возвращает текст ответа или None (пропустить через обычный LLM)."""
+    norm = normalize(_last_user_text(chat_ctx))
+    if not norm:
+        return None
+    words = norm.split()
+    _asked = getattr(llm_obj, "_asked_quantity", False)
+    _delivery = getattr(llm_obj, "_asked_delivery", False)
+    _neg = re.fullmatch(r"(нет|не надо|не интересно|не хочу|отказ[а-я]*)", norm) or (
+        norm.startswith("нет")
+        and len(words) <= 2
+        and not re.search(r"(доставк|город|адрес|улиц|в )", norm)
+    )
+    if _neg:
+        if _delivery:
+            return None  # клиент меняет адрес -> пусть обработает LLM
+        return "Спасибо за внимание, всего хорошего!"
+    if _asked and _delivery:
+        # подтверждение прежнего места доставки -> мгновенный финал + сохранение лида
+        if re.search(
+            r"\b(да|прежнее|подтверждаю|верно|точно|правильно|хорошо)\b", norm
+        ) or norm.startswith("да"):
+            _q = _extract_quantity(chat_ctx)
+            _ph = getattr(llm_obj, "_caller_phone", "")
+            if _ph:
+                asyncio.ensure_future(
+                    save_lead(phone=_ph, quantity=_q, comment="fast-path: подтверждение доставки")
+                )
+            return "С вами свяжется менеджер для уточнения заказа, всего хорошего!"
+        return None
+    if not _asked:
+        _pos = (
+            re.fullmatch(
+                r"(да|да да|конечно|интересно|беру|хорошо|ну да|да интересно|да ладно|ну конечно)",
+                norm,
+            )
+            or (norm.startswith("да") and len(words) <= 3)
+            or (" да " in f" {norm} " and len(words) <= 3 and not norm.startswith(("нет", "не")))
+        )
+        if _pos:
+            llm_obj._asked_quantity = True
+            return "Отлично! Сколько голов вам нужно?"
+    return None
+
+
+def _extract_quantity(chat_ctx) -> str:
+    """Ищет количество голов в предыдущих репликах пользователя."""
+    if chat_ctx is None:
+        return ""
+    for it in reversed(getattr(chat_ctx, "items", []) or []):
+        if getattr(it, "role", None) != "user":
+            continue
+        c = getattr(it, "content", None)
+        if isinstance(c, str):
+            txt = c
+        elif isinstance(c, list):
+            txt = " ".join(
+                p if isinstance(p, str) else (p.get("text", "") if isinstance(p, dict) else "")
+                for p in c
+            )
+        else:
+            txt = ""
+        m = re.search(r"(\d+)\s*(?:голов|цыпл)", txt)
+        if m:
+            return m.group(1)
+    return ""
 
 
 @llm.function_tool
@@ -552,6 +644,8 @@ class DebugLLMStream:
                 return p
         self._n += 1
         print(f"[LLM] __anext__#{self._n} waiting", flush=True)
+        if self._s is None:
+            raise StopAsyncIteration
         try:
             item = await asyncio.wait_for(self._s.__anext__(), timeout=15)
         except TimeoutError:
@@ -573,6 +667,17 @@ class DebugLLMStream:
         return item
 
     async def _first_or_fallback(self):
+        if getattr(self, "_fast_reply", None) is not None:
+            self._s = None
+            return
+        _ctx = self._kwargs.get("chat_ctx") if self._kwargs else None
+        _fast = _fast_path_reply(_ctx, self._llm)
+        if _fast is not None:
+            self._fast_reply = _fast
+            self._prefix = _make_fast_chunk(_fast)
+            self._s = None
+            print(f"[FAST] LLM bypass -> {_fast!r}", flush=True)
+            return
         models = list(dict.fromkeys(self._models))
         streams, tasks = {}, {}
         no_retry_conn = APIConnectOptions(max_retry=0, timeout=20.0)
@@ -705,48 +810,12 @@ class LevitanAgent(Agent):
         self._transcripts: list[str] = []
         self._caller_phone: str = caller_phone
         self._farewell_fired: bool = False
-        self._asked_quantity: bool = False
         self._metrics = {"greet_dur": None, "turns": 0, "resp_lat": [], "last_user_t": None}
 
-    @staticmethod
-    def _msg_text(msg) -> str:
-        content = getattr(msg, "content", None)
-        if content is None:
-            return ""
-        if isinstance(content, str):
-            return content
-        parts = []
-        for c in content:
-            if isinstance(c, str):
-                parts.append(c)
-            elif isinstance(c, dict) and "text" in c:
-                parts.append(str(c["text"]))
-        return " ".join(parts)
-
-    async def on_user_turn_completed(self, turn_ctx, new_message) -> None:
-        text = self._msg_text(new_message)
-        norm = normalize(text)
-        words = norm.split()
-        if norm and not self._farewell_fired:
-            # НЕТ / отказ -> мгновенное прощание (без LLM)
-            _neg = re.fullmatch(r"(нет|не надо|не интересно|не хочу|отказ[а-я]*)", norm) or (
-                norm.startswith("нет") and len(words) <= 2
-                and not re.search(r"(доставк|город|адрес|улиц|в )", norm)
-            )
-            if _neg:
-                print(f"[FAST] negative intent -> instant farewell: {text!r}", flush=True)
-                await self.session.say("Спасибо за внимание, всего хорошего!")
-                return
-            # ДА / интересно (первый раз, до уточнения количества) -> мгновенно "Сколько голов?"
-            _pos = re.fullmatch(r"(да|да да|конечно|интересно|беру|хорошо|ну да|да интересно)", norm) or (
-                norm.startswith("да") and len(words) <= 2
-            )
-            if _pos and not self._asked_quantity:
-                print(f"[FAST] positive intent -> instant ask quantity: {text!r}", flush=True)
-                self._asked_quantity = True
-                await self.session.say("Отлично! Сколько голов вам нужно?")
-                return
-        await super().on_user_turn_completed(turn_ctx, new_message)
+        # состояние fast-path (ДА/НЕТ) для DebugLLM-стрима
+        self.llm._caller_phone = caller_phone
+        self.llm._asked_quantity = False
+        self.llm._asked_delivery = False
 
     async def _warmup_llm(self):
         try:
@@ -885,6 +954,9 @@ class LevitanAgent(Agent):
                     f"[METRICS] turn {self._metrics['turns']} resp_lat={self._metrics['resp_lat'][-1]:.1f}s",
                     flush=True,
                 )
+            if "место доставки" in low:
+                self.llm._asked_delivery = True
+                print("[FAST] delivery question asked -> fast-path armed", flush=True)
             if any(m in low for m in _FAREWELL_MARKERS):
                 self._farewell_fired = True
                 print(f"[CALL] farewell marker detected: {text[:80]!r}", flush=True)
