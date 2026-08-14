@@ -1030,7 +1030,7 @@ async def entrypoint(ctx):
     _session_holder["session"] = None
     session = AgentSession(
         turn_handling={
-            "endpointing": {"min_delay": 0.2, "max_delay": 1.2},
+            "endpointing": {"min_delay": 0.2, "max_delay": 0.4},
         }
     )
     session.on("user_input_transcribed", agent._on_transcribed)
