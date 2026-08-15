@@ -23,12 +23,18 @@ import asyncio
 import math
 
 import aiohttp
+import funnel
 import httpx
+from funnel import (
+    _fast_path_reply,
+    _fmt_phone_spoken,
+    _phone_from_text,
+    normalize,
+)
 from livekit import rtc
-from livekit.agents import Agent, AgentServer, AgentSession, llm, tts
-from livekit.agents.tts import StreamAdapter
-from livekit.agents import tokenize
+from livekit.agents import Agent, AgentServer, AgentSession, llm, tokenize, tts
 from livekit.agents.llm import ChatChunk, ChoiceDelta
+from livekit.agents.tts import StreamAdapter
 from livekit.agents.types import NOT_GIVEN, APIConnectOptions
 from livekit.agents.worker import ServerOptions
 from livekit.plugins import deepgram, openai
@@ -63,13 +69,6 @@ def load_faq_cache() -> None:
         print(f"FAQ load error: {e}")
 
 
-def normalize(text: str) -> str:
-    text = text.lower()
-    text = re.sub(r"[ёй]", lambda m: {"ё": "е", "й": "и"}.get(m.group(), m.group()), text)
-    text = re.sub(r"[^а-я0-9\s]", " ", text)
-    return re.sub(r"\s+", " ", text).strip()
-
-
 def faq_lookup(transcript_text: str) -> str | None:
     if not _faq_cache:
         return None
@@ -86,127 +85,8 @@ def faq_lookup(transcript_text: str) -> str | None:
     return None
 
 
-def _last_user_text(chat_ctx) -> str:
-    if chat_ctx is None:
-        return ""
-    items = getattr(chat_ctx, "items", None) or []
-    for it in reversed(items):
-        if getattr(it, "role", None) == "user":
-            c = getattr(it, "content", None)
-            if isinstance(c, str):
-                return c
-            if isinstance(c, list):
-                return " ".join(
-                    p if isinstance(p, str) else (p.get("text", "") if isinstance(p, dict) else "")
-                    for p in c
-                )
-            return ""
-    return ""
-
-
 def _make_fast_chunk(text: str) -> "ChatChunk":
     return ChatChunk(id="fast", delta=ChoiceDelta(role="assistant", content=text))
-
-
-def _fast_path_reply(chat_ctx, llm_obj) -> str | None:
-    """Детерминированные ветки ДА/НЕТ -> канонический ответ без обращения к LLM.
-    Возвращает текст ответа или None (пропустить через обычный LLM)."""
-    norm = normalize(_last_user_text(chat_ctx))
-    if not norm:
-        return None
-    words = norm.split()
-    _asked = getattr(llm_obj, "_asked_quantity", False)
-    _delivery = getattr(llm_obj, "_asked_delivery", False)
-    _neg = re.fullmatch(r"(нет|не надо|не интересно|не хочу|отказ[а-я]*)", norm) or (
-        norm.startswith("нет")
-        and len(words) <= 2
-        and not re.search(r"(доставк|город|адрес|улиц|в )", norm)
-    )
-    if _neg:
-        if _delivery:
-            return None  # клиент меняет адрес -> пусть обработает LLM
-        return "Спасибо за внимание, всего хорошего!"
-    if _asked and _delivery:
-        # подтверждение прежнего места доставки -> мгновенный финал + сохранение лида
-        if re.search(
-            r"\b(да|прежнее|подтверждаю|верно|точно|правильно|хорошо)\b", norm
-        ) or norm.startswith("да"):
-            _q = _extract_quantity(chat_ctx)
-            _ph = getattr(llm_obj, "_caller_phone", "")
-            if _ph:
-                asyncio.ensure_future(
-                    save_lead(phone=_ph, quantity=_q, comment="fast-path: подтверждение доставки")
-                )
-            return "С вами свяжется менеджер для уточнения заказа, всего хорошего!"
-        return None
-    if _asked and not _delivery:
-        # клиент назвал количество -> цена по шкале считается локально (мгновенно)
-        _q = _qty_from_text(norm)
-        if _q:
-            _price = _price_for_qty(_q)
-            return f"Для {_q} голов цена {_price} рублей за голову. Место доставки цыплят прежнее?"
-        return None
-    if not _asked:
-        _pos = (
-            re.fullmatch(
-                r"(да|да да|конечно|интересно|беру|хорошо|ну да|да интересно|да ладно|ну конечно)",
-                norm,
-            )
-            or (norm.startswith("да") and len(words) <= 3)
-            or (" да " in f" {norm} " and len(words) <= 3 and not norm.startswith(("нет", "не")))
-        )
-        if _pos:
-            llm_obj._asked_quantity = True
-            return "Отлично! Сколько голов вам нужно?"
-    return None
-
-
-def _extract_quantity(chat_ctx) -> str:
-    """Ищет количество голов в предыдущих репликах пользователя."""
-    if chat_ctx is None:
-        return ""
-    for it in reversed(getattr(chat_ctx, "items", []) or []):
-        if getattr(it, "role", None) != "user":
-            continue
-        c = getattr(it, "content", None)
-        if isinstance(c, str):
-            txt = c
-        elif isinstance(c, list):
-            txt = " ".join(
-                p if isinstance(p, str) else (p.get("text", "") if isinstance(p, dict) else "")
-                for p in c
-            )
-        else:
-            txt = ""
-        m = re.search(r"(\d+)\s*(?:голов|цыпл)", txt)
-        if m:
-            return m.group(1)
-    return ""
-
-
-def _qty_from_text(norm: str) -> int | None:
-    """Извлекает количество голов из текущей реплики (цифры или слова)."""
-    m = re.search(r"(\d+)\s*(?:голов|цыпл)", norm)
-    if m:
-        return int(m.group(1))
-    digits = _text_to_digits(norm)
-    if digits:
-        try:
-            return int(digits)
-        except ValueError:
-            return None
-    return None
-
-
-def _price_for_qty(q: int) -> int:
-    """Ступенчатая шкала цен (см. SYSTEM_PROMPT): до 100→90, 101-300→85, 301-999→80, от 1000→75."""
-    if q >= 1000:
-        return 75
-    if q >= 301:
-        return 80
-    if q >= 101:
-        return 85
-    return 90
 
 
 @llm.function_tool
@@ -245,126 +125,8 @@ async def save_lead(
         return f"Ошибка CRM: {str(e)[:100]}"
 
 
-_UNIT_WORDS = {
-    "ноль": 0,
-    "один": 1,
-    "одна": 1,
-    "два": 2,
-    "две": 2,
-    "три": 3,
-    "четыре": 4,
-    "пять": 5,
-    "шесть": 6,
-    "семь": 7,
-    "восемь": 8,
-    "девять": 9,
-}
-_TEEN_WORDS = {
-    "десять": 10,
-    "одиннадцать": 11,
-    "двенадцать": 12,
-    "тринадцать": 13,
-    "четырнадцать": 14,
-    "пятнадцать": 15,
-    "шестнадцать": 16,
-    "семнадцать": 17,
-    "восемнадцать": 18,
-    "девятнадцать": 19,
-}
-_TEN_WORDS = {
-    "двадцать": 20,
-    "тридцать": 30,
-    "сорок": 40,
-    "пятьдесят": 50,
-    "шестьдесят": 60,
-    "семьдесят": 70,
-    "восемьдесят": 80,
-    "девяносто": 90,
-}
-_HUNDRED_WORDS = {
-    "сто": 100,
-    "двести": 200,
-    "триста": 300,
-    "четыреста": 400,
-    "пятьсот": 500,
-    "шестьсот": 600,
-    "семьсот": 700,
-    "восемьсот": 800,
-    "девятьсот": 900,
-}
-
-
-def _parse_number(tokens, start):
-    total = 0
-    i = start
-    used_hundred = False
-    used_ten = False
-    used_unit = False
-    while i < len(tokens):
-        w = tokens[i]
-        if w in _HUNDRED_WORDS and not used_hundred:
-            total += _HUNDRED_WORDS[w]
-            used_hundred = True
-            i += 1
-        elif w in _TEN_WORDS and not used_ten:
-            total += _TEN_WORDS[w]
-            used_ten = True
-            i += 1
-        elif w in _TEEN_WORDS and not used_ten:
-            total += _TEEN_WORDS[w]
-            used_ten = True
-            i += 1
-        elif w in _UNIT_WORDS and not used_unit:
-            if used_ten and total % 10 != 0:
-                break
-            total += _UNIT_WORDS[w]
-            used_unit = True
-            i += 1
-        else:
-            break
-    if i == start:
-        return None, 0
-    return total, i - start
-
-
-def _text_to_digits(text):
-    tokens = re.sub(r"[^а-я0-9\s]", " ", text.lower()).split()
-    parts = []
-    i = 0
-    while i < len(tokens):
-        w = tokens[i]
-        if w.isdigit():
-            parts.append(w)
-            i += 1
-            continue
-        num, consumed = _parse_number(tokens, i)
-        if consumed:
-            parts.append(str(num))
-            i += consumed
-            continue
-        i += 1
-    return "".join(parts)
-
-
-def _phone_from_text(text):
-    raw = re.sub(r"[^0-9]", "", text)
-    if len(raw) >= 10:
-        return raw[-10:]
-    digits = _text_to_digits(text)
-    if len(digits) >= 10:
-        return digits[-10:]
-    return None
-
-
-def _fmt_phone_spoken(p: str) -> str:
-    """Format a phone number for TTS so it is read digit-by-digit,
-    not as a single magnitude (e.g. '79859234644' -> '7 9 8 5 9 2 3 4 6 4 4')."""
-    digits = re.sub(r"\D", "", p or "")
-    if len(digits) == 11 and digits.startswith("8"):
-        digits = "7" + digits[1:]
-    if not digits:
-        return p or ""
-    return " ".join(digits)
+# Привязываем save_lead к funnel (избегаем circular import); fast-path вызывает его лениво
+funnel.save_lead_fn = save_lead
 
 
 _session_holder = {"session": None}
@@ -462,8 +224,8 @@ class YandexTTS(tts.TTS):
 
     @asynccontextmanager
     async def synthesize(self, text: str, *, conn_options: APIConnectOptions = None):
-        import time as _t
         import re as _re
+        import time as _t
 
         _t0 = _t.time()
         print(f"[TTS] START len={len(text)} text={text[:60]!r}", flush=True)
@@ -838,6 +600,7 @@ class LevitanAgent(Agent):
 
             ctx = ChatContext()
             ctx.items.append(ChatMessage(role="system", content=["Ответь одним словом: ок"]))
+            ctx.items.append(ChatMessage(role="user", content=["пинг"]))
             models = [self.llm.model]
             _fb = os.getenv("LLM_FALLBACK_MODEL")
             if _fb and _fb not in models:
@@ -958,6 +721,9 @@ class LevitanAgent(Agent):
         print(f"[ITEM] {role}: {str(text)[:200]}", flush=True)
         if role == "assistant" and not self._farewell_fired:
             low = text.lower()
+            # вооружение fast-path флага "спросили место доставки" по канонической фразе
+            if "место доставки" in low:
+                self.llm._asked_delivery = True
             _lu = self._metrics.get("last_user_t")
             if _lu:
                 self._metrics["resp_lat"].append(time.time() - _lu)
@@ -967,9 +733,6 @@ class LevitanAgent(Agent):
                     f"[METRICS] turn {self._metrics['turns']} resp_lat={self._metrics['resp_lat'][-1]:.1f}s",
                     flush=True,
                 )
-            if "место доставки" in low:
-                self.llm._asked_delivery = True
-                print("[FAST] delivery question asked -> fast-path armed", flush=True)
             if any(m in low for m in _FAREWELL_MARKERS):
                 self._farewell_fired = True
                 print(f"[CALL] farewell marker detected: {text[:80]!r}", flush=True)
