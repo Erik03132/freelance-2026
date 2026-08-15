@@ -1,5 +1,52 @@
 # Levitan — Session Log
 
+## 2026-08-15 (вечер) — OmniRoute-кроличья нора + откат; delivery-фикс задеплоен; NEG-фикс локально, НЕ задеплоен
+
+### Честный итог дня (HT-3): день ушёл почти целиком в OmniRoute, который агента НЕ касается
+- **Не-скриптовые реплики агента НЕ идут через OmniRoute** — агент ходит на **Gemini** (levitan_agent.py: LLM_BASE/LLM_MODEL). OmniRoute на VPS (combo free-cascade, провайдер opencode-zen и т.п.) агент НЕ использует. Поэтому Boot день ковыряния OmniRoute = «коту под хвост» по влиянию на звонки.
+- **Откат к началу сессии:** ufw ВЫКЛЮЧЕН (включал его я — он мог резать входящие порты) → звонки снова проходят. OmniRoute-БД VPS: тег провайдера остался `opencode-zen` (sqlite-команда отката была порвана вставкой, НЕ применилась) — НЕ влияет на агента, тронуть при доступе.
+- Мой IP сменился `95.154.153.47` → **`193.56.253.30`** (динамический). SSH к VPS закрыт Security Group провайдера (даже при открытом ufw: `Connection refused` до хоста) — открыть порт 22 для нового IP (или временно `0.0.0.0/0`) в панели провайдера.
+- Дашборда OmniRoute на VPS НЕТ (headless, `/` и `/omniroute/` → 404). Порт 20128 наружу не доступен (провайдер режет).
+
+### Реальный звонок (VERIFIED): работает, но нашёлся баг
+- Звонок дошёл, диалог состоялся, приветствие ок. **Баг:** на «нет, не интересно» (отказ про цыплят) агент СНОВА поздоровался и СНОВА предложил — составной отказ не ловится NEG-детектом → уходит в LLM, LLM повторяет воронку.
+
+### Фиксы (локально: agent/funnel.py, agent/levitan_agent.py, tests/test_funnel.py — 24 passed)
+1. **Delivery-change canned reply** (задеплоено на VPS): после «Место доставки прежнее?» ЛЮБАЯ не-подтверждающая фраза → `DELIVERY_CHANGED_REPLY` = «Сообщите менеджеру новое место доставки, он с вами свяжется в ближайшее время, всего хорошего!» (было `return None` → LLM → тишина). Промпт step 5 обновлён той же фразой.
+2. **NEG_COMPOUND_RE** (НЕ задеплоено): «нет не интересно» / «не надо» / «не нужно» / «не хочу» / «отказ» → полноценный отказ → «Спасибо за внимание, всего хорошего!» + авто-завершение (маркер «всего хорошего» в _FAREWELL_MARKERS).
+
+### Деплой (VPS)
+- ✅ Пункт 1 задеплоен: байтовый патч (base64, 16 printf-строк в веб-консоль) → `funnel.py patched`, `levitan_agent.py prompt patched`, `systemctl restart levitan-agent` → **active**. Голосом НЕ проверен (в контрольном звонке клиент отказал ДО вопроса доставки).
+- ⚠️ Пункт 2 (NEG-фикс) — **только локально, на VPS НЕ задеплоен**. Завтра первым делом.
+
+### Открыто / на завтра
+1. **Задеплоить NEG-фикс на VPS** (патч `funnel.py` тем же механизмом → restart levitan-agent), контрольный звонок: «нет не интересно» → «Спасибо за внимание…» без повтора оффера.
+2. Проверить голосом delivery-canned reply (вопрос «Место доставки прежнее?» → «нет» → canned-ответ). НЕ Verified.
+3. OmniRoute больше НЕ трогать (агент на Gemini). Если откроется SSH — вернуть тег `opencode-go` (Unverified, не влияет).
+4. Мой IP динамический → для SSH из агента открывать 193.56.253.30 в Security Group провайдера.
+
+### Полезное: тест-звонок из VPS-консоли (Mango callback)
+```bash
+cd /opt/pipecat-agent && python3 - <<'PY'
+import json,hashlib,uuid,urllib.request,urllib.parse
+E={}
+for l in open(".env"):
+    l=l.strip()
+    if "=" in l and not l.startswith("#"): k,v=l.split("=",1); E[k]=v
+K=E.get("MANGO_VPBX_API_KEY",""); S=E.get("MANGO_VPBX_API_SALT","")
+EXT=E.get("MANGO_FROM_EXTENSION","22"); PH=E.get("TEST_PHONE","79859234644")
+p={"command_id":"lv_"+uuid.uuid4().hex[:8],"from":{"extension":EXT},"to_number":PH}
+j=json.dumps(p,separators=(",",":"),ensure_ascii=False)
+s=hashlib.sha256((K+j+S).encode()).hexdigest()
+d=urllib.parse.urlencode({"vpbx_api_key":K,"json":j,"sign":s}).encode()
+r=urllib.request.urlopen("https://app.mango-office.ru/vpbx/commands/callback",data=d,timeout=25)
+print(r.status, r.read().decode()[:200])
+PY
+```
+
+### Файлы (локально изменены, НЕ закоммичено)
+- `agent/funnel.py` (DELIVERY_CHANGED_REPLY + NEG_COMPOUND_RE), `agent/levitan_agent.py` (промпт step 5), `tests/test_funnel.py` (24 passed).
+
 ## 2026-08-15 — FAQ-слой: убраны ложные срабатывания keyword-матчинга (Fixed + Verified)
 
 ### Что сделано (agent/funnel.py)
@@ -945,3 +992,48 @@ systemctl restart levitan-agent
 1. **ТЕСТ-ЗВОНОК** на `79859234644` — проверить: приветствие ЦЕЛИКОМ + задержки диалога меньше + номер НЕ повторяется + только «место доставки прежнее?»
 2. При нестабильности → откат к `voice-stability`
 3. При успехе → зафиксировать в git, обновить `voice-stability` tag
+
+## 2026-08-15 (19:25) — FIXED: callback не звонил — корень test_omni CPU
+Znонки с 17:32 decline-ились агентом ("no servers available (received 1 responses)").
+Mango/INVITE/комнаты работали. Виновник: /tmp/test_omni.py (84% CPU, 1-ядро VPS).
+Kill 19:07 → 19:17 callback прошёл (диалог). Тракт снова рабочий.
+
+## 2026-08-15 (22:45) — funnel: блокировка заказа < 50 голов (MIN_QTY)
+Пользователь заказал 28 голов — агент принял. Добавлено в _fast_path_reply: если q < MIN_QTY(50) →
+"Минимальный заказ — 50 голов. Сколько голов вам нужно?", к доставке не переходит.
++ system prompt шаг 2 (LLM-путь). Тесты: +2 (below_min, exact_min). Деплой: funnel.py+config+agent, restart.
+
+## 2026-08-15 (22:55) — ЖЁСТКИЙ ФАКТ: FAQ = 228 triggers (Verified)
+- Файл: /opt/pipecat-agent/docs/ANGELLA_BROILERS_FAQ_CACHE.json
+- Агент грузит: "FAQ cache loaded: 228 triggers" (levitan_agent.py:58)
+- funnel.py FAQ-слой (_faq_reply): тоже 228, путь-кандидаты parent.parent/docs + parent/docs
+- Альтернатив: /opt/levitan/projects/levitan/docs/… = 238 (возможно новее, НЕ помечен как основной)
+- Если менеджер/клиент спросит "знает ли агент FAQ" — да, 228 ответов в обход LLM.
+
+
+## 2026-08-15 (23:08) — STALL-заглушки (Verified lv_stall_24f755ff)
+LLM-молчание 3-10с закрыто: placeholder из next_placeholder() через 1.5с (LLM_STALL_TIMEOUT),
+ротация 11 фраз, fast-path/FAQ не трогает. После заглушки — реальный чанк.
+
+## 2026-08-15 (23:29) — 6 дефектов диалога Fixed+Verified (lv_stall_24f755ff)
+A склейка заглушки .!? · B endpointing 0.5/0.8 · C FAQ 238 (цены 75-90)
+D миним. 50 до вопроса · E FAQ доставка город/300 · F оставлено.
+27 тестов зелёные, VPS+локально синхрон.
+
+## 2026-08-15 (23:59) — FAQ-пополнение + manager-интенты
+1) intent manager: юрлица/возврат/сув/заказ-перенос → «менеджер перезвонит».
+2) scripts/faq_harvest.py (VPS /opt/faq-harvest, cron 30 0 * * *): recording_id →
+Mango transcripts(5008 fallback) → mp3+whisper → LLM QA → report_YYYYMMDD.md.
+Ручное подтверждение перед вливанием.
+Фикс webhook: record/added (было events/events/record/added).
+Накопление ID с 16.08.
+
+# Session 2026-08-15 — ИТОГИ (для новых сессий)
+
+Enabled. Прочитай блоки chp.md за 15.08 полностью — там детали.
+
+ПЛАН НА СЛЕДУЮЩУЮ СЕССИЮ:
+1. Контрольный звонок на 79859234644: приветствие целиком, заглушки при не-FAQ вопросе, мин-заказ на «25 голов».
+2. Заглянуть /root/faq_harvest/report_20260816.md (крон соберёт ночью) → влить пары Q-A в FAQ-кэш вручную.
+3. Проверить, что events.jsonl накапливает recording_added (webhook record/added фикс деплоен).
+4. git commit результатов сессии (не сделан).

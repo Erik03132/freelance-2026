@@ -43,26 +43,38 @@ _load_config()
 
 PRICE_TIERS = _CONFIG["price_tiers"]
 NEG_PATTERN = _CONFIG["regex"]["neg_full"]
+NEG_COMPOUND_RE = r"\b(?:не\s+(?:интересно|надо|нужно|хочу|буду|заказываю|возьму|обойд[уё]сь)|неинтересно|отказ\w*)\b"
 DELIVERY_CONFIRM_PATTERN = _CONFIG["regex"]["delivery_confirm"]
+DELIVERY_CHANGED_REPLY = (
+    "Сообщите менеджеру новое место доставки, он с вами свяжется в ближайшее время, всего хорошего!"
+)
 POS_PATTERN = _CONFIG["regex"]["pos_full"]
 QTY_REGEX = _CONFIG["regex"]["quantity"]
+MIN_QTY = int(_CONFIG.get("min_qty", 50))
+MIN_QTY_REPLY = f"Минимальный заказ — {MIN_QTY} голов. Сколько голов вам нужно?"
 INTENTS = _CONFIG.get("intents", [])
 PLACEHOLDERS = _CONFIG.get("placeholders", [])
 _pi = [0]
 
-_FAQ_CACHE_PATH = (
-    Path(__file__).resolve().parent.parent / "docs" / "ANGELLA_BROILERS_FAQ_CACHE.json"
-)
+_FAQ_CACHE_PATH = None
+for _cand in (
+    Path(__file__).resolve().parent.parent / "docs" / "ANGELLA_BROILERS_FAQ_CACHE.json",
+    Path(__file__).resolve().parent / "docs" / "ANGELLA_BROILERS_FAQ_CACHE.json",
+):
+    if _cand.exists():
+        _FAQ_CACHE_PATH = _cand
+        break
 _FAQ_CACHE = {}
-try:
-    _FAQ_CACHE = {
-        k: v
-        for k, v in json.loads(_FAQ_CACHE_PATH.read_text(encoding="utf-8")).items()
-        if not k.startswith("_")
-    }
-    print(f"[FUNNEL] FAQ cache loaded: {len(_FAQ_CACHE)} triggers")
-except Exception as e:  # pragma: no cover
-    print(f"[FUNNEL] FAQ cache load error: {e}")
+if _FAQ_CACHE_PATH:
+    try:
+        _FAQ_CACHE = {
+            k: v
+            for k, v in json.loads(_FAQ_CACHE_PATH.read_text(encoding="utf-8")).items()
+            if not k.startswith("_")
+        }
+        print(f"[FUNNEL] FAQ cache loaded: {len(_FAQ_CACHE)} triggers")
+    except Exception as e:  # pragma: no cover
+        print(f"[FUNNEL] FAQ cache load error: {e}")
 
 # Устанавливается из levitan_agent.py после определения save_lead (избегаем circular import)
 save_lead_fn = None
@@ -299,14 +311,21 @@ def _fast_path_reply(chat_ctx, llm_obj) -> str | None:
     words = norm.split()
     _asked = getattr(llm_obj, "_asked_quantity", False)
     _delivery = getattr(llm_obj, "_asked_delivery", False)
-    _neg = re.fullmatch(NEG_PATTERN, norm) or (
-        norm.startswith("нет")
-        and len(words) <= 2
-        and not re.search(r"(доставк|город|адрес|улиц|в )", norm)
+    _neg = (
+        re.fullmatch(NEG_PATTERN, norm)
+        or (
+            norm.startswith("нет")
+            and len(words) <= 2
+            and not re.search(r"(доставк|город|адрес|улиц|в )", norm)
+        )
+        or (
+            re.search(NEG_COMPOUND_RE, norm) is not None
+            and not re.search(r"(доставк|город|адрес|улиц|в )", norm)
+        )
     )
     if _neg:
         if _delivery:
-            return None  # клиент меняет адрес -> пусть обработает LLM
+            return DELIVERY_CHANGED_REPLY  # клиент меняет адрес -> мгновенный канонический ответ
         return "Спасибо за внимание, всего хорошего!"
     if _asked and _delivery:
         if re.search(DELIVERY_CONFIRM_PATTERN, norm) or norm.startswith("да"):
@@ -321,14 +340,27 @@ def _fast_path_reply(chat_ctx, llm_obj) -> str | None:
                     )
                 )
             return "С вами свяжется менеджер для уточнения заказа, всего хорошего!"
-        return None
+        return DELIVERY_CHANGED_REPLY
     if _asked and not _delivery:
         _q = _qty_from_text(norm)
         if _q:
+            if _q < MIN_QTY:
+                return MIN_QTY_REPLY
             _price = _price_for_qty(_q)
             return f"Для {_q} голов цена {_price} рублей за голову. Место доставки цыплят прежнее?"
         return None
     if not _asked:
+        # клиент сам назвал количество до нашего вопроса — оно уже должно быть
+        # не меньше минимума (QA через FAQ-интенты не ставит _asked_quantity)
+        _q_now = _qty_from_text(norm)
+        if _q_now and _q_now < MIN_QTY and not _delivery:
+            return MIN_QTY_REPLY
+        if _q_now and _q_now >= MIN_QTY and not _delivery:
+            llm_obj._asked_quantity = True
+            _price = _price_for_qty(_q_now)
+            return (
+                f"Для {_q_now} голов цена {_price} рублей за голову. Место доставки цыплят прежнее?"
+            )
         _pos = (
             re.fullmatch(POS_PATTERN, norm)
             or (norm.startswith("да") and len(words) <= 3)

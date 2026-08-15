@@ -47,6 +47,7 @@ LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET", "secret")
 LLM_BASE = os.getenv("LLM_BASE", "https://openrouter.ai/api/v1")
 LLM_MODEL = os.getenv("LLM_MODEL", "deepseek/deepseek-chat")
 LLM_PROXY = os.getenv("LLM_PROXY", "http://Q3NeJXTY:dsBaWh2L@172.120.21.141:64468")
+STALL_TIMEOUT = float(os.getenv("LLM_STALL_TIMEOUT", "1.5"))
 
 BITRIX_URL = os.getenv("BITRIX_WEBHOOK_URL", "").rstrip("/")
 _last_lead = {"phone": None, "ts": 0}
@@ -177,7 +178,7 @@ async def _terminate_after_speech(reason: str) -> None:
                 _avg = (sum(_mm["resp_lat"]) / len(_mm["resp_lat"])) if _mm["resp_lat"] else 0
                 print(
                     f"[METRICS] summary: greet_dur={_mm['greet_dur']:.1f} "
-                    f"turns={_mm['turns']} resp_lat={[round(x,1) for x in _mm['resp_lat']]} "
+                    f"turns={_mm['turns']} resp_lat={[round(x, 1) for x in _mm['resp_lat']]} "
                     f"avg_resp_lat={_avg:.1f}",
                     flush=True,
                 )
@@ -283,7 +284,7 @@ class YandexTTS(tts.TTS):
                 _t1 = _t.time()
                 _audio = await _synth_one(_s, lead=(_si == 0))
                 print(
-                    f"[TTS] sentence {_si+1}/{len(_sentences)} {len(_audio)}b in {_t.time()-_t1:.1f}s",
+                    f"[TTS] sentence {_si + 1}/{len(_sentences)} {len(_audio)}b in {_t.time() - _t1:.1f}s",
                     flush=True,
                 )
                 _n = len(_audio) // 2
@@ -309,7 +310,9 @@ class YandexTTS(tts.TTS):
                     _i += 1
 
         self._req_id += 1
-        print(f"[TTS] sentence-split: {len(_sentences)} parts in {_t.time()-_t0:.1f}s", flush=True)
+        print(
+            f"[TTS] sentence-split: {len(_sentences)} parts in {_t.time() - _t0:.1f}s", flush=True
+        )
         yield _stream()
 
 
@@ -327,10 +330,10 @@ SYSTEM_PROMPT = """Голосовой менеджер Азовского инк
 
 ВОРОНКА (НЕ перескакивай шаги):
 1) Если «Алло»/приветствие — повтори кратко: «Здравствуйте, это Азовский инкубатор! Предлагаем Росс-308 от 75 рублей. Вам интересно?»
-2) «ДА» → «Отлично! Сколько голов вам нужно?». После количества назови цену за голову (шкала выше), НЕ сумму, и спроси: «Место доставки цыплят прежнее?»
+2) «ДА» → «Отлично! Сколько голов вам нужно?». После количества: если меньше 50 — «Минимальный заказ — 50 голов. Сколько голов вам нужно?» (НЕ переходи к доставке, переспроси). Иначе назови цену за голову (шкала выше), НЕ сумму, и спроси: «Место доставки цыплят прежнее?»
 3) «НЕТ»/неинтересно → «Спасибо за внимание, всего хорошего!».
 4) Доставка прежняя → save_lead(phone="{caller_phone}", quantity=количество, city=город, comment=итог) ОТДЕЛЬНЫМ вызовом БЕЗ текста, затем: «С вами свяжется менеджер для уточнения заказа, всего хорошего!»
-5) Доставка другая → save_lead ОТДЕЛЬНЫМ вызовом БЕЗ текста, затем: «Записали ваши данные, с вами свяжется менеджер, всего хорошего!»
+5) Доставка другая → save_lead ОТДЕЛЬНЫМ вызовом БЕЗ текста, затем: «Сообщите менеджеру новое место доставки, он с вами свяжется в ближайшее время, всего хорошего!»
 6) Финальную фразу произнеси ОДНИМ полным предложением и закончи. НЕ вызывай end_call и НЕ добавляй текст после прощания — звонок завершится автоматически."""
 
 GREETING = "Здравствуйте, это Азовский инкубатор, ранее вы заказывали у нас цыплят! Мы рады предложить вам сейчас породу Росс-308 от 75 рублей, вам интересно?"
@@ -340,6 +343,8 @@ class DebugLLMStream:
     def __init__(self, stream=None):
         self._s = stream
         self._n = 0
+        self._stall_task = None
+        self._first_real = None
         print(
             f"[LLM] DebugLLMStream wraps {type(stream).__name__ if stream else 'lazy'} client={getattr(stream, '_client', None) and getattr(stream._client, '_base_url', '?')}",
             flush=True,
@@ -419,6 +424,18 @@ class DebugLLMStream:
                 return p
         self._n += 1
         print(f"[LLM] __anext__#{self._n} waiting", flush=True)
+        if getattr(self, "_stall_task", None) is not None:
+            _t = self._stall_task
+            self._stall_task = None
+            try:
+                await _t
+            except Exception as _e:
+                print(f"[LLM] stall-await fail {_e!r}", flush=True)
+                raise
+        if getattr(self, "_first_real", None) is not None:
+            fr, self._first_real = self._first_real, None
+            print("[LLM] real first chunk after stall", flush=True)
+            return fr
         if self._s is None:
             raise StopAsyncIteration
         try:
@@ -453,6 +470,25 @@ class DebugLLMStream:
             self._s = None
             print(f"[FAST] LLM bypass -> {_fast!r}", flush=True)
             return
+        # LLM-ветка: первый чанк может идти 3-10с. Говорим заглушку сразу,
+        # race первого чанка гоняется в фоне (см. __anext__).
+        self._stall_task = asyncio.ensure_future(self._race_first_chunk())
+        try:
+            await asyncio.wait_for(asyncio.shield(self._stall_task), timeout=STALL_TIMEOUT)
+            self._stall_task = None
+            self._prefix = self._first_real
+            self._first_real = None
+            print("[LLM] first chunk fast (no stall)", flush=True)
+        except TimeoutError:
+            _ph = funnel.next_placeholder()
+            if not _ph.endswith((".", "!", "?")):
+                _ph += "."
+            self._prefix = _make_fast_chunk(_ph)
+            print(f"[STALL] placeholder -> {_ph!r}", flush=True)
+
+    async def _race_first_chunk(self):
+        """Запускает race моделей, возвращает первый чанк победителя
+        (сохраняет в self._first_real, стрим — в self._s)."""
         models = list(dict.fromkeys(self._models))
         streams, tasks = {}, {}
         no_retry_conn = APIConnectOptions(max_retry=0, timeout=20.0)
@@ -470,7 +506,8 @@ class DebugLLMStream:
         if not tasks:
             raise RuntimeError("no LLM models available")
         remaining = set(tasks.keys())
-        winner_m, winner_chunk = None, None
+        self._first_real = None
+        winner_m = None
         while remaining:
             wait_set = {m: tasks[m] for m in remaining}
             done, _ = await asyncio.wait(wait_set.values(), return_when=asyncio.FIRST_COMPLETED)
@@ -478,7 +515,7 @@ class DebugLLMStream:
             for m, t in wait_set.items():
                 if t in done:
                     try:
-                        winner_chunk = t.result()
+                        self._first_real = t.result()
                         winner_m = m
                         found = True
                         print(f"[LLM] first chunk OK model={winner_m}", flush=True)
@@ -488,7 +525,7 @@ class DebugLLMStream:
                     break
             if found:
                 break
-        if winner_chunk is None:
+        if self._first_real is None:
             raise RuntimeError("all LLM models failed first chunk")
         for _m, _st in streams.items():
             if _m != winner_m:
@@ -500,7 +537,7 @@ class DebugLLMStream:
                 except Exception:
                     pass
         self._s = streams[winner_m]
-        self._prefix = winner_chunk
+        return self._first_real
 
 
 class DebugLLM(openai.LLM):
@@ -623,7 +660,7 @@ class LevitanAgent(Agent):
                         await _st.aclose()
                     except Exception:
                         pass
-                    print(f"[WARMUP] {m} ok in {_t.time()-_t0:.1f}s", flush=True)
+                    print(f"[WARMUP] {m} ok in {_t.time() - _t0:.1f}s", flush=True)
                 except Exception as _e:
                     print(f"[WARMUP] {m} fail {_e!r}", flush=True)
         except Exception as _e:
@@ -774,7 +811,10 @@ async def entrypoint(ctx):
     _session_holder["session"] = None
     session = AgentSession(
         turn_handling={
-            "endpointing": {"min_delay": 0.2, "max_delay": 0.4},
+            "endpointing": {
+                "min_delay": float(os.getenv("EP_MIN_DELAY", "0.5")),
+                "max_delay": float(os.getenv("EP_MAX_DELAY", "0.8")),
+            },
         }
     )
     session.on("user_input_transcribed", agent._on_transcribed)

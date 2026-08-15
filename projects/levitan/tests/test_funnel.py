@@ -73,6 +73,19 @@ def test_fast_path_net():
     assert funnel._fast_path_reply(ctx, llm) == "Спасибо за внимание, всего хорошего!"
 
 
+def test_fast_path_net_compound_phrase():
+    for phrase in (
+        "нет, не интересно",
+        "не интересно",
+        "не надо, спасибо",
+        "не хочу заказывать",
+        "отказ",
+    ):
+        llm = _FakeLLM()
+        ctx = _FakeCtx([_user(phrase)])
+        assert funnel._fast_path_reply(ctx, llm) == "Спасибо за внимание, всего хорошего!", phrase
+
+
 def test_fast_path_da_sets_asked():
     llm = _FakeLLM()
     ctx = _FakeCtx([_user("да")])
@@ -86,6 +99,34 @@ def test_fast_path_quantity_price():
     ctx = _FakeCtx([_user("двести голов")])
     out = funnel._fast_path_reply(ctx, llm)
     assert out == "Для 200 голов цена 85 рублей за голову. Место доставки цыплят прежнее?"
+
+
+def test_fast_path_quantity_below_min_rejects():
+    for phrase in ("28 голов", "двадцать восемь голов", "5 цыплят"):
+        llm = _FakeLLM(asked_q=True)
+        ctx = _FakeCtx([_user(phrase)])
+        out = funnel._fast_path_reply(ctx, llm)
+        assert out is not None, phrase
+        assert "50" in out, f"{phrase} -> {out}"
+        assert "минимум" in out.lower() or "минимальн" in out.lower(), f"{phrase} -> {out}"
+
+
+def test_fast_path_quantity_exact_min_ok():
+    llm = _FakeLLM(asked_q=True)
+    ctx = _FakeCtx([_user("пятьдесят голов")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out is not None
+    assert "Место доставки цыплят прежнее?" in out
+
+
+def test_fast_path_qty_before_asked_not_min():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("пятьдесят голов")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out is not None
+    assert "50" in out
+    assert "Место доставки цыплят прежнее?" in out
+    assert llm._asked_quantity is True
 
 
 def test_fast_path_delivery_confirm_manager():
@@ -113,10 +154,13 @@ def test_fast_path_delivery_confirm_manager():
     funnel.save_lead_fn = None
 
 
-def test_fast_path_delivery_change_returns_none():
+def test_fast_path_delivery_change_returns_canned():
     llm = _FakeLLM(asked_q=True, delivery=True, phone="9859234644")
     ctx = _FakeCtx([_user("нет, в ростов")])
-    assert funnel._fast_path_reply(ctx, llm) is None
+    assert (
+        funnel._fast_path_reply(ctx, llm)
+        == "Сообщите менеджеру новое место доставки, он с вами свяжется в ближайшее время, всего хорошего!"
+    )
 
 
 def test_first_turn_question_delivery_intent():

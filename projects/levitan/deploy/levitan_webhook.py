@@ -308,7 +308,7 @@ class LevitanHandler(BaseHTTPRequestHandler):
 
                 # Telegram notification
                 notify_telegram(
-                    f"📞 <b>Новый звонок</b>\n" f"Телефон: {client_phone}\n" f"Статус: Connected"
+                    f"📞 <b>Новый звонок</b>\nТелефон: {client_phone}\nСтатус: Connected"
                 )
 
                 ctx_data = ctx or {}
@@ -352,8 +352,10 @@ class LevitanHandler(BaseHTTPRequestHandler):
                         del pending_calls[cmd_key]
 
         # Handle recording
-        if path == "events/events/record/added":
-            rec_id = data.get("recording_id", "") or data.get("record_id", "")
+        if path.endswith("/record/added") or path == "record/added":
+            rec_id = (
+                data.get("recording_id", "") or data.get("record_id", "") or data.get("rec_id", "")
+            )
             if rec_id:
                 event = {
                     "type": "recording_added",
