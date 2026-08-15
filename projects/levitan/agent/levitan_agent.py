@@ -55,7 +55,7 @@ YC_API_KEY = os.getenv("YC_API_KEY", "")
 YC_FOLDER_ID = os.getenv("YC_FOLDER_ID", "")
 TTS_VOICE = os.getenv("TTS_VOICE", "alena")
 
-FAQ_CACHE_PATH = Path(__file__).resolve().parent / "docs" / "ANGELLA_BROILERS_FAQ_CACHE.json"
+FAQ_CACHE_PATH = Path(__file__).resolve().parent.parent / "docs" / "ANGELLA_BROILERS_FAQ_CACHE.json"
 _faq_cache = {}
 
 

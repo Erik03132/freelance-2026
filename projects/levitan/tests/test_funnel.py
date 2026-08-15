@@ -119,6 +119,91 @@ def test_fast_path_delivery_change_returns_none():
     assert funnel._fast_path_reply(ctx, llm) is None
 
 
+def test_first_turn_question_delivery_intent():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("а сколько стоит доставка в краснодар")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out == "Доставка по городу бесплатная, за город — 300 рублей."
+
+
+def test_first_turn_question_schedule_intent():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("какой у вас график работы?")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out == "Мы работаем ежедневно с 9 до 18, без выходных."
+
+
+def test_first_turn_greeting_deterministic():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("алло")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out
+    assert out.lower().startswith(("здравствуйте", "алло", "добрый"))
+    assert "Азовский инкубатор" in out
+
+
+def test_first_turn_plain_greeting():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("здравствуйте")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out and out.startswith("Здравствуйте!")
+
+
+def test_first_turn_request_goes_to_llm():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("дайте контакты вашего поставщика кормов")])
+    assert funnel._fast_path_reply(ctx, llm) is None
+
+
+def test_intent_schedule():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("какой у вас график работы")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out == "Мы работаем ежедневно с 9 до 18, без выходных."
+
+
+def test_intent_delivery_price():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("сколько стоит доставка")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out == "Доставка по городу бесплатная, за город — 300 рублей."
+
+
+def test_intent_price():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("какая у вас цена")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert "90 рублей" in out
+
+
+def test_intent_stock():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("есть ли цыплята в наличии")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert "в наличии" in out
+
+
+def test_unknown_question_still_llm():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("дайте контакты вашего поставщика кормов")])
+    assert funnel._fast_path_reply(ctx, llm) is None
+
+
+def test_porody_known_intent():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("расскажите про породы подробнее")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out is not None
+    assert "90 рублей" in out
+
+
+def test_next_placeholder_rotates():
+    a = funnel.next_placeholder()
+    b = funnel.next_placeholder()
+    assert a != b
+    assert a and b
+
+
 def test_fast_path_greeting_first_turn():
     # первый ход (приветствие оператора) -> детерминированное приветствие без LLM
     llm = _FakeLLM()

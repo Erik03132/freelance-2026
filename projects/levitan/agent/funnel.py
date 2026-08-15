@@ -21,6 +21,8 @@ def _load_config():
     except Exception as e:  # pragma: no cover
         print(f"[FUNNEL] config load error: {e}")
         _CONFIG = {
+            "intents": [],
+            "placeholders": [],
             "price_tiers": [
                 {"min": 1000, "price": 75},
                 {"min": 301, "price": 80},
@@ -44,6 +46,23 @@ NEG_PATTERN = _CONFIG["regex"]["neg_full"]
 DELIVERY_CONFIRM_PATTERN = _CONFIG["regex"]["delivery_confirm"]
 POS_PATTERN = _CONFIG["regex"]["pos_full"]
 QTY_REGEX = _CONFIG["regex"]["quantity"]
+INTENTS = _CONFIG.get("intents", [])
+PLACEHOLDERS = _CONFIG.get("placeholders", [])
+_pi = [0]
+
+_FAQ_CACHE_PATH = (
+    Path(__file__).resolve().parent.parent / "docs" / "ANGELLA_BROILERS_FAQ_CACHE.json"
+)
+_FAQ_CACHE = {}
+try:
+    _FAQ_CACHE = {
+        k: v
+        for k, v in json.loads(_FAQ_CACHE_PATH.read_text(encoding="utf-8")).items()
+        if not k.startswith("_")
+    }
+    print(f"[FUNNEL] FAQ cache loaded: {len(_FAQ_CACHE)} triggers")
+except Exception as e:  # pragma: no cover
+    print(f"[FUNNEL] FAQ cache load error: {e}")
 
 # Устанавливается из levitan_agent.py после определения save_lead (избегаем circular import)
 save_lead_fn = None
@@ -54,6 +73,38 @@ def normalize(text: str) -> str:
     text = re.sub(r"[ёй]", lambda m: {"ё": "е", "й": "и"}.get(m.group(), m.group()), text)
     text = re.sub(r"[^а-я0-9\s]", " ", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+_QUESTION_MARKERS = re.compile(
+    r"^(?:а |ну |так |у |мне )?"
+    r"(сколько|как|какой|какая|какие|какое|когда|где|куда|почему|зачем|"
+    r"есть ли|можно|работает|работаете|открыто|цена|сколько стоит|доставка|"
+    r"график|ваканси|адрес|можно ли|есть ли у|сколько у|какой у|какая у)"
+)
+
+
+def _is_question(norm: str) -> bool:
+    """Вопрос на первом ходу: отдаётся LLM, а не приветствием."""
+    if not norm:
+        return False
+    if "?" in norm or norm.endswith("?"):
+        return True
+    return bool(_QUESTION_MARKERS.match(norm))
+
+
+_GREETING_PREFIX = re.compile(
+    r"^(алло|здравствуите|здраствуите|добрыи|доброе|привет|да слушаю|слушаю вас)\b"
+)
+
+
+def _is_greeting_only(norm: str) -> bool:
+    """Первый ход, начинающийся с приветствия -> детерминированное приветствие.
+    Интенты/вопросы перехватываются РАНЬШЕ (см. порядок в _fast_path_reply),
+    поэтому остаётся только «чистое» приветствие или длинная вежливая фраза.
+    Всё остальное -> None -> LLM."""
+    if not norm:
+        return False
+    return bool(_GREETING_PREFIX.match(norm))
 
 
 def _price_for_qty(q: int) -> int:
@@ -286,10 +337,110 @@ def _fast_path_reply(chat_ctx, llm_obj) -> str | None:
         if _pos:
             llm_obj._asked_quantity = True
             return "Отлично! Сколько голов вам нужно?"
-        # первый ход (приветствие оператора Манго) -> детерминированное приветствие
-        # без обращения к LLM: убирает 20с задержку генерации и обрезание длинной фразы
-        return "Здравствуйте! Это Азовский инкубатор, вас интересуют суточные цыплята породы Росс-308? Вам интересно?"
+        # известный вопрос (intents из funnel_config) -> шаблонный ответ без LLM
+        _intent = _intent_reply(norm)
+        if _intent is not None:
+            return _intent
+        # FAQ-слой: 238 реальных триггеров (SequenceMatcher) -> мгновенный ответ
+        _faq = _faq_reply(norm)
+        if _faq is not None:
+            return _faq
+        # первый ход: детерминированное приветствие ТОЛЬКО для чистого приветствия.
+        # Вопрос/просьба/незнакомое -> None -> LLM (или заглушка на уровне агента).
+        if _is_greeting_only(norm):
+            return "Здравствуйте! Это Азовский инкубатор, вас интересуют суточные цыплята породы Росс-308? Вам интересно?"
+        return None
     return None
+
+
+_FAQ_STOP = set(
+    (
+        "в на по за у с до из для и а но ли не это что как то вы вас мне нам же бы или "
+        "от к об о при между через который которая которые какая какой какие когда где "
+        "сколько можно ли есть пожалуйста скажите подскажите хочу хотел узнать ещё еще "
+        "если если бы будет буду хотите хотел бы здравствуйте здравствуите здраствуйте "
+        "здраствуите алло привет добрыи доброе "
+        "даите дайте контакты вашего поставщика поставщиков кормов корма корм "
+        "примут примите возврат вернуть сдохнет сдохнут падеж"
+    ).split()
+)
+
+
+def _kw(t: str) -> list:
+    """Значимые слова (длина >=4, без стоп-слов) для матчинга по ключам."""
+    return [w for w in t.split() if len(w) >= 4 and w not in _FAQ_STOP]
+
+
+def _word_match(a: str, b: str) -> bool:
+    """Слово из триггера матчит слово вопроса. Точные критерии:
+    - подстрока (морфология: крым~крыму, бройлер~бройлеры);
+    - длинный общий корень (>=5 символов: вакцинация~вакцинации);
+    - SequenceMatcher >= 0.8 (стоит~стоят).
+    НЕ матчит случайные созвучия: беспокоит~бесплатная, цыпленок~цыплята,
+    поставщика~доставка (общие <5 символов и ratio < 0.8)."""
+    if len(a) < 4 or len(b) < 4:
+        return False
+    if a in b or b in a:
+        return True
+    if min(len(a), len(b)) >= 5 and a[:5] == b[:5]:
+        return True
+    return SequenceMatcher(None, a, b).ratio() >= 0.8
+
+
+def _faq_reply(norm: str) -> str | None:
+    """FAQ-слой: 238 реальных триггеров -> мгновенный ответ без LLM.
+    Сначала SequenceMatcher по всей фразе (0.72), затем матчинг по ключевым словам."""
+    if not norm or len(norm) < 3 or not _FAQ_CACHE:
+        return None
+    # 1) SequenceMatcher по фразе целиком
+    best_score, best_reply = 0.0, None
+    for trigger, reply in _FAQ_CACHE.items():
+        score = SequenceMatcher(None, norm, trigger).ratio()
+        if score > best_score:
+            best_score, best_reply = score, reply
+    if best_score >= 0.72:
+        return best_reply
+    # 2) ключевые слова (морфология: гарантия~гарантии, дохнут~сдохнет)
+    # Сервисные/юридические запросы (возврат, падёж, замена) — НЕ FAQ:
+    # их keyword-слой не трогает, уходят в LLM.
+    if re.search(r"(возврат|примут|сдохн|дохн|вернут|падеж|замен)", norm):
+        return None
+    q_kw = _kw(norm)
+    if not q_kw:
+        return None
+    best_kw, best_reply_kw = 0.0, None
+    for trigger, reply in _FAQ_CACHE.items():
+        t_kw = _kw(trigger)
+        if not t_kw:
+            continue
+        matched = sum(1 for tw in t_kw if any(_word_match(tw, qw) for qw in q_kw))
+        score = matched / len(t_kw)
+        if score > best_kw:
+            best_kw, best_reply_kw = score, reply
+    if best_kw >= 0.5 and best_reply_kw is not None:
+        return best_reply_kw
+    return None
+
+
+def _intent_reply(norm: str) -> str | None:
+    """Матчер intents: паттерн вопроса -> шаблонный ответ БЕЗ LLM (детерминированно).
+    Возвращает текст ответа или None (нет матча -> LLM/заглушка)."""
+    if not norm:
+        return None
+    for it in INTENTS:
+        for pat in it.get("patterns", []):
+            if pat in norm:
+                return it.get("response")
+    return None
+
+
+def next_placeholder() -> str:
+    """Ротация фраз-заглушек («понял, одну секунду») — сменяются в процессе диалога."""
+    if not PLACEHOLDERS:
+        return "Да, конечно! Сейчас отвечу"
+    r = PLACEHOLDERS[_pi[0] % len(PLACEHOLDERS)]
+    _pi[0] += 1
+    return r
 
 
 def faq_normalized_similarity(a: str, b: str) -> float:
