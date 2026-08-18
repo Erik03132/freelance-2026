@@ -238,6 +238,22 @@ def test_porody_known_intent():
     ctx = _FakeCtx([_user("расскажите про породы подробнее")])
     out = funnel._fast_path_reply(ctx, llm)
     assert out is not None
+    assert "Росс-308" in out and "Кобб-500" in out
+
+
+def test_porody_beats_price():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("какие породы есть")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out is not None
+    assert "Росс-308" in out
+
+
+def test_price_still_works():
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("сколько стоит цыплёнок")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out is not None
     assert "90 рублей" in out
 
 

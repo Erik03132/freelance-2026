@@ -26,6 +26,16 @@ KNOWN_EVALS=(
   "$ROOT/projects/ai-scout/tests/eval_ai_scout.py"
   "$ROOT/my-project/tests/eval_auto_reels.py"
   "$ROOT/agent-lab/tests/eval_agent_lab.py"
+  "$ROOT/tools/tests/eval_model_bench.py"
+  "$ROOT/tools/tests/eval_model_profiles.py"
+  "$ROOT/tools/tests/eval_context_layers.py"
+  "$ROOT/tools/tests/eval_llms_txt.py"
+  "$ROOT/tools/tests/eval_rag_retrieval.py"
+  "$ROOT/tools/tests/eval_chunking.py"
+  "$ROOT/tools/tests/eval_vision_local.py"
+  "$ROOT/tools/tests/eval_rag_metrics.py"
+  "$ROOT/tools/tests/eval_rag_evalset.py"
+  "$ROOT/tools/tests/eval_rag_evalrunner.py"
 )
 
 list_evals() {

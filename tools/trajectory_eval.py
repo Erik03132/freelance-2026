@@ -26,6 +26,7 @@ AG-2: Траекторный слой оценки агентов (по стат
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 
@@ -131,6 +132,57 @@ class TrajectoryEvaluator:
                 return False
         return True
 
+    # --- BK-1: целостность траектории (урок BookTrans, Habr #1070088) ---
+    # Каждому блоку (вызову) присваивается стабильный ID и хеш содержимого.
+    # Replay (resume/fork) НЕ проходит, если хеш хоть одного блока изменился
+    # (детекция drift/тамперинга траектории).
+
+    @staticmethod
+    def _block_hash(call: dict) -> str:
+        canonical = json.dumps(
+            {"t": call.get("tool"), "a": call.get("args")}, sort_keys=True, ensure_ascii=False
+        )
+        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
+
+    def seal(self, calls: list[dict]) -> list[dict]:
+        """Подписывает траекторию: стабильный block_id + content hash на каждый блок."""
+        sealed = []
+        for i, c in enumerate(calls):
+            sealed.append(
+                {
+                    "block_id": f"b{i:04d}",
+                    "tool": c.get("tool", ""),
+                    "args": c.get("args", {}),
+                    "hash": self._block_hash(c),
+                }
+            )
+        return sealed
+
+    def verify_integrity(self, sealed: list[dict], replay_calls: list[dict]) -> dict:
+        """Проверяет replay против подписанной траектории по block_id+hash.
+
+        Replay НЕ проходит, если длина отличается или хеш любого блока изменился.
+        Возвращает {integrity_ok, length_match, mismatches:[{block_id, sealed_hash, replay_hash}]}.
+        """
+        replay_sealed = self.seal(replay_calls)
+        mismatches = []
+        for i, block in enumerate(sealed):
+            if i >= len(replay_sealed):
+                break
+            rh = replay_sealed[i]["hash"]
+            if block["hash"] != rh:
+                mismatches.append(
+                    {"block_id": block["block_id"], "sealed_hash": block["hash"], "replay_hash": rh}
+                )
+        length_match = len(sealed) == len(replay_sealed)
+        return {
+            "integrity_ok": length_match and not mismatches,
+            "length_match": length_match,
+            "sealed_len": len(sealed),
+            "replay_len": len(replay_sealed),
+            "mismatches": mismatches,
+        }
+
 
 def _parse_calls(raw: str) -> list[dict]:
     """Парсит JSON-массив вызовов или строки вида tool(args)."""
@@ -162,6 +214,12 @@ def main():
     ap.add_argument("--expected-calls", default="", help="эталонная последовательность (JSON)")
     ap.add_argument("--expected-steps", type=int, default=None, help="ожидаемое число витков")
     ap.add_argument("--order", default="any-order", choices=["any-order", "in-order", "exact"])
+    ap.add_argument("--seal", action="store_true", help="BK-1: подписать траекторию (block_id+hash), вывести JSON")
+    ap.add_argument(
+        "--verify-against",
+        default=None,
+        help="BK-1: проверить целостность --calls против подписанного JSON-файла (replay)",
+    )
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
@@ -172,6 +230,19 @@ def main():
         order_mode=args.order,
     )
     result = ev.evaluate(_parse_calls(args.calls))
+
+    if args.seal:
+        sealed = ev.seal(_parse_calls(args.calls))
+        print(json.dumps(sealed, ensure_ascii=False, indent=2))
+        sys.exit(0)
+
+    if args.verify_against:
+        with open(args.verify_against, encoding="utf-8") as f:
+            sealed = json.load(f)
+        report = ev.verify_integrity(sealed, _parse_calls(args.calls))
+        if args.json or True:
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+        sys.exit(0 if report["integrity_ok"] else 1)
 
     if args.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))

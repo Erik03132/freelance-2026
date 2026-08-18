@@ -249,7 +249,10 @@ def main():
 title: {args.title}
 author: {args.author}
 read: {date}
+updated: {date}
 model: {FREE_MODELS[0]}
+type: book-digest
+tags: []
 status: read
 ---
 

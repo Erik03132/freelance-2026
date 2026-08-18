@@ -21,7 +21,11 @@
 
 set -eu
 
-export PATH="/usr/local/bin:/opt/homebrew/bin:/Users/igorvasin/.npm-global/bin:/Users/igorvasin/Library/Python/3.13/bin:$PATH"
+export PATH="/opt/homebrew/bin:/usr/local/bin:/Users/igorvasin/.npm-global/bin:/Users/igorvasin/Library/Python/3.13/bin:$PATH"
+# Теперь /opt/homebrew/bin первым → python3 = homebrew (3.14, есть certifi + прокси-стек).
+# python.org (3.12 в /usr/local/bin) НЕ имеет certifi → SSL CERTIFICATE_VERIFY_FAILED.
+PY="/opt/homebrew/bin/python3"
+[ -x "$PY" ] || PY="$(command -v python3)"
 
 # ============ КОНФИГУРАЦИЯ ============
 
@@ -88,6 +92,35 @@ mkdir -p "$REPORTS_DIR" "$INBOX_DIR"
 log() {
     local msg="[$(date '+%H:%M:%S')] $1"
     echo "$msg" | tee -a "$LOG_FILE"
+}
+
+# ---- Дедупликация: md5-журнал обработанных (только уникальные книги/ссылки) ----
+DEDUP_PY="${PROJECT_ROOT}/tools/ops/reader_dedup.py"
+
+dedup_is_duplicate() {
+    # rc=0 если файл уже обработан (дубль), rc=1 если уникальный
+    "$PY" "$DEDUP_PY" --has "$1" >/dev/null 2>&1
+}
+
+dedup_register() {
+    # Заносим md5 после успешной обработки
+    local md5
+    md5=$("$PY" "$DEDUP_PY" --file "$1" 2>/dev/null)
+    [ -n "$md5" ] && "$PY" "$DEDUP_PY" --add "$md5" "$2" >/dev/null 2>&1 || true
+}
+
+vps_rm() {
+    # Удаляем файл с VPS-инбокса (если он там есть) — чтобы не возвращался rsync'ом
+    local base
+    base=$(basename "$1")
+    local t_host="${TUNNEL_HOST:-127.0.0.1}"
+    local t_port="${TUNNEL_PORT:-22001}"
+    if [ -n "$VPS_HOST" ]; then
+        ssh -i "${VPS_KEY:-~/.ssh/id_rsa}" -o StrictHostKeyChecking=no -o ConnectTimeout=8 -p "${t_port}" \
+            "root@${t_host}" "rm -f '${VPS_INBOX}/${base}'" 2>>"$LOG_FILE" || \
+        ssh -i "${VPS_KEY:-~/.ssh/id_rsa}" -o StrictHostKeyChecking=no -o ConnectTimeout=8 \
+            "${VPS_USER}@${VPS_HOST}" "rm -f '${VPS_INBOX}/${base}'" 2>>"$LOG_FILE" || true
+    fi
 }
 
 send_telegram() {
@@ -374,10 +407,30 @@ else
     while IFS= read -r f; do
         base=$(basename "$f" .md)
         slug=$(echo "$base" | tr '[:upper:]' '[:lower:]' | tr ' /' '--' | tr -cd 'a-z0-9_-')
-        [ -z "$slug" ] && slug="material-$(date +%s)"
+        # Кириллические имена дают пустой slug (или только дефисы) — fallback на material-
+        if echo "$slug" | grep -qvE '^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$'; then
+            slug="material-$(date +%s)"
+        fi
         # Пропускаем уже прочитанные
         if [ -f "${LIBRARY_DIR}/books/${slug}/digest.md" ]; then
-            log "  ⏭️ Уже прочитано: ${base}"
+            log "  ⏭️ Уже прочитано: ${base} (исходник удалён — digest уже есть)"
+            if [ "$DRY_RUN" = true ]; then
+                log "  (dry-run: файл оставили)"
+            else
+                rm -f "$f"
+                vps_rm "$f"
+            fi
+            continue
+        fi
+        # Дедупликация: контент уже обработан ранее → пропускаем и удаляем
+        if dedup_is_duplicate "$f"; then
+            log "  🔄 Дубль (md5 уже обработан): ${base}"
+            if [ "$DRY_RUN" = true ]; then
+                log "  (dry-run: файл оставили)"
+            else
+                rm -f "$f"
+                vps_rm "$f"
+            fi
             continue
         fi
         log "  📖 Читаю: ${base}..."
@@ -386,9 +439,11 @@ else
             continue
         fi
         if OPENROUTER_API_KEY="${OPENROUTER_API_KEY:-$(grep '^OPENROUTER_API_KEY=' "${PROJECT_ROOT}/.env" 2>/dev/null | cut -d= -f2)}" BOOK_DIGEST_PROXY="$BOOK_PROXY" \
-            python3 "$BOOK_DIGEST" --input "$f" --slug "$slug" --title "$base" 2>>"$LOG_FILE"; then
+            "$PY" "$BOOK_DIGEST" --input "$f" --slug "$slug" --title "$base" 2>>"$LOG_FILE"; then
             BOOKS_READ=$((BOOKS_READ+1))
+            dedup_register "$f" "$base"
             rm -f "$f"
+            vps_rm "$f"
         else
             log "  ❌ Ошибка чтения: ${base}"
             BOOKS_FAILED=$((BOOKS_FAILED+1))
@@ -402,9 +457,27 @@ else
         while IFS= read -r f; do
             base=$(basename "$f" .md)
             slug=$(echo "$base" | tr '[:upper:]' '[:lower:]' | tr ' /' '--' | tr -cd 'a-z0-9_-')
-            [ -z "$slug" ] && slug="material-$(date +%s)"
+            if echo "$slug" | grep -qvE '^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$'; then
+                slug="material-$(date +%s)"
+            fi
             if [ -f "${PERSONAL_BASE}/КНИГИ/${slug}/digest.md" ]; then
-                log "  ⏭️ Уже прочитана личная книга: ${base}"
+                log "  ⏭️ Уже прочитана личная книга: ${base} (исходник удалён — digest уже есть)"
+                if [ "$DRY_RUN" = true ]; then
+                    log "  (dry-run: файл оставили)"
+                else
+                    rm -f "$f"
+                    vps_rm "$f"
+                fi
+                continue
+            fi
+            # Дедупликация личных книг (одинаковый контент за сутки/недели)
+            if dedup_is_duplicate "$f"; then
+                log "  🔄 Дубль (md5): личная ${base}"
+                if [ "$DRY_RUN" = true ]; then
+                    log "  (dry-run: файл оставили)"
+                else
+                    rm -f "$f"
+                fi
                 continue
             fi
             log "  📖 Личная книга: ${base}..."
@@ -413,9 +486,10 @@ else
                 continue
             fi
             if OPENROUTER_API_KEY="${OPENROUTER_API_KEY:-$(grep '^OPENROUTER_API_KEY=' "${PROJECT_ROOT}/.env" 2>/dev/null | cut -d= -f2)}" BOOK_DIGEST_PROXY="$BOOK_PROXY" \
-                python3 "$BOOK_DIGEST" --input "$f" --slug "$slug" --title "$base" \
+                "$PY" "$BOOK_DIGEST" --input "$f" --slug "$slug" --title "$base" \
                 --out "${PERSONAL_BASE}/КНИГИ/${slug}" 2>>"$LOG_FILE"; then
                 BOOKS_READ=$((BOOKS_READ+1))
+                dedup_register "$f" "$base"
                 rm -f "$f"
             else
                 log "  ❌ Ошибка чтения личной книги: ${base}"
@@ -491,7 +565,7 @@ else
     rm -rf "$NB_SCAN_DIR"
     mkdir -p "$NB_SCAN_DIR"
     log "🔍 Фаза 4: сканирование блокнотов NotebookLM..."
-    NB_FILES=$(python3 "$NB_SCAN_SCRIPT" --outdir "$NB_SCAN_DIR" 2>>"$LOG_FILE" || true)
+    NB_FILES=$("$PY" "$NB_SCAN_SCRIPT" --outdir "$NB_SCAN_DIR" 2>>"$LOG_FILE" || true)
     if [ -z "$NB_FILES" ]; then
         log "  ⏭️ Новых источников нет (или прокси недоступны)"
         echo "• NotebookLM: новых источников нет" >> "$REPORT_FILE"
@@ -500,12 +574,20 @@ else
             [ -f "$f" ] || continue
             base=$(basename "$f" .md)
             slug=$(echo "$base" | tr '[:upper:]' '[:lower:]' | tr ' /' '--' | tr -cd 'a-z0-9_-')
-            [ -z "$slug" ] && slug="nblm-$(date +%s)"
+            if echo "$slug" | grep -qvE '^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$'; then
+                slug="nblm-$(date +%s)"
+            fi
+            if dedup_is_duplicate "$f"; then
+                log "  🔄 Дубль (md5): NBLM ${base}"
+                rm -f "$f"
+                continue
+            fi
             log "  📖 Читаю из NotebookLM: ${base}..."
             if OPENROUTER_API_KEY="$NB_LLM_KEY" BOOK_DIGEST_PROXY="$BOOK_PROXY" \
-                python3 "$BOOK_DIGEST" --input "$f" --slug "$slug" --title "$base" \
+                "$PY" "$BOOK_DIGEST" --input "$f" --slug "$slug" --title "$base" \
                 --out "${LIBRARY_DIR}/books/${slug}" 2>>"$LOG_FILE"; then
                 NB_READ=$((NB_READ+1))
+                dedup_register "$f" "$base"
                 rm -f "$f"
             else
                 log "  ❌ Ошибка чтения: ${base}"
@@ -544,24 +626,20 @@ log "✅ Ночной читатель завершён: ${TIME_END}"
 log "📄 Отчёт: ${REPORT_FILE}"
 
 # ============ TELEGRAM ============
+# Ночью ТОЛЬКО ошибки (ночное сводка убщается утренним саммари в 08:00, см. summarize_reader.py).
+# Полный отчёт — в reports/night_reader_<date>.md, отдельного ночного ТГ-сообщения не шлём.
 
-if [ "${BOOKS_READ}" -gt 0 ]; then
+TOTAL_ERRORS=$((FAILED + BOOKS_FAILED + NB_FAILED))
+if [ "${TOTAL_ERRORS}" -gt 0 ]; then
     TG_MSG="📚 *Ночной читатель — ${DATE}*
 
-📖 Прочитано книг: *${BOOKS_READ}*
-🧠 Из NotebookLM: *${NB_READ}*
-⚡ Конвертировано: ${CONVERTED}
-❌ Ошибок: $((FAILED + BOOKS_FAILED + NB_FAILED))
+⚠️ Ошибок: *${TOTAL_ERRORS}*
+📖 Прочитано: ${BOOKS_READ}
+🧠 NotebookLM: ${NB_READ}
 
 📄 \`reports/night_reader_${DATE}.md\`"
+    send_telegram "$TG_MSG"
+    log "📤 TG: ночное уведомление об ошибках отправлено"
 else
-    TG_MSG="📚 *Ночной читатель — ${DATE}*
-
-⏳ Книг не было (инбокс пуст)
-🧠 Из NotebookLM: *${NB_READ}*
-⚡ Конвертировано: ${CONVERTED}
-❌ Ошибок: $((FAILED + BOOKS_FAILED + NB_FAILED))"
+    log "⏭️ TG: ошибок нет — ночное сообщение не шлём (утро шлёт саммари)"
 fi
-
-send_telegram "$TG_MSG"
-log "📤 Telegram отправлен"

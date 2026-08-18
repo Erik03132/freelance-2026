@@ -8,9 +8,30 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
+
+
+# Known official package sources. Typosquatters publish lookalikes on the
+# "wrong" registry — e.g. PyPI `deepseek-harness` squats the official npm
+# `@deepseek-ai/dsh` (Habr #1070296, HZ-4). name -> expected source.
+KNOWN_PACKAGE_SOURCES: dict[str, dict] = {
+    "deepseek-harness": {
+        "expected_registry": "npm",
+        "official": "@deepseek-ai/dsh",
+        "note": "Официальный DeepSeek Harness — npm @deepseek-ai/dsh. PyPI-deepseek-harness — тайпсквоттинг третьей стороны.",
+    },
+}
+
+# Packages that attract typosquats. Declared names within edit-distance 2 of a
+# target are flagged for manual source verification before install.
+_TYPOSQUAT_TARGETS = (
+    "openai", "requests", "numpy", "pandas", "tensorflow", "torch", "pip",
+    "setuptools", "cryptography", "boto3", "django", "flask", "react",
+    "lodash", "express", "axios", "webpack", "deepseek-harness",
+)
 
 
 def _run(cmd: list[str], cwd: str, timeout: int = 120) -> tuple[str, str, int]:
@@ -147,8 +168,113 @@ def scan_gitleaks(path: str) -> dict:
 
 def scan_all(path: str) -> list[dict]:
     """Запускает все доступные внешние сканеры."""
-    results = [scan_pip_audit(path), scan_npm_audit(path), scan_bandit(path), scan_gitleaks(path)]
+    results = [scan_pip_audit(path), scan_npm_audit(path), scan_bandit(path), scan_gitleaks(path), scan_typosquat(path)]
     return [r for r in results if r["available"]]
+
+
+def _edit_distance(a: str, b: str) -> int:
+    """Levenshtein distance, capped at 2 (we only care about close lookalikes)."""
+    if a == b:
+        return 0
+    if abs(len(a) - len(b)) > 2:
+        return 99
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            cur.append(min(prev[j] + 1, cur[-1] + 1, prev[j - 1] + (ca != cb)))
+        prev = cur
+    return prev[len(b)]
+
+
+def _extract_declared_deps(path: str) -> dict[str, list[str]]:
+    """Собирает заявленные зависимости: PyPI (requirements/pyproject) + npm (package.json)."""
+    deps: dict[str, list[str]] = {"pypi": [], "npm": []}
+    root = Path(path) if os.path.isdir(path) else Path(path).parent
+    for p in root.rglob("requirements*.txt"):
+        if ".git" in p.parts:
+            continue
+        try:
+            for line in p.read_text(encoding="utf-8", errors="replace").splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or line.startswith("-"):
+                    continue
+                name = re.split(r"[=<>!~ ]", line, 1)[0].strip().lower()
+                if name:
+                    deps["pypi"].append(name)
+        except OSError:
+            pass
+    pj = root / "package.json"
+    if pj.exists():
+        try:
+            data = json.loads(pj.read_text(encoding="utf-8", errors="replace"))
+            for section in ("dependencies", "devDependencies", "peerDependencies"):
+                for name in (data.get(section) or {}):
+                    deps["npm"].append(name.lower())
+        except (OSError, json.JSONDecodeError):
+            pass
+    pp = root / "pyproject.toml"
+    if pp.exists():
+        try:
+            text = pp.read_text(encoding="utf-8", errors="replace")
+            in_deps = False
+            for line in text.splitlines():
+                if re.match(r"^\s*dependencies\s*=\s*\[", line):
+                    in_deps = True
+                    continue
+                if in_deps:
+                    line = line.strip()
+                    if line == "]":
+                        break
+                    m = re.match(r'["\']([^"\']+)["\']', line)
+                    if m:
+                        name = re.split(r"[=<>!~ ]", m.group(1), 1)[0].strip().lower()
+                        if name:
+                            deps["pypi"].append(name)
+        except OSError:
+            pass
+    return deps
+
+
+def scan_typosquat(path: str) -> dict:
+    """Supply-chain: verify declared packages come from official sources (HZ-4)."""
+    deps = _extract_declared_deps(path)
+    findings = []
+    seen: set[str] = set()
+    for registry, names in deps.items():
+        for name in names:
+            base = name.split("@", 1)[-1] if registry == "npm" else name
+            info = KNOWN_PACKAGE_SOURCES.get(base)
+            if info and info["expected_registry"] != registry and base not in seen:
+                seen.add(base)
+                findings.append(
+                    {
+                        "package": name,
+                        "registry": registry,
+                        "severity": "HIGH",
+                        "pattern": "typosquat",
+                        "label": (
+                            f"Тайпсквоттинг-риск: '{name}' заявлен в {registry}, "
+                            f"но официальный источник — {info['official']} ({info['expected_registry']}). "
+                            f"{info['note']}"
+                        ),
+                    }
+                )
+                continue
+            for target in _TYPOSQUAT_TARGETS:
+                if name != target and _edit_distance(name, target) <= 2 and name not in seen:
+                    seen.add(name)
+                    findings.append(
+                        {
+                            "package": name,
+                            "registry": registry,
+                            "severity": "MEDIUM",
+                            "pattern": "typosquat_suspect",
+                            "label": f"Похоже на '{target}' (edit-distance <=2) — проверить официальный источник перед установкой.",
+                        }
+                    )
+                    break
+    return {"tool": "typosquat", "available": True, "findings": findings}
 
 
 def _find_file(path: str, pattern: str) -> str | None:

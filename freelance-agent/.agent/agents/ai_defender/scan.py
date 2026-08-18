@@ -101,6 +101,15 @@ SECURITY_SMELLS: list[tuple[str, re.Pattern | object, str, str]] = [
         "LOW",
         "env подтягивается во фронтенд",
     ),
+    (
+        "untrusted_to_llm",
+        re.compile(
+            r"""(?i)(web_fetch|web_search|requests\.(get|post)|scrap|crawl|download|fetch\()"""
+            r""".{0,80}(llm|agent|chat|completion|prompt|generate|ask)\b[\w.]*\s*\("""
+        ),
+        "MEDIUM",
+        "Недоверенный внешний контент (web/скрап/загрузка) передаётся в LLM/агент — применить untrusted_data-плейбук: скан инъекции + sandbox / --tools '' / web_search off",
+    ),
 ]
 
 _SEVERITY_ORDER = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}

@@ -19,6 +19,7 @@ if AGENTS not in sys.path:
     sys.path.insert(0, AGENTS)
 
 from ai_defender.scan import scan_path, mask_secret  # noqa: E402
+from ai_defender.deps_scan import scan_typosquat  # noqa: E402
 
 FIXTURES_TP = {
     "hardcoded_secret": 'api_key = "sk-or-1234567890abcdef"',  # gitleaks:allow
@@ -31,6 +32,7 @@ FIXTURES_TP = {
     "secret_in_log": 'print("token=" + auth_token)',
     "weak_crypto": 'hash = hashlib.md5(password.encode()).hexdigest()',
     "shell_true": 'subprocess.run(cmd, shell=True)',
+    "untrusted_to_llm": 'data = web_fetch(url); reply = llm(prompt=data)',
 }
 
 FIXTURES_CLEAN = [
@@ -79,6 +81,23 @@ def _run() -> tuple[int, list[str]]:
                 if "1234567890abcdef" in f["snippet"]:
                     fails.append("MASK: секрет не замаскирован")
 
+        # HZ-4: typosquat — PyPI deepseek-harness должен флагаться как HIGH
+        ts_dir = os.path.join(tmp, "ts")
+        os.makedirs(ts_dir)
+        _write(os.path.join(ts_dir, "requirements.txt"), "deepseek-harness==0.1.0\nrequests==2.31.0\n")
+        ts_res = scan_typosquat(ts_dir)
+        ts_patterns = {f["pattern"] for f in ts_res["findings"]}
+        if "typosquat" not in ts_patterns:
+            fails.append("HZ-4 TP MISS: PyPI deepseek-harness не распознан как тайпсквоттинг")
+
+        # HZ-4 negative: официальный npm @deepseek-ai/dsh не должен флагаться
+        ts_clean = os.path.join(tmp, "ts_clean")
+        os.makedirs(ts_clean)
+        _write(os.path.join(ts_clean, "package.json"), '{"dependencies": {"@deepseek-ai/dsh": "0.1.0"}}')
+        ts_clean_res = scan_typosquat(ts_clean)
+        if ts_clean_res["findings"]:
+            fails.append(f"HZ-4 FP: официальный @deepseek-ai/dsh дал находку: {ts_clean_res['findings']}")
+
     return len(fails), fails
 
 
@@ -89,4 +108,4 @@ if __name__ == "__main__":
         for f in fails:
             print(f"  - {f}")
         sys.exit(1)
-    print(f"✅ EVAL PASSED — {len(FIXTURES_TP)} TP classes detected, 0 FP, masking OK")
+    print(f"✅ EVAL PASSED — {len(FIXTURES_TP)} TP classes detected, 0 FP, masking OK, HZ-4 typosquat OK")

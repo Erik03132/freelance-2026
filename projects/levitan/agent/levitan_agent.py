@@ -222,6 +222,9 @@ class YandexTTS(tts.TTS):
         self._lead_done = False
         self._lead_sec = float(os.getenv("TTS_LEAD_SILENCE_SEC", "2.5"))
         self._emotion = os.getenv("TTS_EMOTION", "good")
+        self._cache: dict[str, bytes] = {}
+        self._cache_hits = 0
+        self._cache_misses = 0
 
     @asynccontextmanager
     async def synthesize(self, text: str, *, conn_options: APIConnectOptions = None):
@@ -241,6 +244,12 @@ class YandexTTS(tts.TTS):
             _sentences = [text]
 
         async def _synth_one(sentence: str, lead: bool) -> bytes:
+            _key = sentence.strip()
+            _cached = self._cache.get(_key)
+            if _cached is not None and not (lead and not self._lead_done):
+                self._cache_hits += 1
+                print(f"[TTS] cache hit #{self._cache_hits} ({len(_cached)}b)", flush=True)
+                return _cached
             form = aiohttp.FormData()
             form.add_field("text", sentence)
             form.add_field("folderId", self._folder_id)
@@ -275,6 +284,8 @@ class YandexTTS(tts.TTS):
                     _tone += int(_s).to_bytes(2, "little", signed=True)
                 data = bytes(_tone) + data
                 print(f"[TTS] lead-tone {_dur:.2f}s prepended (first synthesis)", flush=True)
+            self._cache_misses += 1
+            self._cache[_key] = data
             return data
 
         async def _stream():

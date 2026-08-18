@@ -34,7 +34,7 @@ ai-bureau/ai-voice-manager/
 
 | Компонент | Где живёт | Статус |
 |---|---|---|
-| Голосовой агент (обзвон/приём) | `projects/levitan/` (Mango + livekit-sip) | ⚠️ нестабилен (бесплатные модели) |
+| Голосовой агент (обзвон/приём) | `projects/levitan/` (Mango + livekit-sip), SSoT fast-path — `agent/funnel.py` | ✅ гейт AVM-0 по задержкам закрыт (fast-path + preempt по interim ASR), см. `docs/agent-foundation.md` |
 | TTS | Яндекс Realtime | ✅ выбран для прода |
 | CRM / Bitrix24 | `projects/levitan/crm` + bitrix-скиллы | ✅ |
 | LLM | OmniRoute | ✅ |

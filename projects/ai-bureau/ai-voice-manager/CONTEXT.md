@@ -14,7 +14,18 @@
 | **Гейт стабильности** | Условие «агент стабильно отвечает без немых звонков» — до него продукт НЕ продаём |
 | **Локальный бизнес** | Клиника, автосервис, доставка, фитнес и т.п. — ЦА продукта |
 | **Лид-тишина** | Пауза до 5с, когда LLM ещё думает — абонент вешает трубку (главный блокер качества) |
+| **Fast-path** | Детерминированный ответ агента БЕЗ LLM (мгновенный): ДА→уточнение, НЕТ→прощание, КОЛИЧЕСТВО→расчёт цены, подтверждение доставки→финал + save_lead. SSoT — модуль `projects/levitan/agent/funnel.py` (+ `funnel_config.json`); вызывается из `DebugLLMStream._first_or_fallback` и по interim ASR (preempt). |
+| **Funnel / funnel.py** | Чистый stdlib-модуль детерминированной логики без LLM. SSoT для AVM-2: переиспользуемый voice_manager. Конфигурируется `funnel_config.json` (price_tiers + regex) — интерфейс подстройки под клиента. |
+| **funnel_config.json** | Конфиг fast-path: ступенчатая шкала цен (`price_tiers`) и паттерны ДА/НЕТ/количество/подтверждение (`regex`). Для AVM-2 генерируется из KB клиента. |
+| **Preempt (interim ASR)** | Ответ fast-path по ЧАСТИЧНОМУ (нефинальному) транскрипту: агент начинает говорить ещё до завершения фразы клиента. Включается `Deepgram interim_results=True` + `_on_transcribed(not is_final)`; блок дубля — `_preempt_lock`/`_preempt_fired` (сброс на новый ход клиента). Доп. снижение `resp_lat`. |
+| **Streaming TTS** | `StreamAdapter(tts=YandexTTS(streaming=False), SentenceTokenizer)` — первое предложение играет до конца генерации LLM. |
+| **endpointing** | Пауза после речи клиента до финализации транскрипта (`max_delay`); влияет на «snappiness» хода. |
+| **TTFT** | Time To First Token LLM (реальный первый ТЕКСТ, не пустой chunk). |
+| **resp_lat** | Задержка хода: от финального транскрипта клиента до первой реплики агента (preempt снижает её ещё до финала). |
+| **DebugLLM / DebugLLMStream** | Обёртка LLM с конкурентным запуском primary+fallback и внедрённым fast-path (SSoT: `projects/levitan/`, модуль `funnel`). При `_preempt_fired` LLM-стрим шунтируется (ответ уже отдан preempt-веткой). |
 
 ## Ключевые решения (см. claude-mem kind=decision)
 
 - **2026-08-11** — Создан проект AVM в составе AI-bureau. Модель: подписка на AI-секретаря для локальных бизнесов РФ. Продажа — только после гейта стабильности голосового агента (зависимость от Levitan).
+- **2026-08-14** — Финишные настройки голосового агента (оптимизация задержек в Levitan) перенесены в AVM как базовая основа: `docs/agent-foundation.md`. Основная воронка стала мгновенной (fast-path без LLM), `avg_resp_lat` 8.4→4.9s, TTFT ~2s. Гейт AVM-0 по задержкам практически закрыт. SSoT кода — `projects/levitan/`.
+- **2026-08-15** — Рефактор Левитана (тест OK, незакоммичено): fast-path вынесен в `agent/funnel.py` + `funnel_config.json` (SSoT для AVM-2, конфигурабельный KB-интерфейс); добавлен **preempt по interim ASR** (`Deepgram interim_results=True`) — агент отвечает по частичному распознаванию, ещё ниже `resp_lat`. Снимок синхронизирован в `docs/agent-foundation.md`. `docs/agent-foundation.md` — актуальная база для AVM-2.
