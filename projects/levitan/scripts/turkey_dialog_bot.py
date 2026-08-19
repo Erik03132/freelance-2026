@@ -620,6 +620,11 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE):
             "no_answer": "⚫",
             "other": "⚫",
         }.get(status, "⚫")
+        bitrix_link = (
+            f'📋 <a href="https://incubird.bitrix24.ru/crm/lead/show/{bitrix_id}/">Битрикс лид #{bitrix_id}</a>'
+            if bitrix_id
+            else ""
+        )
         card = (
             f"{emoji} <b>Результат #{sum(state.stats.values())}</b>\n\n"
             f"👤 {saved.get('contact_name') or saved.get('name') or '—'}\n"
@@ -630,7 +635,7 @@ async def dialing_loop(context: ContextTypes.DEFAULT_TYPE):
             f"💰 {saved.get('price_info') or '—'}\n"
             f"❓ {saved.get('questions') or '—'}\n"
             f"📝 {saved.get('notes') or '—'}\n"
-            f"{'📋 <a href=\"https://incubird.bitrix24.ru/crm/lead/show/' + bitrix_id + '/\">Битрикс лид #' + bitrix_id + '</a>' if bitrix_id else ''}"
+            f"{bitrix_link}"
         )
         await context.bot.send_message(chat_id=chat_id, text=card, parse_mode="HTML")
 

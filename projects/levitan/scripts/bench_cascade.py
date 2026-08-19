@@ -4,9 +4,9 @@ AVM-0b — проверка каскада LLM на 402/обрыв под наг
 Скрипт бьёт в OmniRoute (LLM_BASE) по primary+fallback моделям параллельно,
 как это делает агент (DebugLLMStream._first_or_fallback), и ловит 402/429/обрыв.
 """
+
 import argparse
 import asyncio
-import json
 import os
 import time
 from pathlib import Path
@@ -102,7 +102,9 @@ async def main():
         print("ERROR TYPES: none")
     print("=== END ===")
     # Блокер гейта: любой 402 / connection error под нагрузкой = AVM-0b FAIL
-    blocker = [r for r in fails if r["err"] and ("402" in r["err"] or "connect" in r["err"].lower())]
+    blocker = [
+        r for r in fails if r["err"] and ("402" in r["err"] or "connect" in r["err"].lower())
+    ]
     if blocker:
         print(f"[AVM-0b] FAIL: {len(blocker)} запросов с 402/обрывом под нагрузкой")
     else:
