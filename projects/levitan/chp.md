@@ -1,5 +1,37 @@
 # Levitan — Session Log
 
+## 2026-08-20 — Анжелла оживлена: 3 вороночных правила + TTS-кэш hit + 3 фикса (Fixed + Verified)
+
+### Что сделано (Fixed)
+1. **Pre-greeting delay 7с → 1с** (`levitan_agent.py:712` `on_enter`). Корневая причина 4 обрывов подряд: 7с + холодный TTS = 10+с, клиент вешал трубку на 12-36с. Verified: звонок-B `greeting said in 12.7s`, диалог дошёл до воронки.
+2. **LLM_STALL_TIMEOUT=1.5 → 4.0** в `/opt/pipecat-agent/.env`. STALL_TIMEOUT короче реального TTFT (1.4с у free-канала) → `_first_or_fallback` падал в TimeoutError до первого chunk'а. Verified: звонки A/B/C — LLM-stream отвечает.
+3. **TTS-кэш: cache hit #1 VERIFIED** на 2-м контрольном звонке (`177898b`, 0.0с vs cold 0.2с). Код корректный (YandexTTS.synthesize строки 225-289, in-memory dict, key=sentence).
+
+### Правила воронки (в system prompt + funnel)
+4. **ПРАВИЛО НЕУВЕРЕННОСТИ**: не выдумывай — скажи «Я уточню у менеджера — он вам перезвонит!» → end_call.
+5. **Шаг 2.5 «НЕ ОПРЕДЕЛИЛСЯ/ПОДУМАЮ/ПОЗЖЕ»** → «Будем признательны, если вы перезвоните и уточните свой заказ! Всего хорошего!» → end_call.
+6. **Шаг 2 «<50 голов»** → «Мне необходимо согласовать это количество, так как мы принимаем заказы больше 50 штук. Менеджер с вами свяжется и уточнит это количество, всего хорошего!» → end_call. НЕ переспрашиваем, НЕ предлагаем округлить. Funnel `MIN_QTY_REPLY` синхронизирован, `MIN_QTY_END_CALL=True`. Verified: звонок-C `[FAST] LLM bypass → согласуем фраза → TTS → farewell marker detected → end_call`.
+
+### FAQ-кэш +6 триггеров (243→249)
+Из `report_20260820.md` (12 звонков, 52 Q-A пары) добавлены гео-нейтральные с ценами 75-90₽: «есть ли утки», «есть утки», «есть ли гусята», «оптовая цена», «от скольки опт», «оплата заказа». 4 уже были (утки/гусята/оплата/самовывоз → старые формулировки). Бэкап `ANGELLA_BROILERS_FAQ_CACHE.json.bak_20260820_1234`.
+
+### Контрольные звонки (абонент 79859234644)
+- **Звонок A (12:46 MSK)**: greeting→«да»→56 голов→«90 руб/гол»→доставка→save_lead→прощание. Полный цикл.
+- **Звонок B (12:48 MSK)**: greeting→«да»→30 голов→MIN_QTY(старая)→переспрос→абонент не ответил→прощание. TTS cache hit #1.
+- **Звонок C (12:52 MSK)**: greeting→«да»→<50→новая фраза согласования→farewell→end_call. Полный цикл.
+
+### Открыто / Блокеры
+- **OpenRouter-ключ в `/opt/omni-auto-router/.env`**: 403 «Access denied by security policy» (compromised/ban). Платные модели через OmniRoute недоступны. Агент сейчас на free-канале `auto/free-coding` → gemma-4-31b-it:free (200, 1.4с). Решение: перевыпустить ключ или подключить альтернативу (Grok 4.5 через SOCKS5 64469, Gemini API direct, Anthropic direct).
+- **VPS CPU**: load=1.0 при пике (1 ядро). livekit-server warn «high cpu load 0.9997» во время звонков. Возможный апгрейд: 1→2 vCPU (Timeweb).
+- **SSH-доступ**: прямой порт 22 закрыт хостером (connection refused, ping alive). ТОЛЬКО через US-SOCKS5 туннель 22001: `ssh -p 22001 root@127.0.0.1` (pid 1236, `scripts/ssh_tunnel.py 22001`).
+- **Barge-in**: `allow_interruptions=False` в `session.say()`, VAD всё равно детектит, агент игнорит (`skipping reply to user input, current speech generation cannot be interrupted`). Не критично для sales-агента, но стоит обсудить.
+- **evals/**: `tests/eval_levitan_voice.py` нет — все тесты ручные (звонки + лог-парсинг). Стоит создать хотя бы smoke-test (greeting/funnel paths).
+
+### md5 на 20.08 13:00
+- `levitan_agent.py` = 5cdde1b0ac627a0c2e6d981301cd4aa8 (bak_20260820_1238 = bb8773c50cc6e58d44c079aad47e0bb3)
+- `funnel.py` = 5e2e1378aa81b6beb7968e7edc4eb64e
+- `ANGELLA_BROILERS_FAQ_CACHE.json` = 249 триггеров (md5 не проверен)
+
 ## 2026-08-19 — FAQ-harvest починен + FAQ-кэш пополнен (Fixed + Verified)
 
 ### Что сделано

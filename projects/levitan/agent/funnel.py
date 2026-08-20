@@ -379,8 +379,6 @@ def _fast_path_reply(chat_ctx, llm_obj) -> str | None:
             return _faq
         # первый ход: детерминированное приветствие ТОЛЬКО для чистого приветствия.
         # Вопрос/просьба/незнакомое -> None -> LLM (или заглушка на уровне агента).
-        if getattr(llm_obj, "_greeting_said", False):
-            return None  # приветствие уже сказано — не дублировать
         if _is_greeting_only(norm):
             return "Здравствуйте! Это Азовский инкубатор, вас интересуют суточные цыплята породы Росс-308? Вам интересно?"
         return None
