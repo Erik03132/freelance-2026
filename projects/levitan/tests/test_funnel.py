@@ -56,6 +56,37 @@ def test_text_to_digits():
     assert funnel._text_to_digits("abc") == ""
 
 
+def test_qty_enumeration_takes_last():
+    # перечисление вариантов НЕ склеивается: «сорок, пятьдесят, семьдесят» -> 70
+    assert funnel._text_to_parts("сорок, может пятьдесят, может семьдесят") == [40, 50, 70]
+    assert funnel._qty_from_text("ну, может сорок, может пятьдесят, может семьдесят, не знаю") == 70
+    llm = _FakeLLM(asked_q=True)
+    ctx = _FakeCtx([_user("ну, может сорок, может пятьдесят, может семьдесят, не знаю")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out is not None
+    assert "Для 70 голов" in out
+
+
+def test_qty_correction_after_delivery_question():
+    # клиент уточняет количество ПОСЛЕ вопроса про доставку -> пересчёт цены, не смена адреса
+    llm = _FakeLLM(asked_q=True, delivery=True)
+    ctx = _FakeCtx([_user("нет, 148 голов, меня интересует вообще")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out is not None
+    assert "Для 148 голов" in out
+    assert "прежнее?" in out
+
+
+def test_delivery_change_still_delivery():
+    # чистая смена доставки без чисел -> как раньше
+    llm = _FakeLLM(asked_q=True, delivery=True)
+    ctx = _FakeCtx([_user("нет, в ростов")])
+    assert (
+        funnel._fast_path_reply(ctx, llm)
+        == "Сообщите менеджеру новое место доставки, он с вами свяжется в ближайшее время, всего хорошего!"
+    )
+
+
 def test_phone_from_text():
     assert funnel._phone_from_text("+7 985 923 46 44") == "9859234644"
     assert funnel._phone_from_text("79859234644") == "9859234644"
@@ -108,7 +139,8 @@ def test_fast_path_quantity_below_min_rejects():
         out = funnel._fast_path_reply(ctx, llm)
         assert out is not None, phrase
         assert "50" in out, f"{phrase} -> {out}"
-        assert "минимум" in out.lower() or "минимальн" in out.lower(), f"{phrase} -> {out}"
+        assert "менеджер" in out.lower() and "свяжется" in out.lower(), f"{phrase} -> {out}"
+        assert "Сколько голов вам нужно?" not in out, f"{phrase} -> {out}"
 
 
 def test_fast_path_quantity_exact_min_ok():
@@ -117,6 +149,29 @@ def test_fast_path_quantity_exact_min_ok():
     out = funnel._fast_path_reply(ctx, llm)
     assert out is not None
     assert "Место доставки цыплят прежнее?" in out
+
+
+def test_fast_path_quantity_below_min_no_repeat():
+    # <50 -> НЕ повторяем вопрос (договорённость с NOB), а передаём менеджеру
+    llm = _FakeLLM(asked_q=True)
+    ctx = _FakeCtx([_user("девятнадцать")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out is not None
+    assert "менеджер" in out.lower() and "свяжется" in out.lower()
+    assert "Сколько голов вам нужно?" not in out
+
+
+def test_fast_path_below_min_question_consultation():
+    # <50, но клиент СПРАШИВАЕТ про минимум -> консультация, диалог продолжается
+    llm = _FakeLLM(asked_q=True)
+    ctx = _FakeCtx([_user("двадцать штук это нормально?")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out == funnel.MIN_QTY_QUERY_REPLY
+    assert "Менеджер" not in out
+    llm2 = _FakeLLM(asked_q=True, delivery=True)
+    ctx2 = _FakeCtx([_user("а можно 20?")])
+    out2 = funnel._fast_path_reply(ctx2, llm2)
+    assert out2 == funnel.MIN_QTY_QUERY_REPLY
 
 
 def test_fast_path_qty_before_asked_not_min():
@@ -272,3 +327,37 @@ def test_fast_path_greeting_first_turn():
     assert out is not None
     assert "интересно" in out
     assert llm._asked_quantity is False
+
+
+def test_fast_path_garbled_repeat():
+    # неразборчивые обрывки STT -> «повтори, я не расслышала» (без LLM)
+    for phrase in ("об", "его", "ты", "вот", "хм", "ну", "об его", "вот так"):
+        llm = _FakeLLM()
+        ctx = _FakeCtx([_user(phrase)])
+        out = funnel._fast_path_reply(ctx, llm)
+        assert out == funnel.REPEAT_REPLY, phrase
+
+
+def test_fast_path_garbled_after_quantity_question():
+    # спросили количество, клиент ответил неразборчиво -> переспрос, не None
+    llm = _FakeLLM(asked_q=True)
+    ctx = _FakeCtx([_user("об")])
+    out = funnel._fast_path_reply(ctx, llm)
+    assert out == funnel.REPEAT_REPLY
+
+
+def test_fast_path_not_garbled_long_phrases():
+    # длинные фразы НЕ считаем мусором (уходят в LLM), «да»/«нет»/числа — в воронку
+    llm = _FakeLLM()
+    ctx = _FakeCtx([_user("дайте контакты вашего поставщика кормов")])
+    assert funnel._fast_path_reply(ctx, llm) is None
+    llm2 = _FakeLLM()
+    assert (
+        funnel._fast_path_reply(_FakeCtx([_user("да")]), llm2)
+        == "Отлично! Сколько голов вам нужно?"
+    )
+    llm3 = _FakeLLM()
+    assert (
+        funnel._fast_path_reply(_FakeCtx([_user("нет")]), llm3)
+        == "Спасибо за внимание, всего хорошего!"
+    )

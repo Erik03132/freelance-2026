@@ -39,6 +39,7 @@ from livekit.agents.types import NOT_GIVEN, APIConnectOptions
 from livekit.agents.worker import ServerOptions
 from livekit.plugins import deepgram, openai
 from openai import AsyncClient as OpenAIAsyncClient
+from text_humanizer import breath_pcm, humanize_text
 
 LIVEKIT_URL = os.getenv("LIVEKIT_URL", "ws://localhost:7880")
 LIVEKIT_API_KEY = os.getenv("LIVEKIT_API_KEY", "devkey")
@@ -222,6 +223,9 @@ class YandexTTS(tts.TTS):
         self._lead_done = False
         self._lead_sec = float(os.getenv("TTS_LEAD_SILENCE_SEC", "2.5"))
         self._emotion = os.getenv("TTS_EMOTION", "good")
+        self._breath = os.getenv("TTS_BREATH", "1") == "1"
+        self._breath_sec = float(os.getenv("TTS_BREATH_SEC", "0.8"))
+        self._humanize = os.getenv("TTS_HUMANIZE", "1") == "1"
         self._cache: dict[str, bytes] = {}
         self._cache_hits = 0
         self._cache_misses = 0
@@ -236,6 +240,11 @@ class YandexTTS(tts.TTS):
         if not text.strip():
             yield
             return
+        if self._humanize:
+            _orig = text
+            text = humanize_text(text)
+            if text != _orig:
+                print(f"[TTS] humanized: {_orig[:60]!r} -> {text[:60]!r}", flush=True)
 
         # Split into sentences so the first sentence's audio starts as soon as
         # its TTS is ready, instead of waiting for the whole reply to be synthesised.
@@ -269,21 +278,12 @@ class YandexTTS(tts.TTS):
                     data = await resp.read()
                     if resp.status != 200 or len(data) < 1000:
                         raise RuntimeError(f"Yandex TTS {resp.status}: {data[:200]}")
-            if lead and not self._lead_done and self._lead_sec > 0:
+            if lead and not self._lead_done and self._breath:
                 self._lead_done = True
-                import math as _m
-
-                _sr = 48000
-                _dur = min(self._lead_sec, 1.5)
-                _n = int(_dur * _sr)
-                _amp = int(32767 * 0.20)
-                _tone = bytearray()
-                for _i in range(_n):
-                    _env = 0.5 - 0.5 * _m.cos(2 * _m.pi * _i / max(_n - 1, 1))
-                    _s = int(_amp * _env * _m.sin(2 * _m.pi * 700 * _i / _sr))
-                    _tone += int(_s).to_bytes(2, "little", signed=True)
-                data = bytes(_tone) + data
-                print(f"[TTS] lead-tone {_dur:.2f}s prepended (first synthesis)", flush=True)
+                _dur = min(self._breath_sec, 1.5)
+                _br = breath_pcm(dur=_dur, sr=48000)
+                data = _br + data
+                print(f"[TTS] breath {_dur:.2f}s prepended (first synthesis)", flush=True)
             self._cache_misses += 1
             self._cache[_key] = data
             return data
@@ -491,7 +491,7 @@ class DebugLLMStream:
             self._first_real = None
             print("[LLM] first chunk fast (no stall)", flush=True)
         except TimeoutError:
-            _ph = funnel.next_placeholder()
+            _ph = funnel.REPEAT_REPLY
             if not _ph.endswith((".", "!", "?")):
                 _ph += "."
             self._prefix = _make_fast_chunk(_ph)
@@ -606,7 +606,7 @@ class LevitanAgent(Agent):
     def __init__(self, instructions=None, caller_phone=""):
         super().__init__(
             instructions=instructions or SYSTEM_PROMPT,
-            allow_interruptions=False,  # ответы агента не прерывать речью клиента
+            allow_interruptions=True,  # клиент может перебить агента и вклиниться с вопросом
             tools=[save_lead, end_call],
             stt=deepgram.STT(model="nova-3", language="ru"),
             llm=DebugLLM(
@@ -625,7 +625,12 @@ class LevitanAgent(Agent):
                 ),
             ),
             tts=StreamAdapter(
-                tts=YandexTTS(api_key=YC_API_KEY, folder_id=YC_FOLDER_ID, voice=TTS_VOICE),
+                tts=YandexTTS(
+                    api_key=YC_API_KEY,
+                    folder_id=YC_FOLDER_ID,
+                    voice=TTS_VOICE,
+                    speed=float(os.getenv("TTS_SPEED", "0.95")),
+                ),
                 sentence_tokenizer=tokenize.basic.SentenceTokenizer(retain_format=True),
             ),
         )
@@ -825,6 +830,15 @@ async def entrypoint(ctx):
             "endpointing": {
                 "min_delay": float(os.getenv("EP_MIN_DELAY", "0.5")),
                 "max_delay": float(os.getenv("EP_MAX_DELAY", "0.8")),
+            },
+            # клиент может вклиниться в речь агента со своей фразой
+            # (barge-in); min_words=2 — «да»/«угу» не прерывают,
+            # полноценная вставка — прерывает TTS и выслушивается
+            "interruption": {
+                "enabled": True,
+                "min_duration": 0.5,
+                "min_words": 2,
+                "resume_false_interruption": True,
             },
         }
     )

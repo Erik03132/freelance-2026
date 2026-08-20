@@ -51,7 +51,15 @@ DELIVERY_CHANGED_REPLY = (
 POS_PATTERN = _CONFIG["regex"]["pos_full"]
 QTY_REGEX = _CONFIG["regex"]["quantity"]
 MIN_QTY = int(_CONFIG.get("min_qty", 50))
-MIN_QTY_REPLY = f"Минимальный заказ — {MIN_QTY} голов. Сколько голов вам нужно?"
+MIN_QTY_REPLY = (
+    f"Мне необходимо согласовать это количество, так как минимальный заказ — {MIN_QTY} голов. "
+    "Менеджер с вами свяжется и уточнит заказ, всего хорошего!"
+)
+MIN_QTY_QUERY_REPLY = f"Минимальный заказ — {MIN_QTY} голов. Сколько голов вам нужно?"
+MIN_QTY_QUERY_RE = re.compile(
+    r"(нормально|можно|подходит|допустимо|разреш|мало|хватит|возможно|это сколько|сколько минимум)"
+)
+REPEAT_REPLY = "Повтори, пожалуйста, я не расслышала."
 INTENTS = _CONFIG.get("intents", [])
 PLACEHOLDERS = _CONFIG.get("placeholders", [])
 _pi = [0]
@@ -119,6 +127,23 @@ def _is_greeting_only(norm: str) -> bool:
     return bool(_GREETING_PREFIX.match(norm))
 
 
+def _is_garbled(norm: str) -> bool:
+    """Неразборчивая речь/обрывки STT: короткая фраза без значимых слов.
+    Примеры из реальных звонков: «об», «его», «ты», «вот», «хм», «ну».
+    Ограничение: максимум 2 слова — длинные фразы не считаем мусором,
+    даже если стоп-слова («дайте контакты вашего поставщика кормов» ->
+    None -> LLM). «да», «нет» и численные ответы перехватываются
+    паттернами воронки РАНЬШЕ, «алло» — веткой greeting позже."""
+    if not norm:
+        return False
+    words = norm.split()
+    if len(norm) <= 2:
+        return True
+    if len(words) > 2:
+        return False
+    return not _kw(norm)
+
+
 def _price_for_qty(q: int) -> int:
     """Ступенчатая шкала цен из config: до 100→90, 101-300→85, 301-999→80, от 1000→75."""
     for tier in PRICE_TIERS:
@@ -128,17 +153,16 @@ def _price_for_qty(q: int) -> int:
 
 
 def _qty_from_text(norm: str, qty_regex: str = QTY_REGEX) -> int | None:
-    """Извлекает количество голов из текущей реплики (цифры или слова)."""
+    """Извлекает количество голов из текущей реплики (цифры или слова).
+    Перечисление вариантов («сорок, пятьдесят, семьдесят») НЕ склеивается:
+    берётся ПОСЛЕДНЕЕ названное число (клиент обычно уточняет к концу фразы)."""
     m = re.search(qty_regex, norm)
     if m:
         return int(m.group(1))
-    digits = _text_to_digits(norm)
-    if digits:
-        try:
-            return int(digits)
-        except ValueError:
-            return None
-    return None
+    parts = _text_to_parts(norm)
+    if not parts:
+        return None
+    return parts[-1]
 
 
 def _extract_quantity(chat_ctx, qty_regex: str = QTY_REGEX) -> str:
@@ -264,23 +288,29 @@ def _parse_number(tokens, start):
     return total, i - start
 
 
-def _text_to_digits(text):
+def _text_to_parts(text: str) -> list[int]:
+    """Числа из текста в порядке появления (перечисление не склеивается).
+    «сто двадцать три» -> [123]; «сорок, пятьдесят» -> [40, 50]."""
     tokens = re.sub(r"[^а-я0-9\s]", " ", text.lower()).split()
     parts = []
     i = 0
     while i < len(tokens):
         w = tokens[i]
         if w.isdigit():
-            parts.append(w)
+            parts.append(int(w))
             i += 1
             continue
         num, consumed = _parse_number(tokens, i)
         if consumed:
-            parts.append(str(num))
+            parts.append(num)
             i += consumed
             continue
         i += 1
-    return "".join(parts)
+    return parts
+
+
+def _text_to_digits(text):
+    return "".join(str(p) for p in _text_to_parts(text))
 
 
 def _phone_from_text(text):
@@ -328,6 +358,15 @@ def _fast_path_reply(chat_ctx, llm_obj) -> str | None:
             return DELIVERY_CHANGED_REPLY  # клиент меняет адрес -> мгновенный канонический ответ
         return "Спасибо за внимание, всего хорошего!"
     if _asked and _delivery:
+        _q2 = _qty_from_text(norm)
+        if _q2:
+            # клиент уточняет/меняет количество после вопроса про доставку
+            if _q2 < MIN_QTY:
+                if MIN_QTY_QUERY_RE.search(norm):
+                    return MIN_QTY_QUERY_REPLY
+                return MIN_QTY_REPLY
+            _price = _price_for_qty(_q2)
+            return f"Для {_q2} голов цена {_price} рублей за голову. Место доставки цыплят прежнее?"
         if re.search(DELIVERY_CONFIRM_PATTERN, norm) or norm.startswith("да"):
             _q = _extract_quantity(chat_ctx)
             _ph = getattr(llm_obj, "_caller_phone", "")
@@ -345,9 +384,13 @@ def _fast_path_reply(chat_ctx, llm_obj) -> str | None:
         _q = _qty_from_text(norm)
         if _q:
             if _q < MIN_QTY:
+                if MIN_QTY_QUERY_RE.search(norm):
+                    return MIN_QTY_QUERY_REPLY
                 return MIN_QTY_REPLY
             _price = _price_for_qty(_q)
             return f"Для {_q} голов цена {_price} рублей за голову. Место доставки цыплят прежнее?"
+        if _is_garbled(norm):
+            return REPEAT_REPLY
         return None
     if not _asked:
         # клиент сам назвал количество до нашего вопроса — оно уже должно быть
@@ -381,6 +424,8 @@ def _fast_path_reply(chat_ctx, llm_obj) -> str | None:
         # Вопрос/просьба/незнакомое -> None -> LLM (или заглушка на уровне агента).
         if _is_greeting_only(norm):
             return "Здравствуйте! Это Азовский инкубатор, вас интересуют суточные цыплята породы Росс-308? Вам интересно?"
+        if _is_garbled(norm):
+            return REPEAT_REPLY
         return None
     return None
 
