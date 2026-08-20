@@ -1096,3 +1096,26 @@ Enabled. Прочитай блоки chp.md за 15.08 полностью — т
 2. Заглянуть /root/faq_harvest/report_20260816.md (крон соберёт ночью) → влить пары Q-A в FAQ-кэш вручную.
 3. Проверить, что events.jsonl накапливает recording_added (webhook record/added фикс деплоен).
 4. git commit результатов сессии (не сделан).
+
+## 2026-08-20 (16:25) — Gemini 2.5 Flash подключён через OmniRoute + lead-tone 10с (Fixed + Verified)
+
+### Gemini 2.5 Flash (платный OpenRouter-ключ)
+1. **Новый OpenRouter-ключ вставлен** (`/opt/omni-auto-router/.env` OPENROUTER_API_KEY, len=73), omniroute restart.
+2. **Verified**: `curl /v1/chat/completions model=openrouter/google/gemini-2.5-flash` → HTTP=200, provider=OpenRouter, latency 47ms, TTFT ~1.5с.
+3. **Агент переведён на Gemini**: `/etc/systemd/system/levitan-agent.service` — `LLM_MODEL=openrouter/google/gemini-2.5-flash`, `LLM_FALLBACK_MODEL=auto/free-coding`, `LLM_FIRST_TIMEOUT=2.5`, `LLM_STALL_TIMEOUT=2.5` (добавлены в юнит, .env НЕ читается systemd). Рестарт + environ-проверка (PID env содержит все 4 переменные).
+4. **Verified на звонках**: `[WARMUP] openrouter/google/gemini-2.5-flash ok in 2.1-2.5s` на каждом контрольном звонке. ДИАЛОГИ ПОКА ШЛИ ЧЕРЕЗ FAST-PATH воронки/FAQ — живой ответ Gemini в разговоре ещё НЕ проверен (нужен вопрос вне шаблонов: рассрочка/Сочи/скидки на 1000+ и т.п.).
+
+### TTS начало обрезается — lead-tone 3→5→10с (пока НЕ решено)
+- Симптом: первые слова приветствия срезаются у абонента (3 раза подряд при 1.5/3/5с).
+- Код: `levitan_agent.py:277` `_dur = min(self._lead_sec, 8.0→16.0)`, env `TTS_LEAD_SILENCE_SEC=10.0` (в юните + .env).
+- Гипотеза: проблема не в паузе перед фразой, а в RTP/джиттер-буфере livekit-sip на старте стрима (packet loss первых секунд). Если 10с не поможет — смотреть `sip.yaml` (jitter buffer, rtp_host) или timing поднятия звонка.
+- На 10с звонок gemini_test7 прошёл полный цикл (235 голов → 85₽ → доставка прежнее → farewell ok), но абонент сказал «обрезан» ДО его проверки (это про 5с звонок) — на 10с отзыв не получен.
+
+### Инфраструктура (важно)
+- **baresip-sip НЕ поднимать**: pm2 restart all его поднял → занял UDP 5060 → livekit-sip упал (errored, 30+ рестартов «address already in use») → звонки не доходили. Решение: `pm2 stop baresip-sip` (вернули в stopped), `pm2 restart livekit-sip` → 5060 снова livekit. **Pm2 restart all на этой VPS НЕ делать** — только точечно.
+- Остальное в pm2 (mango-webhook, levitan-webhook, levitan-faq и др.) работает.
+
+### md5 на 20.08 16:25
+- `levitan_agent.py` = НОВЫЙ (lead-tone 16.0 правка) — md5 не снят
+- `.env` = TTS_LEAD_SILENCE_SEC=3.0→5.0→10.0
+- `levitan-agent.service` = LLM_MODEL=gemini-2.5-flash, TTS_LEAD_SILENCE_SEC=10.0
