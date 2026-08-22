@@ -682,6 +682,106 @@ class LevitanAgent(Agent):
         except Exception as _e:
             print(f"[WARMUP] skipped: {_e!r}", flush=True)
 
+    async def _wait_for_answer(self, room, timeout: float = 22.0) -> None:
+        """Ждать фактического снятия трубки по входящему аудио (вместо sleep(7)).
+
+        Mango принимает SIP-лег пока телефон звонит и пересылает аудио агента
+        только после ответа абонента — но агент-то играет сразу, и всё, что
+        прозвучало до ответа, абонент теряет (обрыв приветствия). Детектим
+        гудки КПВ РФ (~425 Гц): гудки были и исчезли >=1.6с подряд = взяли.
+        Если гудков нет вовсе (early media / мгновенный ответ) — играем через
+        ANSWER_NO_RING_SEC. Общий таймаут timeout — страховка.
+        """
+        import asyncio
+        import time as _t
+
+        try:
+            import numpy as np
+        except ImportError:
+            await asyncio.sleep(7.0)
+            return
+
+        remote_track = None
+        try:
+            for p in room.remote_participants.values():
+                for pub in p.track_publications.values():
+                    if pub.track is not None and pub.track.kind == rtc.TrackKind.KIND_AUDIO:
+                        remote_track = pub.track
+                        break
+                if remote_track is not None:
+                    break
+        except Exception:
+            remote_track = None
+        if remote_track is None:
+            print("[PICKUP] no remote audio track -> fallback sleep(7)", flush=True)
+            await asyncio.sleep(7.0)
+            return
+
+        try:
+            stream = rtc.AudioStream(track=remote_track, sample_rate=8000, num_channels=1)
+        except Exception as e:
+            print(f"[PICKUP] AudioStream fail ({e!r}) -> fallback sleep(7)", flush=True)
+            await asyncio.sleep(7.0)
+            return
+
+        ring_seen = False  # слышали хотя бы один гудок КПВ
+        quiet_since = None  # t последнего окна БЕЗ гудка (после ring_seen)
+        no_ring_start = None  # для случая «гудков не было вообще»
+        t0 = _t.time()
+        try:
+            async for ev in stream:
+                _fr = getattr(ev, "frame", None)
+                if _fr is None or getattr(_fr, "data", None) is None:
+                    continue
+                try:
+                    # AudioFrame.data — memoryview int16 (или float32 в новых SDK)
+                    raw = bytes(_fr.data)
+                    if len(raw) < 2:
+                        continue
+                    data = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+                except Exception:
+                    continue
+                rms = float(np.sqrt((data**2).mean()))
+                # тон КПВ? спектральный пик в 380-480 Гц при достаточной энергии
+                is_ring = False
+                if rms > 0.02:
+                    spec = np.abs(np.fft.rfft(data * np.hanning(len(data))))
+                    freqs = np.fft.rfftfreq(len(data), 1.0 / 8000)
+                    band = (freqs >= 380) & (freqs <= 480)
+                    is_ring = bool(
+                        band.any() and spec[band].max() / (spec.sum() + 1e-9) > 0.35 and rms > 0.03
+                    )
+                now = _t.time()
+                if is_ring:
+                    ring_seen = True
+                    quiet_since = None
+                    no_ring_start = None
+                else:
+                    has_sound = rms > 0.02
+                    if ring_seen:
+                        if has_sound and not is_ring:
+                            # после гудков пошёл НЕ-гудок (речь/«алло»/шум линии) — взяли
+                            print("[PICKUP] non-ring sound after ring -> answered", flush=True)
+                            return
+                        if quiet_since is None:
+                            quiet_since = now
+                        elif now - quiet_since >= 4.6:
+                            # тишина дольше максимальной паузы цикла КПВ (1с вкл / 4с выкл)
+                            print(f"[PICKUP] ring gone {(now - t0):.1f}s -> answered", flush=True)
+                            return
+                    else:
+                        if no_ring_start is None:
+                            no_ring_start = now
+                        elif now - no_ring_start >= 4.0:
+                            print("[PICKUP] no ringback at all -> assume answered", flush=True)
+                            return
+                if now - t0 > timeout:
+                    print(f"[PICKUP] timeout {timeout}s -> play anyway", flush=True)
+                    return
+        except Exception as e:
+            print(f"[PICKUP] stream error ({e!r}) -> fallback sleep(7)", flush=True)
+            await asyncio.sleep(7.0)
+
     async def on_enter(self):
         import asyncio
         import time as _t
@@ -707,13 +807,13 @@ class LevitanAgent(Agent):
                     )
                     print("[AGENT] sip audio track ready", flush=True)
                     await asyncio.sleep(1.0)
-                    print("[AGENT] media bridge settled, saying greeting", flush=True)
-                    # Delay so the callee has time to answer the phone.
-                    # Mango accepts the SIP leg while the phone is still ringing
-                    # and only forwards the agent's audio AFTER the callee answers,
-                    # so speaking immediately truncates the greeting.
-                    await asyncio.sleep(7.0)
-                    print("[AGENT] 7s pre-greeting delay done, saying greeting", flush=True)
+                    print("[AGENT] media bridge settled, waiting for pickup", flush=True)
+                    # Ждём фактического снятия трубки (гудки КПВ исчезли),
+                    # а не фиксированных 7с: раньше часть приветствия
+                    # (lead-silence + breath + первые слова) проигрывалась
+                    # в никуда, если абонент снял позже 7с.
+                    await self._wait_for_answer(room, timeout=22.0)
+                    print("[AGENT] pickup detected, saying greeting", flush=True)
                 else:
                     print("[AGENT] room never connected in 15s", flush=True)
             except Exception as e:
