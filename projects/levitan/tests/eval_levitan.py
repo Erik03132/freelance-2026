@@ -17,11 +17,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from deploy.levitan_faq_agent import (
+    SYSTEM_PROMPT,
+    _normalize,
     faq_lookup,
     load_faq_cache,
-    _normalize,
     synthesize_wav,
-    SYSTEM_PROMPT,
 )
 
 

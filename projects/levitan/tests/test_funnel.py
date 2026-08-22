@@ -319,6 +319,12 @@ def test_next_placeholder_rotates():
     assert a and b
 
 
+def test_config_loaded_no_trailing_comma_bug():
+    # баг 21.08: trailing comma в funnel_config.json ломал загрузку intents/placeholders
+    assert len(funnel.INTENTS) >= 1, "intents не загрузились (config битый?)"
+    assert len(funnel.PLACEHOLDERS) >= 2, "placeholders не загрузились (config битый?)"
+
+
 def test_fast_path_greeting_first_turn():
     # первый ход (приветствие оператора) -> детерминированное приветствие без LLM
     llm = _FakeLLM()

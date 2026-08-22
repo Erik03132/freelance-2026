@@ -55,7 +55,9 @@ def humanize_text(text: str, max_words: int = 15, max_commas: int = 2) -> str:
     Long monotonous sentences (no commas, > max_words) sound robotic in
     Yandex TTS. We add up to max_commas commas before pause markers.
     Short sentences and already-punctuated text are left untouched.
+    Also converts standalone digits to Russian words (ES-15: TTS hygiene).
     """
+    text = _ru_number_to_words(text)
     out: list[str] = []
     for sentence in re.split(r"(?<=[.!?…])\s+", text.strip()):
         if not sentence.strip():
@@ -75,6 +77,108 @@ def humanize_text(text: str, max_words: int = 15, max_commas: int = 2) -> str:
                 added += 1
         out.append(sentence)
     return " ".join(out)
+
+
+# --- ES-15: RU number -> words (TTS hygiene, stdlib-only) ---
+_ONES = ["", "один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять"]
+_TENS = [
+    "",
+    "десять",
+    "двадцать",
+    "тридцать",
+    "сорок",
+    "пятьдесят",
+    "шестьдесят",
+    "семьдесят",
+    "восемьдесят",
+    "девяносто",
+]
+_HUNDREDS = [
+    "",
+    "сто",
+    "двести",
+    "триста",
+    "четыреста",
+    "пятьсот",
+    "шестьсот",
+    "семьсот",
+    "восемьсот",
+    "девятьсот",
+]
+_TEENS = [
+    "десять",
+    "одиннадцать",
+    "двенадцать",
+    "тринадцать",
+    "четырнадцать",
+    "пятнадцать",
+    "шестнадцать",
+    "семнадцать",
+    "восемнадцать",
+    "девятнадцать",
+]
+_RUBLE_UNITS = ["рубль", "рубля", "рублей"]
+
+
+def _ru_triple(n: int) -> str:
+    """Convert 0-999 to Russian words."""
+    if n == 0:
+        return ""
+    parts = []
+    h, rem = divmod(n, 100)
+    if h:
+        parts.append(_HUNDREDS[h])
+    if rem < 10:
+        parts.append(_ONES[rem])
+    elif 10 <= rem < 20:
+        parts.append(_TEENS[rem - 10])
+    else:
+        t, o = divmod(rem, 10)
+        parts.append(_TENS[t])
+        if o:
+            parts.append(_ONES[o])
+    return " ".join(parts)
+
+
+def _ru_number_to_words(text: str) -> str:
+    """Replace standalone integer amounts (e.g. '1250 рублей') with RU words."""
+
+    def _full(n: int) -> str:
+        if n == 0:
+            return "ноль"
+        out = []
+        tho, rem = divmod(n, 1000)
+        if tho:
+            # simple pluralization for "тысяча"
+            if tho % 10 == 1 and tho % 100 != 11:
+                thou = "тысяча"
+            elif 2 <= tho % 10 <= 4 and not 12 <= tho % 100 <= 14:
+                thou = "тысячи"
+            else:
+                thou = "тысяч"
+            out.append(f"{_ru_triple(tho)} {thou}")
+        if rem:
+            out.append(_ru_triple(rem))
+        return " ".join(out)
+
+    def repl(m):
+        num = int(m.group(1))
+        unit = m.group(2) or ""
+        words = _full(num)
+        if unit:
+            if unit.startswith("рубл"):
+                if num % 10 == 1 and num % 100 != 11:
+                    unit = "рубль"
+                elif 2 <= num % 10 <= 4 and not 12 <= num % 100 <= 14:
+                    unit = "рубля"
+                else:
+                    unit = "рублей"  # уже содержит 'й', не добавлять
+            words = f"{words} {unit}"
+        else:
+            words = f"{words} "  # keep trailing space before next word
+        return words
+
+    return re.sub(r"\b(\d{1,9})\b\s*(рубл[еаяй]*|голов|штук)?", repl, text).replace("  ", " ")
 
 
 def breath_pcm(dur: float = 0.8, sr: int = 48000, amp: float = 0.22) -> bytes:

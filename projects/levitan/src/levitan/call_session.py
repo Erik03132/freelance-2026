@@ -6,12 +6,14 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
+from .ack_phrases import AckAction, AckPhraseSet, select_ack
 from .knowledge_base import KnowledgeBase
 from .llm_client import get_llm_client
 from .mango_client import MangoClient
 from .prompts import GREETING, SYSTEM_PROMPT, VOICE_NOT_HEARD
 from .stt_engine import get_stt_engine
 from .tts_engine import get_tts_engine
+from .vad_filter import check_speech_quality, is_artifact_phrase
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +46,9 @@ class CallSession:
         self.stt = get_stt_engine()
         self.tts = get_tts_engine()
         self.llm = get_llm_client(llm_api_key)
+
+        # ES-14: пул ack-фраз (pre-synth заполнитель против perceived latency)
+        self.ack_phrases = AckPhraseSet()
 
         # Состояние
         self.transcript: list[TranscriptEntry] = []
@@ -82,6 +87,23 @@ class CallSession:
         # Распознавание речи
         client_text = self.stt.transcribe(audio_data)
 
+        # ── ES-12: VAD-профиль + блеклист артефактов ────────────────────────────
+        # Whisper галлюцинирует целые фразы на пограничном сигнале (шорох/стук),
+        # который VAD уже принял за речь. Два слоя защиты:
+        #   1) VAD-профиль клипа не прошёл (тишина/шум → речь не было) → считаем,
+        #      что клиент не говорил;
+        #   2) транскрипт целиком = известный артефакт Whisper → тоже тишина.
+        analysis = self.stt.analyze_audio(audio_data)
+        if client_text and not check_speech_quality(analysis):
+            logger.info(
+                f"ES-12: VAD-профиль НЕ пройден (speech_fraction={analysis['speech_fraction']:.3f}, "
+                f"plateau_ms={analysis['plateau_ms']:.0f}) — трактуем '{client_text[:40]}' как тишину"
+            )
+            client_text = ""
+        elif client_text and is_artifact_phrase(client_text):
+            logger.info(f"ES-12: артефакт Whisper отсеян — '{client_text[:40]}'")
+            client_text = ""
+
         if not client_text or len(client_text.strip()) < 2:
             # Не расслышали
             await self._send_agent_message(VOICE_NOT_HEARD)
@@ -89,6 +111,12 @@ class CallSession:
 
         # Записываем в транскрипт
         self.transcript.append(TranscriptEntry(role="client", text=client_text))
+
+        # ── ES-14: ack-фраза до LLM-стрима (снимает perceived latency) ──────────
+        # Проигрываем короткий pre-synth заполнитель сразу, пока LLM думает.
+        # Не дублируем формулировку финала (avoid) и не уводим историю в транскрипт.
+        ack = select_ack(AckAction.THINKING, self.ack_phrases, avoid=self.last_agent_text)
+        await self._send_ack(ack)
 
         # Генерируем ответ
         agent_response = await self._generate_response(client_text)
@@ -122,6 +150,26 @@ class CallSession:
             response = "Извините, не совсем понял. Можете повторить?"
 
         return response
+
+    async def _send_ack(self, text: str):
+        """ES-14: проиграть короткую ack-фразу ДО LLM-ответа (без записи в транскрипт).
+
+        Цель — снять perceived latency (оператор не тянет стоп от тишины), пока
+        LLM думает. ack-фраза НЕ попадает в self.transcript, чтобы не дублировать
+        историю и не портить лид-извлечение.
+        """
+        if not text:
+            return
+        try:
+            tts_path = await self.tts.synthesize_to_wav(text, sample_rate=8000)
+            if tts_path and tts_path.exists():
+                upload_result = await self.mango_client.upload_audio(
+                    str(tts_path), f"ack_{self.call_id}_{len(self.transcript)}.wav"
+                )
+                if "audio_id" in upload_result:
+                    await self.mango_client.play_audio(self.call_id, upload_result["audio_id"])
+        except Exception as e:
+            logger.warning(f"ES-14: ack-фраза не проиграна ({e}) — не блокируем ответ")
 
     async def _send_agent_message(self, text: str):
         """Отправить сообщение агента через TTS и Mango."""

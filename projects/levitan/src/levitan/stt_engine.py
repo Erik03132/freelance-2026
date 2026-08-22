@@ -117,6 +117,28 @@ class STTEngine:
             audio_array = np.frombuffer(audio_data, dtype=np.int16)
             return audio_array.astype(np.float32) / 32768.0
 
+    def analyze_audio(self, audio_data: bytes, sample_rate: int = 8000) -> "dict":
+        """ES-12: VAD-профиль клипа (доля речи/плато/куски).
+
+        Используется до доверия к транскрипции: на пограничном сигнале, который
+        VAD принял за речь, Whisper галлюцинирует целые фразы. Возвращает словарь
+        от `analyze_speech` (из vad_filter) — см. `should_trust_transcript`.
+        """
+        from .vad_filter import analyze_speech
+
+        try:
+            audio_array = self._bytes_to_numpy(audio_data, sample_rate)
+        except Exception:
+            # Не смогли декодировать — трактуем как тишину (безопасный выбор)
+            return {
+                "speech_fraction": 0.0,
+                "speech_chunks": 0,
+                "plateau_ms": 0.0,
+                "speech_frames": 0,
+                "total_frames": 0,
+            }
+        return analyze_speech(audio_array, sample_rate=sample_rate)
+
     def is_speech(self, audio_data: bytes, threshold: float = 0.5) -> bool:
         """
         Определение наличия речи в аудио.

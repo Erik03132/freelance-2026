@@ -1,6 +1,7 @@
 """Tests for CRM enrichment."""
 
 import pytest
+
 from levitan.crm_enricher import ContactInfo, CrmEnricher, MockCrmProvider
 
 
