@@ -42,6 +42,7 @@ Hermes грузит скиллы **только по запросу** (skill_vie
 || **Совет** | `expert-council` | Серьёзный разбор (>30 мин, >10k₽, новый класс) |
 || **Многоагент.** | `expert-council-adapter` | Собрать команду из 3–5 профилей (Шерлок/Маркетолог/Дефендер/Финансист) для одной задачи |
 || **Исследование** | `shrelock-research` | 8-фазный исследовательский пайплайн Шерлока (deep-research + competitive-intelligence) |
+|| **Финансы** | `financier-unit-economics` | Unit-economics framework + pricing strategy + CFO-чеклисты (LTV/CAC, payback, contribution margin) |
 | **Код** | `codegraph` | Разобраться в чужом репо, blast radius, impact analysis |
 | **Веб** | `defuddle` | Чистить web-страницу до markdown |
 | **Гигиена** | `text-unicode-hygiene` | Чистить invisible Unicode (ZWSP, BOM, soft-hyphen) |
