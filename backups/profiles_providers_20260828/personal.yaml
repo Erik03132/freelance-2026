@@ -1,0 +1,1307 @@
+model:
+  provider: omniroute
+  default: auto/free-coding-full
+  base_url: http://127.0.0.1:20128/v1
+  key_env: HERMES_CUSTOM_OMNIROUTE_API_KEY
+  aliases:
+    best-coding: omniroute/auto/free-coding-full
+    free-coding: omniroute/auto/free-coding-full
+providers:
+  omniroute:
+    base_url: http://127.0.0.1:20128/v1
+    name: OmniRoute (OC Zen + Orca + OpenRouter + NEOUS)
+    discover_models: true
+    key_env: HERMES_CUSTOM_OMNIROUTE_API_KEY
+    model: auto/best-coding
+    no_proxy: 127.0.0.1,localhost
+    models:
+      auto/free-coding-full:
+        name: 🏆 Best Coding (top general-purpose coding combo)
+      auto/best-coding: {}
+      auto/best-reasoning: {}
+      auto/best-fast: {}
+      auto/best-vision: {}
+      auto/best-chat: {}
+      auto/best-coding-fast: {}
+      auto/pro-coding: {}
+      auto/pro-reasoning: {}
+      auto/pro-vision: {}
+      auto/pro-chat: {}
+      auto/pro-fast: {}
+      auto/coding: {}
+      auto/fast: {}
+      auto/chat: {}
+      auto/cheap: {}
+      auto/offline: {}
+      auto/smart: {}
+      auto/claude-opus: {}
+      auto/claude-sonnet: {}
+      auto/best-free: {}
+      auto/best-chaos: {}
+      auto/chaos: {}
+      auto/coding:fast: {}
+      auto/coding:cheap: {}
+      auto/coding:free: {}
+      auto/coding:pro: {}
+      auto/coding:reliable: {}
+      auto/reasoning: {}
+      auto/reasoning:pro: {}
+      auto/vision: {}
+      auto/multimodal: {}
+      auto/glm: {}
+      auto/minimax: {}
+      auto/mimo: {}
+      auto/zai: {}
+      auto/gemma: {}
+      auto/llama: {}
+      auto/gemini: {}
+      auto/free-coding: {}
+      pepper/pepper-1: {}
+      ddgw/gpt-5.4-mini: {}
+      ddgw/gpt-5.4-nano: {}
+      ddgw/claude-haiku-4-5: {}
+      ddgw/mistral-small-2603: {}
+      ddgw/tinfoil/gpt-oss-120b: {}
+      ddgw/tinfoil/gemma4-31b: {}
+      felo/felo-chat: {}
+      felo/felo-search: {}
+      felo/felo-scholar: {}
+      felo/felo-social: {}
+      felo/felo-document: {}
+      aug/sonnet4.6: {}
+      aug/fable-5: {}
+      aug/haiku4.5: {}
+      aug/sonnet4.5: {}
+      aug/sonnet4.6-500k: {}
+      aug/sonnet5-high: {}
+      aug/sonnet5-500k: {}
+      aug/opus4.5: {}
+      aug/opus4.6: {}
+      aug/opus4.6-500k: {}
+      aug/opus4.7: {}
+      aug/opus4.7-500k: {}
+      aug/opus4.8: {}
+      aug/gemini-3.1-pro-preview: {}
+      aug/gpt5: {}
+      aug/gpt5.1: {}
+      aug/gpt5.2: {}
+      aug/gpt5.4: {}
+      aug/gpt5.4-mini: {}
+      aug/gpt5.5: {}
+      aug/gpt5.6-luna: {}
+      aug/gpt5.6-sol: {}
+      aug/gpt5.6-terra: {}
+      aug/glm-5.2: {}
+      aug/kimi-k2.6: {}
+      aug/kimi-k2.7: {}
+      aug/prism-a: {}
+      aug/prism-b: {}
+      opencode-zen/gpt-5.1-codex-max: {}
+      opencode-go/glm-5.2-high: {}
+      opencode-go/glm-5.2-max: {}
+      opencode-go/kimi-k3-max: {}
+      opencode-go/mimo-v2.5-high: {}
+      opencode-go/mimo-v2.5-max: {}
+      opencode-go/qwen3.7-max-high: {}
+      opencode-go/qwen3.7-max-max: {}
+      opencode-go/qwen3.7-plus-high: {}
+      opencode-go/qwen3.7-plus-max: {}
+      opencode-go/qwen3.6-plus-high: {}
+      opencode-go/qwen3.6-plus-max: {}
+      opencode-go/hy3-none: {}
+      opencode-go/hy3-low: {}
+      opencode-go/hy3-high: {}
+      opencode-go/grok-4.5-low: {}
+      opencode-go/grok-4.5-medium: {}
+      opencode-go/grok-4.5-high: {}
+      opencode-go/deepseek-v4-pro-low: {}
+      opencode-go/deepseek-v4-pro-medium: {}
+      opencode-go/deepseek-v4-pro-high: {}
+      opencode-go/deepseek-v4-pro-max: {}
+      opencode-go/deepseek-v4-flash-high: {}
+      opencode-go/deepseek-v4-flash-max: {}
+      oc/big-pickle: {}
+      oc/deepseek-v4-flash-free: {}
+      oc/mimo-v2.5-free: {}
+      oc/hy3-free: {}
+      oc/nemotron-3-ultra-free: {}
+      oc/north-mini-code-free: {}
+      tllm/GPT_5_4: {}
+      tllm/GPT_5_3: {}
+      tllm/GPT_5_2: {}
+      tllm/GPT_5_1: {}
+      tllm/GPT_5: {}
+      tllm/GPT_o4_mini: {}
+      tllm/GPT_o3_mini: {}
+      tllm/gemini_3_pro: {}
+      tllm/gemini_2_5_pro: {}
+      tllm/gemini_2_0_flash: {}
+      tllm/gemini_1_5_flash: {}
+      tllm/CLAUDE_4_6_OPUS: {}
+      tllm/CLAUDE_4_6_SONNET: {}
+      tllm/CLAUDE_4_5_HAIKU: {}
+      tllm/openrouter_gpt_4_o: {}
+      tllm/openrouter_gpt_4_o_mini: {}
+      tllm/openrouter_grok_4: {}
+      tllm/together_deepseek_v3: {}
+      tllm/openrouter_deepseek_r1: {}
+      tllm/sonar-pro: {}
+      tllm/GPT_4o: {}
+      tllm/claude_opus_4: {}
+      tllm/claude_sonnet_4: {}
+      tllm/claude_haiku_3_5: {}
+      tllm/deepseek_v4: {}
+      tllm/gemini_3_flash: {}
+      mcode/mimo-auto: {}
+      nous/poolside/laguna-s-2.1:free: {}
+      nous-research/poolside/laguna-s-2.1:free: {}
+      nous/poolside/laguna-xs-2.1:free: {}
+      nous-research/poolside/laguna-xs-2.1:free: {}
+      nous/tencent/hy3:free: {}
+      nous-research/tencent/hy3:free: {}
+      nous/stepfun/step-3.7-flash:free: {}
+      nous-research/stepfun/step-3.7-flash:free: {}
+      nous/upstage/solar-pro4:free: {}
+      nous-research/upstage/solar-pro4:free: {}
+      nous/meituan/longcat-2.0:free: {}
+      nous-research/meituan/longcat-2.0:free: {}
+      opencode-go/minimax-m3: {}
+      opencode-go/minimax-m2.7: {}
+      opencode-go/minimax-m2.5: {}
+      opencode-go/kimi-k3: {}
+      opencode-go/kimi-k2.7-code: {}
+      opencode-go/kimi-k2.6: {}
+      opencode-go/longcat-2.0: {}
+      opencode-go/kimi-k2.5: {}
+      opencode-go/glm-5.2: {}
+      opencode-go/glm-5.3: {}
+      opencode-go/ox-alpha-free: {}
+      opencode-go/glm-5.1: {}
+      opencode-go/glm-5: {}
+      opencode-go/deepseek-v4-pro: {}
+      opencode-go/deepseek-v4-flash: {}
+      opencode-go/deepseek-v4-flash-vision-exp: {}
+      opencode-go/qwen3.7-max: {}
+      opencode-go/qwen3.8-max: {}
+      opencode-go/qwen3.7-plus: {}
+      opencode-go/qwen3.6-plus: {}
+      opencode-go/qwen3.5-plus: {}
+      opencode-go/mimo-v2-pro: {}
+      opencode-go/mimo-v2-omni: {}
+      opencode-go/mimo-v2.5-pro: {}
+      opencode-go/mimo-v2.5: {}
+      opencode-go/hy3: {}
+      opencode-go/hy3-preview: {}
+      opencode-go/gpt-5.6-luna: {}
+      opencode-go/grok-4.5: {}
+      opencode-go/grok-4.6: {}
+      opencode-go/muse-spark-1.2-contributor: {}
+      opencode-zen/claude-fable-5: {}
+      opencode-zen/claude-opus-5: {}
+      opencode-zen/claude-opus-4-8: {}
+      opencode-zen/claude-opus-4-7: {}
+      opencode-zen/claude-opus-4-6: {}
+      opencode-zen/claude-opus-4-5: {}
+      opencode-zen/claude-sonnet-5: {}
+      opencode-zen/claude-sonnet-4-6: {}
+      opencode-zen/claude-sonnet-4-5: {}
+      opencode-zen/claude-sonnet-4: {}
+      opencode-zen/claude-haiku-4-5: {}
+      opencode-zen/gemini-3.6-flash: {}
+      opencode-zen/gemini-3.7-flash: {}
+      opencode-zen/gemini-3.5-flash-lite: {}
+      opencode-zen/gemini-3.5-flash: {}
+      opencode-zen/gemini-3.1-pro: {}
+      opencode-zen/gemini-3-flash: {}
+      opencode-zen/gpt-5.6-sol: {}
+      opencode-zen/gpt-5.6-terra: {}
+      opencode-zen/gpt-5.6-luna: {}
+      opencode-zen/gpt-5.5: {}
+      opencode-zen/gpt-5.5-pro: {}
+      opencode-zen/gpt-5.4: {}
+      opencode-zen/gpt-5.4-pro: {}
+      opencode-zen/gpt-5.4-mini: {}
+      opencode-zen/gpt-5.4-nano: {}
+      opencode-zen/gpt-5.3-codex-spark: {}
+      opencode-zen/gpt-5.3-codex: {}
+      opencode-zen/gpt-5.2: {}
+      opencode-zen/gpt-5.2-codex: {}
+      opencode-zen/gpt-5.1: {}
+      opencode-zen/gpt-5.1-codex: {}
+      opencode-zen/gpt-5.1-codex-mini: {}
+      opencode-zen/gpt-5: {}
+      opencode-zen/gpt-5-codex: {}
+      opencode-zen/gpt-5-nano: {}
+      opencode-zen/grok-build-0.1: {}
+      opencode-zen/grok-4.6: {}
+      opencode-zen/grok-4.5: {}
+      opencode-zen/muse-spark-1.2: {}
+      opencode-zen/deepseek-v4-pro: {}
+      opencode-zen/deepseek-v4-flash: {}
+      opencode-zen/glm-5.2: {}
+      opencode-zen/glm-5.1: {}
+      opencode-zen/glm-5: {}
+      opencode-zen/minimax-m3: {}
+      opencode-zen/minimax-m2.7: {}
+      opencode-zen/minimax-m2.5: {}
+      opencode-zen/kimi-k3: {}
+      opencode-zen/kimi-k2.7-code: {}
+      opencode-zen/kimi-k2.6: {}
+      opencode-zen/kimi-k2.5: {}
+      opencode-zen/qwen3.6-plus: {}
+      opencode-zen/qwen3.5-plus: {}
+      opencode-zen/big-pickle: {}
+      opencode-zen/deepseek-v4-flash-free: {}
+      opencode-zen/x-preview-f-free: {}
+      opencode-zen/muse-spark-1.2-contributor-free: {}
+      opencode-zen/mimo-v2.5-free: {}
+      opencode-zen/hy3-free: {}
+      opencode-zen/nemotron-3-ultra-free: {}
+      opencode-zen/nemotron-3.5-lightning-free: {}
+      opencode-zen/laguna-s-2.1-free: {}
+      openrouter/stealth/ox-alpha: {}
+      openrouter/dots-studio/dots-3-note-preview:free: {}
+      openrouter/liquid/lfm-2.5-2.6b:free: {}
+      openrouter/nvidia/nemotron-3.5-lightning:free: {}
+      openrouter/thinkingmachines/inkling-small:free: {}
+      openrouter/poolside/laguna-s-2.1:free: {}
+      openrouter/thinkingmachines/inkling:free: {}
+      openrouter/poolside/laguna-xs-2.1:free: {}
+      openrouter/cohere/north-mini-code:free: {}
+      openrouter/z-ai/glm-5.2:free: {}
+      openrouter/nvidia/nemotron-3.5-content-safety:free: {}
+      openrouter/nvidia/nemotron-3-ultra-550b-a55b:free: {}
+      openrouter/minimax/minimax-m3:free: {}
+      openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free: {}
+      openrouter/google/gemma-4-26b-a4b-it:free: {}
+      openrouter/google/gemma-4-31b-it:free: {}
+      openrouter/google/lyria-3-pro-preview: {}
+      openrouter/google/lyria-3-clip-preview: {}
+      openrouter/minimax/minimax-m2.7:free: {}
+      openrouter/nvidia/nemotron-3-super-120b-a12b:free: {}
+      openrouter/openrouter/free: {}
+      orcarouter/orcarouter/free: {}
+      orcarouter/orcarouter/fusion: {}
+      orcarouter/orcarouter/fusion-flash: {}
+      orcarouter/orcarouter/fusion-mini: {}
+      orcarouter/orcarouter/auto: {}
+      orcarouter/anthropic/claude-fable-5: {}
+      orcarouter/anthropic/claude-haiku-4.5: {}
+      orcarouter/anthropic/claude-opus-4.5: {}
+      orcarouter/anthropic/claude-opus-4.6: {}
+      orcarouter/anthropic/claude-opus-4.7: {}
+      orcarouter/anthropic/claude-opus-4.8: {}
+      orcarouter/anthropic/claude-opus-5: {}
+      orcarouter/anthropic/claude-sonnet-4.5: {}
+      orcarouter/anthropic/claude-sonnet-4.6: {}
+      orcarouter/anthropic/claude-sonnet-5: {}
+      orcarouter/codex-auto-review: {}
+      orcarouter/deepseek/deepseek-chat: {}
+      orcarouter/deepseek/deepseek-reasoner: {}
+      orcarouter/deepseek/deepseek-v4-flash: {}
+      orcarouter/deepseek/deepseek-v4-flash-0731: {}
+      orcarouter/deepseek/deepseek-v4-flash-free: {}
+      orcarouter/deepseek/deepseek-v4-flash-vision-exp: {}
+      orcarouter/deepseek/deepseek-v4-pro: {}
+      orcarouter/deepseek/deepseek-v4-pro-0813: {}
+      orcarouter/google/gemini-2.5-flash: {}
+      orcarouter/google/gemini-2.5-flash-image: {}
+      orcarouter/google/gemini-2.5-flash-lite: {}
+      orcarouter/google/gemini-2.5-flash-preview-tts: {}
+      orcarouter/google/gemini-2.5-pro: {}
+      orcarouter/google/gemini-2.5-pro-preview-tts: {}
+      orcarouter/google/gemini-3-flash-preview: {}
+      orcarouter/google/gemini-3-pro-image-preview: {}
+      orcarouter/google/gemini-3.1-flash-image-preview: {}
+      orcarouter/google/gemini-3.1-flash-lite: {}
+      orcarouter/google/gemini-3.1-flash-lite-preview: {}
+      orcarouter/google/gemini-3.1-flash-tts-preview: {}
+      orcarouter/google/gemini-3.1-pro-preview: {}
+      orcarouter/google/gemini-3.1-pro-preview-customtools: {}
+      orcarouter/google/gemini-3.5-flash: {}
+      orcarouter/google/gemini-3.5-flash-lite: {}
+      orcarouter/google/gemini-3.6-flash: {}
+      orcarouter/google/gemini-embedding-001: {}
+      orcarouter/google/gemini-embedding-2-preview: {}
+      orcarouter/google/gemini-flash-latest: {}
+      orcarouter/google/gemini-flash-lite-latest: {}
+      orcarouter/google/gemini-pro-latest: {}
+      orcarouter/google/gemini-robotics-er-1.6-preview: {}
+      orcarouter/google/gemma-4-26b-a4b-it: {}
+      orcarouter/google/gemma-4-31b-it: {}
+      orcarouter/google/imagen-4.0-fast-generate-001: {}
+      orcarouter/google/imagen-4.0-generate-001: {}
+      orcarouter/google/imagen-4.0-ultra-generate-001: {}
+      orcarouter/gpt-5.6-luna: {}
+      orcarouter/grok/grok-4.3: {}
+      orcarouter/grok/grok-4.5: {}
+      orcarouter/grok/grok-4.6: {}
+      orcarouter/grok/grok-imagine-image: {}
+      orcarouter/kimi/kimi-k2.5: {}
+      orcarouter/kimi/kimi-k2.6: {}
+      orcarouter/kimi/kimi-k2.7-code: {}
+      orcarouter/kimi/kimi-k3: {}
+      orcarouter/kling/kling-3-turbo: {}
+      orcarouter/kling/kling-v2-1-master: {}
+      orcarouter/kling/kling-v2-5-turbo: {}
+      orcarouter/kling/kling-v2-6: {}
+      orcarouter/kling/kling-v2-master: {}
+      orcarouter/kling/kling-v3: {}
+      orcarouter/kling/kling-v3-omni: {}
+      orcarouter/kling/kling-video-o1: {}
+      orcarouter/meta/muse-spark-1.1: {}
+      orcarouter/meta/muse-spark-1.2: {}
+      orcarouter/minimax/minimax-h3: {}
+      orcarouter/minimax/minimax-m2.5: {}
+      orcarouter/minimax/minimax-m2.5-highspeed: {}
+      orcarouter/minimax/minimax-m2.7: {}
+      orcarouter/minimax/minimax-m2.7-highspeed: {}
+      orcarouter/minimax/minimax-m3: {}
+      orcarouter/obsidian/gemma-4-26B-A4B: {}
+      orcarouter/obsidian/Qwen3.6-35B-A3B: {}
+      orcarouter/obsidian/Qwen3.8-27B: {}
+      orcarouter/openai/gpt-3.5-turbo: {}
+      orcarouter/openai/gpt-3.5-turbo-0125: {}
+      orcarouter/openai/gpt-3.5-turbo-1106: {}
+      orcarouter/openai/gpt-3.5-turbo-16k: {}
+      orcarouter/openai/gpt-4: {}
+      orcarouter/openai/gpt-4-0613: {}
+      orcarouter/openai/gpt-4-turbo: {}
+      orcarouter/openai/gpt-4-turbo-2024-04-09: {}
+      orcarouter/openai/gpt-4.1: {}
+      orcarouter/openai/gpt-4.1-2025-04-14: {}
+      orcarouter/openai/gpt-4.1-mini: {}
+      orcarouter/openai/gpt-4.1-mini-2025-04-14: {}
+      orcarouter/openai/gpt-4.1-nano: {}
+      orcarouter/openai/gpt-4.1-nano-2025-04-14: {}
+      orcarouter/openai/gpt-4o: {}
+      orcarouter/openai/gpt-4o-2024-05-13: {}
+      orcarouter/openai/gpt-4o-2024-08-06: {}
+      orcarouter/openai/gpt-4o-2024-11-20: {}
+      orcarouter/openai/gpt-4o-mini: {}
+      orcarouter/openai/gpt-4o-mini-2024-07-18: {}
+      orcarouter/openai/gpt-4o-mini-tts: {}
+      orcarouter/openai/gpt-4o-mini-tts-2025-03-20: {}
+      orcarouter/openai/gpt-4o-mini-tts-2025-12-15: {}
+      orcarouter/openai/gpt-5: {}
+      orcarouter/openai/gpt-5-2025-08-07: {}
+      orcarouter/openai/gpt-5-chat-latest: {}
+      orcarouter/openai/gpt-5-mini: {}
+      orcarouter/openai/gpt-5-mini-2025-08-07: {}
+      orcarouter/openai/gpt-5-nano: {}
+      orcarouter/openai/gpt-5-nano-2025-08-07: {}
+      orcarouter/openai/gpt-5-pro: {}
+      orcarouter/openai/gpt-5-pro-2025-10-06: {}
+      orcarouter/openai/gpt-5-search-api: {}
+      orcarouter/openai/gpt-5-search-api-2025-10-14: {}
+      orcarouter/openai/gpt-5.1: {}
+      orcarouter/openai/gpt-5.1-2025-11-13: {}
+      orcarouter/openai/gpt-5.1-chat-latest: {}
+      orcarouter/openai/gpt-5.1-codex: {}
+      orcarouter/openai/gpt-5.1-codex-mini: {}
+      orcarouter/openai/gpt-5.2: {}
+      orcarouter/openai/gpt-5.2-2025-12-11: {}
+      orcarouter/openai/gpt-5.2-chat-latest: {}
+      orcarouter/openai/gpt-5.2-codex: {}
+      orcarouter/openai/gpt-5.2-pro: {}
+      orcarouter/openai/gpt-5.2-pro-2025-12-11: {}
+      orcarouter/openai/gpt-5.3-codex: {}
+      orcarouter/openai/gpt-5.4: {}
+      orcarouter/openai/gpt-5.4-2026-03-05: {}
+      orcarouter/openai/gpt-5.4-mini: {}
+      orcarouter/openai/gpt-5.4-mini-2026-03-17: {}
+      orcarouter/openai/gpt-5.4-nano: {}
+      orcarouter/openai/gpt-5.4-nano-2026-03-17: {}
+      orcarouter/openai/gpt-5.4-pro: {}
+      orcarouter/openai/gpt-5.4-pro-2026-03-05: {}
+      orcarouter/openai/gpt-5.5: {}
+      orcarouter/openai/gpt-5.5-2026-04-23: {}
+      orcarouter/openai/gpt-5.5-pro: {}
+      orcarouter/openai/gpt-5.5-pro-2026-04-23: {}
+      orcarouter/openai/gpt-5.6-luna: {}
+      orcarouter/openai/gpt-5.6-sol: {}
+      orcarouter/openai/gpt-5.6-terra: {}
+      orcarouter/openai/gpt-image-1: {}
+      orcarouter/openai/gpt-image-1-mini: {}
+      orcarouter/openai/gpt-image-1.5: {}
+      orcarouter/openai/gpt-image-2: {}
+      orcarouter/openai/gpt-oss-120b: {}
+      orcarouter/openai/text-embedding-3-large: {}
+      orcarouter/openai/text-embedding-3-small: {}
+      orcarouter/openai/text-embedding-ada-002: {}
+      orcarouter/openai/tts-1: {}
+      orcarouter/openai/tts-1-1106: {}
+      orcarouter/openai/tts-1-hd: {}
+      orcarouter/openai/tts-1-hd-1106: {}
+      orcarouter/orca/dub: {}
+      orcarouter/qwen/qwen3-max: {}
+      orcarouter/qwen/qwen3-max-preview: {}
+      orcarouter/qwen/qwen3-vl-235b-a22b-instruct: {}
+      orcarouter/qwen/qwen3-vl-235b-a22b-thinking: {}
+      orcarouter/qwen/qwen3-vl-8b-instruct: {}
+      orcarouter/qwen/qwen3-vl-8b-thinking: {}
+      orcarouter/qwen/qwen3.5-122b-a10b: {}
+      orcarouter/qwen/qwen3.5-27b: {}
+      orcarouter/qwen/qwen3.5-35b-a3b: {}
+      orcarouter/qwen/qwen3.5-397b-a17b: {}
+      orcarouter/qwen/qwen3.5-flash: {}
+      orcarouter/qwen/qwen3.5-flash-2026-02-23: {}
+      orcarouter/qwen/qwen3.5-plus: {}
+      orcarouter/qwen/qwen3.5-plus-2026-02-15: {}
+      orcarouter/qwen/qwen3.6-35b-a3b: {}
+      orcarouter/qwen/qwen3.6-flash: {}
+      orcarouter/qwen/qwen3.6-flash-2026-04-16: {}
+      orcarouter/qwen/qwen3.6-plus: {}
+      orcarouter/qwen/qwen3.6-plus-2026-04-02: {}
+      orcarouter/qwen/qwen3.7-flash: {}
+      orcarouter/qwen/qwen3.7-max: {}
+      orcarouter/qwen/qwen3.7-max-2026-05-20: {}
+      orcarouter/qwen/qwen3.7-plus: {}
+      orcarouter/qwen/qwen3.8-27b: {}
+      orcarouter/qwen/qwen3.8-27b-free: {}
+      orcarouter/qwen/qwen3.8-max: {}
+      orcarouter/tencent/hy3: {}
+      orcarouter/tencent/hy3-free: {}
+      orcarouter/z-ai/glm-4.5: {}
+      orcarouter/z-ai/glm-4.5-air: {}
+      orcarouter/z-ai/glm-4.6: {}
+      orcarouter/z-ai/glm-4.7: {}
+      orcarouter/z-ai/glm-5: {}
+      orcarouter/z-ai/glm-5.1: {}
+      orcarouter/z-ai/glm-5.2: {}
+      orcarouter/z-ai/glm-5.3: {}
+      openrouter/openai/text-embedding-3-small: {}
+      openrouter/openai/text-embedding-3-large: {}
+      openrouter/qwen/qwen3-embedding-8b: {}
+      openrouter/qwen/qwen3-embedding-4b: {}
+      openrouter/baai/bge-m3: {}
+      openrouter/mistralai/mistral-embed-2312: {}
+      openrouter/google/gemini-embedding-001: {}
+      openrouter/openai/gpt-5.4-image-2: {}
+      openrouter/openai/gpt-5-image-mini: {}
+      openrouter/google/gemini-3.1-flash-image-preview: {}
+      openrouter/google/gemini-3-pro-image-preview: {}
+      openrouter/black-forest-labs/flux.2-max: {}
+      openrouter/black-forest-labs/flux.2-pro: {}
+      openrouter/black-forest-labs/flux.2-flex: {}
+      openrouter/cohere/rerank-4-pro: {}
+      openrouter/cohere/rerank-4-fast: {}
+      openrouter/cohere/rerank-v3.5: {}
+      openrouter/deepgram/nova-3: {}
+      openrouter/microsoft/mai-transcribe-1.5: {}
+      openrouter/nvidia/parakeet-tdt-0.6b-v3: {}
+      openrouter/mistralai/voxtral-mini-transcribe: {}
+      openrouter/qwen/qwen3-asr-flash-2026-02-10: {}
+      openrouter/google/chirp-3: {}
+      openrouter/openai/gpt-4o-mini-transcribe: {}
+      openrouter/openai/whisper-large-v3: {}
+      openrouter/openai/whisper-large-v3-turbo: {}
+      openrouter/openai/whisper-1: {}
+      openrouter/openai/gpt-4o-transcribe: {}
+      veoaifree-web/veo: {}
+      veo-free/veo: {}
+      veoaifree-web/seedance: {}
+      veo-free/seedance: {}
+      opencode-zen/claude-fable-5-low: {}
+      opencode-zen/claude-fable-5-medium: {}
+      opencode-zen/claude-fable-5-high: {}
+      opencode-zen/claude-fable-5-xhigh: {}
+      opencode-zen/claude-opus-5-low: {}
+      opencode-zen/claude-opus-5-medium: {}
+      opencode-zen/claude-opus-5-high: {}
+      opencode-zen/claude-opus-5-xhigh: {}
+      opencode-zen/claude-opus-4-8-low: {}
+      opencode-zen/claude-opus-4-8-medium: {}
+      opencode-zen/claude-opus-4-8-high: {}
+      opencode-zen/claude-opus-4-8-xhigh: {}
+      opencode-zen/claude-opus-4-7-low: {}
+      opencode-zen/claude-opus-4-7-medium: {}
+      opencode-zen/claude-opus-4-7-high: {}
+      opencode-zen/claude-opus-4-7-xhigh: {}
+      opencode-zen/claude-opus-4-6-low: {}
+      opencode-zen/claude-opus-4-6-medium: {}
+      opencode-zen/claude-opus-4-6-high: {}
+      opencode-zen/claude-opus-4-5-low: {}
+      opencode-zen/claude-opus-4-5-medium: {}
+      opencode-zen/claude-opus-4-5-high: {}
+      opencode-zen/claude-sonnet-5-low: {}
+      opencode-zen/claude-sonnet-5-medium: {}
+      opencode-zen/claude-sonnet-5-high: {}
+      opencode-zen/claude-sonnet-5-xhigh: {}
+      opencode-zen/claude-sonnet-4-6-low: {}
+      opencode-zen/claude-sonnet-4-6-medium: {}
+      opencode-zen/claude-sonnet-4-6-high: {}
+      opencode-zen/claude-sonnet-4-5-low: {}
+      opencode-zen/claude-sonnet-4-5-medium: {}
+      opencode-zen/claude-sonnet-4-5-high: {}
+      orcarouter/anthropic/claude-fable-5-low: {}
+      orcarouter/anthropic/claude-fable-5-medium: {}
+      orcarouter/anthropic/claude-fable-5-high: {}
+      orcarouter/anthropic/claude-fable-5-xhigh: {}
+      orcarouter/anthropic/claude-haiku-4.5-low: {}
+      orcarouter/anthropic/claude-haiku-4.5-medium: {}
+      orcarouter/anthropic/claude-haiku-4.5-high: {}
+      orcarouter/anthropic/claude-opus-4.6-low: {}
+      orcarouter/anthropic/claude-opus-4.6-medium: {}
+      orcarouter/anthropic/claude-opus-4.6-high: {}
+      orcarouter/anthropic/claude-opus-4.7-low: {}
+      orcarouter/anthropic/claude-opus-4.7-medium: {}
+      orcarouter/anthropic/claude-opus-4.7-high: {}
+      orcarouter/anthropic/claude-opus-4.7-xhigh: {}
+      orcarouter/anthropic/claude-opus-4.8-low: {}
+      orcarouter/anthropic/claude-opus-4.8-medium: {}
+      orcarouter/anthropic/claude-opus-4.8-high: {}
+      orcarouter/anthropic/claude-opus-4.8-xhigh: {}
+      orcarouter/anthropic/claude-opus-5-low: {}
+      orcarouter/anthropic/claude-opus-5-medium: {}
+      orcarouter/anthropic/claude-opus-5-high: {}
+      orcarouter/anthropic/claude-opus-5-xhigh: {}
+      orcarouter/anthropic/claude-sonnet-4.5-low: {}
+      orcarouter/anthropic/claude-sonnet-4.5-medium: {}
+      orcarouter/anthropic/claude-sonnet-4.5-high: {}
+      orcarouter/anthropic/claude-sonnet-4.6-low: {}
+      orcarouter/anthropic/claude-sonnet-4.6-medium: {}
+      orcarouter/anthropic/claude-sonnet-4.6-high: {}
+      orcarouter/anthropic/claude-sonnet-5-low: {}
+      orcarouter/anthropic/claude-sonnet-5-medium: {}
+      orcarouter/anthropic/claude-sonnet-5-high: {}
+      orcarouter/anthropic/claude-sonnet-5-xhigh: {}
+      no-think/opencode-zen/claude-opus-5: {}
+      no-think/opencode-zen/claude-opus-4-8: {}
+      no-think/opencode-zen/claude-opus-4-7: {}
+      no-think/opencode-zen/claude-opus-4-6: {}
+      no-think/opencode-zen/claude-opus-4-5: {}
+      no-think/opencode-zen/claude-sonnet-5: {}
+      no-think/opencode-zen/claude-sonnet-4-6: {}
+      no-think/opencode-zen/claude-sonnet-4-5: {}
+      no-think/orcarouter/anthropic/claude-haiku-4.5: {}
+      no-think/orcarouter/anthropic/claude-opus-4.6: {}
+      no-think/orcarouter/anthropic/claude-opus-4.7: {}
+      no-think/orcarouter/anthropic/claude-opus-4.8: {}
+      no-think/orcarouter/anthropic/claude-opus-5: {}
+      no-think/orcarouter/anthropic/claude-sonnet-4.5: {}
+      no-think/orcarouter/anthropic/claude-sonnet-4.6: {}
+      no-think/orcarouter/anthropic/claude-sonnet-5: {}
+      no-think/opencode-zen/claude-opus-5-low: {}
+      no-think/opencode-zen/claude-opus-5-medium: {}
+      no-think/opencode-zen/claude-opus-5-high: {}
+      no-think/opencode-zen/claude-opus-5-xhigh: {}
+      no-think/opencode-zen/claude-opus-4-8-low: {}
+      no-think/opencode-zen/claude-opus-4-8-medium: {}
+      no-think/opencode-zen/claude-opus-4-8-high: {}
+      no-think/opencode-zen/claude-opus-4-8-xhigh: {}
+      no-think/opencode-zen/claude-opus-4-7-low: {}
+      no-think/opencode-zen/claude-opus-4-7-medium: {}
+      no-think/opencode-zen/claude-opus-4-7-high: {}
+      no-think/opencode-zen/claude-opus-4-7-xhigh: {}
+      no-think/opencode-zen/claude-opus-4-6-low: {}
+      no-think/opencode-zen/claude-opus-4-6-medium: {}
+      no-think/opencode-zen/claude-opus-4-6-high: {}
+      no-think/opencode-zen/claude-opus-4-5-low: {}
+      no-think/opencode-zen/claude-opus-4-5-medium: {}
+      no-think/opencode-zen/claude-opus-4-5-high: {}
+      no-think/opencode-zen/claude-sonnet-5-low: {}
+      no-think/opencode-zen/claude-sonnet-5-medium: {}
+      no-think/opencode-zen/claude-sonnet-5-high: {}
+      no-think/opencode-zen/claude-sonnet-5-xhigh: {}
+      no-think/opencode-zen/claude-sonnet-4-6-low: {}
+      no-think/opencode-zen/claude-sonnet-4-6-medium: {}
+      no-think/opencode-zen/claude-sonnet-4-6-high: {}
+      no-think/opencode-zen/claude-sonnet-4-5-low: {}
+      no-think/opencode-zen/claude-sonnet-4-5-medium: {}
+      no-think/opencode-zen/claude-sonnet-4-5-high: {}
+      no-think/orcarouter/anthropic/claude-opus-5-low: {}
+      no-think/orcarouter/anthropic/claude-opus-5-medium: {}
+      no-think/orcarouter/anthropic/claude-opus-5-high: {}
+      no-think/orcarouter/anthropic/claude-opus-5-xhigh: {}
+      no-think/orcarouter/anthropic/claude-sonnet-5-low: {}
+      no-think/orcarouter/anthropic/claude-sonnet-5-medium: {}
+      no-think/orcarouter/anthropic/claude-sonnet-5-high: {}
+      no-think/orcarouter/anthropic/claude-sonnet-5-xhigh: {}
+      openrouter/stealth/ox-alpha-xhigh: {}
+      openrouter/stealth/ox-alpha-high: {}
+      openrouter/stealth/ox-alpha-low: {}
+      openrouter/thinkingmachines/inkling-small:free-xhigh: {}
+      openrouter/thinkingmachines/inkling-small:free-high: {}
+      openrouter/thinkingmachines/inkling-small:free-medium: {}
+      openrouter/thinkingmachines/inkling-small:free-low: {}
+      openrouter/thinkingmachines/inkling-small:free-minimal: {}
+      openrouter/thinkingmachines/inkling-small:free-none: {}
+      openrouter/thinkingmachines/inkling:free-xhigh: {}
+      openrouter/thinkingmachines/inkling:free-high: {}
+      openrouter/thinkingmachines/inkling:free-medium: {}
+      openrouter/thinkingmachines/inkling:free-low: {}
+      openrouter/thinkingmachines/inkling:free-minimal: {}
+      openrouter/thinkingmachines/inkling:free-none: {}
+      openrouter/z-ai/glm-5.2:free-xhigh: {}
+      openrouter/z-ai/glm-5.2:free-high: {}
+      openrouter/nvidia/nemotron-3-ultra-550b-a55b:free-high: {}
+      openrouter/nvidia/nemotron-3-ultra-550b-a55b:free-medium: {}
+      openrouter/nvidia/nemotron-3-super-120b-a12b:free-medium: {}
+      openrouter/nvidia/nemotron-3-super-120b-a12b:free-low: {}
+  ollama:
+    name: Ollama Local
+    base_url: http://127.0.0.1:11434/v1
+    api_key: ollama
+    discover_models: true
+    model: qwen2.5:1.5b
+    no_proxy: 127.0.0.1,localhost
+  openrouter:
+    name: OpenRouter (direct)
+    base_url: https://openrouter.ai/api/v1
+    key_env: OMNI_API_KEY
+  opencode-zen:
+    name: OpenCode Zen (direct)
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+
+  nous:
+    name: NEOUS / Nous Research (direct)
+    base_url: https://inference-api.nousresearch.com/v1
+    key_env: OMNI_API_KEY
+agent:
+  reasoning_effort: high
+voice:
+  auto_tts: false
+wake_word:
+  enabled: false
+moa:
+  presets:
+    default:
+      reference_models:
+        - provider: omniroute
+          model: auto/free-coding
+          enabled: true
+      aggregator:
+        provider: omniroute
+        model: auto/free-coding
+skills:
+  external_dirs:
+    - /Users/igorvasin/.config/opencode/skills
+    - /Users/igorvasin/.agents/skills
+gateway:
+  telegram:
+    token: 8610936135:AAFR3Gh7SH9iAA5x023aWB9i_WqNjsAteMQ
+onboarding:
+  seen:
+    profile_build_offered: true
+    busy_input_prompt: true
+    openclaw_residue_cleanup: true
+_config_version: 37
+fallback_providers[0]:
+  provider: openrouter
+  model: google/gemini-3.7-flash
+  base_url: https://openrouter.ai/api/v1
+  key_env: OPENROUTER_API_KEY
+platforms:
+  telegram:
+    enabled: true
+    home_channel:
+      platform: telegram
+      chat_id: '176203333'
+      name: Игорь В.
+      user_id: '176203333'
+
+# ── Security ──────────────────────────────────────────────────────────
+# Secret redaction is ON by default — strings that look like API keys,
+# tokens, and passwords are masked in tool output, logs, and chat
+# responses before the model or user ever sees them. Set redact_secrets
+# to false to disable (e.g. when developing the redactor itself).
+# tirith pre-exec scanning is enabled by default when the tirith binary
+# is available. Configure via security.tirith_* keys or env vars
+# (TIRITH_ENABLED, TIRITH_BIN, TIRITH_TIMEOUT, TIRITH_FAIL_OPEN).
+#
+# security:
+#   redact_secrets: true
+#   tirith_enabled: true
+#   tirith_path: "tirith"
+#   tirith_timeout: 5
+#   tirith_fail_open: true
+
+# ── Fallback Model ────────────────────────────────────────────────────
+# Automatic provider failover when primary is unavailable.
+# Uncomment and configure to enable. Triggers on rate limits (429),
+# overload (529), service errors (503), or connection failures.
+#
+# Supported providers:
+#   openrouter   (OPENROUTER_API_KEY)  — routes to any model
+#   openai-codex (OAuth — hermes auth) — OpenAI Codex
+#   nous         (OAuth — hermes auth) — Nous Portal
+#   zai          (ZAI_API_KEY)         — Z.AI / GLM
+#   kimi-coding  (KIMI_API_KEY)        — Kimi / Moonshot
+#   kimi-coding-cn (KIMI_CN_API_KEY)   — Kimi / Moonshot (China)
+#   minimax      (MINIMAX_API_KEY)     — MiniMax
+#   minimax-cn   (MINIMAX_CN_API_KEY)  — MiniMax (China)
+#   bedrock      (AWS IAM / boto3)     — AWS Bedrock (Converse API)
+#
+# For custom OpenAI-compatible endpoints, add base_url and key_env.
+#
+# fallback_model:
+#   provider: openrouter
+#   model: anthropic/claude-sonnet-4
+
+fallback_providers:
+  - provider: omniroute
+    model: auto/free-coding-full
+    base_url: http://127.0.0.1:20128/v1
+    key_env: OMNI_API_KEY
+  - provider: nous
+    model: nous-research/meituan/longcat-2.0:free
+    base_url: https://inference-api.nousresearch.com/v1
+    key_env: OMNI_API_KEY
+  - provider: nous
+    model: nous-research/poolside/laguna-s-2.1:free
+    base_url: https://inference-api.nousresearch.com/v1
+    key_env: OMNI_API_KEY
+  - provider: nous
+    model: nous-research/poolside/laguna-xs-2.1:free
+    base_url: https://inference-api.nousresearch.com/v1
+    key_env: OMNI_API_KEY
+  - provider: nous
+    model: nous-research/stepfun/step-3.7-flash:free
+    base_url: https://inference-api.nousresearch.com/v1
+    key_env: OMNI_API_KEY
+  - provider: nous
+    model: nous-research/tencent/hy3:free
+    base_url: https://inference-api.nousresearch.com/v1
+    key_env: OMNI_API_KEY
+  - provider: nous
+    model: nous-research/upstage/solar-pro4:free
+    base_url: https://inference-api.nousresearch.com/v1
+    key_env: OMNI_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/big-pickle
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-fable-5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-fable-5-high
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-fable-5-low
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-fable-5-medium
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-fable-5-xhigh
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-haiku-4-5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-5-high
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-5-low
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-5-medium
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-6
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-6-high
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-6-low
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-6-medium
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-7
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-7-high
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-7-low
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-7-medium
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-7-xhigh
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-8
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-8-high
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-8-low
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-8-medium
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-4-8-xhigh
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-5-high
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-5-low
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-5-medium
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-opus-5-xhigh
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-4
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-4-5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-4-5-high
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-4-5-low
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-4-5-medium
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-4-6
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-4-6-high
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-4-6-low
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-4-6-medium
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-5-high
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-5-low
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-5-medium
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/claude-sonnet-5-xhigh
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/deepseek-v4-flash
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/deepseek-v4-flash-free
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/deepseek-v4-pro
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gemini-3-flash
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gemini-3.1-pro
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gemini-3.5-flash
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gemini-3.5-flash-lite
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gemini-3.6-flash
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gemini-3.7-flash
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/glm-5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/glm-5.1
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/glm-5.2
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5-codex
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5-nano
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.1
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.1-codex
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.1-codex-max
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.1-codex-mini
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.2
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.2-codex
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.3-codex
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.3-codex-spark
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.4
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.4-mini
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.4-nano
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.4-pro
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.5-pro
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.6-luna
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.6-sol
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/gpt-5.6-terra
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/grok-4.5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/grok-4.6
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/grok-build-0.1
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/hy3-free
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/kimi-k2.5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/kimi-k2.6
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/kimi-k2.7-code
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/kimi-k3
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/laguna-s-2.1-free
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/mimo-v2.5-free
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/minimax-m2.5
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/minimax-m2.7
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/minimax-m3
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/muse-spark-1.2
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/muse-spark-1.2-contributor-free
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/nemotron-3-ultra-free
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/nemotron-3.5-lightning-free
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/qwen3.5-plus
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/qwen3.6-plus
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: opencode-zen
+    model: opencode-zen/x-preview-f-free
+    base_url: https://opencode.ai/zen/v1
+    key_env: OPENCODE_ZEN_API_KEY
+  - provider: openrouter
+    model: openrouter/cohere/north-mini-code:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/dots-studio/dots-3-note-preview:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/google/gemma-4-26b-a4b-it:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/google/gemma-4-31b-it:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/liquid/lfm-2.5-2.6b:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/minimax/minimax-m2.7:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/minimax/minimax-m3:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/nvidia/nemotron-3-super-120b-a12b:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/nvidia/nemotron-3-super-120b-a12b:free-low
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/nvidia/nemotron-3-super-120b-a12b:free-medium
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free-high
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/nvidia/nemotron-3-ultra-550b-a55b:free-medium
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/nvidia/nemotron-3.5-content-safety:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/nvidia/nemotron-3.5-lightning:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/openai/gpt-4o-mini-transcribe
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/openai/gpt-4o-transcribe
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/poolside/laguna-s-2.1:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/poolside/laguna-xs-2.1:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling-small:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling-small:free-high
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling-small:free-low
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling-small:free-medium
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling-small:free-minimal
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling-small:free-none
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling-small:free-xhigh
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling:free-high
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling:free-low
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling:free-medium
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling:free-minimal
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling:free-none
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/thinkingmachines/inkling:free-xhigh
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/z-ai/glm-5.2:free
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/z-ai/glm-5.2:free-high
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: openrouter
+    model: openrouter/z-ai/glm-5.2:free-xhigh
+    base_url: https://openrouter.ai/api/v1
+    key_env: OPENROUTER_API_KEY
+  - provider: ollama
+    model: qwen2.5:1.5b
+    base_url: http://127.0.0.1:11434/v1
+    api_key: ollama

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniRoute Dashboard</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font-family: -apple-system, system-ui, sans-serif; background:#0d1117; color:#e6edf3; margin:0; padding:24px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:#8b949e; font-size:13px; margin-bottom:20px; }
+  .card { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:18px; margin-bottom:18px; }
+  .card h2 { font-size:15px; margin:0 0 12px; color:#58a6ff; }
+  label { display:block; font-size:12px; color:#8b949e; margin:10px 0 4px; }
+  input, select, textarea { width:100%; box-sizing:border-box; background:#0d1117; border:1px solid #30363d; color:#e6edf3; border-radius:6px; padding:8px; font-size:13px; font-family:monospace; }
+  button { background:#238636; color:#fff; border:0; border-radius:6px; padding:9px 16px; font-size:13px; cursor:pointer; margin-top:12px; }
+  button:hover { background:#2ea043; }
+  .status { font-size:13px; padding:6px 0; }
+  .ok { color:#3fb950; } .err { color:#f85149; }
+  pre { background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:12px; overflow:auto; font-size:12px; max-height:300px; }
+  .key { color:#d2a8ff; }
+</style>
+</head>
+<body>
+<h1>OmniRoute Dashboard</h1>
+<div class="sub">Управление провайдерами и моделями (VPS 217.149.23.113). Редактирование <code>/root/.omniroute/.env</code>.</div>
+
+<div class="card">
+  <h2>Статус</h2>
+  <div id="status" class="status">загрузка…</div>
+  <pre id="envDump"></pre>
+</div>
+
+<div class="card">
+  <h2>Быстрая настройка провайдера</h2>
+  <label>ENV-ключ (например OMNIROUTE_API_KEY / OPENROUTER_API_KEY / NOUS_API_KEY)</label>
+  <input id="k" placeholder="OMNIROUTE_API_KEY">
+  <label>Значение</label>
+  <input id="v" placeholder="sk-... или base_url">
+  <button onclick="save()">Сохранить в .env</button>
+  <div id="saveMsg" class="status"></div>
+</div>
+
+<script>
+async function load() {
+  try {
+    const r = await fetch('/omni/api/status');
+    const d = await r.json();
+    document.getElementById('status').innerHTML = '<span class="ok">✓ OmniRoute backend активен</span>';
+    let html = '';
+    for (const k of d.omniroute_env_keys) {
+      const val = d.env[k];
+      html += `<span class="key">${k}</span> = ${val}\n`;
+    }
+    document.getElementById('envDump').textContent = html || '(пусто)';
+  } catch(e) {
+    document.getElementById('status').innerHTML = '<span class="err">✗ нет связи с backend: ' + e + '</span>';
+  }
+}
+async function save() {
+  const k = document.getElementById('k').value.trim();
+  const v = document.getElementById('v').value.trim();
+  if (!k) { document.getElementById('saveMsg').innerHTML = '<span class="err">ключ пуст</span>'; return; }
+  const body = JSON.stringify({ [k]: v });
+  const r = await fetch('/omni/api/env', { method:'POST', headers:{'Content-Type':'application/json'}, body });
+  const d = await r.json();
+  document.getElementById('saveMsg').innerHTML = r.ok ? '<span class="ok">✓ сохранено: ' + (d.keys||[]).join(', ') + '</span>' : '<span class="err">ошибка: ' + (d.error||'?') + '</span>';
+  load();
+}
+load();
+setInterval(load, 15000);
+</script>
+</body>
+</html>

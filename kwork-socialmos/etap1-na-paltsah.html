@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Этап 1 socialmos — на пальцах</title>
+<style>
+  :root{ --bg:#fbf7f0; --card:#ffffff; --ink:#2b2b2b; --muted:#6b6256; --accent:#ff7a59; --line:#ece3d6; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;padding:28px 16px 60px}
+  .wrap{max-width:820px;margin:0 auto}
+  h1{font-size:30px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 28px;font-size:15px}
+  .block{background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:22px 22px 18px;margin-bottom:22px;box-shadow:0 6px 20px rgba(0,0,0,.04)}
+  .block h2{font-size:20px;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+  .emoji{font-size:24px}
+  p{margin:0 0 10px}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .art{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fffdf9}
+  .art .n{display:inline-flex;width:30px;height:30px;border-radius:50%;background:var(--accent);
+    color:#fff;align-items:center;justify-content:center;font-weight:700;margin-bottom:8px}
+  .art h3{margin:0 0 6px;font-size:15px}
+  .art p{font-size:13.5px;color:var(--muted);margin:0}
+  .vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .vs .col{border-radius:14px;padding:16px}
+  .vs .sketch{background:#fff4e8;border:1px dashed #ffb98a}
+  .vs .build{background:#e9f7ee;border:1px dashed #8fd6a8}
+  .vs h3{margin:0 0 8px;font-size:15px}
+  .vs p{font-size:13.5px;margin:0}
+  .warn{background:#fff6e6;border:1px solid #ffd98a;border-radius:14px;padding:16px;font-size:14px}
+  .tag{display:inline-block;background:#f0eadf;color:var(--muted);border-radius:999px;
+    padding:3px 10px;font-size:12px;margin:2px 4px 2px 0}
+  svg{display:block;margin:0 auto}
+  .foot{color:var(--muted);font-size:13px;text-align:center;margin-top:6px}
+  @media(max-width:600px){.cards,.vs{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Этап 1 проекта socialmos 🖐️</h1>
+  <p class="sub">Объясняю простым языком, как ребёнку — с рисунками.</p>
+
+  <div class="block">
+    <h2><span class="emoji">🎯</span> Что вообще происходит</h2>
+    <p>Эдуард (он же socialmos) дал задание на бирже Кворк. За <b>500₽</b> он платит не за готовый продукт.</p>
+    <p>Он платит, чтобы <b>проверить голову</b> исполнителя. Как тестовое задание при приёме на работу.</p>
+    <p>«Покажи, что ты понимаешь задачу. Если голова работает — возьму тебя на большую работу (этап 2)».</p>
+  </div>
+
+  <div class="block">
+    <h2><span class="emoji">🖼️</span> 4 артефакта = 4 рисунка-идеи</h2>
+    <div class="cards">
+      <div class="art"><span class="n">1</span><h3>Аудит группы</h3><p>«Глянь на мою ВК-группу и скажи, что там криво и что поправить».</p></div>
+      <div class="art"><span class="n">2</span><h3>Витрина</h3><p>«Набросай, как могла бы выглядеть моя витрина: 2 обложки + кнопки меню».</p></div>
+      <div class="art"><span class="n">3</span><h3>Рассылка</h3><p>«Напиши текст-приманку из 1–2 писем: „5 ошибок, мешающих росту“».</p></div>
+      <div class="art"><span class="n">4</span><h3>Сценарий бота</h3><p>«Нарисуй схему: что бот скажет человеку, как спросит и куда приведёт».</p></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h2><span class="emoji">✏️</span> Эскиз, а не сборка</h2>
+    <div class="vs">
+      <div class="col sketch">
+        <h3>Этап 1 — рисуем на бумаге</h3>
+        <p>Карандашом, в нашем демо-сообществе «Примерка». Эдуарду ничего не заливаем. Это концепт.</p>
+      </div>
+      <div class="col build">
+        <h3>Этап 2 — собираем по-настоящему</h3>
+        <p>Лезем в аккаунт, настраиваем бота, рассылки, мини-приложение. Отдельная оплата.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h2><span class="emoji">🔻</span> Воронка обучения (1→2→3→4)</h2>
+    <svg width="320" height="200" viewBox="0 0 320 200">
+      <polygon points="20,20 300,20 250,60 70,60" fill="#4a90d9" opacity=".92"/>
+      <polygon points="70,75 250,75 215,115 105,115" fill="#3fae6b" opacity=".92"/>
+      <polygon points="105,130 215,130 185,170 135,170" fill="#f4c03f" opacity=".95"/>
+      <polygon points="135,182 185,182 170,198 150,198" fill="#9b6dd6"/>
+      <text x="160" y="45" fill="#fff" font-size="13" text-anchor="middle">1 Аудит</text>
+      <text x="160" y="98" fill="#fff" font-size="13" text-anchor="middle">2 Меню</text>
+      <text x="160" y="152" fill="#222" font-size="13" text-anchor="middle">3 Рассыльщик</text>
+      <text x="160" y="194" fill="#fff" font-size="12" text-anchor="middle">4 Бот</text>
+    </svg>
+    <p style="font-size:13.5px;color:var(--muted);text-align:center">Шаг вверх — только пройдя предыдущий. Для профи есть кнопка «уже настроено».</p>
+  </div>
+
+  <div class="block">
+    <h2><span class="emoji">🚧</span> Главное правило (не облажаться)</h2>
+    <div class="warn">
+      На этапе 1 <b>не лезем в аккаунт заказчика</b>. Всё крутится в нашем демо «Примерка».
+      Обещаем только концепт — без рабочего кода и заливки. Логика важнее красоты оформления.
+    </div>
+    <p style="margin-top:12px">
+      <span class="tag">аудит</span><span class="tag">обложки</span><span class="tag">рассылка</span>
+      <span class="tag">сценарий бота</span><span class="tag">демо «Примерка»</span><span class="tag">не заливаем</span>
+    </p>
+  </div>
+
+  <p class="foot">Сделано для встречи 19:00 · проект socialmos · этап 1 за 500₽</p>
+</div>
+</body>
+</html>

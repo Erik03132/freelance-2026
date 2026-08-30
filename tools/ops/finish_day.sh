@@ -73,8 +73,11 @@ backup_file "$ANTIGRAVITY/GLOBAL_CORE_STANDARDS.md"   "$BACKUP_DIR/core/GLOBAL_C
 backup_file "$ANTIGRAVITY/GLOBAL_STATUS_MANIFEST.md"  "$BACKUP_DIR/core/GLOBAL_STATUS_MANIFEST.md"  "GLOBAL_STATUS_MANIFEST.md"
 backup_file "$ANTIGRAVITY/mcp_config.json"            "$BACKUP_DIR/core/mcp_config.json"            "mcp_config.json"
 
-# 2. Скиллы
-backup_dir "$ANTIGRAVITY/skills"     "$BACKUP_DIR/skills"     "Skills (8 агентов)"
+# 2. Скиллы — current Hermes layout. Legacy Antigravity skills may no longer
+# exist, so backing up only that path produced archives that could never pass
+# restore verification after the migration to Hermes.
+backup_dir "$HOME/.hermes/skills" "$BACKUP_DIR/hermes/skills" "Hermes Skills"
+backup_dir "$ANTIGRAVITY/skills" "$BACKUP_DIR/legacy/skills" "Legacy Antigravity Skills"
 
 # 3. Knowledge
 backup_dir "$ANTIGRAVITY/knowledge"  "$BACKUP_DIR/knowledge"  "Knowledge Items"
@@ -159,7 +162,13 @@ find /tmp -maxdepth 1 -user "$(whoami)" -type f -mtime +1 -delete 2>/dev/null ||
 echo -e "  ${RED}🗑️  /tmp (>1d): $tmp_cleaned файлов${NC}"
 
 # Чистка tmp/ в проекте (Document Governance)
-project_tmp=$(find "$WORKSPACE/tmp" -name "*.md" -o -name "*.txt" -o -name "*.py" 2>/dev/null | wc -l | tr -d ' ')
+# Отсутствующая tmp/ — нормальное состояние. При set -euo pipefail голый find
+# по несуществующему пути возвращает 1 и раньше аварийно обрывал finish-day.
+if [[ -d "$WORKSPACE/tmp" ]]; then
+    project_tmp=$(find "$WORKSPACE/tmp" \( -name "*.md" -o -name "*.txt" -o -name "*.py" \) -type f 2>/dev/null | wc -l | tr -d ' ')
+else
+    project_tmp=0
+fi
 if [[ "$project_tmp" -gt 0 ]]; then
     echo -e "  ${YELLOW}⚠️  tmp/ в проекте: $project_tmp файлов — удали вручную после проверки${NC}"
 fi
@@ -185,9 +194,16 @@ git -C "$BACKUP_ROOT" add .
 git -C "$BACKUP_ROOT" commit -m "🧠 Antigravity Brain Sync: $TIMESTAMP" --author="Antigravity AI <ai@antigravity.net>" 2>/dev/null || echo -e "  ${YELLOW}ℹ️  Нет изменений для коммита${NC}"
 
 # Пытаемся запушить, если есть remote
+GITHUB_OK=false
 if git -C "$BACKUP_ROOT" remote | grep -q "origin"; then
     echo -e "  ${CYAN}📤 Пушим в GitHub...${NC}"
-    git -C "$BACKUP_ROOT" push origin main 2>/dev/null || echo -e "  ${RED}❌ Ошибка пуша (проверьте интернет или права)${NC}"
+    if env -u http_proxy -u https_proxy -u all_proxy \
+           -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
+           git -C "$BACKUP_ROOT" push origin main; then
+        GITHUB_OK=true
+    else
+        echo -e "  ${RED}❌ Ошибка пуша (проверьте интернет или права)${NC}"
+    fi
 else
     echo -e "  ${YELLOW}⚠️  GitHub remote 'origin' не настроен. Бэкап только локальный.${NC}"
     echo -e "     Чтобы настроить: git -C $BACKUP_ROOT remote add origin <URL>${NC}"
@@ -256,7 +272,7 @@ echo -e "  ${BOLD}📍 Чекпоинт:${NC}   $WORKSPACE/chp.md"
 echo -e "  ${BOLD}📦 Бэкап:${NC}      $ARCHIVE"
 echo ""
 echo -e "  ${BOLD}Уровни резервирования:${NC}"
-echo -e "    🌐 GitHub      → $(git -C "$BACKUP_ROOT" remote | grep -q origin && echo '✅ синхронизирован' || echo '⚠️  не настроен')"
+echo -e "    🌐 GitHub      → $([[ "$GITHUB_OK" == 'true' ]] && echo '✅ синхронизирован' || echo '⚠️  не синхронизирован')"
 echo -e "    🏠 NAS DS720   → $([[ \"$NAS_OK\" == 'true' ]] && echo '✅ синхронизирован' || echo '⚠️  недоступен')"
 echo -e "    💾 Внешний диск→ $([[ -d \"$EXT_MOUNT\" ]] && echo '✅ синхронизирован' || echo '⚠️  не подключён')"
 echo ""

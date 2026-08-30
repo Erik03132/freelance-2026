@@ -8,7 +8,6 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple, Dict
 
 
 class ReportValidator:
@@ -17,13 +16,13 @@ class ReportValidator:
     def __init__(self, report_path: Path):
         self.report_path = report_path
         self.content = self._read_report()
-        self.errors: List[str] = []
-        self.warnings: List[str] = []
+        self.errors: list[str] = []
+        self.warnings: list[str] = []
 
     def _read_report(self) -> str:
         """Read report file"""
         try:
-            with open(self.report_path, 'r', encoding='utf-8') as f:
+            with open(self.report_path, encoding="utf-8") as f:
                 return f.read()
         except Exception as e:
             print(f"❌ ERROR: Cannot read report: {e}")
@@ -61,7 +60,7 @@ class ReportValidator:
 
     def _check_executive_summary(self) -> bool:
         """Check executive summary exists and is under 250 words"""
-        pattern = r'## Executive Summary(.*?)(?=##|\Z)'
+        pattern = r"## Executive Summary(.*?)(?=##|\Z)"
         match = re.search(pattern, self.content, re.DOTALL | re.IGNORECASE)
 
         if not match:
@@ -89,18 +88,15 @@ class ReportValidator:
             "Limitations",
             "Recommendations",
             "Bibliography",
-            "Methodology"
+            "Methodology",
         ]
 
         # Recommended sections (warnings if missing, not errors)
-        recommended = [
-            "Counterevidence Register",
-            "Claims-Evidence Table"
-        ]
+        recommended = ["Counterevidence Register", "Claims-Evidence Table"]
 
         missing = []
         for section in required:
-            if not re.search(rf'##.*{section}', self.content, re.IGNORECASE):
+            if not re.search(rf"##.*{section}", self.content, re.IGNORECASE):
                 missing.append(section)
 
         if missing:
@@ -110,18 +106,20 @@ class ReportValidator:
         # Check recommended sections (warnings only)
         missing_recommended = []
         for section in recommended:
-            if not re.search(rf'##.*{section}', self.content, re.IGNORECASE):
+            if not re.search(rf"##.*{section}", self.content, re.IGNORECASE):
                 missing_recommended.append(section)
 
         if missing_recommended:
-            self.warnings.append(f"Missing recommended sections (for academic rigor): {', '.join(missing_recommended)}")
+            self.warnings.append(
+                f"Missing recommended sections (for academic rigor): {', '.join(missing_recommended)}"
+            )
 
         return True
 
     def _check_citations(self) -> bool:
         """Check citation format and presence"""
         # Find all citation references [1], [2], etc.
-        citations = re.findall(r'\[(\d+)\]', self.content)
+        citations = re.findall(r"\[(\d+)\]", self.content)
 
         if not citations:
             self.errors.append("No citations found in report")
@@ -130,7 +128,9 @@ class ReportValidator:
         unique_citations = set(citations)
 
         if len(unique_citations) < 10:
-            self.warnings.append(f"Only {len(unique_citations)} unique sources cited (recommended: ≥10)")
+            self.warnings.append(
+                f"Only {len(unique_citations)} unique sources cited (recommended: ≥10)"
+            )
 
         # Check for consecutive citation numbers
         citation_nums = sorted([int(c) for c in unique_citations])
@@ -140,13 +140,15 @@ class ReportValidator:
             missing = expected - set(citation_nums)
 
             if missing:
-                self.warnings.append(f"Non-consecutive citation numbers, missing: {sorted(missing)}")
+                self.warnings.append(
+                    f"Non-consecutive citation numbers, missing: {sorted(missing)}"
+                )
 
         return True
 
     def _check_bibliography(self) -> bool:
         """Check bibliography exists, matches citations, and has no truncation placeholders"""
-        pattern = r'## Bibliography(.*?)(?=##|\Z)'
+        pattern = r"## Bibliography(.*?)(?=##|\Z)"
         match = re.search(pattern, self.content, re.DOTALL | re.IGNORECASE)
 
         if not match:
@@ -157,23 +159,27 @@ class ReportValidator:
 
         # CRITICAL: Check for truncation placeholders (2025 CiteGuard enhancement)
         truncation_patterns = [
-            (r'\[\d+-\d+\]', 'Citation range (e.g., [8-75])'),
-            (r'Additional.*citations', 'Phrase "Additional citations"'),
-            (r'would be included', 'Phrase "would be included"'),
-            (r'\[\.\.\.continue', 'Pattern "[...continue"'),
-            (r'\[Continue with', 'Pattern "[Continue with"'),
-            (r'etc\.(?!\w)', 'Standalone "etc."'),
-            (r'and so on', 'Phrase "and so on"'),
+            (r"\[\d+-\d+\]", "Citation range (e.g., [8-75])"),
+            (r"Additional.*citations", 'Phrase "Additional citations"'),
+            (r"would be included", 'Phrase "would be included"'),
+            (r"\[\.\.\.continue", 'Pattern "[...continue"'),
+            (r"\[Continue with", 'Pattern "[Continue with"'),
+            (r"etc\.(?!\w)", 'Standalone "etc."'),
+            (r"and so on", 'Phrase "and so on"'),
         ]
 
         for pattern_re, description in truncation_patterns:
             if re.search(pattern_re, bib_section, re.IGNORECASE):
-                self.errors.append(f"⚠️ CRITICAL: Bibliography contains truncation placeholder: {description}")
-                self.errors.append(f"   This makes the report UNUSABLE - complete bibliography required")
+                self.errors.append(
+                    f"⚠️ CRITICAL: Bibliography contains truncation placeholder: {description}"
+                )
+                self.errors.append(
+                    "   This makes the report UNUSABLE - complete bibliography required"
+                )
                 return False
 
         # Count bibliography entries [1], [2], etc.
-        bib_entries = re.findall(r'^\[(\d+)\]', bib_section, re.MULTILINE)
+        bib_entries = re.findall(r"^\[(\d+)\]", bib_section, re.MULTILINE)
 
         if not bib_entries:
             self.errors.append("Bibliography has no entries")
@@ -190,7 +196,7 @@ class ReportValidator:
                 return False
 
         # Find citations in text
-        text_citations = set(re.findall(r'\[(\d+)\]', self.content))
+        text_citations = set(re.findall(r"\[(\d+)\]", self.content))
         bib_citations = set(bib_entries)
 
         # Check all citations have bibliography entries
@@ -209,9 +215,15 @@ class ReportValidator:
     def _check_placeholders(self) -> bool:
         """Check for placeholder text that shouldn't be in final report"""
         placeholders = [
-            'TBD', 'TODO', 'FIXME', 'XXX',
-            '[citation needed]', '[needs citation]',
-            '[placeholder]', '[TODO]', '[TBD]'
+            "TBD",
+            "TODO",
+            "FIXME",
+            "XXX",
+            "[citation needed]",
+            "[needs citation]",
+            "[placeholder]",
+            "[TODO]",
+            "[TBD]",
         ]
 
         found_placeholders = []
@@ -228,18 +240,23 @@ class ReportValidator:
     def _check_content_truncation(self) -> bool:
         """Check for content truncation patterns (2025 Progressive Assembly enhancement)"""
         truncation_patterns = [
-            (r'Content continues', 'Phrase "Content continues"'),
-            (r'Due to length', 'Phrase "Due to length"'),
-            (r'would continue', 'Phrase "would continue"'),
-            (r'\[Sections \d+-\d+', 'Pattern "[Sections X-Y"'),
-            (r'Additional sections', 'Phrase "Additional sections"'),
-            (r'comprehensive.*word document that continues', 'Pattern "comprehensive...document that continues"'),
+            (r"Content continues", 'Phrase "Content continues"'),
+            (r"Due to length", 'Phrase "Due to length"'),
+            (r"would continue", 'Phrase "would continue"'),
+            (r"\[Sections \d+-\d+", 'Pattern "[Sections X-Y"'),
+            (r"Additional sections", 'Phrase "Additional sections"'),
+            (
+                r"comprehensive.*word document that continues",
+                'Pattern "comprehensive...document that continues"',
+            ),
         ]
 
         for pattern_re, description in truncation_patterns:
             if re.search(pattern_re, self.content, re.IGNORECASE):
                 self.errors.append(f"⚠️ CRITICAL: Content truncation detected: {description}")
-                self.errors.append(f"   Report is INCOMPLETE and UNUSABLE - regenerate with progressive assembly")
+                self.errors.append(
+                    "   Report is INCOMPLETE and UNUSABLE - regenerate with progressive assembly"
+                )
                 return False
 
         return True
@@ -256,14 +273,14 @@ class ReportValidator:
 
     def _check_source_count(self) -> bool:
         """Check minimum source count"""
-        pattern = r'## Bibliography(.*?)(?=##|\Z)'
+        pattern = r"## Bibliography(.*?)(?=##|\Z)"
         match = re.search(pattern, self.content, re.DOTALL | re.IGNORECASE)
 
         if not match:
             return True  # Already caught in bibliography check
 
         bib_section = match.group(1)
-        bib_entries = re.findall(r'^\[(\d+)\]', bib_section, re.MULTILINE)
+        bib_entries = re.findall(r"^\[(\d+)\]", bib_section, re.MULTILINE)
 
         source_count = len(set(bib_entries))
 
@@ -275,12 +292,12 @@ class ReportValidator:
     def _check_broken_references(self) -> bool:
         """Check for broken internal references"""
         # Find all markdown links [text](./path)
-        internal_links = re.findall(r'\[.*?\]\((\.\/.*?)\)', self.content)
+        internal_links = re.findall(r"\[.*?\]\((\.\/.*?)\)", self.content)
 
         broken = []
         for link in internal_links:
             # Remove anchor if present
-            link_path = link.split('#')[0]
+            link_path = link.split("#")[0]
             full_path = self.report_path.parent / link_path
 
             if not full_path.exists():
@@ -295,7 +312,7 @@ class ReportValidator:
     def _print_summary(self):
         """Print validation summary"""
         print(f"\n{'='*60}")
-        print(f"VALIDATION SUMMARY")
+        print("VALIDATION SUMMARY")
         print(f"{'='*60}\n")
 
         if self.errors:
@@ -326,14 +343,11 @@ def main():
 Examples:
   python validate_report.py --report report.md
   python validate_report.py -r ~/freelance-2026/projects/hh-ai-agent/docs/outbox/research_20251104_153045.md
-        """
+        """,
     )
 
     parser.add_argument(
-        '--report', '-r',
-        type=str,
-        required=True,
-        help='Path to research report markdown file'
+        "--report", "-r", type=str, required=True, help="Path to research report markdown file"
     )
 
     args = parser.parse_args()
@@ -350,5 +364,5 @@ Examples:
     sys.exit(0 if passed else 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

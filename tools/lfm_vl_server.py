@@ -75,7 +75,7 @@ def resolve_image(url: str | None) -> str | None:
         urllib.request.urlretrieve(url, p)
         return p
     if url.startswith("file://"):
-        return url[len("file://"):]
+        return url[len("file://") :]
     return url  # локальный путь
 
 

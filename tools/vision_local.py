@@ -48,8 +48,15 @@ def understand(
         if not backend_available("mlx_vlm"):
             raise RuntimeError("mlx_vlm не установлен: pip install mlx-vlm")
         cmd = [
-            sys.executable, "-m", "mlx_vlm.generate",
-            "--model", model, "--image", image_path, "--prompt", prompt,
+            sys.executable,
+            "-m",
+            "mlx_vlm.generate",
+            "--model",
+            model,
+            "--image",
+            image_path,
+            "--prompt",
+            prompt,
         ]
         out = subprocess.run(cmd, capture_output=True, text=True, check=True)
         return out.stdout.strip()

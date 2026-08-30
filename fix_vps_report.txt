@@ -1,0 +1,59 @@
+=== START Sun Aug 30 18:11:18 MSK 2026 ===
+Туннель 2222 жив на итерации 1
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-190-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Sun Aug 30 15:11:19 UTC 2026
+
+  System load:  0.0                Processes:             142
+  Usage of /:   65.4% of 48.27GB   Users logged in:       1
+  Memory usage: 53%                IPv4 address for eth0: 217.149.23.113
+  Swap usage:   40%                IPv6 address for eth0: 2a03:6f00:a::2:d5cf
+
+ * Canonical Workshop gives developers fast, composable, reproducible, and
+   secure developer environments that are perfect for agentic workflows.
+
+   https://ubuntu.com/workshop
+
+Expanded Security Maintenance for Applications is not enabled.
+
+9 updates can be applied immediately.
+To see these additional updates run: apt list --upgradable
+
+44 additional security updates can be applied with ESM Apps.
+Learn more about enabling ESM Apps service at https://ubuntu.com/esm
+
+New release '24.04.4 LTS' available.
+Run 'do-release-upgrade' to upgrade to it.
+
+
+*** System restart required ***
+=== SSH на VPS OK ===
+--- systemctl omni/hermes ---
+active
+active
+active
+active
+--- порт 20128 ---
+LISTEN 0      511        127.0.0.1:20128      0.0.0.0:*    users:(("omniroute (v16.",pid=831958,fd=21))                                                                                                                      
+--- curl localhost:20128/v1/models ---
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.10/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+  File "/usr/lib/python3.10/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python3.10/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/usr/lib/python3.10/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+CURL FAILED
+--- curl chat test ---
+
+--- journalctl omni errors (10 min) ---
+=== END Sun Aug 30 18:11:20 MSK 2026 ===

@@ -14,7 +14,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-from tools.vision_local import understand, detect_objects, backend_available  # noqa: E402
+from tools.vision_local import understand, backend_available  # noqa: E402
 
 
 def _run() -> tuple[int, list[str]]:
@@ -64,4 +64,6 @@ if __name__ == "__main__":
         for f in fails:
             print(f"  - {f}")
         sys.exit(1)
-    print("✅ EVAL PASSED — LFM-1/LFM-2 vision connector logic OK (модель прогоняется на Mac, LFM-4)")
+    print(
+        "✅ EVAL PASSED — LFM-1/LFM-2 vision connector logic OK (модель прогоняется на Mac, LFM-4)"
+    )

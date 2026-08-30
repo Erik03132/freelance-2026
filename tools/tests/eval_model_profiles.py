@@ -64,4 +64,6 @@ if __name__ == "__main__":
         for f in fails:
             print(f"  - {f}")
         sys.exit(1)
-    print(f"✅ EVAL PASSED — BK-4 per-task model profiles ({len(MODEL_PROFILES)} задач, fallback OK)")
+    print(
+        f"✅ EVAL PASSED — BK-4 per-task model profiles ({len(MODEL_PROFILES)} задач, fallback OK)"
+    )

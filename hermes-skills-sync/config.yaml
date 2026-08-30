@@ -1,0 +1,7 @@
+# Hermes Skills Sync Configuration
+# Core settings for global synchronization of Hermes Skills
+
+canon_dir: "/Users/igorvasin/freelance-2026/hermes-skills-sync/skills"
+runtime_dir: "/Users/igorvasin/.hermes/profiles"
+vps_host: "user@vps-217-149-23-113"
+log_dir: "/Users/igorvasin/freelance-2026/hermes-skills-sync/logs"

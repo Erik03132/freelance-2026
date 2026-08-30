@@ -25,21 +25,28 @@ def _run() -> tuple[int, list[str]]:
         fails.append(f"TP-1: text-only некорректно: p={p!r} img={img!r}")
 
     # TP-2: система+юзер текст собираются
-    p, img = extract_text_and_image([
-        {"role": "system", "content": "ты помощник"},
-        {"role": "user", "content": "что на фото?"},
-    ])
+    p, img = extract_text_and_image(
+        [
+            {"role": "system", "content": "ты помощник"},
+            {"role": "user", "content": "что на фото?"},
+        ]
+    )
     if "помощник" not in p or "что на фото" not in p or img is not None:
         fails.append(f"TP-2: сбор текста некорректен: {p!r}")
 
     # TP-3: content-массив с image_url (data URI)
     data = "data:image/png;base64," + base64.b64encode(b"\x89PNG\r\n").decode()
-    p, img = extract_text_and_image([
-        {"role": "user", "content": [
-            {"type": "text", "text": "опиши"},
-            {"type": "image_url", "image_url": {"url": data}},
-        ]},
-    ])
+    p, img = extract_text_and_image(
+        [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "опиши"},
+                    {"type": "image_url", "image_url": {"url": data}},
+                ],
+            },
+        ]
+    )
     if p != "опиши" or img is None:
         fails.append(f"TP-3: image_url не извлечён: p={p!r} img={img!r}")
     else:
@@ -54,12 +61,17 @@ def _run() -> tuple[int, list[str]]:
                 pass
 
     # TP-4: несколько картинок — берётся первая
-    p, img = extract_text_and_image([
-        {"role": "user", "content": [
-            {"type": "image_url", "image_url": {"url": "file:///tmp/a.png"}},
-            {"type": "image_url", "image_url": {"url": "file:///tmp/b.png"}},
-        ]},
-    ])
+    p, img = extract_text_and_image(
+        [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image_url", "image_url": {"url": "file:///tmp/a.png"}},
+                    {"type": "image_url", "image_url": {"url": "file:///tmp/b.png"}},
+                ],
+            },
+        ]
+    )
     if img != "file:///tmp/a.png":
         fails.append(f"TP-4: взята не первая картинка: {img!r}")
 

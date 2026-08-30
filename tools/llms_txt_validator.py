@@ -37,9 +37,14 @@ def parse_llms_txt(text: str) -> dict:
     first_idx = next((i for i, ln in enumerate(lines) if ln.strip()), None)
     if first_idx is None:
         return {
-            "title": None, "title_is_first": False, "h1_count": 0,
-            "description": None, "description_before_title": False,
-            "sections": [], "malformed_entries": [], "stray_lines": [],
+            "title": None,
+            "title_is_first": False,
+            "h1_count": 0,
+            "description": None,
+            "description_before_title": False,
+            "sections": [],
+            "malformed_entries": [],
+            "stray_lines": [],
         }
 
     h1_count = sum(1 for ln in lines if _H1.match(ln))
@@ -106,7 +111,9 @@ def validate_llms_txt(text: str) -> dict:
     findings: list[dict] = []
 
     def add(sev: str, check: str, msg: str) -> None:
-        findings.append({"severity": sev, "check": check, "weight": SEVERITY_WEIGHT[sev], "message": msg})
+        findings.append(
+            {"severity": sev, "check": check, "weight": SEVERITY_WEIGHT[sev], "message": msg}
+        )
 
     if not text or not text.strip():
         add("critical", "empty", "файл пустой — читать нечего")

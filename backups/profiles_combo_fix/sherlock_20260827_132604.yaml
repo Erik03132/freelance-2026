@@ -1,0 +1,278 @@
+model:
+  provider: omniroute
+  default: auto/best-free
+  base_url: http://127.0.0.1:20128/v1
+  key_env: OMNI_API_KEY
+  aliases:
+    best-coding: omniroute/auto/best-coding
+    free-coding: omniroute/auto/free-coding
+providers:
+  omniroute:
+    name: OmniRoute (OpenCode Zen + OpenRouter + Orca)
+    base_url: http://127.0.0.1:20128/v1
+    key_env: OMNI_API_KEY
+    discover_models: true
+    models:
+      auto/free-coding:
+        name: '🆓 Free Coding (combo: OC Zen + OR + Orca)'
+      auto/best-coding:
+        name: 🏆 Best Coding (top general-purpose coding combo)
+      nous/Hermes-4-70B:
+        name: 🔥 Nous Hermes 4 70B (via OmniRoute)
+      nous/Hermes-4-405B:
+        name: 🔥 Nous Hermes 4 405B (via OmniRoute)
+      openrouter/stealth/ox-alpha:
+        name: ⚠️ Ox Alpha (LOW-TRUST · stealth provider RETains prompts · 
+          public-code ONLY · no secrets)
+database:
+  journal_mode: wal
+runtime:
+  nofile_soft_limit: 4096
+agent:
+  max_turns: 500
+  verbose: false
+  reasoning_effort: medium
+  personalities: {}
+terminal:
+  backend: local
+  cwd: .
+  timeout: 180
+  home_mode: auto
+  container_cpu: 1
+  container_memory: 5120
+  container_disk: 51200
+  container_persistent: true
+  docker_mount_cwd_to_workspace: false
+  lifetime_seconds: 300
+web:
+  backend: firecrawl
+browser:
+  inactivity_timeout: 120
+  cloud_provider: browser-use
+tool_loop_guardrails:
+  warnings_enabled: true
+  hard_stop_enabled: false
+  warn_after:
+    exact_failure: 2
+    same_tool_failure: 3
+    idempotent_no_progress: 2
+  hard_stop_after:
+    exact_failure: 5
+    same_tool_failure: 8
+    idempotent_no_progress: 5
+compression:
+  enabled: true
+  progress_notices: false
+  threshold: 0.5
+  target_ratio: 0.2
+  protect_last_n: 20
+  min_tail_user_messages: 1
+  max_attempts: 3
+  proactive_prune_tokens: 0
+  proactive_prune_min_result_chars: 8000
+  proactive_prune_min_reclaim_tokens: 4096
+  protect_first_n: 3
+  codex_gpt55_autoraise: true
+  codex_app_server_auto: native
+  codex_responses_native: false
+  codex_responses_compact_threshold: 200000
+  idle_compact_after_seconds: 0
+prompt_caching:
+  cache_ttl: 5m
+display:
+  compact: false
+  busy_input_mode: interrupt
+  bell_on_complete: false
+  show_reasoning: true
+  background_process_notifications: concise
+  streaming: false
+  skin: default
+  interim_assistant_messages: true
+  tool_progress: all
+  cleanup_progress: false
+  long_running_notifications: true
+  busy_ack_detail: true
+tts:
+  provider: openai
+stt:
+  enabled: true
+  language: en
+  local:
+    model: small
+    language: russia
+  openai:
+    model: whisper-1
+    language: ''
+voice:
+  auto_tts: false
+wake_word:
+  enabled: false
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  memory_char_limit: 2200
+  user_char_limit: 1375
+  nudge_interval: 10
+  flush_min_turns: 6
+delegation:
+  max_iterations: 250
+moa:
+  presets:
+    default:
+      reference_models:
+        - provider: omniroute
+          model: auto/free-coding
+          enabled: true
+      degraded_reference_policy: loud
+      fanout: user_turn
+  reference_models:
+    - provider: omniroute
+      model: auto/free-coding
+      enabled: true
+  aggregator:
+    provider: omniroute
+    model: auto/free-coding
+  degraded_reference_policy: loud
+  max_tokens: 4096
+  fanout: user_turn
+  enabled: true
+skills:
+  creation_nudge_interval: 15
+kanban:
+  review_dispatch: true
+code_execution:
+  timeout: 300
+  max_tool_calls: 50
+model_catalog:
+  enabled: true
+  url: https://hermes-agent.nousresearch.com/docs/api/model-catalog.json
+  ttl_hours: 1
+streaming:
+  enabled: false
+onboarding:
+  seen:
+    openclaw_residue_cleanup: true
+telemetry:
+  shared_metrics:
+    enabled: false
+updates:
+  pre_update_backup: quick
+  backup_keep: 5
+  non_interactive_local_changes: stash
+_config_version: 38
+session_reset:
+  mode: none
+  idle_minutes: 1440
+  at_hour: 4
+group_sessions_per_user: true
+platform_toolsets:
+  cli:
+    - a2a
+    - bfl
+    - browser
+    - clarify
+    - code_execution
+    - computer_use
+    - cronjob
+    - delegation
+    - file
+    - homeassistant
+    - image_gen
+    - kanban
+    - memory
+    - session_search
+    - skills
+    - spotify
+    - terminal
+    - todo
+    - tts
+    - video
+    - video_gen
+    - vision
+    - web
+  desktop:
+    - browser
+    - clarify
+    - code_execution
+    - cronjob
+    - delegation
+    - file
+    - image_gen
+    - memory
+    - skills
+    - terminal
+    - todo
+    - tts
+    - vision
+    - web
+  telegram:
+    - hermes-telegram
+  discord:
+    - hermes-discord
+  whatsapp:
+    - hermes-whatsapp
+  slack:
+    - hermes-slack
+  signal:
+    - hermes-signal
+  homeassistant:
+    - hermes-homeassistant
+  qqbot:
+    - hermes-qqbot
+  yuanbao:
+    - hermes-yuanbao
+  teams:
+    - hermes-teams
+  google_chat:
+    - hermes-google_chat
+platforms:
+  telegram:
+    enabled: false
+image_gen:
+  use_gateway: true
+mcp_servers:
+  vercel:
+    url: https://mcp.vercel.com
+    auth: oauth
+    enabled: true
+  hugging_face:
+    url: https://huggingface.co/mcp
+    auth: oauth
+    enabled: true
+  supabase:
+    url: https://mcp.supabase.com/mcp
+    auth: oauth
+    enabled: false
+known_plugin_toolsets:
+  cli:
+    - a2a
+    - spotify
+known_builtin_toolsets:
+  cli:
+    - bfl
+    - browser
+    - clarify
+    - code_execution
+    - computer_use
+    - context_engine
+    - cronjob
+    - delegation
+    - discord
+    - discord_admin
+    - file
+    - homeassistant
+    - image_gen
+    - memory
+    - session_search
+    - skills
+    - spotify
+    - stt
+    - terminal
+    - todo
+    - tts
+    - video
+    - video_gen
+    - vision
+    - web
+    - x_search
+    - yuanbao

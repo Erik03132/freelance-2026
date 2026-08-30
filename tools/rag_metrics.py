@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import math
 from statistics import mean
-from typing import Iterable, Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 
 
 def recall_at_k(retrieved: Sequence[str], expected: Sequence[str], k: int | None = None) -> float:
@@ -33,7 +33,7 @@ def mrr_at_k(retrieved: Sequence[str], expected: Sequence[str], k: int | None = 
 
 
 def _dcg(gains: Sequence[int]) -> float:
-    return sum((2 ** g - 1) / math.log2(i + 2) for i, g in enumerate(gains))
+    return sum((2**g - 1) / math.log2(i + 2) for i, g in enumerate(gains))
 
 
 def ndcg_at_k(

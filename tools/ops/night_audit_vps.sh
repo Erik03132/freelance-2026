@@ -6,7 +6,7 @@
 #   Или вручную: bash tools/night_audit_vps.sh
 #
 # Фаза 1: ruff + grep-секреты
-# Фаза 2: Grok 4.5 (OpenRouter) — глубокий код-ревью
+# Фаза 2: Free-каскад моделей (OpenRouter) — глубокий код-ревью
 # Фаза 3: Отчёт в Telegram Игорю
 # ============================================================
 
@@ -69,7 +69,7 @@ fi
 
 # ─── Фаза 2: Сильная LLM (Grok 4.5) ──────────────────────────
 echo ""
-echo "⚡ Фаза 2: Grok 4.5 — глубокий код-ревью"
+echo "⚡ Фаза 2: Бесплатная LLM — глубокий код-ревью"
 
 LLM_TEXT=""
 if [ -n "$OPENROUTER_KEY" ]; then
@@ -87,7 +87,7 @@ if [ -n "$OPENROUTER_KEY" ]; then
     done
 
     LLM_TEXT=$($VENV -c "
-import json, os, requests
+import json, requests
 
 proxy_url = '${PROXY_URL}'
 key = '${OPENROUTER_KEY}'
@@ -109,24 +109,41 @@ prompt = '''Ты — старший разработчик на code-review. Н�
 ### 🔵 Замечания
 Если всё чисто — напиши: ✅ Критических ошибок нет, всё чисто.'''
 
-try:
-    proxies = {'https': proxy_url, 'http': proxy_url} if proxy_url else None
-    resp = requests.post(
-        'https://openrouter.ai/api/v1/chat/completions',
-        headers={'Authorization': f'Bearer {key}', 'Content-Type': 'application/json'},
-        json={'model': 'x-ai/grok-4.5', 'messages': [{'role': 'user', 'content': prompt}], 'temperature': 0.1, 'max_tokens': 1500},
-        proxies=proxies,
-        timeout=60
-    )
-    if resp.status_code == 200:
-        print(resp.json()['choices'][0]['message']['content'])
-    else:
-        err = resp.json().get('error', {}).get('message', resp.text[:200])
-        print(f'⚠️ {err}')
-except Exception as e:
-    print(f'⚠️ {e}')
+# Free-каскад моделей OpenRouter (Grok платный — НЕ используем).
+# Порядок = приоритет; при сбое одной идём к следующей (fallback-цепочка).
+FREE_MODELS = [
+    'z-ai/glm-5.2:free',
+    'nvidia/nemotron-3-super-120b-a12b:free',
+    'deepseek/deepseek-chat-v3-0324:free',
+    'qwen/qwen3-coder:free',
+    'cohere/north-mini-code:free',
+    'google/gemma-3-27b-it:free',
+]
+proxies = {'https': proxy_url, 'http': proxy_url} if proxy_url else None
+last_err = ''
+for model in FREE_MODELS:
+    try:
+        resp = requests.post(
+            'https://openrouter.ai/api/v1/chat/completions',
+            headers={'Authorization': f'Bearer {key}', 'Content-Type': 'application/json'},
+            json={'model': model, 'messages': [{'role': 'user', 'content': prompt}], 'temperature': 0.1, 'max_tokens': 1500},
+            proxies=proxies,
+            timeout=60
+        )
+        if resp.status_code == 200:
+            print(resp.json()['choices'][0]['message']['content'])
+            print(f'\n[model: {model}]')
+            break
+        else:
+            last_err = resp.json().get('error', {}).get('message', resp.text[:200])
+            print(f'⚠️ {model}: {last_err}')
+    except Exception as e:
+        last_err = str(e)
+        print(f'⚠️ {model}: {e}')
+else:
+    print(f'⚠️ Все free-модели упали. Последняя ошибка: {last_err}')
 " <<< "$AUDIT_PAYLOAD" 2>&1)
-    echo "   ✅ Grok 4.5 — ревью завершено"
+    echo "   ✅ Code-review завершён (free-модель)"
 else
     LLM_TEXT="⚠️ OPENROUTER_KEY не найден"
     echo "   $LLM_TEXT"
@@ -148,7 +165,7 @@ ${RUFF_TEXT}
 ### 🔑 Секреты
 ${SECRETS_TEXT}
 
-## ⚡ Фаза 2: AI Code Review (Grok 4.5)
+## ⚡ Фаза 2: AI Code Review (free-каскад моделей)
 
 ${LLM_TEXT}
 
@@ -165,7 +182,7 @@ if [ -n "$TG_BOT_TOKEN" ]; then
     $VENV -c "
 import json, requests
 url = 'https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage'
-msg = {'chat_id': ${TG_ADMIN_ID}, 'text': '🌙 Night Audit VPS — ${DATE}\nPhase 1:\n• Ruff: ${RUFF_TEXT}\n• Secrets: ${SECRETS_TEXT}\n\nPhase 2: Grok 4.5 — review done\n\nReport: ${REPORT_FILE}'}
+msg = {'chat_id': ${TG_ADMIN_ID}, 'text': '🌙 Night Audit VPS — ${DATE}\nPhase 1:\n• Ruff: ${RUFF_TEXT}\n• Secrets: ${SECRETS_TEXT}\n\nPhase 2: free-каскад — review done\n\nReport: ${REPORT_FILE}'}
 r = requests.post(url, json=msg, proxies={'https': '${PROXY_URL}'}, timeout=10)
 print('📨 Sent to Telegram' if r.status_code == 200 else f'⚠ TG {r.status_code}')
 " 2>&1

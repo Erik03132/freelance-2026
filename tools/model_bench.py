@@ -60,12 +60,18 @@ TASKS: list[tuple[str, str, callable]] = [
     (
         "hello_world",
         "Выведи ровно одну строку: HELLO",
-        lambda out, err, rc: (out.strip() == "HELLO" and rc == 0, 1 if out.strip() == "HELLO" else 0),
+        lambda out, err, rc: (
+            out.strip() == "HELLO" and rc == 0,
+            1 if out.strip() == "HELLO" else 0,
+        ),
     ),
     (
         "reverse_string",
         "Выведи строку 'abcdef' в обратном порядке (fedcba).",
-        lambda out, err, rc: (out.strip() == "fedcba" and rc == 0, 1 if out.strip() == "fedcba" else 0),
+        lambda out, err, rc: (
+            out.strip() == "fedcba" and rc == 0,
+            1 if out.strip() == "fedcba" else 0,
+        ),
     ),
     (
         "sum_range",
@@ -109,8 +115,14 @@ def call_model(prompt: str, model: str) -> str:
     resp = client.chat.completions.create(
         model=model,
         messages=[
-            {"role": "system", "content": f"Ты решаешь задачу ТОЛЬКО через bash. Инструмент: {MINIMAL_TOOL_SURFACE}."},
-            {"role": "user", "content": prompt + "\nВерни ТОЛЬКО bash-скрипт в блоке ```bash ... ```."},
+            {
+                "role": "system",
+                "content": f"Ты решаешь задачу ТОЛЬКО через bash. Инструмент: {MINIMAL_TOOL_SURFACE}.",
+            },
+            {
+                "role": "user",
+                "content": prompt + "\nВерни ТОЛЬКО bash-скрипт в блоке ```bash ... ```.",
+            },
         ],
         timeout=60,
     )
@@ -152,7 +164,9 @@ def selftest() -> int:
     if bad["passed"] or bad["score"]:
         fails.append("FP: неверное решение прошло верификацию")
     # compare_models корректно сортирует по score
-    rows = compare_models({"m1": [{"passed": True, "score": 1}], "m2": [{"passed": False, "score": 0}]})
+    rows = compare_models(
+        {"m1": [{"passed": True, "score": 1}], "m2": [{"passed": False, "score": 0}]}
+    )
     if rows[0]["model"] != "m1":
         fails.append("compare_models: сортировка по score сломана")
     if fails:
@@ -160,15 +174,23 @@ def selftest() -> int:
         for f in fails:
             print(f"  - {f}")
         return 1
-    print(f"✅ MODEL_BENCH SELFTEST PASSED — контракт bash-only OK, {len(TASKS)} задач, верификатор+сводка OK")
+    print(
+        f"✅ MODEL_BENCH SELFTEST PASSED — контракт bash-only OK, {len(TASKS)} задач, верификатор+сводка OK"
+    )
     return 0
 
 
 def main():
     ap = argparse.ArgumentParser(description="HZ-5 Model Benchmark Harness (Bash Only)")
-    ap.add_argument("--selftest", action="store_true", help="Офлайн-проверка механики (для eval_gate)")
-    ap.add_argument("--live", action="store_true", help="Лайв-прогон по моделям (нужен OPENAI_BASE_URL+KEY)")
-    ap.add_argument("--models", nargs="*", default=None, help="Список моделей (иначе DEFAULT_MODELS)")
+    ap.add_argument(
+        "--selftest", action="store_true", help="Офлайн-проверка механики (для eval_gate)"
+    )
+    ap.add_argument(
+        "--live", action="store_true", help="Лайв-прогон по моделям (нужен OPENAI_BASE_URL+KEY)"
+    )
+    ap.add_argument(
+        "--models", nargs="*", default=None, help="Список моделей (иначе DEFAULT_MODELS)"
+    )
     args = ap.parse_args()
 
     if args.selftest:
@@ -176,7 +198,13 @@ def main():
     if args.live:
         models = args.models or DEFAULT_MODELS
         res = run_bench(models)
-        print(json.dumps({"tool_surface": MINIMAL_TOOL_SURFACE, "results": compare_models(res)}, ensure_ascii=False, indent=2))
+        print(
+            json.dumps(
+                {"tool_surface": MINIMAL_TOOL_SURFACE, "results": compare_models(res)},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         sys.exit(0)
     print("Используй --selftest (офлайн) или --live (нужен OPENAI_BASE_URL+OPENAI_API_KEY).")
     sys.exit(2)

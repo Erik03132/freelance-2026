@@ -86,10 +86,14 @@ def _run() -> tuple[int, list[str]]:
 
     embed_query("q", spy)
     if not seen["last"].startswith(QUERY_PREFIX):
-        fails.append(f"TP-6: embed_query должен добавлять '{QUERY_PREFIX}', получили {seen['last']!r}")
+        fails.append(
+            f"TP-6: embed_query должен добавлять '{QUERY_PREFIX}', получили {seen['last']!r}"
+        )
     embed_document("d", spy)
     if not seen["last"].startswith(DOC_PREFIX):
-        fails.append(f"TP-6: embed_document должен добавлять '{DOC_PREFIX}', получили {seen['last']!r}")
+        fails.append(
+            f"TP-6: embed_document должен добавлять '{DOC_PREFIX}', получили {seen['last']!r}"
+        )
 
     # TP-7 (RAG-5): build_prompt содержит grounding + контекст + вопрос
     p = build_prompt("Вопрос?", ["кусок1", "кусок2"])

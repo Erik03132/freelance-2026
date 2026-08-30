@@ -100,11 +100,16 @@ if [[ -d "$BACKUP_ROOT" ]]; then
         RESTORE_ROOT=$(find "$TEST_DIR" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | head -1)
         
         if [[ -n "$RESTORE_ROOT" ]]; then
-            verify_file "COLD_START.md"       "$RESTORE_ROOT/core/COLD_START.md"
-            verify_file "GLOBAL_CORE_STANDARDS.md" "$RESTORE_ROOT/core/GLOBAL_CORE_STANDARDS.md"
-            verify_dir  "Skills"              "$RESTORE_ROOT/skills" 3
-            verify_dir  "Knowledge"           "$RESTORE_ROOT/knowledge" 1
-            verify_dir  "Strategy"            "$RESTORE_ROOT/strategy" 1
+            # Current post-migration contract: workspace state + Hermes skills.
+            # Legacy Antigravity core/skills are optional and must not make a
+            # valid modern backup fail merely because those paths were retired.
+            verify_file "chp.md"               "$RESTORE_ROOT/strategy/chp.md"
+            verify_file "ACTIVE_TASKS.md"      "$RESTORE_ROOT/strategy/ACTIVE_TASKS.md"
+            verify_dir  "Hermes Skills"        "$RESTORE_ROOT/hermes/skills" 3
+            verify_dir  "Strategy"             "$RESTORE_ROOT/strategy" 2
+            if [[ -d "$RESTORE_ROOT/knowledge" ]]; then
+                verify_dir "Legacy Knowledge (optional)" "$RESTORE_ROOT/knowledge" 1
+            fi
         else
             log_fail "Archive extraction failed"
             ((FAIL++)) || true
@@ -129,11 +134,14 @@ if [[ -d "$WORKSPACE/.git" ]]; then
 fi
 
 echo ""
-echo -e "${BOLD}📋 Проверка Antigravity brain:${NC}"
+echo -e "${BOLD}📋 Проверка текущего Hermes/workspace:${NC}"
 
-verify_file "COLD_START.md (live)"       "$ANTIGRAVITY/COLD_START.md"
-verify_dir  "Skills (live)"             "$ANTIGRAVITY/skills" 3
-verify_dir  "Knowledge (live)"          "$ANTIGRAVITY/knowledge" 1
+verify_file "chp.md (live)"             "$WORKSPACE/chp.md"
+verify_file "ACTIVE_TASKS.md (live)"    "$WORKSPACE/ACTIVE_TASKS.md"
+verify_dir  "Hermes Skills (live)"      "$HOME/.hermes/skills" 3
+if [[ -d "$ANTIGRAVITY/knowledge" ]] && find "$ANTIGRAVITY/knowledge" -type f -print -quit 2>/dev/null | grep -q .; then
+    verify_dir "Legacy Knowledge (live, optional)" "$ANTIGRAVITY/knowledge" 1
+fi
 
 # ============================ ИТОГ ====================================
 

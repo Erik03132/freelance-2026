@@ -40,18 +40,20 @@ FREE_MODELS = [
     "openrouter/mistralai/mistral-large-3:free",
 ]
 
+COMBO_FREE = "combo:auto/free-coding"
+
 TIER_CHAINS = {
-    0: FREE_MODELS[:],
-    1: [f"local:{OLLAMA_MODEL}", "openrouter/deepseek/deepseek-chat", "openrouter/google/gemini-2.5-flash", "openrouter/moonshotai/kimi-k2"],
-    2: [f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-sonnet-4.6", "openrouter/openai/gpt-4o", "openrouter/google/gemini-2.5-pro"],
-    3: [f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-opus-4.8", "openrouter/anthropic/claude-fable-5", "openrouter/openai/gpt-5.6-sol"],
+    0: [COMBO_FREE] + FREE_MODELS[:],
+    1: [COMBO_FREE, f"local:{OLLAMA_MODEL}", "openrouter/deepseek/deepseek-chat", "openrouter/google/gemini-2.5-flash", "openrouter/moonshotai/kimi-k2"],
+    2: [COMBO_FREE, f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-sonnet-4.6", "openrouter/openai/gpt-4o", "openrouter/google/gemini-2.5-pro"],
+    3: [COMBO_FREE, f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-opus-4.8", "openrouter/anthropic/claude-fable-5", "openrouter/openai/gpt-5.6-sol"],
 }
 
 VISION_CHAINS = {
     0: [f"local:{OLLAMA_MODEL}", "openrouter/google/gemma-4-26b-a4b-it:free", "openrouter/google/gemma-4-31b-it:free", "openrouter/nvidia/nemotron-nano-12b-v2-vl:free", "openrouter/qwen/qwen-vl-plus:free", "openrouter/sentence-transformers/all-roles-multimodal-v2:free"],
     1: [f"local:{OLLAMA_MODEL}", "openrouter/google/gemma-4-26b-a4b-it:free", "openrouter/google/gemini-2.5-flash", "openrouter/openai/gpt-4o-mini"],
-    2: [f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-sonnet-4.6", "openrouter/openai/gpt-4o", "openrouter/google/gemini-2.5-pro"],
-    3: [f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-sonnet-5", "openrouter/openai/gpt-5.6-sol", "openrouter/anthropic/claude-opus-4.8"],
+    2: [COMBO_FREE, f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-sonnet-4.6", "openrouter/openai/gpt-4o", "openrouter/google/gemini-2.5-pro"],
+    3: [COMBO_FREE, f"local:{OLLAMA_MODEL}", "openrouter/anthropic/claude-sonnet-5", "openrouter/openai/gpt-5.6-sol", "openrouter/anthropic/claude-opus-4.8"],
 }
 
 TIER_LABELS = {0: "Free", 1: "Cheap", 2: "Smart", 3: "Pro"}
@@ -206,16 +208,63 @@ def _do_request(url: str, body: dict, api_key: Optional[str], timeout: int = 120
 def _clean_model(model: str) -> str:
     return model.lstrip("/").replace("openrouter/", "", 1)
 
+def _sse_to_json(raw: str, fallback_model: str) -> dict:
+    """Собрать SSE-поток (data: {...}) в единый chat.completion JSON."""
+    content = []
+    reasoning = []
+    usage = None
+    model = fallback_model
+    for line in raw.splitlines():
+        line = line.strip()
+        if not line.startswith("data:"):
+            continue
+        payload = line[len("data:"):].strip()
+        if payload == "[DONE]":
+            break
+        try:
+            evt = json.loads(payload)
+        except Exception:
+            continue
+        if evt.get("object") == "chat.completion.chunk":
+            if evt.get("model"):
+                model = evt["model"]
+            delta = (evt.get("choices") or [{}])[0].get("delta") or {}
+            if delta.get("content"):
+                content.append(delta["content"])
+            if delta.get("reasoning_content"):
+                reasoning.append(delta["reasoning_content"])
+            if evt.get("usage"):
+                usage = evt["usage"]
+    return {
+        "id": "combo",
+        "object": "chat.completion",
+        "created": int(time.time()),
+        "model": model,
+        "choices": [{
+            "index": 0,
+            "message": {"role": "assistant", "content": "".join(content)},
+            "finish_reason": "stop",
+        }],
+        "usage": usage or {"prompt_tokens": 0, "completion_tokens": len("".join(content).split()), "total_tokens": 0},
+    }
+
 def call_omni(model: str, body: dict, auth_header: Optional[str], retries=1) -> tuple:
     vps_key = OMNIR_VPS_KEY or OPENROUTER_API_KEY or auth_header
     if is_vps_alive():
-        for attempt in range(retries + 1):
-            body["model"] = _clean_model(model)
-            resp, mdl, err = _do_request(OMNIR_VPS_URL, body, vps_key, timeout=30)
+        if model.startswith("combo:"):
+            body["model"] = model[len("combo:"):]
+            resp, mdl, err = _do_request(OMNIR_VPS_URL, body, vps_key, timeout=240)
             if resp: return resp, mdl, False
-            if attempt < retries: time.sleep(1); continue
             import sys
-            print(f"[omni-auto] VPS: {err[:80]}. Fallback OpenRouter...", file=sys.stderr, flush=True)
+            print(f"[omni-auto] VPS combo {model}: {err[:80]}. Fallback...", file=sys.stderr, flush=True)
+        else:
+            for attempt in range(retries + 1):
+                body["model"] = _clean_model(model)
+                resp, mdl, err = _do_request(OMNIR_VPS_URL, body, vps_key, timeout=30)
+                if resp: return resp, mdl, False
+                if attempt < retries: time.sleep(1); continue
+                import sys
+                print(f"[omni-auto] VPS: {err[:80]}. Fallback OpenRouter...", file=sys.stderr, flush=True)
     body["model"] = _clean_model(model)
     fallback_key = OPENROUTER_API_KEY or auth_header
     resp2, mdl2, err2 = _do_request(OPENROUTER_FALLBACK_URL, body, fallback_key, timeout=120)
@@ -333,8 +382,9 @@ class Handler(BaseHTTPRequestHandler):
                 if not chunk: break
                 self.wfile.write(chunk); self.wfile.flush()
             resp.close(); return
-        try: resp_body = json.loads(resp.read())
-        except Exception: resp_body = {"error": "bad upstream response"}
+        raw = resp.read().decode("utf-8", "replace") if hasattr(resp, "read") else ""
+        try: resp_body = json.loads(raw)
+        except Exception: resp_body = _sse_to_json(raw, full_model)
         resp_body["model"] = full_model
         self._log_stats(full_model, tier if tier else 0, in_tokens=sum(len(m.get("content", "") or "") for m in messages) // 2, resp_body=resp_body)
         self.send_json(resp_body)

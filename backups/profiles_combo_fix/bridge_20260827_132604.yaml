@@ -1,0 +1,20 @@
+model:
+  provider: omniroute
+  default: auto/free-coding
+  base_url: http://127.0.0.1:20128/v1
+  api_key: sk-e354fcd9a30fe0d8-237223-acf5c392
+  key_env: OMNI_API_KEY
+fallback_providers:
+  - provider: custom
+    model: oc/deepseek-v4-flash-free
+    base_url: http://127.0.0.1:20128/v1
+    key_env: OMNI_API_KEY
+  - provider: openrouter
+    model: nvidia/nemotron-3-ultra-550b-a55b:free
+skills:
+  write_approval: true
+  external_dirs:
+    - ~/.config/opencode/skills
+    - ~/.agents/skills
+memory:
+  write_approval: true

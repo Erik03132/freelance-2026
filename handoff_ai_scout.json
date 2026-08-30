@@ -1,0 +1,31 @@
+{
+  "project": "AI Scout Unified Pipeline",
+  "task": "Сбор последних 3 новостей из Gmail/YouTube/Habr + триаж + экспертиза + уведомление в Telegram",
+  "context": "Реализована система сбора и анализа AI-новостей. Создана SQLite БД ai-scout.db с таблицами features. Написаны скрипты: email_collector.py, fast_triage.py, expert_router.py, angela_webhook.py. Проблемы: OAuth2 для Gmail API требует ручного подтверждения, YouTube/Habr нужны API-ключи. Пользователь хочет получить вердикт эксперта в Telegram @erik03132. Источники: Gmail (метка unread), YouTube (поиск 'ai'), Habr (тег 'искусственный интеллект').",
+  "files": [
+    "~/freelance-2026/ai-scout.db",
+    "~/freelance-2026/ai-scout.sql",
+    "~/freelance-2026/tools/ai-scout/email_collector.py",
+    "~/freelance-2026/tools/ai-scout/fast_triage.py",
+    "~/freelance-2026/tools/ai-scout/expert_router.py",
+    "~/freelance-2026/tools/ai-scout/angela_webhook.py",
+    "~/freelance-2026/tools/ai-scout/collect_latest.py"
+  ],
+  "skills": [
+    "ai-analysis-pipeline",
+    "telegram-hermes-bot",
+    "himalaya",
+    "youtube-content"
+  ],
+  "next_steps": [
+    "1. Собрать 3 последних письма из Gmail (обход OAuth через экспорт/RSS)",
+    "2. Собрать 3 последних видео с YouTube по запросу 'ai news' (youtube-dl или RSS)",
+    "3. Собрать 3 последних статьи с Habr по тегу 'искусственный интеллект' (requests + BeautifulSoup)",
+    "4. Загрузить все данные в ai-scout.db",
+    "5. Запустить fast_triage.py для автооценки",
+    "6. Отправить результаты в Telegram @erik03132"
+  ],
+  "escalation": false,
+  "deadline": "2026-08-29T20:00:00",
+  "notes": "Пользователь ждёт результат сегодня. Критически важно получить реальные данные, а не тестовые. Вердикт эксперта должен быть отправлен в Telegram."
+}

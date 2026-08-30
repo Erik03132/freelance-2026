@@ -1,0 +1,93 @@
+{
+  "db_meta": {
+    "schema_version": "1"
+  },
+  "provider_connections": [
+    {
+      "id": "52cd1717-3b96-4c8b-8235-f03cccd32663",
+      "provider": "openrouter",
+      "auth_type": "apikey",
+      "name": "OpenRouter",
+      "email": null,
+      "priority": 1,
+      "is_active": 1,
+      "display_name": null,
+      "default_model": null,
+      "api_key": "enc:v1:e77f6aa7c7413f61aa2e0aa9f2ceb92d:acfbb9a9904db04183771f4ab7c55d501e6835566e089400ab74363302e08adf6b26827fd12413fd6e04e9d3ab55ebe0aae0f45a07d065cdb5ff70937141fcb85c80a1a4cf2248749b:2900d306b52c29a7270971d627fcb3c3",
+      "provider_specific_data": "{\"apiKeyHealth\":{}}"
+    }
+  ],
+  "combos": [
+    {
+      "id": "9fe79065-aa9f-45dd-8527-2605d886526e",
+      "name": "auto/super-free",
+      "data": "{\"name\": \"auto/super-free\", \"description\": \"\\u041c\\u0415\\u0413\\u0410-\\u041f\\u0423\\u041b 100% \\u0411\\u0415\\u0421\\u041f\\u041b\\u0410\\u0422\\u041d\\u042b\\u0425 \\u041c\\u041e\\u0414\\u0415\\u041b\\u0415\\u0419 (22 \\u043c\\u043e\\u0434\\u0435\\u043b\\u0435\\u0439): OpenCode + OpenRouter :free + DuckDuckGo + Zen/TLLM\", \"strategy\": \"priority\", \"models\": [\"oc/deepseek-v4-flash-free\", \"oc/mimo-v2.5-free\", \"oc/nemotron-3-ultra-free\", \"oc/hy3-free\", \"oc/north-mini-code-free\", \"oc/big-pickle\", \"ddgw/gpt-5.4-mini\", \"ddgw/gpt-5.4-nano\", \"ddgw/claude-haiku-4-5\", \"ddgw/mistral-small-2603\", \"ddgw/tinfoil/gpt-oss-120b\", \"ddgw/tinfoil/gemma4-31b\", \"tllm/gemini_3_flash\", \"tllm/gemini_2_5_pro\", \"tllm/gemini_2_0_flash\", \"tllm/CLAUDE_4_6_SONNET\", \"tllm/CLAUDE_4_5_HAIKU\", \"tllm/together_deepseek_v3\", \"tllm/openrouter_deepseek_r1\", \"tllm/GPT_5_4\", \"tllm/GPT_o4_mini\", \"tllm/sonar-pro\"], \"is_active\": true}",
+      "system_message": null,
+      "tool_filter_regex": null,
+      "context_cache_protection": 0
+    },
+    {
+      "id": "f9e695de-65d4-4133-9f7b-fd7e4ef1c21c",
+      "name": "auto/free-coding",
+      "data": "{\"name\": \"auto/free-coding\", \"description\": \"\\u0411\\u0435\\u0441\\u043f\\u043b\\u0430\\u0442\\u043d\\u044b\\u0439 \\u043f\\u0443\\u043b \\u0441\\u043f\\u0435\\u0446\\u0438\\u0430\\u043b\\u044c\\u043d\\u043e \\u0434\\u043b\\u044f \\u041a\\u041e\\u0414\\u0410: DeepSeek V4, Nemotron 3 Ultra, Qwen 2.5 Coder, MiMo\", \"strategy\": \"priority\", \"models\": [\"oc/deepseek-v4-flash-free\", \"oc/nemotron-3-ultra-free\", \"openrouter/nvidia/nemotron-3-ultra-550b-a55b:free\", \"openrouter/nvidia/nemotron-3.5-lightning:free\", \"oc/mimo-v2.5-free\", \"openrouter/cohere/north-mini-code:free\", \"openrouter/poolside/laguna-s-2.1:free\", \"openrouter/openai/gpt-oss-20b:free\", \"tllm/CLAUDE_4_6_SONNET\", \"tllm/together_deepseek_v3\"], \"is_active\": true}",
+      "system_message": null,
+      "tool_filter_regex": null,
+      "context_cache_protection": 0
+    },
+    {
+      "id": "43e7fc4a-b76c-4a14-a1eb-4abe3ef33c44",
+      "name": "auto/free-chat",
+      "data": "{\"name\": \"auto/free-chat\", \"description\": \"\\u0411\\u0435\\u0441\\u043f\\u043b\\u0430\\u0442\\u043d\\u044b\\u0439 \\u043f\\u0443\\u043b \\u0434\\u043b\\u044f \\u0411\\u042b\\u0421\\u0422\\u0420\\u041e\\u0413\\u041e \\u041e\\u0411\\u0429\\u0415\\u041d\\u0418\\u042f \\u0438 \\u043f\\u043e\\u0438\\u0441\\u043a\\u0430: DuckDuckGo, Gemma, Llama, Gemini\", \"strategy\": \"priority\", \"models\": [\"ddgw/gpt-5.4-mini\", \"ddgw/claude-haiku-4-5\", \"ddgw/mistral-small-2603\", \"openrouter/google/gemma-4-31b-it:free\", \"openrouter/google/gemma-4-26b-a4b-it:free\", \"tllm/gemini_3_flash\", \"tllm/gemini_2_0_flash\", \"tllm/sonar-pro\", \"oc/hy3-free\"], \"is_active\": true}",
+      "system_message": null,
+      "tool_filter_regex": null,
+      "context_cache_protection": 0
+    },
+    {
+      "id": "c45546f3-0310-45bd-ab43-41c7fa1bdb25",
+      "name": "auto/free-reasoning",
+      "data": "{\"name\": \"auto/free-reasoning\", \"description\": \"\\u0411\\u0435\\u0441\\u043f\\u043b\\u0430\\u0442\\u043d\\u044b\\u0439 \\u043f\\u0443\\u043b \\u0434\\u043b\\u044f \\u0421\\u041b\\u041e\\u0416\\u041d\\u042b\\u0425 \\u0420\\u0410\\u0421\\u0421\\u0423\\u0416\\u0414\\u0415\\u041d\\u0418\\u0419: DeepSeek R1, Nemotron Reasoning, GLM\", \"strategy\": \"priority\", \"models\": [\"tllm/openrouter_deepseek_r1\", \"openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free\", \"openrouter/z-ai/glm-5.2:free\", \"openrouter/liquid/lfm-2.5-2.6b:free\", \"ddgw/tinfoil/gpt-oss-120b\", \"tllm/GPT_5_4\"], \"is_active\": true}",
+      "system_message": null,
+      "tool_filter_regex": null,
+      "context_cache_protection": 0
+    }
+  ],
+  "api_keys": [
+    {
+      "id": "38c69013-0587-444c-bd9a-59795bf4564b",
+      "name": "Hermes",
+      "key": "sk-e354fcd9a30fe0d8-88ee41-9b57cccd",
+      "key_prefix": "sk-e354fcd9a",
+      "allowed_models": "[]",
+      "allowed_combos": null,
+      "scopes": "[\"manage\",\"self:usage\",\"self:account-quota\"]",
+      "is_active": 1
+    }
+  ],
+  "provider_nodes": [],
+  "version_manager": [
+    {
+      "tool": "9router",
+      "installed_version": null,
+      "pinned_version": null,
+      "status": "not_installed",
+      "port": 20130,
+      "health_status": "unknown"
+    },
+    {
+      "tool": "mux",
+      "installed_version": null,
+      "pinned_version": null,
+      "status": "not_installed",
+      "port": 8322,
+      "health_status": "unknown"
+    },
+    {
+      "tool": "bifrost",
+      "installed_version": null,
+      "pinned_version": null,
+      "status": "not_installed",
+      "port": 8080,
+      "health_status": "unknown"
+    }
+  ]
+}

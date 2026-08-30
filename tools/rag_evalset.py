@@ -19,9 +19,8 @@ answerability хранит вопросы БЕЗ ответа — иначе с�
 from __future__ import annotations
 
 import json
-import os
 from dataclasses import dataclass, field
-from typing import Any, Iterator
+from typing import Any
 
 SCENARIOS = {
     "exact_entity",
@@ -70,7 +69,7 @@ class EvalCase:
     dataset_version: str = ""
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "EvalCase":
+    def from_dict(cls, d: dict[str, Any]) -> EvalCase:
         ev = [
             GoldEvidence(
                 document_id=e.get("document_id", ""),
@@ -96,7 +95,7 @@ class EvalCase:
         )
 
     @classmethod
-    def from_json_line(cls, line: str) -> "EvalCase":
+    def from_json_line(cls, line: str) -> EvalCase:
         return cls.from_dict(json.loads(line))
 
     def relevance_map(self) -> dict[str, int]:

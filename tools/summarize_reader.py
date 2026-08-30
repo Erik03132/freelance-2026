@@ -14,9 +14,9 @@
 
 Интеграция: ночной читатель (night_reader.sh) вызывает с --send после Фазы 3.
 """
+
 import argparse
 import json
-import os
 import re
 import sys
 import urllib.request
@@ -115,12 +115,12 @@ def render(results: list, target_date: date | None = None) -> str:
         target_date = date.today()
     if not results:
         return (
-            f"📚 *Ночной читатель — тишина*\n\n"
-            f"За последние сутки новых книг не прочитано.\n"
-            f"Инбоксы пусты — всё разобрано."
+            "📚 *Ночной читатель — тишина*\n\n"
+            "За последние сутки новых книг не прочитано.\n"
+            "Инбоксы пусты — всё разобрано."
         )
     lines = [
-        f"🌅 *Утреннее саммари ночного чтения*",
+        "🌅 *Утреннее саммари ночного чтения*",
         f"_({len(results)} кн. прочитано ночью, digest готовы)_\n",
     ]
     for i, r in enumerate(results, 1):
@@ -161,6 +161,7 @@ def send_tg(text: str) -> bool:
     if proxy and "127.0.0.1" not in proxy and "localhost" not in proxy:
         try:
             from urllib.request import ProxyHandler, build_opener
+
             opener = build_opener(ProxyHandler({"http": proxy, "https": proxy}))
             with opener.open(
                 f"https://api.telegram.org/bot{token}/sendMessage", data=payload, timeout=15

@@ -1,0 +1,8 @@
+# Sync daemon (every 5 hours)
+0 */5 * * * cd /Users/igorvasin/freelance-2026/hermes-skills-sync && ./sync/daemon/sync-daemon.sh
+
+# Daily backup of canon repository
+0 2 * * * cd /Users/igorvasin/freelance-2026/hermes-skills-sync && git archive -o "backups/hermes-skills-sync-$(date +%Y%m%d).tar.gz" main
+
+# Weekly validation
+0 0 * * 0 cd /Users/igorvasin/freelance-2026/hermes-skills-sync && ./hooks/pre-commit.d/validate-all.sh

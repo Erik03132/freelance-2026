@@ -1,0 +1,15 @@
+[Unit]
+Description=OmniRoute Dashboard Backend (custom UI)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root
+ExecStart=/usr/bin/python3 /root/omni_dashboard.py
+Restart=always
+RestartSec=5
+Environment=PORT=8890
+
+[Install]
+WantedBy=multi-user.target

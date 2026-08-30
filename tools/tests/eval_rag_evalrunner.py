@@ -90,7 +90,9 @@ def _run() -> tuple[int, list[str]]:
     t1 = traces[0]
     if t1.case_id != "c1" or t1.config_id != "dense-v1" or t1.index_version != "2026-08-14":
         fails.append("TP-1: токены trace (config/index) не заполнены")
-    if [r.id for r in t1.retrieved] != ["docA", "docC", "docB"] or [r.rank for r in t1.retrieved] != [1, 2, 3]:
+    if [r.id for r in t1.retrieved] != ["docA", "docC", "docB"] or [
+        r.rank for r in t1.retrieved
+    ] != [1, 2, 3]:
         fails.append(f"TP-1: retrieved/rank неверны: {t1.retrieved}")
     if t1.answer != "E204: upstream API недоступен":
         fails.append(f"TP-1: answer не заполнен: {t1.answer!r}")
@@ -109,10 +111,14 @@ def _run() -> tuple[int, list[str]]:
 
     # TP-3: срезы — exact_entity и paraphrase отдельно
     sc = metrics["by_scenario"]
-    if not _close(sc["exact_entity"]["recall_at_k"], 1.0) or not _close(sc["exact_entity"]["mrr_at_k"], 1.0):
+    if not _close(sc["exact_entity"]["recall_at_k"], 1.0) or not _close(
+        sc["exact_entity"]["mrr_at_k"], 1.0
+    ):
         fails.append(f"TP-3: exact_entity срез неверен: {sc.get('exact_entity')}")
     if not _close(sc["paraphrase"]["mrr_at_k"], 0.5):
-        fails.append(f"TP-3: paraphrase мrr@3 должен быть 0.5, получили {sc['paraphrase']['mrr_at_k']}")
+        fails.append(
+            f"TP-3: paraphrase мrr@3 должен быть 0.5, получили {sc['paraphrase']['mrr_at_k']}"
+        )
 
     # TP-4: abstention — c3 воздерживается (пустой answer)
     ab = metrics["abstention"]

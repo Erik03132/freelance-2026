@@ -25,7 +25,6 @@
 from __future__ import annotations
 
 import math
-import os
 import pickle
 
 QUERY_PREFIX = "search_query:"
@@ -130,8 +129,4 @@ def rag_retrieve(
 def build_prompt(question: str, chunks: list[str], grounding: str = GROUNDING) -> str:
     """Промпт генерации с инструкцией заземления (RAG-5)."""
     context = "\n---\n".join(chunks)
-    return (
-        f"{grounding}\n\n"
-        f"Контекст:\n---\n{context}\n---\n\n"
-        f"Вопрос: {question}\n\nОтвет:"
-    )
+    return f"{grounding}\n\n" f"Контекст:\n---\n{context}\n---\n\n" f"Вопрос: {question}\n\nОтвет:"

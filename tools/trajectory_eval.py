@@ -214,7 +214,11 @@ def main():
     ap.add_argument("--expected-calls", default="", help="эталонная последовательность (JSON)")
     ap.add_argument("--expected-steps", type=int, default=None, help="ожидаемое число витков")
     ap.add_argument("--order", default="any-order", choices=["any-order", "in-order", "exact"])
-    ap.add_argument("--seal", action="store_true", help="BK-1: подписать траекторию (block_id+hash), вывести JSON")
+    ap.add_argument(
+        "--seal",
+        action="store_true",
+        help="BK-1: подписать траекторию (block_id+hash), вывести JSON",
+    )
     ap.add_argument(
         "--verify-against",
         default=None,

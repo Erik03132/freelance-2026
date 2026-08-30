@@ -14,10 +14,10 @@ CLI:
   reader_dedup.py --has <file>           # вычислить md5 файла и проверить (rc=0 - дубль)
   reader_dedup.py --stats                # количество записей
 """
+
 import argparse
 import hashlib
 import json
-import os
 import sys
 from datetime import date
 from pathlib import Path
@@ -37,9 +37,7 @@ def load() -> dict:
 
 def save(data: dict) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    JOURNAL.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    JOURNAL.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def file_md5(p: Path) -> str:

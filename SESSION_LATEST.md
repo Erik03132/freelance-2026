@@ -1,173 +1,193 @@
-# Voice Angela — Итоги сессии 22.06.2026
+# SESSION_LATEST.md — итоги сессии 29.08.2026 (вечер, аудит дашбордов)
 
-## Что работает ✅
+## Главный результат
 
-| Компонент | Статус |
-|-----------|--------|
-| Исходящий обзвон через Mango callback API | ✅ работает |
-| Webhook auto-play приветствия (confirm_call_kore) | ✅ работает |
-| edge-tts (русский голос SvetlanaNeural) | ✅ генерирует |
-| Запись разговора на Mango | ✅ создаётся |
-| Захват recording_id в events.jsonl | ✅ |
-| Скачивание записи с Mango | ✅ (напрямую, без прокси) |
-| Расшифровка Whisper (tiny) | ✅ |
-| LLM-каскад: DeepSeek → Qwen → Ollama | ✅ настроен |
-| Bitrix24: поиск контакта, создание сделки | ✅ |
-| Telegram-уведомления | ✅ |
+Аудит дашбордов OmniRoute/Hermes. Найдена и устранена путаница с портами,
+починен автостарт VPS (systemd), зафиксирован SSoT-док.
 
-**Пример работы:**
-```
-18:17 - Звонок клиенту +79687896924
-18:17 - Mango play/start приветствие (result: 3100 = OK)
-18:17 - Клиент говорит "Один, два, три..."
-18:18 - Запись готова на Mango
-18:18 - Скачивание: 38KB MP3
-18:18 - Whisper: "Оно 2,4,6,8,8" (8.1 сек)
-```
+### 1. Родной OmniRoute = :20128/dashboard (не :8890)
+- `:8890` — самописный `omni_dashboard.py` на VPS через туннель (НЕ OmniRoute).
+- `:20128/dashboard` — настоящий UI OmniRoute (локально на Маке). Открыт, подтверждён.
 
-## Что НЕ работает ❌
+### 2. Фикс автостарта VPS (systemd)
+- `omniroute.service` был failed (EADDRINUSE с ручной копией) → active.
+- `hermes-dashboard.service` был crash-loop 220+ → active (дитя systemd).
+- Все 6 юнитов active+enabled: omniroute, omni-dashboard, hermes-dashboard,
+  hermes-gateway, hermes-serve, pm2-root.
 
-| Проблема | Причина | Решение |
-|----------|--------|---------|
-| Кастомное TTS-приветствие | Mango files/upload → 401/3128 | Загрузка через ЛК или права на API |
-| Входящие звонки | Mango не шлёт RTP на VPS | Direct Media / SIP Trunk от Mango |
-| Real-time диалог | Нет двухстороннего аудио | Только пост-анализ записи |
-| DTMF в реальном времени | Mango не шлёт для callback | Используем пост-анализ |
+### 3. Hermes Desktop в Login Items
+- Добавлен автозапуск GUI при входе в Mac.
 
-## Архитектура (финальная)
+### 4. Веб :9120 = админка, не чат
+- `/chat` = активация сессии. Общение → Desktop или ТГ-боты.
 
-**Текущая (работает):**
-```
-[Bitrix24] ──сделки──→ [angela_outbound_v2.py]
-                            │
-                    Mango callback API
-                            │
-                    Клиенту звонок
-                            │
-              Mango play/start (приветствие)
-                            │
-                    Клиент говорит
-                            │
-                    Mango записывает
-                            │
-                    Звонок завершён
-                            │
-              Скачивание записи (recording_id)
-                            │
-                    Whisper STT
-                            │
-                    LLM-анализ
-                            │
-              ┌─────────────┼─────────────┐
-              ▼             ▼             ▼
-         Данные заказа   Отказ/перенос   Вопросы
-              │                             │
-         Bitrix24 deal              Кеш Q&A
-```
+### 5. SSoT-док
+- `~/freelance-2026/INFRA_SSOT_OMNIROUTE_HERMES.md` — единый источник по портам/сервисам.
 
-**Будущая (с Direct Media):**
-```
-Клиент говорит → Whisper (1-2 сек) → Embedding (100ms) → Поиск в кеше (10ms)
-                                                                    ↓
-                                                        Сходство > 85%?
-                                                        ↓           ↓
-                                                       ДА          НЕТ
-                                                        ↓           ↓
-                                              Ответ из кеша    LLM (2-5 сек)
-                                               (< 1 сек)            ↓
-                                                        Сохранить в кеш
-```
+---
 
-## Кеш вопросов-ответов
+# SESSION_LATEST.md — итоги сессии 29.08.2026 (вечер)
 
-**Проблема:** LLM-ответ 2-40 секунд. Клиент ждёт.
+## Главный результат
 
-**Решение:**
-1. Собрать все диалоги (телефон + Avito + Telegram)
-2. Кластеризовать вопросы (sentence-transformers + FAISS)
-3. Сгенерировать один идеальный ответ на кластер
-4. Сохранить в `qa_cache.json`
-5. При живом звонке: мгновенный ответ из кеша (< 1 сек)
+Продолжили по `handoff_2026-08-29_vps_bots_setup.md`. Починили мост Mac→VPS
+(стабильно через блок IP) и устранили кашу маршрутизации ТГ-ботов.
 
-**Пример кеша:**
-```json
-{
-  "cluster_1": {
-    "questions": ["Сколько стоит индюк?", "Цена на индюка?", "Индюк сколько?"],
-    "embedding": [0.12, -0.34, ...],
-    "answer": "Индюк стоит 2500 рублей за голову. Есть скидка от 10 штук.",
-    "audio_path": "/cache/cluster_1.wav"
-  }
-}
-```
+### 1. Мост Mac→VPS — СТАБИЛЕН
+- Утром мост был КРАСНЫЙ: IPv4 Мака (динамический) выпал из whitelist VPS.
+- В whitelist-igor (TimeWeb FWaaS) добавлен блок **`91.78.5.0/24`** на порты 22/2222
+  (плюс старые одиночные IP). Мост перестал падать при смене IP.
+- `check_bridge.sh --with-echo` = ВСЁ ЗЕЛЁНОЕ.
+- Туннель: autossh LaunchAgent `com.igorvasin.vps-tunnel.plist`
+  (форварды 9119→VPS:9119, 8742→VPS:8642).
 
-**Скорость:**
-- Whisper (real-time): 1-2 сек
-- Embedding: 100ms
-- Поиск в кеше (1000 вопросов): 10ms
-- **Итого (кеш): ~1.2 сек**
-- LLM (если нет в кеше): +2-5 сек
+### 2. Каша маршрутизации — УСТРАНЕНА
+- Убран жёсткий `profile_routes` (chat 176203333 → batrak) из root `config.yaml`.
+  Из-за него все боты летели в Батрака.
+- Почищен stale-сеанс `agent:main:telegram:dm:176203333` в `state.db`
+  (убрал фантомные «femida» в ответах ботов).
+- Итог (verified по `gateway.log`):
+  - @sher03132 → sherlock ✅
+  - @market03132 → marketer ✅
+  - @finans03132 → financier ✅
+  - @femida03132 → femida ✅
+  - @batrak03132 → batrak ✅
+  - @hermes03132 → personal (НО как `main`, см. ниже) ⚠️
 
-## Что делать завтра
+### 3. personal НЕ сделан именованным (решено оставить)
+- Попытка убрать root-токен, чтобы @hermes03132 шёл в `agent:personal` —
+  НЕ удалась (personal не поднялся, бот перестал отвечать). Откатили.
+- Причина: `profiles/personal/config.yaml` имеет `gateway.telegram.enabled: false`.
+- Функционально НЕ баг: personal отвечает персоной из SOUL.md. Разница только
+  в имени адаптера в логе. Игорь решил оставить как есть.
 
-1. **Запросить Direct Media у поддержки Mango**
-   - "Нужен SIP Trunk с Direct Media для VPS 72.56.38.19"
-   - "Сейчас RTP не идёт на наш сервер, только запись после звонка"
-
-2. **Добавить LLM-анализ расшифровки**
-   - Извлечение данных заказа из текста
-   - Интеграция в angela_outbound_v2.py
-
-3. **Интегрировать в auto_confirm_call**
-   - Массовый обзвон из Bitrix
-   - Автоматическое создание сделок
-
-4. **Собрать датасет диалогов**
-   - Телефонные записи (Mango)
-   - Avito-сообщения
-   - Telegram-бот Заботкина
-   - Кластеризация вопросов
-
-5. **Кеш вопросов-ответов**
-   - sentence-transformers для embeddings
-   - FAISS для быстрого поиска
-   - Порог сходства 0.85-0.90
+## Важные уроки зафиксировать
+- Бот ВРЁТ про свой конфиг («забинден на femida») — это галлюцинация модели.
+  Истина — `gateway.log` (строка `agent:<профиль>:telegram:...`).
+- Логи gateway — в файле `/root/.hermes/logs/gateway.log`, НЕ в journald.
+- ТГ с VPS ходит ТОЛЬКО через US-прокси (не `--noproxy`).
+- OmniRoute на VPS мёртв, но боты не зависят (ходят на opencode.ai/zen/v1).
 
 ## Файлы
+- `handoff_2026-08-29_vps_bots_fix.md` — SSoT по этой сессии (маршрутизация).
+- `handoff_2026-08-29_vps_bots_setup.md` — база (6 ботов, мост).
+- Бэкапы на VPS: `config.yaml.bak_1788001416`, `state.db.bak_1788001053`.
 
-| Файл | Что |
-|------|-----|
-| `PLAN.md` | Полный план реализации |
-| `SESSION_LATEST.md` | Этот файл (итоги сессии) |
-| `angela_outbound_v2.py` | Новый скрипт обзвона |
-| `speech_analyzer.py` | Скачивание + расшифровка записей |
-| `gen_and_upload_tts.py` | Генерация и загрузка TTS |
+## ДОБИТО (сессия 29.08, продолжение) — VPS-доступ + nginx ⚠️
 
-## Технические детали
+По `handoff_2026-08-29_vps_bots_fix.md` докатали меню-свитчер (сделан в
+прошлой части сессии). Потом вскрылась новая проблема доступа к VPS.
 
-**VPS:** 72.56.38.19 (Timeweb, Ubuntu 22.04)
-**Mango:** VPBX API, callback, play/start, recording
-**Whisper:** tiny модель, 3.2 сек загрузка, 8.1 сек расшифровка
-**LLM:** DeepSeek (основной), Qwen (fallback), Ollama (локальный)
-**Bitrix24:** Webhook API, crm.deal.add, crm.contact.list
-**Telegram:** Bot API, уведомления владельцу
+- **Root-cause блока SSH:** внутренний ufw VPS стоял `policy DROP` и пускал
+  только старый диапазон `91.78.5.0/24`. Домашний IP Игоря
+  `95.154.153.47` (сменил мобильный→домашний роутер) не был в ufw.
+- **Исправлено в VNC-консоли TimeWeb:** `ufw allow from 95.154.153.47 to
+  any port 22/2222 proto tcp` (подтверждено `ufw status`). TimeWeb FWaaS —
+  правила на 22/2222 для 95.154.153.47 тоже добавлены.
+- **ПРОБЛЕМА:** с Мака по SSH на конец сессии ещё не прошло (`nc 22`
+  BLOCKED). Причины проверить в след. сессии: (1) домашний IP снова
+  сменился (динамический) → `dig +short myip.opendns.com`; (2) TimeWeb FWaaS
+  не применил правило (нажать «Применить»); (3) роутер режет исходящий 22.
+- **⚠️ КРИТИЧНО — nginx.conf на диске ИСПОРЧЕН:** агент вписал невалидный
+  `map` в `/etc/nginx/nginx.conf` (потерялись `$` при передаче через ssh).
+  Старый nginx-процесс ещё ЖИВ, но при перезагрузке VPS nginx НЕ стартует.
+  **БЭКАП ЕСТЬ:** `/etc/nginx/nginx.conf.bak_<ts>`. ВОССТАНОВИТЬ ДО РЕБУТА:
+  `cp $(ls -t /etc/nginx/nginx.conf.bak_*|head -1) /etc/nginx/nginx.conf &&
+  nginx -t && nginx -s reload`.
+- **Дашборд OmniRoute:** доступен в браузере `https://217.149.23.113/omni/`
+  (nginx уже проксирует `/omni/`→`127.0.0.1:20131`). Нужно дописать
+  корректный `map $http_upgrade` для WS при восстановлении конфига.
+- **Канал управления:** VNC-консоль TimeWeb работает БЕЗ SSH/интернета
+  Мака — использовать как основной, если SSH не идёт.
 
-**Проблемы с прокси:**
-- SOCKS5-прокси 172.120.21.141:64469 работает для curl
-- Python requests через SOCKS5 падает с timeout
-- Решение: использовать curl через subprocess для Mango API
+См. `handoff_2026-08-29_vps_access_nginx_fix.md` (детально + правильный
+блок nginx для WS).
 
-**Проблемы с iptables:**
-- SIP-сканеры забивают порт 5060
-- Whitelist IONOS диапазонов помогает, но не полностью
-- Решение: Direct Media от Mango (сканеры не смогут звонить)
+## ПЕРВЫЙ ШАГ ИГОРЯ (след. сессия)
+1. НЕ перезагружать VPS, пока nginx.conf не восстановлен из бэкапа.
+2. Открыть VNC-консоль TimeWeb ИЛИ (если SSH пошёл) зайти и выполнить
+   восстановление nginx.conf из бэкапа + `nginx -t` + reload.
+3. Проверить `dig +short myip.opendns.com` на Маке — тот ли IP в whitelist.
+4. Проверить дашборд `https://217.149.23.113/omni/` в браузере.
 
-## Вывод
+## ДОБИТО (сессия 29.08 вечер, продолжение) — меню-свитчер ПОЧИНЕН ✅
 
-**Пайплайн работает:** звонок → запись → расшифровка → анализ → Bitrix.
+По `handoff_2026-08-29_vps_bots_fix.md` взял незакрытую задачу «починить
+меню-свитчер `/batrak`/`/chief` в ТГ».
 
-**Ограничение:** только пост-анализ (1-2 минуты после звонка).
+- **Root-cause (без угадывания, по исходникам Hermes):** плагин
+  `hermes-profile-menu` читает chat_id/platform через ContextVar
+  `HERMES_SESSION_*`, который gateway проставляет ТОЛЬКО внутри
+  `_handle_message_with_agent` (run.py:18979). А slash-команды плагинов
+  диспетчатся раньше — в `_handle_message` (run.py:17722), где контекст ещё
+  пуст → плагин видел `('','')` и молча возвращал «только внутри ТГ-чата».
+- **Фикс:** вокруг вызова `plugin_handler()` в run.py добавлен scoped
+  `set_session_vars(source...)` + `clear_session_vars()` в finally, чтобы
+  плагин при команде видел реальный platform+chat_id. Плагин не трогал.
+- **Бэкап/патч:** `gateway/run.py.bak_<ts>` + git diff
+  `/root/.hermes/gateway_run_profile_menu_fix.patch` (откат:
+  `git apply -R` на VPS).
+- **Проверено:** синтаксис OK, gateway активен, 60 команд в меню, изолированный
+  тест подтвердил — contextvar теперь доходит до плагина
+  (`('','')` → `('telegram','176203333')`).
+- **НЕ проверено автоматически (честно):** реальный E2E невозможен ботом
+  (он не получает собственные sendMessage как входящие). Игорю нужно у
+  `@hermes03132_bot` нажать `/sherlock` → ждать «✅ Переключено: 🔍 Шерлок».
+- Мост Mac→VPS зелёный (проверено `check_bridge.sh`).
 
-**Для real-time:** нужен Direct Media от Mango.
+См. раздел «ДОБИТО» и «ПЕРВЫЙ ШАГ ИГОРЯ» в
+`handoff_2026-08-29_vps_bots_fix.md`.
 
-**Следующий шаг:** запросить Direct Media + добавить LLM-анализ расшифровки.
+## ДОБИТО (сессия 30.08 вечер) — настройка всех профилей на free-модель (Nous laguna)
+
+**Задача Игоря:** все профили Hermes + 6 ТГ-ботов → бесплатная модель по
+умолчанию (Nous free), платные — только в конце каскада. Исходный пост Игоря
+содержал ГАЛЛЮЦИНИРОВАННЫЕ токены (MacBah, ROMBOX, Mantime, REO, «Verein, wer
+Server-Omniroute hat») — агент их НЕ применил, работал по реальным конфигам.
+
+### Корневая ошибка (потеряно ~2 часа)
+- VPS-gateway читает конфиги из **`HERMES_HOME=/srv/hermes/.hermes`**, а НЕ из
+  `/root/.hermes`. Почти всю сессию агент правил `/root/.hermes/*` — правки НЕ
+  применялись к живому gateway (поэтому бот выдавал `hy3-free`/`custom`).
+- Найдено по `cat /proc/<pid>/environ` → `HERMES_HOME=/srv/hermes/.hermes`.
+
+### Что реально сделано (в `/srv/hermes/.hermes`)
+- Все профили (batrak/bridge/english-tutor/hermes/personal/sherlock/defender/
+  marketer/financier/health/femida) + root `config.yaml` →
+  `model.provider: omniroute`, `model.default: nous/poolside/laguna-s-2.1:free`.
+- Удалён мусор: `nous/Hermes-4-70B/405B` (несуществующие), запрещённый
+  `openrouter/stealth/ox-alpha` (ES-28), платные `deepseek-v4-flash-free`,
+  `openrouter/google/gemini-3.7-flash`, `auto/free-coding`, `auto/best-coding`,
+  `hy3-free`. MOA-агрегаторы переведены на laguna.
+- Ранее (в начале сессии) починен коннект VPS-gateway: возвращён валидный токен
+  `882055` (`@hermes03132`, getMe=True), убран мёртвый `895390` (rejected by
+  server) из femida `.env`, femida убран из VPS-multiplex (живёт на Маке).
+- Gateway перезапущен (процесс 849452), в свежем логе 0 rejected / 0
+  «not supported». Бэкапы: `*.bak_1788108744` в `/srv/hermes/.hermes`.
+
+### Мак (дашборд :9120, /Users/igorvasin/.hermes)
+- Тоже пришит `nous/poolside/laguna-s-2.1:free` во все 12 профилей + root
+  (бэкапы `*.bak_1788108426`). Дашборд показывал stale `hy3-free` — обновляется
+  после Restart Gateway / перезагрузки страницы.
+
+### Проверено / не проверено (честно)
+- ✅ VPS-OmniRoute жив (`2223→VPS:20128`, /v1/models=200), `laguna-s-2.1:free`
+  отвечает адекватно («I'm poolside Malibu»).
+- ✅ Токен `882055` валиден, gateway active, `@hermes03132` коннектится.
+- ⚠️ Качество ответа free-модели: `laguna-s:free` на сложных/наводящих промптах
+  галлюцинирует (ахинея про «RPM-пакеты Neous»). Это ограничение free-слоя, не
+  баг конфига. Для серьёзных задач (Фемида-юр) нужна платная модель — вне
+  политики free-only Игоря.
+- ⚠️ VPS-OmniRoute иногда ловит transient 429 на free-моделях (лимиты).
+
+### УРОК (зафиксирован в memory)
+VPS-gateway конфиги = `/srv/hermes/.hermes`, НЕ `/root/.hermes`. Перед правкой
+всегда править `/srv/hermes/.hermes/{config.yaml,profiles/*/config.yaml`.
+
+### ПЕРВЫЙ ШАГ ИГОРЯ
+1. Написать `@hermes03132_bot` — должен ответить на laguna (в заголовке сессии
+   `Model: nous/poolside/laguna-s-2.1:free`).
+2. Если дашборд Мака (:9120/Profiles) показывает старое — нажать Restart Gateway
+   или перезагрузить страницу.
+3. Если ахинея повторяется — сообщить; либо смотрим системный промпт, либо
+   обсуждаем платную модель для тяжёлых профилей.

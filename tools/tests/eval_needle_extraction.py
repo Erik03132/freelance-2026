@@ -7,7 +7,6 @@
 
 from __future__ import annotations
 
-import os
 import sys
 
 from pydantic import BaseModel
@@ -95,7 +94,9 @@ def _run() -> tuple[int, list[str]]:
                 ok = _normalize(str(got_v)) == _normalize(str(want))
             passed_fields += int(ok)
             if not ok:
-                fails.append(f"ND-{schema.__name__}.{field} '…{text[-22:]}': ждали {want!r}, получили {got_v!r}")
+                fails.append(
+                    f"ND-{schema.__name__}.{field} '…{text[-22:]}': ждали {want!r}, получили {got_v!r}"
+                )
 
     accuracy = passed_fields / total_fields * 100 if total_fields else 0.0
     print(f"ND-1 extraction: {passed_fields}/{total_fields} полей точны ({accuracy:.0f}%)")

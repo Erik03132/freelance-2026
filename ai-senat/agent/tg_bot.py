@@ -7,6 +7,7 @@ Telegram-бот для Senator AI (Мустай).
 import asyncio
 import os
 import signal
+import subprocess
 import sys
 from datetime import datetime
 
@@ -378,13 +379,88 @@ async def cmd_status(message: types.Message):
 
 
 # ============================================================
-# 💬 Свободный диалог
+# 🧭 ПЕРЕКЛЮЧЕНИЕ HERMES-ПРОФИЛЕЙ (спецов) через алиасы /use profile X
+# ============================================================
+
+# SSoT: наши спецы (профили Hermes). command = use_profile_<id>.
+PROFILE_ALIASES = {
+    "use_profile_batrak": "batrak",
+    "use_profile_sherlock": "sherlock",
+    "use_profile_femida": "femida",
+    "use_profile_defender": "defender",
+    "use_profile_marketer": "marketer",
+    "use_profile_financier": "financier",
+    "use_profile_health": "health",
+}
+
+PROFILE_TITLES = {
+    "batrak": "🤖 Мустай (Батрак)",
+    "sherlock": "🔍 Шерлок",
+    "femida": "⚖️ Фемида",
+    "defender": "🛡️ Дефендер",
+    "marketer": "📣 Маркетолог",
+    "financier": "💰 Финансист",
+    "health": "⚕️ Айболит",
+}
+
+
+def _run_hermes(args: list[str]) -> tuple[str, int]:
+    """Синхронный вызов Hermes CLI (без сети к модели — только управление профилем)."""
+    try:
+        result = subprocess.run(
+            ["hermes", *args],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        out = (result.stdout or result.stderr or "").strip()
+        return out, result.returncode
+    except Exception as e:  # noqa: BLE001 — любая ошибка вызова CLI → в чат
+        return f"⚠️ Ошибка вызова hermes: {e}", 1
+
+
+@dp.message(Command("profile"))
+async def cmd_profile(message: types.Message):
+    """Показать текущий активный профиль Hermes."""
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Нет доступа.")
+        return
+    out, _ = _run_hermes(["profile", "list"])
+    await message.answer(f"🧭 <b>Профили Hermes</b>\n<pre>{out}</pre>", parse_mode="HTML")
+
+
+@dp.message(Command(*list(PROFILE_ALIASES.keys())))
+async def cmd_use_profile(message: types.Message):
+    """Переключить активный профиль Hermes (алиас /use profile X)."""
+    if not is_admin(message.from_user.id):
+        await message.answer("⛔ Нет доступа.")
+        return
+    cmd = message.text.lstrip("/").split()[0]
+    profile_id = PROFILE_ALIASES.get(cmd)
+    if not profile_id:
+        await message.answer("⚠️ Неизвестный алиас профиля.")
+        return
+    out, rc = _run_hermes(["profile", "use", profile_id])
+    title = PROFILE_TITLES.get(profile_id, profile_id)
+    if rc == 0:
+        await message.answer(
+            f"✅ Переключено на профиль <b>{title}</b>.\nДальше пиши сообщения — они пойдут через этого спеца.\n<code>{out}</code>",
+            parse_mode="HTML",
+        )
+    else:
+        await message.answer(
+            f"⚠️ Не удалось переключить профиль:\n<code>{out}</code>", parse_mode="HTML"
+        )
+
+
+# ============================================================
+# 💬 Свободный диалог — через активный Hermes-профиль
 # ============================================================
 
 
 @dp.message()
 async def chat_handler(message: types.Message):
-    """Обработка произвольных сообщений."""
+    """Обработка произвольных сообщений — через активный Hermes-профиль."""
     user_id = message.from_user.id
     text = message.text
 
@@ -396,29 +472,62 @@ async def chat_handler(message: types.Message):
     print(f"MSG:     {text}")
     print(f"{'='*40}\n")
 
-    if user_id not in user_histories:
-        user_histories[user_id] = []
-    history = user_histories[user_id]
+    # Определяем активный профиль (помечен ◆ в `hermes profile list`)
+    active_profile = _active_hermes_profile()
+
+    await message.answer("⏳ Думаю через профиль «%s»…" % active_profile)
 
     try:
-        from senator_core import get_answer
+        response, rc = _ask_hermes(text, active_profile)
+        if rc != 0:
+            response = f"⚠️ Hermes вернул ошибку:\n{response}"
 
-        response = await asyncio.to_thread(get_answer, text, history)
-
-        if len(response) > 4000:
-            response = response[:3997] + "..."
-
-        history.append({"role": "user", "parts": [text]})
-        history.append({"role": "model", "parts": [response]})
-        user_histories[user_id] = history[-20:]  # Длиннее история — лучше контекст
-
-        await message.answer(response)
+        # Telegram лимит 4096 символов — дробим
+        chunks = [response[i : i + 4000] for i in range(0, len(response), 4000)]
+        for chunk in chunks:
+            await message.answer(chunk)
     except Exception as e:
         print(f"ERROR: {e}")
         import traceback
 
         traceback.print_exc()
         await message.answer(f"⚠️ Ошибка обработки: {e}")
+
+
+def _active_hermes_profile() -> str:
+    """Возвращает id активного профиля Hermes (помечен ◆). Кэшируется на запуск."""
+    global _ACTIVE_PROFILE_CACHE
+    if _ACTIVE_PROFILE_CACHE is not None:
+        return _ACTIVE_PROFILE_CACHE
+    out, _ = _run_hermes(["profile", "list"])
+    active = "default"
+    for line in out.splitlines():
+        if "◆" in line:
+            # формат: " ◆batrak  hy3-free  running  batrak  —"
+            parts = line.replace("◆", "").split()
+            if parts:
+                active = parts[0]
+            break
+    _ACTIVE_PROFILE_CACHE = active
+    return active
+
+
+_ACTIVE_PROFILE_CACHE = None
+
+
+def _ask_hermes(query: str, profile: str) -> tuple[str, int]:
+    """Одноразовый запрос к Hermes через активный профиль (-p profile -z query)."""
+    try:
+        result = subprocess.run(
+            ["hermes", "-p", profile, "-z", query, "--no-restore-cwd"],
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+        out = (result.stdout or result.stderr or "").strip()
+        return out, result.returncode
+    except Exception as e:  # noqa: BLE001
+        return f"⚠️ Ошибка вызова hermes: {e}", 1
 
 
 # ============================================================
@@ -471,17 +580,21 @@ async def main():
     for sig in (signal.SIGTERM, signal.SIGINT):
         loop.add_signal_handler(sig, lambda: asyncio.create_task(_shutdown()))
 
-    # Регистрация меню
+    # Регистрация меню: только переключение Hermes-профилей (спецов) + статус.
+    # Telegram-команда не может содержать пробел, поэтому алиас = use_profile_<id>,
+    # который бот переводит в `/use profile <id>` (hermes profile use <id>).
     commands = [
-        BotCommand(command="initiative", description="🏛️ Инициатива дня"),
-        BotCommand(command="search", description="🔍 Глубокий поиск"),
-        BotCommand(command="global", description="🌍 Мировой опыт"),
-        BotCommand(command="compare", description="📊 Сравнение регионов"),
-        BotCommand(command="focus", description="🎯 Фокусная тема"),
-        BotCommand(command="digest", description="📰 Дайджест дня"),
-        BotCommand(command="history", description="📜 Архив инициатив"),
-        BotCommand(command="pipeline", description="⚙️ Запуск цикла"),
-        BotCommand(command="status", description="📊 Статус системы"),
+        BotCommand(command="start", description="👋 Старт / справка"),
+        BotCommand(command="profile", description="🧭 Текущий активный профиль"),
+        BotCommand(
+            command="use_profile_batrak", description="🤖 Мустай (Батрак) — поиск работы/отклики"
+        ),
+        BotCommand(command="use_profile_sherlock", description="🔍 Шерлок — разведка/факты"),
+        BotCommand(command="use_profile_femida", description="⚖️ Фемида — юр/152-ФЗ"),
+        BotCommand(command="use_profile_defender", description="🛡️ Дефендер — безопасность"),
+        BotCommand(command="use_profile_marketer", description="📣 Маркетолог — позиционирование"),
+        BotCommand(command="use_profile_financier", description="💰 Финансист — юнит-экономика"),
+        BotCommand(command="use_profile_health", description="⚕️ Айболит — здоровье (справочно)"),
     ]
 
     try:

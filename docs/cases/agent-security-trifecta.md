@@ -1,0 +1,6 @@
+## agent-security-trifecta — lethal trifecta, guardrails, red-teaming
+**Автор/источник:** Денис Макрушин (Яндекс/SourceCraft Security), конф. Олега Бунина, Habr 1071908 (20.08.2026) — модель угроз агентской разработки «lethal trifecta».
+**Суть (2-3 строки):** Три поверхности агента (LLM/RAG/MCP), классы атак (prompt injection, RAG poisoning, tool poisoning, Confused Deputy). Защита: разорвать trifecta архитектурно (отдельные агенты + policy-шлюзы, чувствительные тулы под human-confirm) + runtime guardrail (LLM-as-judge, hard-block/advisory) + непрерывный AI Red Teaming (мутация промптов, PromptFoo). Окно эксплуатации CVE: 771 дня (2018) → 1 день (2026).
+**Стек:** Simon Willison lethal trifecta, FIDES (data provenance + policy-block), PromptFoo, LLM-as-judge, Zero Trust.
+**Что применимо у нас:** [ДА] — 3 фичи: (ES-25) разрыв trifecta через архитектурное разделение ролей (бьёт AP-1/HT-3), (ES-26) runtime guardrail-слой (LLM-as-judge + hard-block; у нас AG-1/AV-1 post-hoc, не runtime), (ES-27) непрерывный AI Red Teaming цикл (у нас SEC-10 одноразово). Не берём: конкретные CVE (примеры), supply-chain/RepoJacking (покрыто SEC-11/gitleaks).
+**Действие:** [ ] ES-25..ES-27 → ACTIVE_TASKS (секция «🧠 Эксперт-сессия»); Дефендер включён в Экспертную группу.

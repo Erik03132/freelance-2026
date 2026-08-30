@@ -21,10 +21,17 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import dataclass, field, asdict
-from typing import Callable
+from collections.abc import Callable
 
 from tools.rag_evalset import EvalCase
-from tools.rag_metrics import recall_at_k, mrr_at_k, ndcg_at_k, aggregate, abstention_accuracy, false_answer_rate
+from tools.rag_metrics import (
+    recall_at_k,
+    mrr_at_k,
+    ndcg_at_k,
+    aggregate,
+    abstention_accuracy,
+    false_answer_rate,
+)
 
 
 @dataclass

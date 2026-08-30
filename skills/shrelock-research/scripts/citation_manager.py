@@ -5,23 +5,22 @@ Tracks sources, generates citations, and maintains bibliography
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
 from datetime import datetime
-from urllib.parse import urlparse
 import hashlib
 
 
 @dataclass
 class Citation:
     """Represents a single citation"""
+
     id: str
     title: str
     url: str
-    authors: Optional[List[str]] = None
-    publication_date: Optional[str] = None
-    retrieved_date: str = field(default_factory=lambda: datetime.now().strftime('%Y-%m-%d'))
+    authors: list[str] | None = None
+    publication_date: str | None = None
+    retrieved_date: str = field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d"))
     source_type: str = "web"  # web, academic, documentation, book, paper
-    doi: Optional[str] = None
+    doi: str | None = None
     citation_count: int = 0
 
     def to_apa(self, index: int) -> str:
@@ -52,17 +51,17 @@ class CitationManager:
     """Manages citations and bibliography"""
 
     def __init__(self):
-        self.citations: Dict[str, Citation] = {}
-        self.citation_order: List[str] = []
+        self.citations: dict[str, Citation] = {}
+        self.citation_order: list[str] = []
 
     def add_source(
         self,
         url: str,
         title: str,
-        authors: Optional[List[str]] = None,
-        publication_date: Optional[str] = None,
+        authors: list[str] | None = None,
+        publication_date: str | None = None,
         source_type: str = "web",
-        doi: Optional[str] = None
+        doi: str | None = None,
     ) -> str:
         """Add a source and return its citation ID"""
         # Generate unique ID based on URL
@@ -76,7 +75,7 @@ class CitationManager:
                 authors=authors,
                 publication_date=publication_date,
                 source_type=source_type,
-                doi=doi
+                doi=doi,
             )
             self.citations[citation_id] = citation
             self.citation_order.append(citation_id)
@@ -86,7 +85,7 @@ class CitationManager:
 
         return citation_id
 
-    def get_citation_number(self, citation_id: str) -> Optional[int]:
+    def get_citation_number(self, citation_id: str) -> int | None:
         """Get the citation number for a given ID"""
         try:
             return self.citation_order.index(citation_id) + 1
@@ -116,45 +115,45 @@ class CitationManager:
 
         return "Unsupported citation style"
 
-    def get_statistics(self) -> Dict[str, any]:
+    def get_statistics(self) -> dict[str, any]:
         """Get citation statistics"""
         return {
-            'total_sources': len(self.citations),
-            'total_citations': sum(c.citation_count for c in self.citations.values()),
-            'source_types': self._count_by_type(),
-            'most_cited': self._get_most_cited(5),
-            'uncited': self._get_uncited()
+            "total_sources": len(self.citations),
+            "total_citations": sum(c.citation_count for c in self.citations.values()),
+            "source_types": self._count_by_type(),
+            "most_cited": self._get_most_cited(5),
+            "uncited": self._get_uncited(),
         }
 
-    def _count_by_type(self) -> Dict[str, int]:
+    def _count_by_type(self) -> dict[str, int]:
         """Count sources by type"""
         counts = {}
         for citation in self.citations.values():
             counts[citation.source_type] = counts.get(citation.source_type, 0) + 1
         return counts
 
-    def _get_most_cited(self, n: int = 5) -> List[tuple]:
+    def _get_most_cited(self, n: int = 5) -> list[tuple]:
         """Get most cited sources"""
         sorted_citations = sorted(
-            self.citations.items(),
-            key=lambda x: x[1].citation_count,
-            reverse=True
+            self.citations.items(), key=lambda x: x[1].citation_count, reverse=True
         )
-        return [(self.get_citation_number(cid), c.title, c.citation_count)
-                for cid, c in sorted_citations[:n]]
+        return [
+            (self.get_citation_number(cid), c.title, c.citation_count)
+            for cid, c in sorted_citations[:n]
+        ]
 
-    def _get_uncited(self) -> List[str]:
+    def _get_uncited(self) -> list[str]:
         """Get sources that were added but never cited"""
         return [c.title for c in self.citations.values() if c.citation_count == 0]
 
     def export_to_file(self, filepath: str, style: str = "markdown"):
         """Export bibliography to file"""
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             f.write(self.generate_bibliography(style))
 
 
 # Example usage
-if __name__ == '__main__':
+if __name__ == "__main__":
     manager = CitationManager()
 
     # Add sources
@@ -162,13 +161,11 @@ if __name__ == '__main__':
         url="https://example.com/article1",
         title="Understanding Deep Research",
         authors=["Smith, J.", "Johnson, K."],
-        publication_date="2025"
+        publication_date="2025",
     )
 
     id2 = manager.add_source(
-        url="https://example.com/article2",
-        title="AI Research Methods",
-        source_type="academic"
+        url="https://example.com/article2", title="AI Research Methods", source_type="academic"
     )
 
     # Use citations
