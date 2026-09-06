@@ -1,0 +1,26 @@
+# Levitan — Agents Configuration
+
+Агенты проекта Levitan.
+
+## Активные агенты
+
+| ID | Имя | Роль | Описание |
+|----|-----|------|----------|
+| main | Main Agent | Оркестратор | Главный агент управления |
+
+## Конфигурация агентов
+
+```yaml
+agents:
+  - id: main
+    name: Main Agent
+    role: orchestrator
+    project_skills: []
+    description: "Главный оркестратор проекта"
+```
+
+## Добавление нового агента
+
+1. Создайте папку в `agent/skills/<agent_name>/`
+2. Добавьте конфигурацию в этот файл
+3. Обновите `PROJECT.md`

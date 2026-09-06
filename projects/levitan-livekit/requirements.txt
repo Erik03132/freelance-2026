@@ -1,0 +1,23 @@
+# Levitan LiveKit — вариант 1: DeepSeek LLM + Yandex TTS + Deepgram STT (LiveKit Agents)
+
+# LiveKit
+livekit-agents>=1.0
+livekit-plugins-deepgram>=0.5
+livekit-plugins-openai>=0.5
+livekit-plugins-silero>=1.0
+
+# Common infra (levitan-common)
+-e ../levitan-common
+
+# LLM (DeepSeek через OpenAI-совместимый API)
+openai>=1.0
+
+# TTS (Yandex SpeechKit через httpx)
+httpx>=0.25.0
+
+# Utils
+python-dotenv>=1.0.0
+numpy>=1.24.0
+
+# Dev
+pytest>=9.0.0

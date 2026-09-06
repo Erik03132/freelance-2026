@@ -1,0 +1,16 @@
+# Levitan Gemini — вариант 2: Gemini Live (speech-to-speech) на LiveKit Agents
+
+# LiveKit
+livekit-agents>=1.7
+livekit-plugins-google>=1.7
+google-genai>=2.0
+
+# Common infra (levitan-common)
+-e ../levitan-common
+
+# Utils
+python-dotenv>=1.0.0
+httpx>=0.25.0
+
+# Dev
+pytest>=9.0.0

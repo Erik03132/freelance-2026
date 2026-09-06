@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %} — Напоминания{% endblock %}
+{% block content %}
+<h1>Напоминания</h1>
+
+<div class="grid-2">
+    <div class="card">
+        <h2>Активные</h2>
+        {% for r in active %}
+        <div class="reminder-card {% if r.due_date < today %}overdue{% endif %}">
+            <div class="reminder-body">
+                <strong>{{ r.phone }}</strong>
+                {% if r.due_date < today %}<span class="status-badge status-overdue">⚠️ Просрочено</span>{% endif %}
+                <p>{{ r.note }}</p>
+                <small>Дедлайн: {{ r.due_date }}</small>
+            </div>
+            <div class="reminder-actions">
+                <button class="btn-sm" onclick="toggleReminder({{ r.id }})">✅</button>
+                <button class="btn-sm btn-danger" onclick="deleteReminder({{ r.id }})">🗑</button>
+            </div>
+        </div>
+        {% else %}
+        <p class="muted">Нет активных напоминаний</p>
+        {% endfor %}
+    </div>
+    <div class="card">
+        <h2>Выполненные</h2>
+        {% for r in done %}
+        <div class="reminder-card done">
+            <div class="reminder-body">
+                <strong>{{ r.phone }}</strong>
+                <p>{{ r.note }}</p>
+                <small>Дедлайн: {{ r.due_date }}</small>
+            </div>
+            <div class="reminder-actions">
+                <button class="btn-sm" onclick="toggleReminder({{ r.id }})">↩️</button>
+            </div>
+        </div>
+        {% else %}
+        <p class="muted">Нет выполненных</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function toggleReminder(id) {
+    fetch('/api/reminders/' + id + '/done', {method: 'PATCH'})
+        .then(r => { if (r.ok) location.reload(); });
+}
+function deleteReminder(id) {
+    if (!confirm('Удалить напоминание?')) return;
+    fetch('/api/reminders/' + id, {method: 'DELETE'})
+        .then(r => { if (r.ok) location.reload(); });
+}
+</script>
+{% endblock %}

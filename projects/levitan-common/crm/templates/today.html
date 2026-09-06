@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %} — На сегодня{% endblock %}
+{% block content %}
+<h1>📞 На сегодня</h1>
+
+{% if overdue > 0 %}
+<div class="alert" style="background:#FFF8F5;border:1px solid #F5D0C5;color:#B83A1A;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem">
+    ⚠️ <strong>{{ overdue }}</strong> просрочено — дедлайн прошёл
+</div>
+{% endif %}
+
+{% set combined = due_reminders + queue %}
+
+{% if combined %}
+<div class="contacts-table-wrap">
+    <table class="contacts-table">
+        <thead>
+            <tr>
+                <th>Компания</th>
+                <th>Телефон</th>
+                <th>Контакт</th>
+                <th>Заметка</th>
+                <th>Дедлайн</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in combined %}
+            <tr>
+                <td><strong>{{ item.company_name or item.phone }}</strong></td>
+                <td>{{ item.phone }}</td>
+                <td>{{ item.contact_name or "—" }}</td>
+                <td style="font-size:0.85rem;color:var(--warm-grey)">{{ item.note or "—" }}</td>
+                <td>
+                    {% if item.due_date %}
+                        {% if item.due_date < today %}
+                            <span class="status-badge status-overdue">{{ item.due_date }}</span>
+                        {% elif item.due_date == today %}
+                            <span style="color:var(--pine);font-weight:600">{{ item.due_date }}</span>
+                        {% else %}
+                            {{ item.due_date }}
+                        {% endif %}
+                    {% else %}
+                        <span class="muted">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="btn-sm" onclick="done({{ item.id }}, '{{ 'reminder' if item.done is defined else 'queue' }}')" title="Готово">✅</button>
+                    <button class="btn-sm btn-danger" onclick="remove({{ item.id }}, '{{ 'reminder' if item.done is defined else 'queue' }}')" title="Убрать">✕</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:3rem 2rem">
+    <p style="font-size:1.2rem;margin-bottom:0.5rem">✅ На сегодня ничего нет</p>
+    <p class="muted">Отдыхай! Или добавь контакт из карточки клиента → «На сегодня»</p>
+</div>
+{% endif %}
+
+<script>
+function done(id, type) {
+    if (type === 'reminder') {
+        fetch('/api/reminders/' + id + '/done', {method: 'PATCH'})
+            .then(r => { if (r.ok) location.reload(); });
+    } else {
+        fetch('/api/queue/' + id + '/done', {method: 'PATCH'})
+            .then(r => { if (r.ok) location.reload(); });
+    }
+}
+function remove(id, type) {
+    if (type === 'reminder') {
+        fetch('/api/reminders/' + id, {method: 'DELETE'})
+            .then(r => { if (r.ok) location.reload(); });
+    } else {
+        fetch('/api/queue/' + id, {method: 'DELETE'})
+            .then(r => { if (r.ok) location.reload(); });
+    }
+}
+</script>
+{% endblock %}

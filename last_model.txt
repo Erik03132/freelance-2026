@@ -1,0 +1,3 @@
+Модель: auto/best-chat
+Provider: omniroute
+Platform: desktop

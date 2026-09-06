@@ -1,5 +1,28 @@
 # ACTIVE_TASKS.md — сводка (переформирована 22.08.2026)
 
+## 🔴 P0-блок (finish-day 2026-09-01) — VPS: каскад моделей и TG-токены
+
+- [x] **HFM-004** — Настроить каскад из 13 бесплатных моделей на OpenRouter для всех 13 профилей (deepseek-v4, nemotron-3.5, laguna-s-2.1, minimax-m2.7/m3, ling-3.0 и др.)
+- [x] **HFM-005** — Обновить TG-токены 7 ботов (personal, sherlock, marketer, batrak, femida, financier, english-tutor) в `.env`
+- [x] **HFM-006** — Удалить дубликаты `/srv/hermes/.hermes/profiles/` → 13 уникальных профилей в `/root/.hermes/profiles/`
+- [x] **HFM-007** — Настроить systemd drop-in: `HERMES_HOME=/root/.hermes`, `TELEGRAM_PROXY`, `OPENROUTER_API_KEY`, `TELEGRAM_ALLOWED_USERS=176203333`
+- [x] **HFM-008** — Проверить что все 6 ТГ-ботов отвечают (personal, sherlock, marketer, batrak, femida, financier)
+- [ ] **HFM-009** — Настроить `/sethome` для каждого бота в Telegram
+
+## 🔴 P0-блок (finish-day 2026-08-30 вечер) — Инфраструктура знаний, Timeweb S3 и MCP
+
+- [x] **TW-001** — Timeweb Cloud: создать S3-бакет (напр. `igor-shared`) для обмена файлами и знаниями между Mac и VPS.
+- [x] **TW-002** — Настроить `rclone` / sync-пайплайн на Mac и VPS для безопасного knowledge-экспорта из Obsidian в S3.
+- [x] **TW-003** — Подключить Timeweb мониторинг и алерты на падение сервисов/ботов на VPS.
+- [x] **MCP-001** — Проверить OAuth-авторизацию Vercel MCP в живой сессии при первом деплое. ✅ 31.08: `hermes mcp login vercel` (OAuth-браузер) → `✓ Authenticated — 37 tool(s)`, `hermes mcp test vercel` отдаёт инструменты.
+- [ ] **MCP-002** — Протестировать инструменты GitHub MCP (26 tools via `mcp-github-stdio.sh`) и Obsidian Vault MCP на реальных задачах.
+
+## 🔴 P0-блок (finish-day 2026-08-30) — Автономия и оркестрация агентов
+
+- [x] **ORCH-001** — Внедрен Zero-Token Watchdog Kwork (`~/.hermes/scripts/watchdog_kwork.py`, крон ID: `4b6f9e4f5184`, `no_agent=True`, каждые 30м, $0 затрат токенов).
+- [x] **ORCH-002** — Развернут автономный пайплайн Scout → Batrak через `continuity` и `context_from` (крон ID: `b4b4e33a4272` и `18939972f1ed`, дедупликация + инлайн-драфт отклика).
+- [x] **ORCH-003** — Создан раннер долгих автономных миссий в `tmux` (`tools/ops/run_mission_tmux.sh`).
+
 ## 🔴 P0-блок (finish-day 2026-08-29 вечер) — инфраструктура OmniRoute/Hermes
 
 > Итог аудита: инфра подтверждена рабочей. Блокеров нет.
@@ -265,8 +288,31 @@ computer-use) и **semantica** (прототип в графовый слой); 
 (AGPL-3.0 + дубль smart-rag, нужен юр-чек Фемиды); omarchy/needle — out of scope.
 **Риски:** OpenViking AGPL при сетевом use обязывает открыть исходники; computer
 (Cloudflare) может нести vendor-lock на Anthropic/Workers (против ADR-002).
-**СТАТУС:** зафиксировано, НЕ реализовано (ждёт «закругляемся»). При реализации —
+**СТАТУС:** зафиксировано, НЕ реализовано (ждёт «закругляемся»）。 При реализации —
 сначала юр-чек лицензии OpenViking через Фемиду.
+
+
+
+### ES-29: Obsidian↔Hermes MCP-мост с гибридным поиском（devbrain）
+- **Что:** из `devbrain`(30.08.2026: MCP+FastEmbed/BM25 retrieval к Obsidian-хранилищу для агентов) взять паттерн「4 memory-тулы: поиск, контекст проекта, лог сессии, скилл」под наш Hermes/Obsidian.
+
+- **Решение:** берём как паттерн（★1, ранний) для достройки нашей общей базы знаний(ARCH-001/002）: гибридный retrieval поверх уже существующего `sync_hermes_knowledge.sh` + `skill-router`。
+- **Что делать:** прототип MCP-моста Obsidian↔Hermes (объём малый: FastEmbed CPU/BM25 на 8GB Mac; мост к одному профилю), оценить против git-синака.
+
+ → файл `docs/cases/2026-08-31_devbrain-obsidian-ssot.md`
+
+### ES-30: Диспетчер задач команды Hermes-профилей（hermes-hq）
+- **Что:** из `hermes-hq`(29.08.2026: SQLite-движок,「одна сессия→задача」, reviewer-gate, статус「нужен ты」, state machine из 11 состояний) построить контроль над нашими 6 профилями поверх существующего Chief/`ACTIVE_TASKS.md`。
+- **Решение:** берём как паттерн（★0, early dev; автор сам「third attempt」）для оркестрации командой агентов; НЕ зависимость.
+
+- **Что делать:** прототип на 1-2 профилях（SQLite-таблица задач + одна Hermes-сессия на задачу + reviewer-gate）， после стабилизации VPS-базы(T-08. → файл `docs/cases/2026-08-31_hermes-hq-control-plane.md`
+
+### ES-31: Каталог несовместимостей OpenAI-совместимых провайдеров + прокси-адаптер（hermes-snowflake）
+- **Что:** из `hermes-snowflake`(26.08.2026: каталог 5 расхождений OpenAI-протокола у Cortex + minimal прокси, который их чинит) зафиксировать систематический чек-каталог девиаций наших провайдеров(opencode-zen 401=`/zen/go/v1`→`/zen/v1`; OmniRoute auto-каскады мёртвые; max_tokens vs max_completion_tokens) и тонкий многоразовый прокси-адаптер。
+
+- **Решение:** берём как урок（систематизируем провайдер-совместимость, а не чиним руками каждый раз); сам Snowflake-деплой — НЕТ(нет SPCS у нас）.
+ Нейтральная лицензия NOASSERTION — юр-чек Фемиды перед reuse кода光
+- **Что делать:** составить `docs/solutions/provider-compat-checklist.md`(наши типовые девиации + фиксы);тонкий прокси-адаптер — только если снова наткнёмся на кривой провайдер. → файл `docs/cases/2026-08-31_hermes-snowflake-provider-proxy.md`
 
 ## 🔭 AI-SCOUT: экспертная группа на каждой новости + Habr + мерж с Angela
 

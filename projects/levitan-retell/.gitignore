@@ -1,0 +1,33 @@
+# Secrets
+.env
+*.env
+!*.env.example
+
+# Runtime/data
+__pycache__/
+*.pyc
+*.db
+data/call_results/*
+data/transcripts/*
+data/webhook_logs/*
+data/operator_csv/*
+data/voice_cache/*
+data/turkey_audio/*
+data/adygea_leads/*
+data/campaigns/*
+!.gitkeep
+
+# Logs
+logs/
+*.log
+
+# Caches
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# venv
+.venv/
+venv/

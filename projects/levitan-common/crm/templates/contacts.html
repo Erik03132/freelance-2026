@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %} — Контакты{% endblock %}
+{% block content %}
+<h1>Контакты</h1>
+
+<form class="search-bar" method="get">
+    <input type="text" name="search" placeholder="Поиск по телефону, названию, контакту..." value="{{ search }}">
+    <select name="status">
+        <option value="">Все статусы</option>
+        {% for s in statuses %}
+        <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ status_labels.get(s, s) }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Поиск</button>
+</form>
+
+<p class="muted">Всего: {{ total }}</p>
+
+<div class="contacts-table-wrap">
+    <table class="contacts-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Компания</th>
+                <th>Телефон</th>
+                <th>Контакт</th>
+                <th>Продукт</th>
+                <th>Статус</th>
+                <th>Дата</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in contacts %}
+            <tr onclick="window.location='/contacts/{{ c.id }}'" style="cursor:pointer">
+                <td>{{ c.id }}</td>
+                <td>{{ c.company_name[:40] or c.phone }}</td>
+                <td>{{ c.phone }}</td>
+                <td>{{ c.contact_name }}</td>
+                <td>{{ c.product[:30] }}</td>
+                <td><span class="status-badge status-{{ c.status }}">{{ status_labels.get(c.status, c.status) }}</span></td>
+                <td>{{ c.created_at[:10] }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="muted" style="text-align:center; padding:2rem">Контактов нет</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="pagination">
+    {% if page > 1 %}
+    <a href="?page={{ page-1 }}&search={{ search }}&status={{ status_filter }}">← Назад</a>
+    {% endif %}
+    <span>Стр. {{ page }} / {{ pages }}</span>
+    {% if page < pages %}
+    <a href="?page={{ page+1 }}&search={{ search }}&status={{ status_filter }}">Вперёд →</a>
+    {% endif %}
+</div>
+{% endblock %}

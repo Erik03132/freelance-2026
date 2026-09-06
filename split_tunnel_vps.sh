@@ -17,6 +17,8 @@
 
 set -u
 VPS="217.149.23.113"
+# Демон (root, launchd) запускает route без sudo; из терминала — через sudo.
+if [ "$(id -u)" -eq 0 ]; then ROUTE="route"; else ROUTE="sudo route"; fi
 # Шлюз берём ДИНАМИЧЕСКИ из текущего default-маршрута (меняется при смене сети/Wi-Fi).
 # Если не удалось определить — fallback на хотспот.
 LOCAL_GW=$(netstat -rn -f inet 2>/dev/null | awk '/^default/{print $2; exit}')
@@ -35,7 +37,7 @@ case "$ACTION" in
     exit 0 ;;
   undo)
     echo "Откат: удаляем хост-маршрут $VPS"
-    sudo route delete -host "$VPS" 2>/dev/null && echo "удалён" || echo "уже нет / не удалён"
+    "$ROUTE" delete -host "$VPS" 2>/dev/null && echo "удалён" || echo "уже нет / не удалён"
     exit 0 ;;
 esac
 
@@ -51,7 +53,7 @@ if [ "$CUR" = "$LOCAL_GW" ]; then
 fi
 
 echo "Добавляем хост-маршрут: $VPS -> $LOCAL_GW ($IFACE)"
-sudo route add -host "$VPS" "$LOCAL_GW" 2>&1
+"$ROUTE" add -host "$VPS" "$LOCAL_GW" 2>&1
 if [ $? -eq 0 ]; then
   echo "✅ Готово. Проверь: route get $VPS (должен показать gateway: $LOCAL_GW)"
   echo "   Теперь при ВКЛ VPN трафик до VPS пойдёт мимо туннеля."

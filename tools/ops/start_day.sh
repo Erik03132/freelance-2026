@@ -66,7 +66,9 @@ for PORT in "${PORTS[@]}"; do
 done
 echo ""
 
-# 7. API keys check
+# 7. Network proxy & split-tunnel init
+# Load split-tunnel: RF-direct + overseas-proxy
+source /Users/igorvasin/.proxy_funcs.sh && ruNet
 echo "── API Keys Check ──"
 if [ -f "$ENV_FILE" ]; then
     grep -E "^(OPENAI|ANTHROPIC|GEMINI|SERPAPI|PERPLEXITY|API_|KEY)" "$ENV_FILE" 2>/dev/null | while IFS= read -r line; do

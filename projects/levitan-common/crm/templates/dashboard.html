@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %} — Дашборд{% endblock %}
+{% block content %}
+<h1>Дашборд</h1>
+
+<div class="stats-grid">
+    <a href="/contacts" class="stat-card" style="text-decoration:none;color:inherit">
+        <div class="stat-value">{{ total }}</div>
+        <div class="stat-label">Всего контактов</div>
+    </a>
+    <a href="/contacts?status=lead" class="stat-card stat-lead" style="text-decoration:none;color:inherit">
+        <div class="stat-value">{{ leads }}</div>
+        <div class="stat-label">🔥 Лидов</div>
+    </a>
+    <a href="/contacts" class="stat-card stat-calls" style="text-decoration:none;color:inherit">
+        <div class="stat-value">{{ today_calls }}</div>
+        <div class="stat-label">Звонков сегодня</div>
+    </a>
+    <a href="/reminders" class="stat-card" style="text-decoration:none;color:inherit">
+        <div class="stat-value">{{ pending_reminders }}</div>
+        <div class="stat-label">⏳ Активных напоминаний</div>
+    </a>
+    <a href="/reminders" class="stat-card stat-overdue" style="text-decoration:none;color:inherit">
+        <div class="stat-value">{{ overdue_reminders }}</div>
+        <div class="stat-label">⚠️ Просроченных</div>
+    </a>
+    <a href="/today" class="stat-card" style="text-decoration:none;color:inherit">
+        <div class="stat-value">{{ queue_count }}</div>
+        <div class="stat-label">📞 В очереди сегодня</div>
+    </a>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <h2>По статусам</h2>
+        <div class="status-list">
+            {% for status, count in status_chart.items() %}
+            <a href="/contacts?status={{ status }}" class="status-row" style="text-decoration:none;color:inherit">
+                <span class="status-badge status-{{ status }}">{{ status_labels.get(status, status) }}</span>
+                <span class="status-count">{{ count }}</span>
+            </a>
+            {% else %}
+            <p class="muted">Нет данных</p>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="card">
+        <h2>Последние контакты</h2>
+        <div class="contact-list">
+            {% for c in recent_contacts %}
+            <a href="/contacts/{{ c.id }}" class="contact-row">
+                <div>
+                    <strong>{{ c.company_name or c.phone }}</strong>
+                    <span class="status-badge status-{{ c.status }}">{{ status_labels.get(c.status, c.status) }}</span>
+                </div>
+                <small>{{ c.created_at[:16] }}</small>
+            </a>
+            {% else %}
+            <p class="muted">Нет контактов</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

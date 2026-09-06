@@ -1,0 +1,10 @@
+# Levitan Retell — вариант 3: Retell Conductor (на паузе, нет API-ключа)
+
+# Retell вызывает через HTTPS API
+requests>=2.31.0
+
+# Mango callback
+python-dotenv>=1.0.0
+
+# Common infra (levitan-common)
+-e ../levitan-common

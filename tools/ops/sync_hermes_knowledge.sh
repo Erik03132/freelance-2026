@@ -123,6 +123,40 @@ apply_statefiles(){
     ok "Файлы состояния применены в $WORKSPACE"
 }
 
+# === TW-002: S3 knowledge-export Obsidian (Mac -> Timeweb S3) ===
+# Двусторонний/one-way бэкап вольта в облако; VPS-боты подтягивают из S3.
+S3_REMOTE="timeweb-s3"
+S3_BUCKET="igor-shared"
+VAULT_DIR="${OBSIDIAN_VAULT:-$HOME/freelance-2026/vault}"
+PERSONAL_VAULT="$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents/Личное"
+
+s3_sync_push(){
+    which rclone >/dev/null 2>&1 || { err "rclone не установлен — пропускаю S3-sync"; return 0; }
+    
+    # 1. Проектный вольт
+    if [[ -d "$VAULT_DIR" ]]; then
+        log "S3-sync Obsidian ($VAULT_DIR) -> ${S3_REMOTE}:${S3_BUCKET}/knowledge"
+        rclone sync "$VAULT_DIR" "${S3_REMOTE}:${S3_BUCKET}/knowledge" \
+            --transfers 4 --fast-list --stats 5s 2>&1 | tail -8
+    fi
+
+    # 2. Активное «Личное» (только Входящие и новые папки, без архива и тяжелого видео)
+    if [[ -d "$PERSONAL_VAULT" ]]; then
+        log "S3-sync Личное ($PERSONAL_VAULT) -> ${S3_REMOTE}:${S3_BUCKET}/personal"
+        rclone sync "$PERSONAL_VAULT" "${S3_REMOTE}:${S3_BUCKET}/personal" \
+            --exclude '_Архив_2026/**' \
+            --exclude '.obsidian/**' \
+            --exclude '*.mov' \
+            --exclude '*.mp4' \
+            --exclude '*.webm' \
+            --exclude '*.avi' \
+            --exclude '*.mkv' \
+            --transfers 4 --fast-list --stats 5s 2>&1 | tail -8
+    fi
+
+    ok "Obsidian и Личное синхронизированы в S3 bucket $S3_BUCKET"
+}
+
 cmd="${1:-status}"
 
 case "$cmd" in
@@ -141,6 +175,7 @@ case "$cmd" in
               git push 2>&1 | sed 's/^/  /' && ok "Push выполнен"
           fi
         )
+        s3_sync_push
         ;;
     pull)
         ensure_sync_dir || exit 1
