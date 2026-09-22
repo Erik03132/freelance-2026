@@ -1,0 +1,28 @@
+# robots.txt для AI Bureau
+# Разместить в корне сайта: https://ai-bureau.pro/robots.txt
+
+User-agent: *
+Allow: /
+Allow: /services/
+Allow: /blog/
+Allow: /cases/
+Allow: /faq/
+Allow: /contact/
+
+# Заблокировать служебные пути
+Disallow: /_astro/
+Disallow: /node_modules/
+
+# Указать sitemap
+Sitemap: https://ai-bureau.pro/sitemap.xml
+Sitemap: https://ai-bureau.pro/llms.txt
+
+# Для Яндекс.роботов
+User-agent: Yandex
+Allow: /
+Sitemap: https://ai-bureau.pro/sitemap.xml
+
+# Для Googlebot
+User-agent: Googlebot
+Allow: /
+Sitemap: https://ai-bureau.pro/sitemap.xml
