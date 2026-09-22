@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sitemap для AI Bureau — генерируется автоматически через @astrojs/sitemap -->
+<!-- Ручной шаблон для резерва при отключении автоматической генерации -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:video="http://www.google.com/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <url>
+    <loc>https://ai-bureau.pro/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <priority>1.0</priority>
+    <changefreq>weekly</changefreq>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ai-bureau.pro/"/>
+  </url>
+
+  <url>
+    <loc>https://ai-bureau.pro/services/ai-agents</loc>
+    <lastmod>2026-09-21</lastmod>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ai-bureau.pro/services/ai-agents"/>
+  </url>
+
+  <url>
+    <loc>https://ai-bureau.pro/services/voice-bots</loc>
+    <lastmod>2026-09-21</lastmod>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ai-bureau.pro/services/voice-bots"/>
+  </url>
+
+  <url>
+    <loc>https://ai-bureau.pro/services/rag-knowledge</loc>
+    <lastmod>2026-09-21</lastmod>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ai-bureau.pro/services/rag-knowledge"/>
+  </url>
+
+  <url>
+    <loc>https://ai-bureau.pro/services/private-llm</loc>
+    <lastmod>2026-09-21</lastmod>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ai-bureau.pro/services/private-llm"/>
+  </url>
+
+  <url>
+    <loc>https://ai-bureau.pro/services/audit</loc>
+    <lastmod>2026-09-21</lastmod>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ai-bureau.pro/services/audit"/>
+  </url>
+
+  <url>
+    <loc>https://ai-bureau.pro/cases</loc>
+    <lastmod>2026-09-21</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ai-bureau.pro/cases"/>
+  </url>
+
+  <url>
+    <loc>https://ai-bureau.pro/faq</loc>
+    <lastmod>2026-09-21</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ai-bureau.pro/faq"/>
+  </url>
+
+  <url>
+    <loc>https://ai-bureau.pro/contact</loc>
+    <lastmod>2026-09-21</lastmod>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ai-bureau.pro/contact"/>
+  </url>
+
+  <url>
+    <loc>https://ai-bureau.pro/blog/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://ai-bureau.pro/blog/"/>
+  </url>
+
+  <url>
+    <loc>https://ai-bureau.pro/llms.txt</loc>
+    <lastmod>2026-09-21</lastmod>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+</urlset>
