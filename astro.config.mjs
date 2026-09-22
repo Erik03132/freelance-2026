@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
+  base: '/freelance-2026/',
   site: 'https://ai-bureau.pro',
   integrations: [
     react(),

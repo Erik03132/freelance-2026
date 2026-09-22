@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>AI Bureau — автономные AI-системы для бизнеса</title>
+    <description>AI-агенты с RAG, голосовые боты, чат-боты с базой знаний, private LLM, AI-консалтинг.</description>
+    <link>https://ai-bureau.pro</link>
+    <language>ru-RU</language>
+    <atom:link href="https://ai-bureau.pro/rss.xml" rel="self" type="application/rss+xml"/>
+    
+    <item>
+      <title>LLMOps: полный гайд по операциям с языковыми моделями в production</title>
+      <link>https://ai-bureau.pro/blog/llmops-guide/</link>
+      <pubDate>Thu, 10 Sep 2026 00:00:00 GMT</pubDate>
+      <description>LLMOps — это набор практик для работы с языковыми моделями в production: мониторинг качества, версионирование, оптимизация инференса, безопасность. Читайте, как настроить LLMOps для вашего бизнеса.</description>
+    </item>
+  
+
+    <item>
+      <title>Архитектура RAG: как работает Retrieval-Augmented Generation</title>
+      <link>https://ai-bureau.pro/blog/rag-architecture/</link>
+      <pubDate>Sat, 05 Sep 2026 00:00:00 GMT</pubDate>
+      <description>RAG — технология, позволяющая LLM отвечать на вопросы по вашим документам. Разбираем архитектуру: как работает retrieval, augmentation, какие компоненты нужны и как выбрать стек.</description>
+    </item>
+  
+
+    <item>
+      <title>Фреймворки AI-агентов 2026: LangChain, CrewAI, AutoGen, DSPy</title>
+      <link>https://ai-bureau.pro/blog/ai-agents-frameworks/</link>
+      <pubDate>Tue, 01 Sep 2026 00:00:00 GMT</pubDate>
+      <description>Сравнение фреймворков для разработки AI-агентов: LangChain, CrewAI, AutoGen, DSPy — плюсы, минусы, сценарии применения и как выбрать под вашу задачу.</description>
+    </item>
+  
+  </channel>
+</rss>
