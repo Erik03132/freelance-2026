@@ -1,0 +1,196 @@
+---
+// src/pages/blog/rag-architecture.astro — Статья про RAG
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = 'Архитектура RAG: как работает Retrieval-Augmented Generation';
+const description =
+  'RAG — технология, позволяющая LLM отвечать на вопросы по вашим документам. Разбираем архитектуру: как работает retrieval, augmentation, какие компоненты нужны и как выбрать стек.';
+const canonical = 'https://ai-bureau.pro/blog/rag-architecture/';
+const ogImage = '/og-default.png';
+---
+
+<BaseLayout {title} {description} {canonical} {ogImage}>
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content reveal">
+        <span class="label">Статья · RAG</span>
+        <h1>Архитектура RAG: как работает Retrieval-Augmented Generation</h1>
+        <p class="hero-desc">
+          RAG позволяет языковой модели отвечать на вопросы по вашим документам,
+          не выдумывая информацию. Разбираем архитектуру по компонентам —
+          от chunking до re-ranking.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .hero {
+      padding: 60px 0 48px;
+      background: radial-gradient(ellipse at 20% 50%, var(--accent-dim) 0%, transparent 60%);
+    }
+    .hero-content {
+      max-width: 660px;
+    }
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text);
+      margin: 12px 0 0;
+      line-height: 1.6;
+    }
+  </style>
+
+  <section class="section">
+    <div class="container">
+      <div class="article-content">
+        <p>
+          RAG (Retrieval-Augmented Generation) — это подход, при котором
+          языковая модель получает дополнительный контекст из ваших
+          документов перед тем, как сгенерировать ответ. Модель не
+          обучается на ваших данных — ей просто передают релевантные
+          фрагменты как часть промпта.
+        </p>
+
+        <p>
+          Это решает две главные проблемы LLM: галлюцинации (модель
+          выдумывает факты) и отсутствие доступа к специфичной информации
+          (модель не знает ваших документов, инструкций, контрактов).
+        </p>
+
+        <h2>Архитектура RAG-системы</h2>
+        <p>
+          Классическая RAG-система состоит из двух частей: индексного
+          пайплайна (подготовка и хранение документов) и пайплайна
+          запросов (поиск релевантного контекста и генерация ответа).
+        </p>
+
+        <h3>Индексный пайплайн</h3>
+        <p>
+          <strong>Chunking.</strong> Документы разбиваются на смысловые
+          фрагменты — chunk-и. Размер chunk-а зависит от задачи: слишком
+          крупный chunk содержит лишнее, слишком мелкий — теряет context.
+          Оптимальный размер для большинства задач — 250–500 токенов.
+        </p>
+        <p>
+          <strong>Встраивания (embeddings).</strong> Каждый chunk преобразуется
+          в вектор — числовое представление смысла текста. Для русскоязычных
+          задач используют многоязычные модели встраивания (например,
+          multilingual-e5-large, text-embedding-3-small).
+        </p>
+        <p>
+          <strong>Хранение.</strong> Векторы хранятся в векторной базе данных:
+          Milvus, Qdrant, Weaviate, Chroma. База должна быстро отвечать на
+          запросы семантического поиска — находить ближайшие векторы к
+          вектору запроса.
+        </p>
+
+        <h3>Пайплайн запросов</h3>
+        <p>
+          <strong>Превращение запроса в вектор.</strong> Входной запрос
+          преобразуется в вектор той же модели, что и документы.
+        </p>
+        <p>
+          <strong>Поиск.</strong> Поиск ближайших chunk-ов в векторной базе.
+          Это semantic-поиск — на основе смысла, а не ключевых слов.
+        </p>
+        <p>
+          <strong>Гибридный поиск.</strong> В сложных случаях комбинируют
+          semantic-поиск с keyword-поиском (BM25 или аналог) для точности
+          — когда запрос содержит специфичные термины, имена, номера.
+        </p>
+        <p>
+          <strong>Переранжирование (re-ranking).</strong> Найденные chunk-ы
+          перераanks по релевантности запросу — отдельный моделью-задачей
+          или rule-based логикой. Это улучшает точность, особенно когда
+          в первоначальном результате много шума.
+        </p>
+        <p>
+          <strong>Генерация ответа.</strong> Топ-k релевантных chunk-ов
+          передаются в LLM как контекст. Промпт включает контекст, вопрос
+          пользователя и инструкции — ответить по контексту, не выдумывать,
+          указать источник.
+        </p>
+
+        <h2>Когда RAG работает лучше всего</h2>
+        <ul>
+          <li>Когда у вас есть структурированные или полуструктурированные
+          документы — инструкции, контракты, каталоги, базы знаний.</li>
+          <li>Когда информация периодически обновляется — RAG-система
+          переиндексируется, а не переобучается.</li>
+          <li>Когда важен источник — RAG позволяет указать, на какой
+          странице или документе найден ответ.</li>
+        </ul>
+
+        <h2>Ограничения RAG</h2>
+        <ul>
+          <li>RAG зависит от качества индексного пайплайна — плохой chunking
+          или плохие встраивания дают плохие результаты.</li>
+          <li>Модель ограничена контекстным окном — если нужно много
+          документов, приходится использовать техники сжатия контекста
+          или multi-hop поиска.</li>
+          <li>RAG не решает задач, требующих reasoning над данными —
+          для этого нужны более сложные архитектуры (GraphRAG, agentic RAG).</li>
+        </ul>
+
+        <h2>Итог</h2>
+        <p>
+          RAG — это проверенная архитектура для создания chatbot-ов, которые
+          «знают» ваши документы. Правильный выбор стека — chunking-стратегия,
+          модель встраивания, векторная база, стратегия re-ranking — определяет
+          качество ответов. Мы проектируем RAG-архитектуру под ваши документы
+          и задачи.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .section {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .article-content {
+      padding-top: 32px;
+    }
+    .article-content > p {
+      font-size: 1.02rem;
+      line-height: 1.75;
+      margin-bottom: 16px;
+    }
+    .article-content > ul {
+      margin: 12px 0 16px 24px;
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+    .article-content h2 {
+      margin: 40px 0 12px;
+    }
+    .article-content h3 {
+      margin: 24px 0 8px;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+  </style>
+
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: 'Архитектура RAG: как работает Retrieval-Augmented Generation',
+      description,
+      datePublished: '2026-09-05',
+      author: {
+        '@type': 'Organization',
+        name: 'AI Bureau',
+        url: 'https://ai-bureau.pro',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'AI Bureau',
+        url: 'https://ai-bureau.pro',
+      },
+      keywords: 'RAG, Retrieval-Augmented Generation, векторные базы, гибридный поиск, LLM',
+    })}
+  />
+</BaseLayout>

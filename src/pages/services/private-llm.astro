@@ -1,0 +1,307 @@
+---
+// src/pages/services/private-llm.astro — Private LLM
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+
+const title = 'Private LLM — своя языковая модель на вашем сервере | AI Bureau';
+const description =
+  'Развёртывание private LLM: локальные модели, on-premise инфраструктура, данные не уходят в облако. Безопасность, контроль, кастомизация.';
+const serviceName = 'Private LLM — развёртывание локальной модели';
+const serviceType = 'Private LLM Deployment Services';
+const canonical = 'https://ai-bureau.pro/services/private-llm/';
+
+const faq = [
+  {
+    question: 'Что такое private LLM и когда он нужен?',
+    answer:
+      'Private LLM — это языковая модель, работающая на вашей инфраструктуре: ваших серверах, вашем GPU, под вашим контролем. Данные не уходят в внешние облака и не передаются третьим сторонам. Private LLM нужен, когда вы работаете с конфиденциальными данными (финансы, медицина, персональные данные, коммерческая тайна), есть требования регуляторов к локации данных, или вы хотите управлять стоимостью инференса в долгосрочной перспективе.',
+  },
+  {
+    question: 'Какие модели можно развернуть на своей инфраструктуре?',
+    answer:
+      'На вашей инфраструктуре можно запустить открытые модели: Llama (Meta), Mistral, Falcon, специализированные модели под вашу задачу. Мы помогаем выбрать модель под требования к качеству, размеру и техническим возможностям, настраиваем инференс-сервер (vLLM, TGI, llama.cpp), оптимизируем производительность под вашу нагрузку и настраиваем безопасность доступа.',
+  },
+  {
+    question: 'Какая инфраструктура нужна для private LLM?',
+    answer:
+      'Для работы моделей требуется GPU-сервер с достаточным объёмом видеопамяти (VRAM). Точные требования зависят от модели: например, Llama 3 8B работает на одном GPU с 16–24 GB VRAM, модель 70B требует кластера. Мы проектируем инфраструктуру под ваш бюджет и нагрузку — от одиночного сервера до кластера с оркестрацией (Kubernetes). Оптимизация инференса (квантизация, batching) позволяет сократить затраты на 30–50%.',
+  },
+  {
+    question: 'Безопасно ли хранить данные в private LLM?',
+    answer:
+      'При правильной настройке — да. Private LLM даёт полный контроль над данными: они не покидают вашу инфраструктуру, вы управляете доступом, логируете запросы, настраиваете изоляцию. Мы проектируем архитектуру безопасности: сетевая изоляция, контроль доступа по ролям, шифрование, аудит. Это критично для регуляторных требований (152-ФЗ, GDPR, отраслевые стандарты) и для защиты коммерческой тайны.',
+  },
+];
+---
+
+<ServiceLayout
+  {title}
+  {description}
+  {serviceName}
+  {serviceType}
+  {faq}
+  {canonical}
+>
+  <section class="service-hero">
+    <div class="container">
+      <div class="service-hero-content reveal">
+        <span class="label">Услуга · Private LLM</span>
+        <h1>Private LLM: своя языковая модель на вашей инфраструктуре</h1>
+        <p class="service-hero-desc">
+          Private LLM — языковая модель, работающая на вашей инфраструктуре.
+          Данные не уходят в внешние облака, вы полностью контролируете
+          безопасность и производительность. Развёртывание, настройка,
+          оптимизация.
+        </p>
+        <div class="service-cta">
+          <a href="/contact" class="btn">Обсудить развёртывание</a>
+          <a href="/services/audit" class="btn btn-ghost">AI-аудит</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .service-hero {
+      padding: 60px 0 48px;
+      background: radial-gradient(ellipse at 80% 30%, var(--accent-dim) 0%, transparent 60%);
+    }
+    .service-hero-content {
+      max-width: 720px;
+    }
+    .service-hero-desc {
+      font-size: 1.05rem;
+      color: var(--text);
+      margin: 16px 0 28px;
+      line-height: 1.7;
+      max-width: 620px;
+    }
+    .service-cta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+  </style>
+
+  <section class="section">
+    <div class="container">
+      <div class="content-block reveal">
+        <span class="label">О услуге</span>
+        <h2>Своя языковая модель — под вашим контролем</h2>
+        <p>
+          Когда вы используете облачные модели, ваши данные уходят на внешние
+          серверы. Private LLM работает на вашей инфраструктуре — ваши данные
+          не покидают контролируемую среду, вы управляете доступом, логированием
+          и безопасностью. Это критично для регуляторных требований и
+          коммерческой тайны.
+        </p>
+        <p>
+          Мы проектируем и развёртываем private LLM: выбираем модель, настраиваем
+          инференс, оптимизируем производительность, внедряем мониторинг
+          и интеграции с вашими системами.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="content-block reveal">
+        <h2>Преимущества</h2>
+        <div class="tasks-list">
+          <div class="task-item">
+            <div class="task-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <h3>Конфиденциальность данных</h3>
+            <p>
+              Данные не покидают вашу инфраструктуру. Никаких передач во внешние
+              API — полный контроль над тем, какая информация куда попадает.
+              Критично для финансов, медицины, персональных данных, коммерческой
+              тайны.
+            </p>
+          </div>
+          <div class="task-item">
+            <div class="task-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+              </svg>
+            </div>
+            <h3>Контроль над инфраструктурой</h3>
+            <p>
+              Вы управляете тем, на каких серверах работает модель, как настроен
+              доступ, как логируются запросы. Никакой зависимости от внешних
+              провайдеров и их изменений лимитов, цен, доступности.
+            </p>
+          </div>
+          <div class="task-item">
+            <div class="task-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+              </svg>
+            </div>
+            <h3>Кастомизация и fine-tuning</h3>
+            <p>
+              Модель можно дополнительно обучить на ваших данных — чтобы лучше
+              понимать вашу предметную область, терминологию, стиль. Fine-tuning
+              даёт более точные ответы в вашей области, чем общая модель.
+            </p>
+          </div>
+          <div class="task-item">
+            <div class="task-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            </div>
+            <h3>SEO / стоимость инференса</h3>
+            <p>
+              В долгосрочной перспективе свой сервер часто дешевле облака —
+              особенно при стабильной нагрузке. Оптимизация инференса
+              (квантизация, batching, выбор модели) снижает стоимость
+              обработки запросов.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .content-block {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .content-block h2 {
+      margin-bottom: 16px;
+    }
+    .content-block > p {
+      font-size: 1.02rem;
+      line-height: 1.75;
+      margin-bottom: 16px;
+    }
+    .tasks-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+    .task-item {
+      padding: 20px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .task-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .task-item h3 {
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+    .task-item p {
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+  </style>
+
+  <section class="section">
+    <div class="container">
+      <div class="content-block reveal">
+        <h2>Технология</h2>
+        <div class="tech-columns">
+          <div class="tech-col">
+            <h3>Модели</h3>
+            <p>
+              Llama (Meta), Mistral, Falcon и специализированные модели.
+              Подбираем модель под задачу: от компактных 7B для простых
+              сценариев до крупных modelos для сложных задач.
+            </p>
+          </div>
+          <div class="tech-col">
+            <h3>Инфраструктура</h3>
+            <p>
+              GPU-серверы, оптимизация инференса (vLLM, TGI, llama.cpp),
+              оркестрация (Kubernetes), масштабирование под нагрузку.
+            </p>
+          </div>
+          <div class="tech-col">
+            <h3>Безопасность</h3>
+            <p>
+              Сетевая изоляция, контроль доступа по ролям, шифрование,
+              аудит запросов — всё для соответствия регуляторным
+              требованиям и защиты данных.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .tech-columns {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+    .tech-col {
+      padding: 20px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    .tech-col h3 {
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      color: var(--accent);
+    }
+    .tech-col p {
+      font-size: 0.88rem;
+      line-height: 1.65;
+    }
+  </style>
+
+  <section class="section cta-block">
+    <div class="container">
+      <div class="cta-inner reveal">
+        <h2>Нужно развернуть private LLM?</h2>
+        <p>
+          Проведём аудит инфраструктуры, выберем модель под ваши задачи
+          и развёрнём — с настройкой безопасности и мониторингом.
+        </p>
+        <a href="/contact" class="btn">Обсудить развёртывание private LLM</a>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .cta-block {
+      border-top: none;
+      padding-top: 48px;
+    }
+    .cta-inner {
+      max-width: 560px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 32px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .cta-inner h2 { margin-bottom: 8px; }
+    .cta-inner p { margin: 0 auto 20px; font-size: 1rem; }
+  </style>
+</ServiceLayout>

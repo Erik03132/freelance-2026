@@ -1,0 +1,173 @@
+---
+// src/pages/blog/ai-agents-frameworks.astro — Статья про фреймворки AI-агентов
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const title = 'Фреймворки AI-агентов 2026: LangChain, CrewAI, AutoGen, DSPy';
+const description =
+  'Сравнение фреймворков для разработки AI-агентов: LangChain, CrewAI, AutoGen, DSPy — плюсы, минусы, сценарии применения и как выбрать под вашу задачу.';
+const canonical = 'https://ai-bureau.pro/blog/ai-agents-frameworks/';
+const ogImage = '/og-default.png';
+---
+
+<BaseLayout {title} {description} {canonical} {ogImage}>
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content reveal">
+        <span class="label">Статья · AI-агенты</span>
+        <h1>Фреймворки AI-агентов 2026: LangChain, CrewAI, AutoGen, DSPy</h1>
+        <p class="hero-desc">
+          Обзор основных фреймворков для разработки AI-агентов — их возможности,
+          ограничения и сценарии, в которых каждый из них работает лучше всего.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .hero {
+      padding: 60px 0 48px;
+      background: radial-gradient(ellipse at 20% 50%, var(--accent-dim) 0%, transparent 60%);
+    }
+    .hero-content {
+      max-width: 660px;
+    }
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text);
+      margin: 12px 0 0;
+      line-height: 1.6;
+    }
+  </style>
+
+  <section class="section">
+    <div class="container">
+      <div class="article-content">
+        <p>
+          Фреймворки для AI-агентов упрощают создание автономных систем —
+          они предоставляют abstractions для планирования, использования
+          инструментов, памяти и взаимодействия агентов между собой и с
+          человеком. В 2026 году основные варианты — LangChain, CrewAI,
+          AutoGen и DSPy — каждый со своим подходом.
+        </p>
+
+        <h2>LangChain</h2>
+        <p>
+          LangChain — самый обширный фреймворк, с обширной экосистомом
+          компонентов: цепочки (chains), агенты, инструменты, мемори, векторные
+          интеграции. LangChain подходит для задач, где нужно быстро собрать
+          прототип с доступом к большому количеству внешних сервисов и
+          источников данных.
+        </p>
+        <p>
+          <strong>Плюсы:</strong> широкая экосистема, много интеграций,
+          отличная документация, активное сообщество, LangSmith для
+          observability. <strong>Минусы:</strong> сложность для простых задач,
+          Abstraction Leak — в сложных сценариях приходится углубляться в детали.
+        </p>
+
+        <h2>CrewAI</h2>
+        <p>
+          CrewAI — фреймворк для мульти-агентных систем, где каждый агент имеет
+          роль, цели и набор инструментов. Агенты работают в crew и сотрудничают
+          для решения сложной задачи. Подходит для сценариев, где задача
+          естественным образом разбивается на роли.
+        </p>
+        <p>
+          <strong>Плюсы:</strong> простой подход к multi-agent, role-based
+          архитектура, быстрый прототип для сложных workflow. <strong>Минусы:</strong>
+          меньше интеграций, чем LangChain, меньше низкоуровневой гибкости.
+        </p>
+
+        <h2>AutoGen</h2>
+        <p>
+          AutoGen — фреймворк от Microsoft для диалогов между агентами и человека.
+          Агенты могут общаться между собой в формате диалога, обсуждать решения,
+          делегировать задачи. Подходит для сценариев, где процесс решения
+          является диалогом или итеративным обсуждением.
+        </p>
+        <p>
+          <strong>Плюсы:</strong> гибкая модель диалога, good для research-сценариев,
+          интеграция с 코드-execution. <strong>Минусы:</strong> сложнее для
+          production, меньше готовых интеграций, подходит не для всех бизнес-задач.
+        </p>
+
+        <h2>DSPy</h2>
+        <p>
+          DSPy — фреймворк для программируемого оптимизирования промптов и
+          signatures. Вместо ручного написания промптов DSPy позволяет
+          декларировать сигнатуры (input → output) и оптимизировать их
+          автоматически на основе примеров. Подходит для задач, где качество
+          зависит от точного промпта, и когда у вас есть данные для оптимизации.
+        </p>
+        <p>
+          <strong>Плюсы:</strong> программируемая оптимизация промптов,
+          reproducibility, good для production-сценариев с требованиями
+          к стабильности. <strong>Минусы:</strong> требует примеров для
+          оптимизации, меньше готовых агентных abstractions.
+        </p>
+
+        <h2>Как выбрать фреймворк</h2>
+        <ul>
+          <li><strong>Простой прототип с интеграциями</strong> — LangChain.</li>
+          <li><strong>Мульти-агентная система с ролями</strong> — CrewAI.</li>
+          <li><strong>Диалог между агентами, research-сценарии</strong> — AutoGen.</li>
+          <li><strong>Стабильные промпты, оптимизация под данные</strong> — DSPy.</li>
+          <li><strong>Сложный production-сценарий</strong> — комбинация: DSPy для
+          промптов + LangChain/CrewAI для orchestration.</li>
+        </ul>
+
+        <p>
+          В реальных проектах мы часто комбинируем несколько подходов: LangChain
+          для доступа к инструментам и данным, DSPy для оптимизации ключевых
+          промптов, кастомную логику для бизнес-процессов. Фреймворк — это
+          инструмент, а не ограничение — мы выбираем под задачу.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .section {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .article-content {
+      padding-top: 32px;
+    }
+    .article-content > p {
+      font-size: 1.02rem;
+      line-height: 1.75;
+      margin-bottom: 16px;
+    }
+    .article-content > ul {
+      margin: 12px 0 16px 24px;
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+    .article-content h2 {
+      margin: 40px 0 12px;
+    }
+  </style>
+
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: 'Фреймворки AI-агентов 2026: LangChain, CrewAI, AutoGen, DSPy',
+      description,
+      datePublished: '2026-09-01',
+      author: {
+        '@type': 'Organization',
+        name: 'AI Bureau',
+        url: 'https://ai-bureau.pro',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'AI Bureau',
+        url: 'https://ai-bureau.pro',
+      },
+      keywords: 'AI-агенты, LangChain, CrewAI, AutoGen, DSPy, фреймворки',
+    })}
+  />
+</BaseLayout>

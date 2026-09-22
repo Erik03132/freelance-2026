@@ -1,0 +1,344 @@
+---
+// src/pages/contact.astro — Контакты
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Свяжитесь с AI Bureau — запрос консультации';
+const description =
+  'Свяжитесь с AI Bureau для консультации по AI-агентам, RAG, голосовым ботам, private LLM. Email, телефон, Telegram.';
+const canonical = 'https://ai-bureau.pro/contact/';
+const ogImage = '/og-default.png';
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'AI Bureau',
+  url: 'https://ai-bureau.pro',
+  logo: 'https://ai-bureau.pro/logo.svg',
+  contactPoint: [
+    {
+      '@type': 'ContactPoint',
+      telephone: '+7 (XXX) XXX-XX-XX',
+      contactType: 'customer service',
+      availableLanguage: ['Russian', 'English'],
+    },
+    {
+      '@type': 'ContactPoint',
+      contactType: 'sales',
+      email: 'architect@ai-bureau.pro',
+      availableLanguage: ['Russian', 'English'],
+    },
+  ],
+  email: 'architect@ai-bureau.pro',
+  sameAs: [
+    'https://t.me/ai_bureau',
+  ],
+  areaServed: 'RU',
+};
+---
+
+<BaseLayout {title} {description} {canonical} {ogImage}>
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify(organizationJsonLd)}
+  />
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content reveal">
+        <span class="label">Контакты</span>
+        <h1>Свяжитесь с AI Bureau</h1>
+        <p class="hero-desc">
+          Опишите вашу задачу — проведём диагностику, ответим на вопросы
+          и подготовим preliminary-план.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .hero {
+      padding: 60px 0 40px;
+      background: radial-gradient(ellipse at 20% 50%, var(--accent-dim) 0%, transparent 60%);
+    }
+    .hero-content {
+      max-width: 580px;
+    }
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text);
+      margin: 12px 0 0;
+      line-height: 1.6;
+    }
+  </style>
+
+  <section class="section">
+    <div class="container">
+      <div class="contact-grid">
+        <!-- Форма -->
+        <div class="contact-form-wrap reveal">
+          <h2>Запрос консультации</h2>
+          <form class="contact-form" action="/submit" method="POST">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">Имя *</label>
+                <input type="text" id="name" name="name" required placeholder="Ваше имя" />
+              </div>
+              <div class="form-group">
+                <label for="company">Компания</label>
+                <input type="text" id="company" name="company" placeholder="Название компании" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" required placeholder="email@company.com" />
+              </div>
+              <div class="form-group">
+                <label for="phone">Телефон</label>
+                <input type="tel" id="phone" name="phone" placeholder="+7 (___) ___ __-__" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="task">Задача *</label>
+              <select id="task" name="task" required>
+                <option value="" disabled selected>Выберите задачу</option>
+                <option value="ai-agents">AI-агенты с RAG</option>
+                <option value="voice-bots">Голосовые боты</option>
+                <option value="rag-knowledge">RAG-чатбот на базе знаний</option>
+                <option value="private-llm">Private LLM</option>
+                <option value="audit">AI-аудит и консалтинг</option>
+                <option value="other">Другая задача</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">Описание задачи *</label>
+              <textarea id="message" name="message" required rows="5" placeholder="Опишите, что нужно автоматизировать или какая задача стоит…"></textarea>
+            </div>
+            <button type="submit" class="btn">Отправить запрос</button>
+            <p class="form-note">
+              Мы ответим в течение 1 рабочего дня. Все данные обрабатываются
+              в соответствии с политикой конфиденциальности.
+            </p>
+          </form>
+        </div>
+
+        <!-- Контакты -->
+        <div class="contact-info reveal">
+          <h2>Другие способы связи</h2>
+          <ul class="contact-list">
+            <li class="contact-item">
+              <div class="contact-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg>
+              </div>
+              <div>
+                <strong>Email</strong>
+                <a href="mailto:architect@ai-bureau.pro">architect@ai-bureau.pro</a>
+              </div>
+            </li>
+            <li class="contact-item">
+              <div class="contact-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </div>
+              <div>
+                <strong>Telegram</strong>
+                <a href="https://t.me/ai_bureau">@ai_bureau</a>
+              </div>
+            </li>
+          </ul>
+
+          <div class="contact-note">
+            <p>
+              <strong>Режим работы:</strong> пн–пт, 10:00–19:00 по московскому времени.
+              Мы ответим на все вопросы в течение 1 рабочего дня.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+    }
+
+    .contact-form-wrap h2 {
+      margin-bottom: 20px;
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 480px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 12px 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .btn {
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+
+    .form-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .contact-info h2 {
+      margin-bottom: 20px;
+    }
+
+    .contact-list {
+      list-style: none;
+      margin-bottom: 24px;
+    }
+
+    .contact-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .contact-item:first-child {
+      padding-top: 0;
+    }
+
+    .contact-item:last-child {
+      border-bottom: none;
+    }
+
+    .contact-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .contact-item strong {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .contact-item a {
+      color: var(--accent);
+      font-size: 0.95rem;
+    }
+
+    .contact-note {
+      padding: 16px;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+    }
+
+    .contact-note p {
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+  </style>
+
+  <section class="section cta-block">
+    <div class="container">
+      <div class="cta-inner reveal">
+        <h2>Готовы обсудить вашу задачу?</h2>
+        <p>
+          Заполните форму или напишите в Telegram — ответим в течение
+          1 рабочего дня.
+        </p>
+        <a href="https://t.me/ai_bureau" class="btn">Написать в Telegram</a>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .cta-block {
+      border-top: none;
+      padding-top: 48px;
+    }
+    .cta-inner {
+      max-width: 560px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 32px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .cta-inner h2 { margin-bottom: 8px; }
+    .cta-inner p { margin: 0 auto 20px; font-size: 1rem; }
+  </style>
+</BaseLayout>

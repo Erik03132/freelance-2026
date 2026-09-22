@@ -1,0 +1,504 @@
+---
+// src/pages/index.astro — Главная AI Bureau
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'AI бюро инжиниринга — автономные AI-системы для бизнеса';
+const description =
+  'AI Bureau — инженерное бюро по проектированию автономных AI-систем. AI-агенты с RAG, голосовые боты, чат-боты с базой знаний, private LLM, AI-консалтинг. См. кейсы.';
+const canonical = 'https://ai-bureau.pro/';
+const ogImage = '/og-default.png';
+---
+
+<BaseLayout {title} {description} {canonical} {ogImage}>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content reveal">
+        <span class="label">Инженерное бюро AI-систем</span>
+        <h1>AI-инжиниринг: автономные AI-системы для бизнеса</h1>
+        <p class="hero-desc">
+          AI Bureau проектирует и внедряет автономные AI-системы для
+          B2B-компаний, ретейла, EdTech и финансов. AI-агенты с RAG,
+          голосовые боты, чат-боты с базой знаний, private LLM и
+          AI-консалтинг — полный цикл от аудита до production.
+        </p>
+        <div class="hero-cta">
+          <a href="/contact" class="btn">Получить консультацию</a>
+          <a href="/services/audit" class="btn btn-ghost">AI-аудит бизнеса</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <!-- Абстрактная визуализация AI-архитектуры -->
+        <svg
+          class="hero-svg"
+          viewBox="0 0 400 300"
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-label="Схема автономной AI-системы"
+        >
+          <defs>
+            <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#00f0ff" />
+              <stop offset="100%" stop-color="#7c3aed" />
+            </linearGradient>
+          </defs>
+          <!-- Нода 1 -->
+          <rect x="40" y="60" width="80" height="50" rx="10" fill="var(--bg-surface)" stroke="var(--accent)" stroke-width="1.5" />
+          <text x="80" y="90" text-anchor="middle" fill="var(--accent)" font-size="9" font-weight="600">AI-Агент</text>
+          <!-- Нода 2 -->
+          <rect x="160" y="40" width="80" height="50" rx="10" fill="var(--bg-surface)" stroke="var(--accent)" stroke-width="1.5" />
+          <text x="200" y="70" text-anchor="middle" fill="var(--accent)" font-size="9" font-weight="600">RAG</text>
+          <!-- Нода 3 -->
+          <rect x="280" y="60" width="80" height="50" rx="10" fill="var(--bg-surface)" stroke="var(--accent)" stroke-width="1.5" />
+          <text x="320" y="90" text-anchor="middle" fill="var(--accent)" font-size="9" font-weight="600">LLM</text>
+          <!-- Связи -->
+          <line x1="120" y1="85" x2="160" y2="65" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+          <line x1="240" y1="65" x2="280" y2="85" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+          <!-- Бизнес-данные -->
+          <rect x="100" y="180" width="200" height="60" rx="10" fill="var(--bg-elevated)" stroke="var(--border)" stroke-width="1"/>
+          <text x="200" y="205" text-anchor="middle" fill="var(--text-muted)" font-size="10">Бизнес-процессы · Данные · Интеграции</text>
+          <!-- Стрелки -->
+          <line x1="80" y1="110" x2="140" y2="180" stroke="var(--accent)" stroke-width="1" opacity="0.3"/>
+          <line x1="200" y1="90" x2="200" y2="180" stroke="var(--accent)" stroke-width="1" opacity="0.3"/>
+          <line x1="320" y1="110" x2="260" y2="180" stroke="var(--accent)" stroke-width="1" opacity="0.3"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .hero {
+      padding: 80px 0 60px;
+      background: radial-gradient(ellipse at 20% 50%, var(--accent-dim) 0%, transparent 60%);
+    }
+    .hero-content {
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text);
+      margin: 20px 0 32px;
+      line-height: 1.7;
+      max-width: 560px;
+    }
+    .hero-cta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+    }
+    .hero-svg {
+      width: 100%;
+      max-width: 420px;
+      height: auto;
+      opacity: 0.9;
+    }
+  </style>
+
+  <!-- 5 УСЛУГ -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">Услуги</span>
+        <h2>AI-решения для вашего бизнеса</h2>
+        <p>
+          От прототипа до production — проектируем автономные AI-системы
+          под конкретные задачи и ограничения вашей инфраструктуры.
+        </p>
+      </div>
+
+      <div class="services-grid">
+        <!-- AI-агенты -->
+        <a href="/services/ai-agents" class="service-card reveal">
+          <div class="service-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 2v4m0 12v4M2 12h4m12 0h4" />
+              <path d="M5.6 5.6l2.8 2.8m8.4 0l-2.8 2.8M5.6 18.4l2.8-2.8m8.4 0l-2.8-2.8" />
+            </svg>
+          </div>
+          <h3>AI-агенты с RAG</h3>
+          <p>
+            Кастомные автономные агенты для бизнес-задач: автоматизация
+            процессов, обработка документов, многошаговое планирование
+            с интеграцией баз знаний.
+          </p>
+          <span class="service-link">Подробнее →</span>
+        </a>
+
+        <!-- Голосовые боты -->
+        <a href="/services/voice-bots" class="service-card reveal">
+          <div class="service-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="22" />
+            </svg>
+          </div>
+          <h3>Голосовые боты</h3>
+          <p>
+            AI-колл-центр и голосовые помощники: автоматизация входящих
+            и исходящих звонков, распознавание и синтез речи, интеграция
+            с телефонией.
+          </p>
+          <span class="service-link">Подробнее →</span>
+        </a>
+
+        <!-- RAG-чатботы -->
+        <a href="/services/rag-knowledge" class="service-card reveal">
+          <div class="service-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              <line x1="8" y1="7" x2="16" y2="7" />
+              <line x1="8" y1="11" x2="14" y2="11" />
+            </svg>
+          </div>
+          <h3>Чат-боты с базой знаний</h3>
+          <p>
+            RAG-системы на документах компании: корпоративные инструкции,
+            базы данных, контракты — бот знает ваш бизнес и отвечает
+            по контексту.
+          </p>
+          <span class="service-link">Подробнее →</span>
+        </a>
+
+        <!-- Private LLM -->
+        <a href="/services/private-llm" class="service-card reveal">
+          <div class="service-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="3" />
+              <path d="M9 9h6v6H9z" />
+              <path d="M3 9h3m12 0h3M3 15h3m12 0h3" />
+            </svg>
+          </div>
+          <h3>Private LLM</h3>
+          <p>
+            Своя языковая модель на вашем сервере. Данные не уходят в
+            облако, вы контролируете безопасность, производительность
+            и стоимость инференса.
+          </p>
+          <span class="service-link">Подробнее →</span>
+        </a>
+
+        <!-- AI-консалтинг -->
+        <a href="/services/audit" class="service-card reveal">
+          <div class="service-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg>
+          </div>
+          <h3>AI-консалтинг</h3>
+          <p>
+            Аудит процессов, точки роста, оценка ROI, поэтапный план
+            внедрения AI. LLMOps, промпт-инжиниринг, стратегия —
+            для B2B, ретейла, EdTech и финансов.
+          </p>
+          <span class="service-link">Подробнее →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .section-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .section-header p {
+      margin: 12px auto 0;
+      font-size: 1.05rem;
+    }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .service-card {
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .service-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .service-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-dim);
+      border-radius: 10px;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    .service-card h3 {
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .service-card p {
+      font-size: 0.92rem;
+      line-height: 1.65;
+      flex: 1;
+    }
+    .service-link {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      align-self: flex-start;
+    }
+  </style>
+
+  <!-- ПРОЦЕСС -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">Как мы работаем</span>
+        <h2>Процесс разработки AI-систем</h2>
+        <p>
+          Всё 투명но — от диагностики до production. Каждый шаг с согласованием,
+          метриками и документацией.
+        </p>
+      </div>
+
+      <div class="process-steps">
+        <div class="step reveal">
+          <div class="step-num">01</div>
+          <h3>Диагностика</h3>
+          <p>
+            Анализ ваших процессов, данных и технической готовности.
+            Выявляем точки, где AI принесёт реальную ценность, и
+            оцениваем риски и ограничения.
+          </p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">02</div>
+          <h3>Архитектура</h3>
+          <p>
+            Проектируем систему: выбор фреймворков (LangChain, CrewAI,
+            DSPy), архитектуры агентов, векторных баз, инфраструктуры
+            и интеграций с вашими сервисами.
+          </p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">03</div>
+          <h3>Прототип</h3>
+          <p>
+            Быстрый MVP за 2–4 недели для проверки гипотезы. Вы видите
+            рабочий продукт, оцениваете качество ответов и удобство
+            до полноценного внедрения.
+          </p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">04</div>
+          <h3>Внедрение</h3>
+          <p>
+            Полноценная система в production: настройка инфраструктуры,
+            мониторинг, логирование, управление версиями моделей и
+            промптов, интеграция с вашими системами.
+          </p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">05</div>
+          <h3>Поддержка</h3>
+          <p>
+            Мониторинг качества, доработки, масштабирование, обучение
+            вашей команды. Мы остаёмся с вами после запуска.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .process-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+    }
+    .step {
+      padding: 20px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .step-num {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 12px;
+      letter-spacing: 0.05em;
+    }
+    .step h3 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+    .step p {
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+  </style>
+
+  <!-- КЕЙСЫ (превью) -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">Кейсы</span>
+        <h2>AI в действии</h2>
+        <p>
+          Кейсы наших проектов — проблема, решение, результат.
+          Полный список на отдельной странице.
+        </p>
+      </div>
+
+      <div class="cases-preview">
+        <article class="case-card reveal">
+          <div class="case-emoji">📞</div>
+          <h3>AI-колл-центр для retail</h3>
+          <div class="case-meta">
+            <span class="tag">ASR/TTS</span>
+            <span class="tag">NLP</span>
+          </div>
+          <p>
+            Автоматизация входящих звонков: бот принимает заказы, отвечает
+            на вопросы по ассортименту и помогает с подбором товаров.
+            Обработка 40% входящих без операторов.
+          </p>
+        </article>
+
+        <article class="case-card reveal">
+          <div class="case-emoji">📚</div>
+          <h3>RAG-чатбот для документации</h3>
+          <div class="case-meta">
+            <span class="tag">RAG</span>
+            <span class="tag">Search</span>
+          </div>
+          <p>
+            Чат-бот, знающий тысячи страниц технической документации и
+            инструкций. Сократил время поиска ответов с 15 минут до 30 секунд.
+          </p>
+        </article>
+
+        <article class="case-card reveal">
+          <div class="case-emoji">🔒</div>
+          <h3>Private LLM для финансов</h3>
+          <div class="case-meta">
+            <span class="tag">LLM</span>
+            <span class="tag">On-premise</span>
+          </div>
+          <p>
+            Запуск модели Llama на собственных серверах для анализа
+            финансовых отчётов. Данные не покидают инфраструктуру,
+            стоимость инференса в 3 раза ниже облака.
+          </p>
+        </article>
+      </div>
+
+      <div class="cases-cta reveal">
+        <a href="/cases" class="btn">Все кейсы</a>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .cases-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .case-card {
+      padding: 24px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .case-emoji {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .case-card h3 {
+</ font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+    .case-meta {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 4px;
+    }
+    .case-card p {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .cases-cta {
+      text-align: center;
+    }
+  </style>
+
+  <!-- CTA -->
+  <section class="section cta-section">
+    <div class="container reveal">
+      <div class="cta-box">
+        <h2>Готовы внедрить AI в бизнес?</h2>
+        <p>
+          Проведём диагностику процессов, определим точки роста
+          и составим поэтапный план внедрения.
+        </p>
+        <a href="/contact" class="btn">Запросить консультацию</a>
+        <a href="/services/audit" class="btn btn-ghost">Подробнее про аудит</a>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .cta-section {
+      background: var(--bg-elevated);
+      text-align: center;
+    }
+    .cta-box {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 48px 32px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    .cta-box h2 {
+      margin-bottom: 12px;
+    }
+    .cta-box p {
+      margin: 0 auto 24px;
+      font-size: 1rem;
+      text-align: center;
+    }
+    .cta-box .btn {
+      margin: 0 8px 12px;
+    }
+  </style>
+</BaseLayout>
