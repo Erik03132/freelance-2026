@@ -211,6 +211,8 @@ push/pull при подъёме/отбое Mac либо общий volume); пр
 
 ## 📌 Отложено / в очереди
 
+- [ ] **TGRAM-001** (P1) — Обновить Telegram Bot API до 10.x: aiogram 3.13.1→3.31.0 (full support 10.3), python-telegram-bot 20.x→21.x. Перейти на Rich Messages + нативный streaming AI-ответов (sendRichMessageDraft, can_stop=True). Проекты: ai-eggs, angel-backend (aiogram), levitan (python-telegram-bot). Выгода: пользователь видит ответ в реальном времени, может остановить генерацию. Верерифицировано: официальный changelog Telegram + aiogram v3.31.0 release notes. **Статус:** проверено, к реализации.
+
 - **ES-8d Codebase Memory MCP**, **ES-8e Marketing Skills** — ждут задачу.
 - **ES-13 Ornith-1.5**, **ES-14 Qwen-uncensored**, **ES-15 Vercel fx** — локальные
   LLM-рантаймы, кандидаты, не реализуем сразу.
