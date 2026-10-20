@@ -61,6 +61,13 @@ FAQ_CACHE_PATH = Path(__file__).resolve().parent.parent / "docs" / "ANGELLA_BROI
 _faq_cache = {}
 
 
+def normalize(text: str) -> str:
+    text = text.lower().strip()
+    text = re.sub(r"[^\w\s]", " ", text)
+    text = re.sub(r"\s+", " ", text)
+    return text
+
+
 def load_faq_cache() -> None:
     global _faq_cache
     try:
@@ -180,7 +187,7 @@ async def _terminate_after_speech(reason: str) -> None:
                 print(
                     f"[METRICS] summary: greet_dur={_mm['greet_dur']:.1f} "
                     f"turns={_mm['turns']} resp_lat={[round(x, 1) for x in _mm['resp_lat']]} "
-                    f"avg_resp_lat={_avg:.1f}",
+                    f"avg_resp_lat={_avg:.1f} faq_hits={_mm.get('faq_hits', 0)}",
                     flush=True,
                 )
         except Exception as _me:
@@ -277,6 +284,9 @@ class YandexTTS(tts.TTS):
                 ) as resp:
                     data = await resp.read()
                     if resp.status != 200 or len(data) < 1000:
+                        if resp.status == 401:
+                            print("[TTS] Yandex 401, fallback to edge-tts", flush=True)
+                            return await self._synth_edge(sentence)
                         raise RuntimeError(f"Yandex TTS {resp.status}: {data[:200]}")
             if lead and not self._lead_done and self._breath:
                 self._lead_done = True
@@ -325,6 +335,54 @@ class YandexTTS(tts.TTS):
             f"[TTS] sentence-split: {len(_sentences)} parts in {_t.time() - _t0:.1f}s", flush=True
         )
         yield _stream()
+
+    async def _synth_edge(self, sentence: str) -> bytes:
+        """Fallback TTS через edge-tts (Microsoft)."""
+        import tempfile
+        import os
+
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as mp3:
+            _path = mp3.name
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                "edge-tts",
+                "--voice",
+                "ru-RU-DariyaNeural",
+                "--text",
+                sentence,
+                "--write-media",
+                _path,
+                "--rate=+0%",
+                stdout=asyncio.subprocess.DEVNULL,
+                stderr=asyncio.subprocess.DEVNULL,
+            )
+            await proc.wait()
+            if not os.path.exists(_path) or os.path.getsize(_path) < 1000:
+                raise RuntimeError("edge-tts empty")
+            proc2 = await asyncio.create_subprocess_exec(
+                "ffmpeg",
+                "-y",
+                "-i",
+                _path,
+                "-f",
+                "s16le",
+                "-ar",
+                "48000",
+                "-ac",
+                "1",
+                "-acodec",
+                "pcm_s16le",
+                "pipe:1",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.DEVNULL,
+            )
+            out, _ = await proc2.communicate()
+            return out
+        finally:
+            try:
+                os.unlink(_path)
+            except FileNotFoundError:
+                pass
 
 
 SYSTEM_PROMPT = """Голосовой менеджер Азовского инкубатора (IncuBird). Звонишь постоянному клиенту по известному номеру (НЕ называй его вслух) про суточных цыплят бройлеров. Его город и телефон уже в базе — просто уточняй «место доставки прежнее?».
@@ -638,12 +696,31 @@ class LevitanAgent(Agent):
         self._transcripts: list[str] = []
         self._caller_phone: str = caller_phone
         self._farewell_fired: bool = False
-        self._metrics = {"greet_dur": None, "turns": 0, "resp_lat": [], "last_user_t": None}
+        self._faq_spoken: bool = False
+        self._metrics = {
+            "greet_dur": None,
+            "turns": 0,
+            "resp_lat": [],
+            "last_user_t": None,
+            "faq_hits": 0,
+        }
 
         # состояние fast-path (ДА/НЕТ) для DebugLLM-стрима
         self.llm._caller_phone = caller_phone
         self.llm._asked_quantity = False
         self.llm._asked_delivery = False
+
+    async def _speak_faq(self, answer: str) -> None:
+        """Воспроизвести ответ из FAQ-кэша (Level 1 — мгновенный ответ без LLM)."""
+        self._faq_spoken = True
+        self._metrics["faq_hits"] += 1
+        print(f"[FAQ] HIT ×{self._metrics['faq_hits']}: {answer[:80]}...", flush=True)
+        try:
+            await self.session.say(answer, allow_interruptions=True)
+            print("[FAQ] spoken, interruptible", flush=True)
+        except Exception as e:
+            print(f"[FAQ] say error: {e}", flush=True)
+        self._faq_spoken = False
 
     async def _warmup_llm(self):
         try:
@@ -839,6 +916,17 @@ class LevitanAgent(Agent):
             if any(_p in _t_low for _p in mango_phrases):
                 print(f"[STT] mango-phrase ignored: {ev.transcript!r}", flush=True)
                 return
+            if not self._faq_spoken:
+                _faq_answer = faq_lookup(ev.transcript)
+                if _faq_answer:
+                    import asyncio as _afaq
+
+                    _afaq.ensure_future(self._speak_faq(_faq_answer))
+                    print(
+                        f"[FAQ] fast-path taken, skipping LLM for: {ev.transcript[:60]!r}",
+                        flush=True,
+                    )
+                    return
             self._transcripts.append(ev.transcript)
             self._transcripts = self._transcripts[-20:]
             self._metrics["last_user_t"] = time.time()

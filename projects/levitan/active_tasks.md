@@ -71,6 +71,18 @@
 
 ---
 
+## 🟣 Voice-стек Vapi AI (ADR-003, Proposed)
+
+> Источник: рекомендация по расширению стека. Статус: к пилотированию.
+
+- [ ] **V1.** Зарегистрировать Vapi-аккаунт (dashboard.vapi.ai) — предложено автором → проверено (vapi.ai real, 2.5M+ agents, 1B calls, SDK open) → **принято (Proposed)**
+- [ ] **V2.** Спилотный проект: voice-агент для записи в салон/клинику (входящий → STT → LLM → webhook Bitrix24 → TTS)
+- [ ] **V3.** Сравнить latency/CSAT со текущим стеком (Mango+LiveKit+pipecat)
+- [ ] **V4.** Решение: Accepted / Deprecated / Adjusted
+- [ ] Если Accepted — задокументировать voice-паттерн «Vapi + Bitrix24 webhook» в project-skills
+
+---
+
 ## 🟠 Фаза 2: Мгновенное подключение без гудков
 
 > Блокирована Фазой 0 (NAT/VPS).

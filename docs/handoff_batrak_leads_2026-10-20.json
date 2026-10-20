@@ -1,0 +1,24 @@
+{
+  "project": "freelance-2026 / Батрак (jobhunter) → projectId: ai-bureau",
+  "date": "2026-10-20",
+  "task": "Отклики на HH + Kwork: 6 готовых писем ждут апрува Игоря",
+  "context": "Сессия Батрака 20.10.2026: прочитаны правила (skill agents/batrak, batrak_v3.txt, cover_letter_v3.txt, batrak_kwork.txt, candidate_profile.txt, AGENTS.md hh-ai-agent). Образец отклика (HOOK→MATCH→PROOF→АУДИТ) записан в skill agents/batrak (раздел Reference Response в SKILL.md). Сгенерированы и записаны в jobhunter/leads.md отклики: (1) HH 138656978 ЛУИС+ AI-инженер — матч ~85%, Dify/n8n-хедж; (2) HH 138627823 Натури Фарм контент-ферма — пограничный ~55-60%, серая зона (уникализация/мультиаккаунты), ⚠️ в лидах; (3) HH 138604149 Афонина GEO-специалист — ~90%, формат работодателя соблюдён (задачи/инструменты/языки/кейсы/цены); (4) HH 138458820 xHuman Sales CSM — пограничный ~55-60%, хедж по продажам; (5) HH 138256771 Froza Бизнес-аналитик AI — ядро 75-80%, блокер: ОФИС Москва (Варшавская) 5/2, мы в Воскресенске — решает Игорь; (6) Kwork маркетолог-копирайтер (blesterin) — оффер по batrak_kwork.txt, от 2500₽/3 дня. Для Froza подготовлен квиз-ответ «какие AI-агенты используете» (вставить в поле вопроса при отправке). Полные тексты писем — в jobhunter/leads.md (записи 2026-10-20).",
+  "files": [
+    "jobhunter/leads.md",
+    "jobhunter/cover_letters.md",
+    "projects/hh-ai-agent/prompts/candidate_profile.txt",
+    "projects/hh-ai-agent/prompts/cover_letter_v3.txt",
+    "projects/hh-ai-agent/prompts/batrak_kwork.txt",
+    ".config/opencode/skills/agents/batrak/SKILL.md"
+  ],
+  "skills": ["agents/batrak", "hh-ai-agent"],
+  "next_steps": [
+    "1. Игорь: апрув/отклонение каждого из 6 откликов (статусы в leads.md, записи 2026-10-20)",
+    "2. Froza решает по локации (офис Москва — блокер или нет); при апруве вставить квиз-ответ про AI-агентов",
+    "3. Kwork маркетолог-копирайтер: скопировать оффер в форму (3 дня / 2500₽), ссылка не приложена",
+    "4. После апрува: ручная отправка на HH/Kwork (анти-бан), пометить статусы [x] отправлен в leads.md",
+    "5. Отправлять письма только по стандарту v3: «Здравствуйте!», HOOK→MATCH→PROOF, GitHub https://github.com/Erik03132/freelance-2026, «С уважением, Игорь»"
+  ],
+  "escalation": false,
+  "deadline": "2026-10-21T20:00:00"
+}

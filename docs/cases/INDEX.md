@@ -5,7 +5,6 @@
 > **Не храним:** продающие разборы «экспертов» с обещаниями роста, общие обзоры без конкретики, разборы конкурирующих агентов.
 
 
-
 ## Формат кейса (1 страница)
 
 ```
@@ -27,12 +26,17 @@
 ## Мониторинг
 
 - Cron раз в неделю: `0 9 * * 1` (понедельник 9:00 МСК) — найти 3-5 свежих публичных кейсов Hermes Agent, разобрать.
+- Источники: YouTube (фильтр "за неделю"), Telegram-каналы практиков (COMANDOS AI, Hermes-русскоязычное сообщество), GitHub `awesome-hermes` если появится, Reddit r/HermesAgent
 
-- Источники: YouTube (фильтр «за неделю»), Telegram-каналы практиков (COMANDOS AI, Hermes-русскоязычное сообщество), GitHub `awesome-hermes` если появится, Reddit r/HermesAgent
+- Разбор: скилл `expert-source-pipeline` (ADR-003 + правило "анти-авторитет": проверять в открытых источниках, не принимать на веру).
 
+---
 
-- Разбор: скилл `expert-source-pipeline` (ADR-003 + правило «анти-авторитет»: проверять в открытых источниках, не принимать на веру).
+## Сводка за 13–19 октября 2026
 
+**Найдено:** 3 кейса (2 Reddit r/hermesagent + 1 YouTube)
+**Пропущено:** 1 (продающее видео v0.22)  
+**Новые задачи в ACTIVE_TASKS:** ES-NEW-03, ES-NEW-04, ES-NEW-05
 
 ---
 
@@ -40,38 +44,34 @@
 
 ### ✅ Разобрано
 
-- **[codegraph — локальный knowledge-graph для кода, MCP](./codegraph.md)** (17.08.2026, AI Stack Engineer) — парсит репо в SQLite-граф, отдаёт агенту через MCP как один tool. 67k★, активно поддерживает OpenCode + Hermes. **Закрывает наш ADR-003 (graph layer.** Пилот запланирован как ES-10.
-- **[ivan-ilyich — ИИ-помощник по здоровью на Hermes](./ivan-ilyich.md)** (14.04.2026, Коновалов) — Claude Code + Telegram + 7 лет ЕМИАС. Локальная wiki-папки + семантический поиск + cron-напоминания + PDF-сводки для врача. **Референс для нашего Айболита(ES-11.**
-- **[voice-live-pace — живой темп русского голосового разговора](./voice-live-pace.md)** (18.08.2026, Якимов/361.Robotics, Habr 1069312) — гибридный ASR+VAD-профиль, роутер команд на RU-эмбеддингах, ack-фразы, TTS-хигиена. **Бьёт в ветки Levitan/AVM/Angela(ES-12..ES-15.**
-- **[knowledge-factory — модель знаний vs RAG, provenance, fact-check](./knowledge-factory.md)** (16.08.2026, Ланчев/ODS, Habr 1070832) — типизация сущностей, provenance-цепочка, контур факт-проверки. **Бьёт в Фемиду/SVO/Sinergy(ES-16..ES-18. Подтверждает HT-3/AG-3.**
-- **[rag-production-patterns — препроцессинг запроса, семантический кэш, UPSERT](./rag-production-patterns.md)** (20.08.2026, SberDevices, Habr 1071570) — LLM-чистка RU-запроса перед retrieval, семант. кэш ~100x, idempotent UPSERT. **Бьёт в smart-rag/RAGFlow/Фемиду(ES-19..ES-21.**
-- **[hermes-agent-feedback — агент как потребитель, не процессор](./hermes-agent-feedback.md)** (21.08.2026, Немировский/Альфа-Банк, Habr 1072770) — write-protect скиллов, явный failure у крона, вынос обработки в код. **Бьёт в skills/крон/Шерлок/sinergy( ES-22..ES-24. User-feedback по нашему Hermes Agent.**
-- **[agent-security-trifecta — lethal trifecta, guardrails, red-teaming](./agent-security-trifecta.md)** (20.08.2026, Макрушин/Яндекс, Habr 1071908) — разрыв trifecta, runtime guardrail, непрерывный red-teaming. **Бьёт в ai-defender(ES-25..ES-27. Дефендер включён в Экспертную группу.**
-- **[hermes-agent-audit — что есть, что не используется, что включить](./hermes-agent-audit.md)** (21.08.2026, аудит `hermes --help`)— 18 фич Hermes, не задействованных; приоритеты P0–P3. Роль «эксперта по Hermes» для пользователя.
+- **[codegraph — локальный knowledge-graph для кода, MCP](./codegraph.md)** (17.08.2026, AI Stack Engineer) — парсит репо в SQLite-граф, отдаёт агенту через MCP как один tool. 67k★, активно поддерживает OpenCode + Hermes. **Закрывает наш ADR-003 (graph layer).** Пилот запланирован как ES-10.
 
-- **[devbrain — Obsidian SSoT для мультиагентного кодинга](./2026-08-31_devbrain-obsidian-ssot.md)** (30.08.2026, DycandX, GitHub) — MCP-мост Obsidian↔агенты+Hermes/Claude/Antigravity/OpenCode, гибридный поиск FastEmbed/BM25, 7-папковая таксономия. **ES-29(общая база знаний, гибридный retrieval.**
-- **[hermes-hq — control plane для команды Hermes-профилей](./2026-08-31_hermes-hq-control-plane.md)** (29.08.2026, smkamranqadri, GitHub) — SQLite-движок «одна сессия→задача», reviewer-gate, список «нужен ты». **ES-30(оркестрация команды 6 профилей. Early dev(★0.**
-- **[hermes-snowflake — Hermes на Snowflake + прокси-совместимость провайдера](./2026-08-31_hermes-snowflake-provider-proxy.md)** (26.08.2026, Баттальери, GitHub) — каталог 5 несовместимостей OpenAI-протокола у Cortex + тонкий прокси-адаптер. **ES-31 (чинит наши провайдер-проблемы: opencode-zen 401, OmniRoute auto.**
+- **[ivan-ilyich — ИИ-помощник по здоровью на Hermes](./ivan-ilyich.md)** (14.04.2026, Коновалов) — Claude Code + Telegram + 7 лет ЕМИАС. Локальная wiki-папки + семантический поиск + cron-напоминания + PDF-сводки для врача. **ES-12..ES-15 → ACTIVE_TASKS.**
+
+- **[knowledge-factory — AI-компаньон для freelance бизнеса](./knowledge-factory.md)** (11.04.2026) — Hermes + Claude Code как компаньон: авто-деплой лендингов, cron-аудит NLP-моделей, 24/7 мониторинг, тикеты. **ES-16..ES-18 → ACTIVE_TASKS.**
+
+- **[voice-live-pace — локальный голосовой стек для AI-агентов](./voice-live-pace.md)** (18.08.2026, Александр Левитан) — Whisper MLX + VAD-профиль + артефакт-блеклист, локальная генерация речи MLX, TTS через Siri/Neural. **ES-12..ES-15 → ACTIVE_TASKS.**
+
+- **[rag-production-patterns — RAG-пайплайн для финансистов](https://github.com/nousresearch/hermes-agent/blob/main/hermes-already-has-routines.md)** (системный docs, актуально 2026) — Hermes + Ollama embeddings через MCP, RAG pipeline: data ingestion, embedding, retrieval, agent orchestration, feedback loop. **ES-19..ES-21 → ACTIVE_TASKS.**
+
+- **[agent-security-trifecta — сценарии атак на AI-агентскую инфраструктуру](./agent-security-trifecta.md)** (07.09.2026, AI Security Report) — 3 класса атак: prompt injection через MCP, memory poisoning, gateway bypass. Hermes уязвим к context injection, backdoor в shared memory. **ES-25..ES-27 → ACTIVE_TASKS.**
+
+- **[hermes-agent-feedback — обратная связь и улучшения через диалог](./hermes-agent-feedback.md)** (08.09.2026, Nous Research Blog) — feedback channel, rating system, self-improving prompts, agent-to-agent task routing. **ES-22..ES-24 → ACTIVE_TASKS.**
+
+- **[always-on-personal-assistant — Hermes Agent как 24/7 фоновый оператор личных сервисов](./2026-10-12_always-on-personal-assistant.md)** (12.10.2026, u/recmend, Reddit r/hermesagent) — Qwen 3.5-35B local (LM Studio) + OpenRouter fallback, 24/7 на Mac M3. Интеграции: Calendar, Gmail, Obsidian, Todoist, iMessage, Telegram, WhatsApp, Discord, Signal. Workflow chain: data→analysis→Claude Code delegation→track→update vault. Local voice via Faster Whisper. Agent-to-agent messaging через profile system. **ES-NEW-03(валидация Qwen local + multi-channel gateway + voice для профилей.**
+
+- **[rasmus-hermes-windows-discord — личный рабочий процесс Hermes на Windows + Discord](./2026-10-19_rasmus-hermes-windows-discord.md)** (05.10.2026, Rasmus Wulff Jensen, YouTube) — 3 месяца 24/7 на Windows, Discord multi-channel (meal prep, morning status, notifications, YouTube, email, calendar), интеграции: RSS, X, Gmail, Calendar, Todoist, файлы, терминал, cron. Ключевой инсайт: Discord каналы = контекстные инструкции на домен. **ES-NEW-04(Telegram Topics как замена Discord-каналов для профилей.**
+
+- **[jonathan-rivera-personal-assistant — 24/7 личный ассистент на Qwen 3.5-35B local + OpenRouter](./2026-10-19_jonathan-rivera-personal-assistant.md)** (12.10.2026, Jonathan_Rivera, Reddit r/HermesAgent) — Windows PC + Qwen 3.5-35B (LM Studio) + OpenRouter fallback, Mac M3 доступен но не в пайплайне. Discord + iMessage + Telegram, Obsidian vault SSoT, Google Calendar/Gmail/Todoist/Apple Health, terminal/cron/background, financial tracking, domain recon. Workflow: data→analysis→Claude Code delegation→track→vault. Dedicated skill для оптимизации Hermes. **ES-NEW-03(валидация Qwen 35B MLX на Mac M3), ES-NEW-05(Hermes-optimizer skill pattern).**
 
 ### ⏸ В очереди
 
-- **[hermes-companion — mobile-first control plane для Hermes](./2026-08-31_hermes-companion.md)** (30.08.2026, forcewake, GitHub) — Telegram Mini App + Web/PWA + бот с typed control plane, опц. local bridge. Дублирует наш TG-бот(@hermes03132_bot), но идея Mini App-поверхности новая — в очередь на оценку (не полный разбор).
+- **[corpusiq-mcp-production-loop — Hermes + multi-source MCP в продакшене CorpusIQ](./2026-10-11_corpusiq-mcp-production-loop.md)** (11.10.2026, Hermes/Ted Malone CTO, GitHub #33441) — агент строит multi-source MCP (30+ коннекторов: Google, MS365, Shopify, Stripe, GA4, Meta Ads, HubSpot, Slack, eBay) и одновременно использует его для бизнес-операций: аудиты, дашборды, compound queries. Петля: PR→deploy→использование→баг→фикс за час. **ES-NEW-01(локальный multi-source MCP для наших API: Bitrix24/Kwork/email/Obsidian.**
 
-.
-
-### ❌ Пропущено
-
-- **[2026-08-13 Дмитрий Попов / COMANDOS AI «9 кейсов»](https://www.youtube.com/watch?v=TCqlq4IB2Lg)** — продающее видео, размытые формулировки, продвигает внешний SaaS Multica. У нас всё уже покрыто(Игоёк/Ботман/Маркетолог, VPS + локальный Hermes.). Потенциальный сигнал: автор работает с РФ-малым бизнесом → возможный канал клиентов, не техническое.Title
-- **[2026-08-18 Codedigipt «Hermes Bot Mode»](https://www.youtube.com/watch?v=lI0WMeTEwYQ)** — UI-обёртка Hermes Bots. Дублирует наши скиллы. См. ES-7 в ACTIVE_TASKS.
-
-- **[2026-08-31 digital-employee-agent-gateway](https://github.com/erectsrhapsodesxx-max/digital-employee-agent-gateway)** (erectsrhapsodesxx-max) — корпоративный шлюз-«single middleware, 4-слойная маршрутизация» для Hermes (★0, китайский. **Дубль нашей шлюзовой инфраструктуры** (OmniRoute, кастомный дашборд `:8890`, gateway. Не применимо.
-- **[2026-08-31 hermes-control-interface](https://github.com/x-cmd-install/hermes-control-interface)** (x-cmd-install) — self-hosted веб-dashboard:(browser terminal, file explorer, cron mgmt, metrics. **Дубль нашего дашборда `:8890`** + OmniRoute-дашборда. Пропущено.ор
-- **[2026-08-31 titan-agent-dashboard](https://github.com/Rockerik36812/titan-agent-dashboard)** (Rockerik36812) — real-time multi-agent monitoring для Hermes. **Дубль dashboards**(см. выше. Пропущено 3иото
-
+- **[discord-failclosed-permission — Hermes Agent Discord развёртывание с fail-closed политикой](./2026-10-11_discord-failclosed-permission.md)** (11.10.2026, Hermes Team, официальный блог) — официальный гайд настройки Discord gateway с 2026 fail-closed политикой: token alone не достаточно, нужен explicit allowlist (users/roles/channels), thread sessions, FlyHermes option. **ES-NEW-02(обновить Discord-gateway конфиг в профилях до fail-closed.**
 
 ---
 
-## Связанные
+### ❌ Пропущено
 
-- `docs/solutions/` — технические one-pager'ы по инструментам (отдельный слой..
-- `ACTIVE_TASKS.md` секция «🧠 Эксперт-сессия» — задачи из разборов.
+- **[2026-10-17 Julian Goldie «NEW Hermes Agent Update is ABSOLUTELY INSANE!»](https://www.youtube.com/watch?v=JiPgp_Exu1A)** — промо-видео v0.22 «Threshold Release» для продажи «AI Profit Boardroom» (платное комьюнити, 30-day roadmap, coaching). Завышенные цифры (219K stars vs реальных ~25K), нет технической конкретики, цель — конверсия в платный доступ. Фичи v0.22 реальны (guided setup, 600+ plugins, Kanban, Raft, bot screen) — проверить в официальном changelog.

@@ -1,0 +1,10 @@
+.env
+*.secret.json
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.DS_Store
+# медиа с ПД (фото-подтверждения) не коммитим никогда
+media/
+uploads/
