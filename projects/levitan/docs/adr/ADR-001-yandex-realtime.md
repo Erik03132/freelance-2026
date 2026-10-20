@@ -141,7 +141,7 @@ FastAPI WS-прокси (deploy/levitan_realtime.py)  ← держит YC_API_KE
 ### ⚠️ ЯНДЕКС REALTIME — БЛОК (endpoint 404)
 - Попробованы: `llm.api.cloud.yandex.net/llm/v1/realtime` (404 даже без авторизации),
   `foundationModels/v1/realtime` (403 — путь есть, доступ закрыт scope-ключом),
-  `ai.api.cloud.yandex.net/*` (404). Ключ `AQVN00...` валиден, SA `levitan-realtime-sa`
+  `ai.api.cloud.yandex.net/*` (404). Ключ `[REDACTED_YC_KEY_ROTATE]...` валиден, SA `levitan-realtime-sa`
   имеет 4 роли, но **UI Яндекса заставляет выбирать scope** (`yc.speech-sense.use`),
   что блокирует foundation-модели (грабль из Хабра).
 - **Решение:** написать в поддержку Яндекса (текст в чате консоли) — как создать ключ
