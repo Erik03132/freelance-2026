@@ -8,7 +8,7 @@
 > превью — прогнать через паттерн 🧪 UXT (4 персоны-субагенты, first-users).
 > Записано в UXT-2, НЕ забыть.
 
-## 🌐 ATP — AI-Traffic PRO: прод на GitHub Pages + API на VPS (28.10.2026) ✅ Verified
+## 🌐 ATP — AI-Traffic PRO: прод на GitHub Pages + API на Cloudflare Worker (28.10.2026) ✅ Verified
 
 > Репозиторий: `Erik03132/ai-traffic-pro-landing` (origin), рабочая копия
 > `~/freelance-2026/projects/ai-marketing` (в монорепо не отслеживается).
@@ -19,10 +19,14 @@
   подтверждено на 8.8.8.8 / 1.1.1.1 / 9.9.9.9.
 - [x] **ATP-2 (Verified):** HTTPS. Сертификат GitHub (Let's Encrypt, до 2027-01-04)
   покрывает apex + www. `http → 301 → https`. `www → 301 → apex`.
-- [x] **ATP-3 (Verified):** API на поддомене — `https://api.ai-traffic-pro.ru/api/health/`
-  → `{"ok":true,"telegram":true}`; CORS по белому списку `ALLOWED_ORIGINS`
+- [x] **ATP-3 (Verified):** API на поддомене. **Основной путь — Cloudflare
+  Worker** (`https://ai-traffic-pro-api.erik03132.workers.dev`, см. ATP-13);
+  **резерв — VPS** `https://api.ai-traffic-pro.ru/api/health/` →
+  `{"ok":true,"telegram":true}`; CORS по белому списку `ALLOWED_ORIGINS`
   (чужой origin → без заголовков). Заявка с разрешённого origin → 200,
-  в pm2-логе `✅ Заявка отправлена в Telegram`.
+  в pm2-логе `✅ Заявка отправлена в Telegram`. DNS-запись `api` на Timeweb
+  пока указывает на VPS (`217.149.23.113`) — переключится на Worker после
+  переноса NS (ATP-14).
 - [x] **ATP-4 (Verified):** LLM-канал виджета — `source: "llm"` (9.6 с), ответы
   не выдумывают цены/кейсы. При недоступности — `source: "fallback"`, не 500.
 - [x] **ATP-5 (Verified):** 14 маршрутов на проде → 200; несуществующий путь → 404;
@@ -51,6 +55,338 @@
   раннер отдавал Node 22.23.3 при требуемом `>=22.23.4`. В
   `.github/workflows/deploy.yml` `node-version` закреплён на `24`.
 - [ ] **ATP-9 (от Игоря):** мобильные экраны в Stitch (адаптив сделан на глаз).
+- [x] **ATP-13 (Fixed + Verified):** API переведён с VPS на Cloudflare Worker —
+  сайт больше не зависит от VPS. `ai-traffic-pro-api.erik03132.workers.dev`
+  (аккаунт `Erik03132@gmail.com's Account`, ID `610715a2ab95ac2c3540caf469796412`).
+  Общая логика вынесена в `server/agent-core.js` (база знаний, валидация лида,
+  формат сообщения Telegram) — один источник истины для Worker и VPS-сервера;
+  покрыта 20 тестами. LLM переехал внутрь CF (Workers AI,
+  `@cf/meta/llama-3.1-8b-instruct-fp8-fast`): внешние провайдеры из РФ отдают
+  403 (CF блокирует российские IP), из CF-эджа — работают. Бэкап лидов —
+  Workers KV (`LEADS`, `6aa58b76b01e4c2f9999578e4234c976`), пишется **до**
+  отправки в Telegram. Rate limit — встроенные binding'и `CHAT_LIMITER`/
+  `LEAD_LIMITER` (10 req/60s, раздельные баки). Секреты — `wrangler secret put`.
+  Проверено: health 200, база знаний, Workers AI, заявка в Telegram (`✅` в логах
+  `wrangler tail`), CORS по белому списку, OPTIONS 204, 404, доступ из РФ
+  (180 мс с VPS-IP), сквозная проверка формы в браузере на проде.
+  Переключение сайта: GitHub Actions variable `PUBLIC_API_BASE_URL`.
+  Коммиты `fbdbe8e`, `52da759`, `1b51e42`.
+- [x] **ATP-13a (Fixed + Verified):** баг `applyCors is not defined` — при выносе
+  общей логики в `agent-core.js` мой скрипт вырезал `ALLOWED_ORIGINS` и
+  `applyCors` из `server/server.js`. VPS-API падал с `ReferenceError` на любом
+  запросе (health/chat/lead → 000). Восстановлено, VPS перезапущен,
+  error-лог pm2 пуст после серии запросов. Закрыт интеграционным тестом
+  `server/server.test.js` (7 тестов: сервер поднимается на свободном порту) —
+  проверено мутацией: без `applyCors` тест падает. `npm test` → 36/36.
+- [ ] **ATP-14 (от Игоря, косметика — не блокер работы):** перенос NS зоны
+  `ai-traffic-pro.ru` с Timeweb на Cloudflare. Без этого кастомный домен
+  `api.ai-traffic-pro.ru` привязать к Worker нельзя: CNAME-setup и
+  subdomain-setup доступны только на Business/Enterprise, на Free — только
+  primary setup (перенос NS всей зоны). Подтверждено документацией CF
+  (dns/zone-setups).
+  **Эмпирически проверено 28.10 (не документом, а экспериментом):** CNAME в
+  Timeweb НЕ публикуется авторитетным NS. Тестовая запись
+  `api-test → ai-traffic-pro-api.erik03132.workers.dev` появилась в панели,
+  но авторитетный NS отдавал `NXDOMAIN`, SOA serial зоны не менялся, публичные
+  резолверы — пусто. Тестовая запись удалена, все 6 рабочих записей на месте.
+  Значит CNAME-путь закрыт технически, остаётся только перенос NS.
+  **Схема Игоря при этом уже выполнена:** на Timeweb только домен + переадресация
+  на GitHub Pages, API — на Worker. Перенос NS нужен лишь для кастомного домена
+  API (красота + независимость от CF-блокировок), а не для работы сайта.
+  **Действие Игоря:** войти в `dash.cloudflare.com` (сессии у агента нет —
+  OAuth-токен ≠ сессия дашборда; `dash.cloudflare.com` с российского IP отдаёт
+  403 «Just a moment…» — риск, что вход не пройдёт), добавить зону
+  `ai-traffic-pro.ru` (primary setup, без jump-start) → Cloudflare выдаст
+  NS-серверы → в Timeweb («Управление» → «NS-серверы» → «Настроить») заменить
+  `ns1-4.timeweb.{ru,org}` на выданные CF. Готовая форма NS в Timeweb
+  открыта и доступна. Записи DNS переносятся как есть: `A @ 185.199.108.153`,
+  `A www 185.199.108.153`, `A api → Worker (custom domain)`, `MX 10 mx1.timeweb.ru`
+  / `20 mx2.timeweb.ru`, `TXT @ v=spf1 include:_spf.timeweb.ru ~all`
+  (DKIM-селекторов нет).
+  **После переноса NS — обязательно:** (1) раскомментировать `routes` в
+  `worker/wrangler.jsonc` (`pattern: api.ai-traffic-pro.ru`, `custom_domain: true`)
+  и задеплоить (`npm run worker:deploy`); (2) проверить
+  `https://api.ai-traffic-pro.ru/api/health/`; (3) **перевести резерв на
+  отдельный хост** (например `api-vps.ai-traffic-pro.ru` + nginx-vhost +
+  Let's Encrypt) — иначе резерв станет той же инфраструктурой Cloudflare и
+  перестанет быть резервом.
+- [x] **ATP-15 (Fixed + Verified):** резервный путь API в браузере. Сайт шёл
+  только на один адрес: если Worker недоступен по сети (троттлинг трафика
+  из РФ), форма отдавала «сетевую ошибку», а заявка терялась. Добавлен
+  `src/lib/api-post.ts` (`postJson`) — Worker → при сетевой ошибке резерв на
+  VPS; **повтор только при сетевой ошибке** (на 5xx повтор запрещён: сервер
+  ответил — значит заявка могла уйти, повтор дал бы две заявки; на 400/404/429
+  резерв не пробуем). Если не сработало ни то, ни другое — форма показывает
+  ссылку в Telegram с готовым текстом заявки. 12 тестов на правила повтора.
+  Адреса API — из переменных сборки: `PUBLIC_API_BASE_URL` (Worker),
+  `PUBLIC_API_FALLBACK_URL` (VPS). Проверено сквозняком в браузере на проде:
+  Worker недоступен → форма показала success, чат получил ответ по базе
+  знаний, оба запроса ушли на резерв; лид дошёл на VPS
+  (`server/leads/2026-10-28.jsonl`), тестовые записи удалены.
+  Параллельно: **ADR-001** (`docs/adr/ADR-001-api-on-cloudflare-worker.md`) —
+  решение о Worker + резерв, причины (VPS под давлением, 403 внешних LLM
+  из РФ), отклонённые альтернативы, последствия; README и ROADMAP приведены
+  в соответствие с продом (до этого они описывали «API на VPS» как основной
+  путь — документация врала); **18 тестов Worker**
+  (`worker/src/index.test.js`) — роутинг, CORS, чат по базе знаний, LLM,
+  падение AI → fallback, валидация заявки, KV-бэкап до Telegram, honeypot,
+  rate limit, раздельные баки; проверено мутациями (без CORS в `json()` падают
+  2 теста, без KV-бэкапа — 1, без rate limit — 2). `npm test` → 66/66,
+  `astro check` → 0 ошибок, `wrangler deploy --dry-run` → 29.89 KiB (тесты в
+  бандл не попадают). Коммиты `13cd244`, `138211f`, `692ad6c`, `ffc9487`.
+- [x] **ATP-16 (Fixed + Verified):** статика переведена на **Cloudflare Pages**.
+  GitHub Pages не умеет `_headers` — security-заголовки и `Cache-Control:
+  immutable` для `/_astro/` там недоступны (живёт `max-age=600`); это же
+  ограничение закрывало Фазу 1 (задачи 1.5, 1.8). Сделано: Pages-проект
+  `ai-traffic-pro` (production branch `main`, env_vars с адресами API),
+  `public/_headers` (CSP, HSTS, X-Frame-Options, Permissions-Policy,
+  Referrer-Policy, nosniff + `/_astro/*` → `max-age=31536000, immutable`),
+  `public/_redirects` (`/services/marketplace/` → 301 на `/services/ecommerce/`
+  вместо meta-refresh в 2 хопа), `src/pages/404.astro` (без него Pages отдаёт
+  на любой мусорный URL главную с кодом 200 — soft-404, дубликат главной в
+  индексе), `public/favicon.svg` (на проде был 404; перекрашен в фирменный
+  `#004ac6`, оранжевый `#FF3C00` остался от старого Replit-билда).
+  Проверено на staging `ai-traffic-pro.pages.dev`: заголовки присутствуют,
+  `/_astro/*` → immutable, маркетплейс → 301, мусорный URL → 404,
+  favicon → 200; заявка со staging-origin дошла до Telegram и легла в Workers
+  KV; CORS Worker'а дополнен origin `https://ai-traffic-pro.pages.dev`
+  (без этого форма на staging не отправлялась). Прод (GitHub Pages) уже
+  отдаёт новую сборку: favicon 200, 404-страница с `noindex`. CI: новый
+  `ci.yml` (`astro check` + тесты + проверка артефактов `_headers`/
+  `_redirects`/`404.html`/`favicon.svg` в `dist/`) и `deploy-pages.yml`
+  (деплой в Pages; без `CLOUDFLARE_API_TOKEN` шаг пропускается, job зелёный).
+  `npm test` → 66/66, `astro check` → 0 ошибок. Коммиты `27ae831`, `d2c9446`.
+- [ ] **ATP-17 (от Игоря, блокирует ATP-14/ATP-16):** довести переезд до
+  боевого домена. (1) **Создать зону `ai-traffic-pro.ru` в Cloudflare** —
+  OAuth-токен агента не имеет права `zone.create` (проверено: ошибка 9109
+  «Requires permission com.cloudflare.api.account.zone.create»), в панели
+  домена на CF зон нет. (2) Сменить NS в Timeweb на выданные CF. (3) Привязать
+  кастомный домен к Pages-проекту (`ai-traffic-pro.ru` + `www`). (4) Завести
+  `CLOUDFLARE_API_TOKEN` (шаблон «Edit Cloudflare Workers») и
+  `CLOUDFLARE_ACCOUNT_ID` в секреты репозитория — без них CI-деплой в Pages
+  пропускается (токен агента не умеет создавать API-токены: ошибка 9109).
+  **Риск окна простоя:** между шагом 2 и 3 домен не отвечает — записи A
+  указывают на GitHub Pages IP, а если NS переключить до привязки домена,
+  Cloudflare не найдёт зону и отдаст 1016/«error 1016». Порядок обязателен:
+  зона → NS → привязка домена к Pages → проверка A-записей и TLS.
+  **Альтернатива без NS:** оставить домен на GitHub Pages, а Pages использовать
+  как staging (`pages.dev`) — тогда задачи 1.5/1.8 на проде не закрываются.
+- [x] **ATP-18 (Fixed + Verified):** бот выдумывал определение GEO. На вопрос
+  «Что такое GEO?» виджет уходил в LLM и отвечал «GEO — это сокращение от
+  Geographic или Geolocation» — путал GEO с геолокацией. Правильный ответ
+  («Generative Engine Optimization» — попадание бренда в ответы AI-сервисов)
+  был в FAQ сайта (`src/data/site.ts`), но **не в базе знаний бота**: запрос не
+  находился по ключевым словам и уходил в модель, а модель выдумывала.
+  Найдено при ручной проверке в браузере (28.10), не тестом — тестов на GEO
+  не было. Исправлено: правило GEO/AEO и правило SEO в `KNOWLEDGE`
+  (`server/agent-core.js`) + определение GEO в `FACTS` (системный промпт
+  страхует модель, если вопрос не найдётся в базе). 3 регрессионных теста,
+  проверено мутациями: без правила GEO падает 1 тест, без строки в FACTS — 1.
+  Проверено на проде: `source: knowledge`, ответ верный; регрессия на остальных
+  вопросах не найдена (цены, услуги, e-commerce, сроки, договор — все
+  `knowledge`). Worker передеплоен, commit `3faec2b`.
+- [ ] **ATP-19 (от Игоря, в работе):** редизайн главной под **Corporate
+  Elegance Hub**. Референс: <https://motiondesignspain.github.io/Google-Stitch-Style-Hub/demos/corporate.html>.
+  Ветка `redesign` (репозиторий `Erik03132/ai-traffic-pro-landing`), `main` не
+  трогаем, production без согласования Игоря не публикуем.
+  **Сделано (Fixed):** коммит `ad0e7f1` — палитра, тени, градиенты, `public/logo.svg`,
+  логотип в Header/Footer/ChatWidget, favicon перекрашен. **Игорь отклонил:**
+  «вообще не похоже» — темная сапфировая палитра (#1e3a5f) и объёмные вертикальные
+  тени не совпадают с референсом (там яркий синий #0052cc + горизонтальные мягкие
+  тени с синим подтоном rgba(9,30,66)).
+  **Спецификация на следующую сессию:** `docs/design/SPEC-redesign-corporate.md`
+  (точные токены + маппинг + список паттернов), локальная копия темы —
+  `docs/design/theme-corporate.css` (коммиты `47973dd`, `8321177`).
+  **Ограничения:** менять только оформление; контент (`src/data/site.ts`),
+  порядок секций, логику форм (`ContactSection.astro`, `submit-lead.ts`), API,
+  DNS/NS/Worker/секреты/env — не трогать. Логотип принят, не переделывать.
+  **Next:** переделать `index.astro` + компоненты по спеке → собрать → показать
+  Игорю локально (`npm run dev`) → preview Cloudflare Pages → ждать согласования.
+
+### 🐔 AIEGGS — второй сервер: `72.56.38.19` заменён на `217.149.23.113` (28.10.2026) ✅ Verified
+
+> Проект: `~/freelance-2026/projects/ai-eggs` (Анжелочка / ВеземCip / голосовой стек).
+
+- [x] **AIEGGS-1 (Verified):** разобрано, где на самом деле живёт голосовой и
+  CRM-стек. Документ `projects/ai-eggs/PROJECT.md` указывал
+  `root@72.56.38.19` и путь `/root/antigravity/ai-eggs/agent/` — это **старый,
+  заменённый сервер**. Факты (проверено на живом VPS 28.10.2026):
+  - `72.56.38.19` — не Timeweb: whois отдаёт `NetRange 72.56.0.0-72.56.255.255`,
+    `RIPE Network Coordination Centre`, `Country: NL`. В панели Timeweb такого
+    сервера нет — только «Wild Cygnus» = `217.149.23.113`.
+  - SSH на `72.56.38.19` недоступен: `Permission denied (publickey,password)`
+    для всех ключей (`.ssh_agent_key`, `~/.ssh/id_ed25519`, ssh-agent). Хост
+    жив (ping RTT 1.4 мс), с моего IP все порты видны открытыми — фильтр на
+    стороне моего IP; с VPS порт 22 открыт.
+  - `projects/ai-eggs/.env` уже указывает `VEZEM_SERVER_IP=217.149.23.113`
+    (тот сервер, где есть доступ), `VEZEM_SERVER_USER=root`, пароль есть;
+    в git-истории `.env` смены IP не нашлось.
+  - **Проверка, что стек переехал целиком:** на `217.149.23.113` в pm2 — весь
+    набор из `PROJECT.md`: `angela-scheduler`, `angela-autopilot`, `angela-bot`,
+    `angela-test`, `vezem-web` (путь `/opt/levitan/projects/ai-eggs/vezem/dist/server/entry.mjs`),
+    плюс `levitan-sip-register`, `dtmf-handler` (порт 8086), `mango-webhook`.
+    Код агента — `/opt/freelance/projects/ai-eggs/agent`; рядом uvicorn на 8080,
+    Ollama на 11434, pm2-`ai-traffic-pro-api` на 3001.
+  - Вывод: `72.56.38.19` — устаревшая запись в документации, отдельного
+    «второго сервера» в панели Timeweb не существует. Рабочий сервер один —
+    `217.149.23.113`.
+- [x] **AIEGGS-2 (Fixed):** документация приведена в соответствие.
+  `projects/ai-eggs/PROJECT.md`: `root@72.56.38.19` → `root@217.149.23.113`,
+  пути `/root/antigravity/ai-eggs/agent/` → `/opt/freelance/projects/ai-eggs/agent/`,
+  vezem → `/opt/freelance/projects/ai-eggs/vezem/`, обновлены примеры
+  rsync/ssh, добавлена таблица **systemd-юнитов** (их не было в документе —
+  а именно ими управляется seller-бот на 8002 и голосовой стек на 8081) и
+  предупреждение о конфликте `angelochka` (systemd) vs `server-seller` (pm2)
+  за порт 8002. `projects/ai-eggs/agent/deploy_to_vps.sh`: дефолты путей
+  `VPS_DIR` → `/opt/freelance/projects/ai-eggs`,
+  `ECOSYSTEM_ROOT` → `/opt/freelance/projects` (были `/opt/levitan/...` —
+  существовали только как symlink'и). Синтаксис скрипта проверен (`bash -n`).
+- [x] **AIEGGS-3 (Fixed + Verified):** точечная замена старого IP/путей доведена
+  до конца. Ключевое — правились **не только документы, но и сломанные рабочие
+  файлы** (это и было реальным блокером):
+  - **Были сломаны (Fixed):** `resurrect.sh` (указывал на несуществующий
+    `/root/antigravity` — аварийное восстановление не могло ничего восстановить),
+    `agent/ecosystem.config.cjs` и `.js` (интерпретатор
+    `/root/antigravity/ai-eggs/venv/bin/python3` — каталога нет), `agent/run_agent.sh`
+    (вообще не было в git — жил только на VPS), `agent/deploy_to_vps.sh`
+    (копировал `ecosystem.config.js` → `.cjs`, затирая конфиг `angela-bot`),
+    `vezem/deploy_cloud.sh` (делал `pm2 delete all` + `pm2 start ecosystem.config.cjs`
+    при **несуществующем** корневом ecosystem-файле → убил бы все 16 процессов
+    и не поднял ни одного), `tools/setup_dtmf_vps.sh` (загружал в `/opt/`,
+    поднимал `baresip` — конфликт порта 5060 с `livekit-sip`).
+  - **Были неверны в доке:** `PROJECT.md`, `AGENTS.md`, `chp.md`,
+    `docs/RECOVERY_RUNBOOK.md` (переписан полностью под реальный сервер),
+    `docs/MORNING_REPORT_CASCADE.md`, `SECURITY_FIX_REPORT.md`,
+    `data/mango/README.md` + `AUTO_CALL_SETUP.md` (порт Mango-callback
+    8080 → **8085**, Verified живым POST'ом 200),
+    `vezem/PRODUCTION.md`, `vezem/deploy.sh`, `vezem/deploy_mustai.sh`,
+    `vezem/tools/night_audit*.sh`, `vezem/tools/pm2_status.sh`,
+    правила агентов `vezem/.agent/rules/{IRON_RULES,two-angelas-map}.md`,
+    `vezem/freelance-agent/.agent/rules/AUTONOMOUS_SERVER_ACCESS.md`,
+    `vezem/freelance-agent/.agent/skills/vk-integration/SKILL.md`.
+  - **Проверки:** `bash -n` — OK для всех 9 скриптов; `node -e` валидирует
+    оба ecosystem-конфига; остатки `72.56.38.19` / `/root/antigravity` — только
+    в комментариях-объяснениях правки и в исторических отчётах
+    (`vezem/checkpoints|chronicles|reports`, `_archive/`) — их прошлое не меняем.
+  - **Синхронизация на VPS (Verified):** `resurrect.sh`,
+    `agent/ecosystem.config.{cjs,js}`, `agent/run_agent.sh` залиты в
+    `/opt/freelance/projects/ai-eggs/` (бэкап старых версий:
+    `/root/bak/ai-eggs-20261028-2025/`), `chmod +x` проставлен, `pm2 save --force`
+    выполнен (бэкап дампа: `/root/.pm2/dump.pm2.bak-20261028-2026`).
+    Дамп валиден: 16 процессов, **битых путей нет**. pm2: 16 online, 0 errored.
+  - **Побочно найдено и проверено:** сообщения `angela-scheduler` «Скрипт не
+    найден: unified_morning_report.py / habr_intelligence.py» — это сбои
+    **до** создания symlink (19:28), а логи за 08:00/09:00. Сейчас
+    `os.path.exists` → True для обоих (Verified) — проблема устранена сама
+    после починки symlink'ов, отдельного кода не требует.
+  - **История отчётов/чекпоинтов намеренно не переписывается** — это запись
+    о прошлом, а не инструкция.
+
+### 🛠 VPSFIX — восстановление VPS `217.149.23.113` после удаления `/opt/levitan` (28.10.2026) ✅ Verified
+
+> Причина поломки: каталог `/opt/levitan/projects/` удалён 22.10.2026
+> (остался пустой `/opt/levitan/vendor`). pm2-dump от 30.09 указывал на эти
+> пути и на venv `/opt/levitan/projects/ai-eggs/.server_venv`, поэтому
+> процессы держали удалённые inode (`cwd → … (deleted)`, каталог пуст).
+
+- [x] **VPSFIX-1 (Fixed + Verified):** `vezem-web` отдавал **500**
+  (`ERR_MODULE_NOT_FOUND: …/vezem/dist/server/pages/index.astro.mjs`) — сайт
+  VezemCip был мёртв. Восстановлен symlink'ами
+  (`/opt/levitan/projects/{ai-eggs,angel-backend,levitan}` →
+  `/opt/freelance/projects/*`) — **500 → 200 без перезапуска процесса**.
+  Проверено: `curl :4321` → 200.
+- [x] **VPSFIX-2 (Fixed + Verified):** venv'ы пересозданы с
+  `--system-site-packages` (быстро, экономит место): `ai-eggs/.server_venv`,
+  `levitan/.server_venv` (+ symlink `bin/python`), `/opt/levitan/.venv`,
+  `angel-backend/.venv`. Доустановлено `markdown2==2.4.12`,
+  `psycopg2-binary==2.9.9`, `flask==3.0.0`, `rank_bm25`, `uvicorn`
+  (последний — был нужен для `bin/uvicorn` в юните `knowledge-api`).
+  Все 8 ключевых модулей импортируются: `tg_bot`, `scheduler`, `autopilot`,
+  `feed_interactor`, `dtmf_handler`, `mango_webhook`, `a2a_dispatcher`,
+  `angelochka_core`.
+- [x] **VPSFIX-3 (Fixed + Verified):** восстановлен `run_agent.sh`
+  (`/opt/freelance/projects/ai-eggs/agent/run_agent.sh`, chmod +x) — обёртка
+  запуска python через venv, на которую ссылались `angela-bot`, `bitrix-bot`
+  и `server-seller`. Поведение восстановлено по cmdline живых процессов:
+  `exec "$VENV_PYTHON" "$@"` + `PYTHONPATH=angel-backend:agent`. Проверено:
+  `run_agent.sh -c` → `python из venv`; `tg_bot`, `bitrix_bot`, `agent/server.py`
+  импортируются.
+- [x] **VPSFIX-4 (Fixed + Verified):** `bitrix-bot` был errored (30 рестартов) →
+  **online**, лог: «Непрочитанных нет — чисто!».
+- [x] **VPSFIX-5 (Fixed + Verified):** восстановлены 3 файла `angel-backend`
+  из GitHub (`Erik03132/angel-backend`): `server.py` (9773 б),
+  `bitrix_crm.py` (13556 б), `delivery_reminder.py` (7377 б) — их не было
+  ни на диске, ни в репозитории `ai-eggs` (у них отдельный репозиторий).
+  `angel-backend/server.py` импортируется: OK.
+- [x] **VPSFIX-6 (Fixed + Verified):** `pm2 save` выполнен — **до этого дамп
+  был от 30.09 и не содержал `ai-traffic-pro-api`** (создан 28.10), то есть
+  резервный API сайта не поднялся бы после ребута. Бэкап старого дампа:
+  `/root/.pm2/dump.pm2.bak-20261028-pre-save`. Новый дамп: 16 процессов,
+  **все 16 валидны** (exec/interpreter/cwd существуют — проверено скриптом).
+- [x] **VPSFIX-7 (Fixed + Verified):** разрулен конфликт за порт 8002.
+  Найдено, что **seller-ботом управляет systemd-юнит `angelochka.service`**
+  (`ExecStart=…/.server_venv/bin/python3 -u server.py`, порт 8002), а pm2-
+  процесс `server-seller` запускал тот же `agent/server.py` → оба на 8002 →
+  pm2 уходил в цикл рестартов (накопилось 133 рестарта). Решение: pm2-
+  `server-seller` удалён (дубликат), остался systemd-юнит. Проверено:
+  `:8002/api/health` → `{"status":"ok","agent":"angelochka","version":"2.0"}`,
+  `/api/chat` отвечает, через nginx с `Host: vezemcip.ru` — то же.
+- [x] **VPSFIX-8 (Fixed + Verified):** `knowledge-api.service` (порт 8080,
+  RAG-поиск по базе знаний) был enabled, но **битый**: `ExecStart` указывал на
+  несуществующий `…/.server_venv/bin/uvicorn` → `status=203/EXEC` → сервис
+  падал в рестарт-цикле. Починен: `uvicorn` доустановлен (`--force-reinstall
+  --no-deps` — иначе pip пропускал скрипт, т.к. пакет был виден через
+  `--system-site-packages`), юнит перезапущен. Проверено:
+  `/health` → `{"status":"ok","service":"knowledge-api","model":"paraphrase-multilingual-MiniLM-L12-v2","model_loaded":true,…}`,
+  `/docs` → 200, порт 8080 слушается.
+- [x] **VPSFIX-9 (Fixed):** `angelochka-seller.service` (systemd, ссылался на
+  утерянный `server_seller.py`) — `stop`+`disable`; `angelochka-bitrix.service`
+  и `angelochka-expert.service` — `disable` (исходники утеряны, но процессы
+  875/876 живы и продолжают работать на 8003/8004). Кто ими пользуется —
+  никто: grep по коду и nginx пуст, наружу порты закрыты (`ufw` INPUT DROP,
+  8002–8004 не открыты), внешних соединений нет.
+- [x] **VPSFIX-10 (Fixed + Verified):** `levitan-agent.service` (голосовой агент
+  LiveKit, порт 8081) — enabled, но битый: `WorkingDirectory=/opt/pipecat-agent`
+  и `ExecStart=/opt/pipecat-venv/bin/python3` — **оба каталога удалены**.
+  Исходник цел: `/opt/freelance/projects/levitan/agent/levitan_agent.py`.
+  Собран venv `/opt/pipecat-venv` (393 МБ): `livekit-agents==1.8.9`,
+  `livekit-plugins-deepgram==1.8.9`, `livekit-plugins-openai==1.8.9`,
+  `aiohttp`, `httpx`, `python-dotenv`, `openai`. Импорты OK
+  (`livekit.agents`, `livekit.plugins.deepgram`, `livekit.plugins.openai`),
+  `levitan_agent` импортируется («[FUNNEL] FAQ cache loaded: 242 triggers»).
+  Юнит переведён на `WorkingDirectory=/opt/freelance/projects/levitan/agent`
+  (бэкап: `levitan-agent.service.bak-20261028`), перезапущен: **active**,
+  `NRestarts=0`, worker зарегистрирован в LiveKit, порт 8081 слушается.
+- [x] **VPSFIX-11 (потеря безвозвратно, зафиксировано):** три исходника
+  **не восстановимы** — `server_seller.py`, `server_bitrix.py`,
+  `server_expert.py`: отсутствуют на диске (в т.ч. в git-истории
+  `angel-sales` по всем веткам, в `git fsck`), в репозиториях
+  `angel-sales`/`angel-backend`/`antigravity-brain`/`freelance-2026`,
+  в бэкапах и тарах; следы работы есть только в `syslog`/journal. Их
+  функциональность **закрыта**: `agent/server.py` (systemd `angelochka`,
+  порт 8002) отдаёт тот же формат `{"response":…,"session_id":…}` и больше
+  маршрутов, чем seller-сирота; 8003/8004 никем не используются. Реальная
+  потеря — только `profile: "seller"` в ответе `/api/health` и персональные
+  промпты bitrix/expert-профилей. Восстановление возможно лишь переписать
+  с нуля — целесообразности нет, пока их не зовёт код.
+- [x] **VPSFIX-12 (Verified):** финальная проверка после восстановления.
+  Все 10 сервисов на VPS отвечают **200**: `api-traffic`(3001), `vezem-web`
+  (4321), `angel-backend`(5001), `angelochka`(8002), bitrix-профиль(8003),
+  expert-профиль(8004), `knowledge-api`(8080), `mango-webhook`(8085),
+  `dtmf-handler`(8086), `livekit-sip`(8081). pm2: **16 процессов online**,
+  0 errored; дамп валиден (16/16, все exec/interpreter/cwd существуют).
+  systemd: **0 битых enabled-юнитов** (было 2). Внешне: сайт 200,
+  Worker-API 200 (`{"ok":true,"telegram":true,"ai":true}`), резерв-API 200
+  (`{"ok":true,"telegram":true}`). nginx-конфиг валиден.
+  Проверено, что `pm2 resurrect` **не** поднимет `baresip-sip` (в дампе
+  `status=stopped`; в коде pm2 `God.prepare` при `STOPPED_STATUS` только
+  регистрирует процесс, а `resurrect` пропускает уже присутствующие) —
+  иначе он конфликтовал бы с `livekit-sip` за порт 5060 (оба на `sip_port:
+  5060`).
+- [ ] **VPSFIX-13 (гигиена, отложено):** `pip cache` на VPS занимает **3.5 ГБ**
+  при 74% заполненности диска (`/dev/sda1 117G, свободно 31G`). Можно
+  безопасно чистить (`pip cache purge`) — но лучше после того, как убедимся,
+  что голосовой стек не требует офлайн-переустановки. Не срочно.
 
 ### 🗺️ ATP-ROADMAP — карта прод-качества: Фаза 0 (28.10.2026)
 

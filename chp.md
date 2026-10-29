@@ -1,5 +1,35 @@
 # Context — последней сессии
 
+## 🏆 2026-10-29 (AI-Traffic PRO) — редизайн под Corporate Elegance Hub: первая попытка отклонена, спека готова
+
+**Статус:** ветка `redesign` в `Erik03132/ai-traffic-pro-landing` (`8321177`), `main` не тронут,
+production не публиковался. Игорь отклонил первую версию («вообще не похоже») — палитра и тени
+не совпали с референсом. Точные токены и дельты зафиксированы в
+`projects/ai-marketing/docs/design/SPEC-redesign-corporate.md`.
+
+1. **Сделано (Fixed):** коммит `ad0e7f1` — сапфировая палитра, свои `--shadow-*`, градиентный hero,
+   `public/logo.svg` (принят), логотип в Header/Footer/ChatWidget, favicon `#1e3a5f`.
+2. **Причина отклонения:** референс — яркий синий `#0052cc`, текст `#172b4d`, фон `#f4f5f7`,
+   границы `#dfe1e6`, горизонтальные мягкие тени с подтоном `rgba(9,30,66)`, radius кнопок 4px,
+   `border-bottom: 2px` у заголовков секций, бейджи `#deebff`.
+3. **Сохранено (не трогать):** контент `src/data/site.ts`, порядок секций, логика форм
+   (`ContactSection.astro`, `submit-lead.ts`), API/Worker/DNS/NS/секреты/env.
+4. **Next:** переделать `index.astro` + компоненты по спеке → `npm run dev` → показать Игорю →
+   preview Cloudflare Pages → согласование → merge в `main`.
+5. **Блокировано на Игоря:** DNS/NS на Cloudflare (ATP-17), `CLOUDFLARE_API_TOKEN` +
+   `CLOUDFLARE_ACCOUNT_ID` в секреты репозитория, включение preview-деплоя для `redesign`.
+
+
+## 🏆 2026-10-25 (Лид-генерация автоматизация) — копилот-схема готова, опубликавшегося рейтинга нет (подтвердить)</think>
+
+**Статус:** скилл `lead-copilot` записан в `skills/lead-copilot/SKILL.md` — начальная реализация 70% операций. Правила отправки Игоря: оценка + текст отклика целиком. Черновики откликов в `jobhunter/leads.md` (2026-10-25). Handoff: `docs/handoff_batrak_2026-10-25.json`.
+
+1. **Generic Lead Template** (создан) — структура: боль, бюджет, срочность, роль, тайминг + форматы в соответствии с Игорем.
+2. **Lead Scouting via FCP/MCP** (создан) — agent leads люди по Apollo/FullEnrich/Data Legion (Приватное) → статуса? [намечены как 2026-10-25].
+3. **Lead Scoring + Workflow** (создан) — скоринг по 5 сигналам + пайплайн batrak.
+
+От Игоря: 1) запуск lead-copilot, 2) апрув lead-score thresholds, 3) запуск cron (если понадобится), 4) статус лидов [хэш].
+
 ## 🏆 2026-10-20 (Батрак) — 6 откликов готовы, ждут апрува
 
 **Статус:** все отклики — черновики в `jobhunter/leads.md` (записи 2026-10-20), НЕ отправлены. Образец отклика записан в skill `agents/batrak` (Reference Response). Handoff: `docs/handoff_batrak_leads_2026-10-20.json`.
