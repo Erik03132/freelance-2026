@@ -1,5 +1,32 @@
 # Context — последней сессии
 
+## 🏆 2026-11-10 (AI-Traffic PRO) — дистрибуция в Telegram: черновик с кнопкой, публикация не подтверждена
+
+**Статус:** канал `@aitrafficpro`, бот `@ai_bureau_new_bot` назначен админом, права проверены
+(`init` → `status: administrator`, `can_post_messages: true`). Публикация в канал **не подтверждена**:
+через 20 минут Telegram начал отвечать `401 Unauthorized` на любой вызов этого бота (другой бот в тот
+же момент отвечал нормально) — токен стал недействительным. В канале 0 постов, в KV 0 черновиков.
+
+1. **Сделано (Fixed):** `tools/tg-publish/send.py` (черновик в личный чат, `--dry-run`, User-Agent —
+   Cloudflare режет `Python-urllib` кодом 1010); `/api/tg/preview|webhook|init` в Worker;
+   кнопки «✅ Опубликовать в канал» / «❌ Отклонить»; публикует Worker по нажатию, текст из KV
+   (подпись не подделать правкой сообщения); в канале пост с кнопкой «Читать статью →».
+2. **UTM:** `src/lib/utm.ts` (first-touch в `sessionStorage`) → поля заявки → Worker → KV →
+   строка «📣 Источник: telegram · <статья> · <пост>» в сообщении о заявке.
+3. **Черновики привязаны к посту:** ключ `draft:tg:<slug>:post-N` (был `draft:tg:<slug>` — второй
+   пост про ту же статью затирал первый). `init` теперь проверяет ещё и канал.
+4. **Атрибуция в боте:** диплинк `?start=<метка>` → KV `ref:<user_id>` (первый источник не
+   перезаписывается), вопросы пересылаются владельцу, `GET /api/tg/sources` — отчёт по меткам.
+5. **Проверено:** 124 теста зелёные, CI + GitHub Pages + Cloudflare Pages success, вебхук без
+   секрета отдаёт 401, `/api/health` → `publish: true`. Коммиты `4ba8de2`, `0a7449c`, `b1e80c2`,
+   `d584821` в `main`.
+6. **Блокировано на Игоря (ATP-R11):** токен `@ai_bureau_new_bot` из BotFather — прислать или
+   вписать `TELEGRAM_BOT_TOKEN=` в `.env` проекта. Дальше `wrangler secret put TELEGRAM_BOT_TOKEN`,
+   перепроверить `init` и отправить черновик `docs/distribution/posts/intro.md`.
+7. **Next:** статья 3 `voronka-prodazh-kak-postroit` (услуга `leadgen`, доказательство «C — своя
+   схема»); запросить индексирование в GSC для статей 1–2; VK и Дзен — только после адаптации
+   текстов под площадки, Хабр — после 6 статей.
+
 ## 🏆 2026-10-29 (AI-Traffic PRO) — редизайн под Corporate Elegance Hub: первая попытка отклонена, спека готова
 
 **Статус:** ветка `redesign` в `Erik03132/ai-traffic-pro-landing` (`8321177`), `main` не тронут,
