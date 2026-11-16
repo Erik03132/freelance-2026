@@ -256,3 +256,54 @@ merge в `main` только после согласования.
 Прод сайта работает и не зависит от VPS. VPS восстановлен и переживает ребут
 (pm2-дамп валиден, systemd-юниты починены). Блокер для полного «красивого»
 завершения — один: **доступ Игоря в `dash.cloudflare.com`** (ATP-17/ATP-14).
+
+## 02.11.2026 — Аналитика AI-Traffic PRO: Фаза 0, шаги 0.1 и 0.2
+
+**Сделано и проверено:**
+- Метрика (114006019, 4 цели) — живая: визиты, `phone_click` 2, `chat_open` 1,
+  `scroll_75` 1. Найдены и закрыты два молчаливых дефекта: CSP не пропускал
+  `mc.yandex.ru`, `ssr: true` обрывал инициализацию счётчика.
+- Домены: Вебмастер `VERIFIED` (мета-тег), GSC `Ownership verified`
+  (HTML-файл + rewrite `200` в `_redirects`).
+- Сводки в Telegram раз в 3 дня без VPS и без веб-дашборда: приватный репо
+  `Erik03132/ai-traffic-dashboard`, GitHub Actions cron, бот HERMES-1.
+  История дневная (`data/daily/<день>.json`), отчёт за период — `--report`.
+  Цифры считает скрипт, LLM только пересказывает.
+
+**Не закрыто (и почему):**
+- Позиции по фразам пустые: Вебмастер отдаёт `HOST_NOT_LOADED` — Яндекс ещё
+  не загрузил новый хост (добавлен 02.11). Ждём 1–2 суток.
+- `sitemap.xml` не отправлен: GSC отвечал «попробуйте позже» (лимит на новом
+  ресурсе), API Вебмастера на добавление карты отдаёт 405. Только руками.
+- VPS `217.149.23.113` умирает ~05.11: вместе с ним уйдут `hermes-gateway`,
+  `hermes-dashboard`, `hermes-orproxy`. Сводки от этого не зависят.
+
+## 16.11.2026 — разбор 6 внешних дропов + ClamDown установлен, тест с закрытой крышкой завтра
+
+**Сделано (Fixed):**
+- `ACTIVE_TASKS.md` — 6 новых секций: HMK (Hallmark), EGM (Elephant-Goldfish), VSIP
+  (OpenAI Voice SIP), HOME (Home Repo Pattern), UIS (Vercel UI SDK), CLD (ClamDown).
+- `~/.config/opencode/tools/ops/clamdown_probe.sh` — read-only снимок состояния Mac
+  (`before`/`after`/`status`): приложение, хелпер, `SleepDisabled`, ассерт ClamDown,
+  батарея, thermal, крышка, PID агентов, нагрузка. Лог в `~/.config/opencode/logs/`.
+- ClamDown установлен: `/Applications/ClamDown.app`, режим взведён (`SleepDisabled 1`).
+- Cron-напоминание `ce12da675387` на 17.11 09:00 MSK в Telegram — весь протокол теста.
+- `self_improve_log.md` — запись про ложный вывод «режим выключен» из неверной команды.
+
+**Проверено (Verified):**
+- ClamDown: DMG нотаризован (`Notarized Developer ID`, Team `RFYMF7Q4UK`, hardened runtime),
+  хелпер `app.clamdown.helper` зарегистрирован (`active count = 2`), код хелпера fail-closed
+  (пиннит bundle ID + Team ID), `pmset` только через закрытый enum с `Bool`, вентиляторы
+  ограничены min/max по построению, есть e2e-тест отказа неавторизованному клиенту.
+- sloplint на `ai-bureau-site/concept/index.html`: 108 floor FAIL, 47 reflex (реальные:
+  `pure #fff`, 2× `<svg>` без `aria-label`, нет focus; шум: гейт 20 Hallmark-stamp, гейт 19 тире).
+- `skills_audit --dry-run`: `egm-review` = 0 вызовов (основание отклонить EGM).
+- Локально: скиллы 15.5 МБ вне git в трёх местах, 18 симлинков, `hermes-skills-sync/skills` пуст.
+
+**Не закрыто (и почему):**
+- Функциональный тест ClamDown с закрытой крышкой — **17.11**, нужен ручной запуск задач
+  в OpenCode и Hermes + физическое закрытие крышки. Автоматизировать нельзя.
+- CLD-003 (проверка `kill -9` → восстановление `SleepDisabled`) — после основного теста.
+- HOME-001 (git для скиллов), HOME-002 (пустой `hermes-skills-sync/skills`), HMK-001
+  (порт Hallmark в Hermes), UIS-001 (`unslop` в `/code-review`) — записаны, не начаты.
+- Бэкап скиллов в Timeweb S3 — не проверял (до этого «единственная копия» не утверждать).
