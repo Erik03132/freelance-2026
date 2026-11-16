@@ -307,3 +307,38 @@ merge в `main` только после согласования.
 - HOME-001 (git для скиллов), HOME-002 (пустой `hermes-skills-sync/skills`), HMK-001
   (порт Hallmark в Hermes), UIS-001 (`unslop` в `/code-review`) — записаны, не начаты.
 - Бэкап скиллов в Timeweb S3 — не проверял (до этого «единственная копия» не утверждать).
+
+## 17.11.2026 (ночь) — автономный прогон трёх приоритетных задач: HMK-002, HMK-003, RSI-002
+
+**Зачем:** Игорь закрыл крышку и попросил выполнить три самые приоритетные задачи из
+`ACTIVE_TASKS.md` без его участия.
+
+**Сделано (Fixed):**
+- **HMK-002** — baseline sloplint по трём фронтам, вкусовые гейты отделены от реальных:
+  `ai-bureau-site` 256 floor FAIL / 62 файла (149 реальных, 107 вкусовых; 129 из 149 — `48`,
+  литералы вместо токенов), `dashboard` 4 / 4 (все реальные), `projects/affiliate-landing`
+  40 / 1 (28 реальных). Таблица — в задаче.
+- **HMK-003** — шаг 4 в `/code-review` (`~/.config/opencode/AGENTS.md`): запуск sloplint,
+  блокирующие гейты (`7a`,`10a`,`26a`,`39a`,`33`,`34`,`62`,`30a`,`48`), не блокирующие
+  вкусовые (`54`,`67`,`63`,`19`,`20`), сравнение с baseline HMK-002.
+- **RSI-002** — сейф: `tools/rag_evalset.py` (`SPLITS`, `EvalCase.split`, валидация,
+  `load_eval_set(path, split)`, `load_visible`/`load_holdout`), новый `tools/holdout_gate.py`,
+  `tools/eval_gate.sh --holdout`, `tools/tests/holdout/` (README + шаблон), правило 20 в `AGENTS.md`.
+- `self_improve_log.md` — запись про «зелёные eval, написанные самим агентом».
+
+**Проверено (Verified):**
+- `eval_rag_evalset.py` PASSED (TP-1..TP-7: split-фильтр, невалидный split, holdout без
+  `reviewed_by`, легальный holdout); `eval_rag_evalrunner.py` и `eval_rag_retrieval.py` PASSED —
+  регрессий нет.
+- Гейт на 4 путях: валидный сейф → 0, без `reviewed_by` → 1, утечка visible в holdout-файл → 1,
+  `--min 5` при 1 кейсе → 1. На реальном репозитории — **exit 1 «сейф пуст»**.
+- `ruff check` чист, `ruff format` применён, `bash -n tools/eval_gate.sh` ок.
+- Снимок машины 00:00: `SleepDisabled 1`, ассерт ClamDown живой, батарея 80% на зарядке,
+  агенты живы.
+
+**Не закрыто (и почему):**
+- **CLD-002** — тест с закрытой крышкой не состоялся: в 00:00 `AppleClamshellState = No`
+  (крышка открыта). Нужен ручной прогон задач при физически закрытой крышке.
+- **RSI-002 наполнение** — holdout-кейсы не заведены: их пишет человек по реальным провалам
+  приёмки. Пустой сейф гейт честно называет провалом, а не «зелёным».
+- RSI-001/003/004/005, HOME-001/002, HMK-001, UIS-001 — записаны, не начаты.

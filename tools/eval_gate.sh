@@ -8,6 +8,7 @@
 #   bash tools/eval_gate.sh --project ai-eggs
 #   bash tools/eval_gate.sh --quick         # только детерминированные (без LLM)
 #   bash tools/eval_gate.sh --list          # список доступных eval
+#   bash tools/eval_gate.sh --holdout       # RSI-002: гейт закрытого набора (сейф)
 #
 # Интеграция в /goal (шаг 4) и в Two-axis Review перед коммитом.
 
@@ -64,6 +65,12 @@ main() {
     case "$1" in
       --list) list_evals; return 0 ;;
       --quick) mode="quick" ;;
+      --holdout)
+        # RSI-002: закрытый набор. Пустой сейф — громкий провал, а не «зелёно».
+        echo "Eval gate: HOLDOUT (RSI-002) — прогон только на приёмке"
+        python3 "$ROOT/tools/holdout_gate.py" --root "$ROOT" "${@:2}"
+        return $?
+        ;;
       --project) project="$2"; shift ;;
       *) echo "Неизвестный флаг: $1" >&2; return 2 ;;
     esac

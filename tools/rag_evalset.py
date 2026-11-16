@@ -9,6 +9,9 @@ JSONL, один объект на кейс. Стабильные ссылки �
   gold_evidence [{document_id, section_id, relevance 0-2}], expected_facts,
   acceptable_answer, why_it_matters, source, reviewed_by, dataset_version.
 
+split — "visible" (по умолчанию) или "holdout" (RSI-002): закрытый набор, который
+оптимизатор не видит; holdout обязан иметь reviewed_by (его пишет человек).
+
 answerability хранит вопросы БЕЗ ответа — иначе система не учится воздерживаться.
 Для unanswerable expected_document_ids может быть пустым (это норма).
 
@@ -33,6 +36,9 @@ SCENARIOS = {
     "sensitive",
 }
 ANSWERABILITY = {"answerable", "unanswerable"}
+# RSI-002: сейф. visible — агент видит и по нему оптимизирует;
+# holdout — оптимизатор НЕ видит, прогон только на приёмке (защита от закона Гудхарта).
+SPLITS = {"visible", "holdout"}
 
 REQUIRED = (
     "id",
@@ -67,6 +73,7 @@ class EvalCase:
     source: str = ""
     reviewed_by: str = ""
     dataset_version: str = ""
+    split: str = "visible"
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> EvalCase:
@@ -92,6 +99,7 @@ class EvalCase:
             source=str(d.get("source", "")),
             reviewed_by=str(d.get("reviewed_by", "")),
             dataset_version=str(d.get("dataset_version", "")),
+            split=str(d.get("split", "visible")),
         )
 
     @classmethod
@@ -106,15 +114,33 @@ class EvalCase:
         return out
 
 
-def load_eval_set(path: str) -> list[EvalCase]:
-    """Чтение JSONL-набора. Пустые строки пропускаются."""
+def load_eval_set(path: str, split: str | None = None) -> list[EvalCase]:
+    """Чтение JSONL-набора. Пустые строки пропускаются.
+
+    split=None — все кейсы; "visible"/"holdout" — только кейсы этого набора.
+    """
+    if split is not None and split not in SPLITS:
+        raise ValueError(f"split '{split}' вне {sorted(SPLITS)}")
     cases: list[EvalCase] = []
     with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
-            if line:
-                cases.append(EvalCase.from_json_line(line))
+            if not line:
+                continue
+            case = EvalCase.from_json_line(line)
+            if split is None or case.split == split:
+                cases.append(case)
     return cases
+
+
+def load_visible(path: str) -> list[EvalCase]:
+    """Кейсы, которые оптимизатору видеть можно."""
+    return load_eval_set(path, split="visible")
+
+
+def load_holdout(path: str) -> list[EvalCase]:
+    """Закрытый набор: только для приёмки, не для оптимизации."""
+    return load_eval_set(path, split="holdout")
 
 
 def validate_case(case: EvalCase) -> list[str]:
@@ -137,6 +163,10 @@ def validate_case(case: EvalCase) -> list[str]:
             errs.append(f"gold_evidence relevance {e.relevance} вне 0-2")
     if case.answerability == "unanswerable" and case.expected_document_ids:
         errs.append("unanswerable, но указаны expected_document_ids")
+    if case.split not in SPLITS:
+        errs.append(f"split '{case.split}' вне {sorted(SPLITS)}")
+    if case.split == "holdout" and not case.reviewed_by:
+        errs.append("holdout без reviewed_by (закрытый набор пишет человек, не агент)")
     return errs
 
 

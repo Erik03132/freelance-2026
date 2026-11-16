@@ -1,5 +1,36 @@
 # Context — последней сессии
 
+## 🛠️ 2026-11-17 (ночь) — три приоритетные задачи выполнены автономно: HMK-002, HMK-003, RSI-002
+
+**Статус:** все три — **Fixed + Verified**. Код проектов не менялся, кроме eval-инфраструктуры
+и одного нового гейта. Тест ClamDown с закрытой крышкой **не состоялся**: в 00:00
+`AppleClamshellState = No` (крышка была открыта), поэтому CLD-002 остаётся открытой.
+
+1. **HMK-002 (baseline sloplint)** — замер по трём фронтам, вкусовые гейты (`54`,`67`,`63`,`19`,`20`)
+   отделены от реальных: `ai-bureau-site` **256 floor FAIL / 62 файла** (149 реальных, 107 вкусовых;
+   129 из 149 — гейт `48`, литералы цветов/шрифтов вместо токенов), `dashboard` **4 / 4** (все реальные),
+   `projects/affiliate-landing` **40 / 1** (28 реальных). Таблица внесена в задачу.
+2. **HMK-003 (sloplint как гейт)** — шаг 4 в `/code-review` (`~/.config/opencode/AGENTS.md`):
+   команда запуска, список блокирующих гейтов, явно не блокирующие вкусовые, сравнение с baseline,
+   а не с нулём. Сделано advisory-шагом: на `ai-bureau-site` 149 находок — pre-commit-блокировка
+   парализовала бы работу.
+3. **RSI-002 (сейф visible/holdout)** — `tools/rag_evalset.py`: `SPLITS`, поле `EvalCase.split`
+   (дефолт `visible`), валидация (split вне списка; holdout без `reviewed_by`), `load_eval_set(path, split)`
+   + `load_visible`/`load_holdout`. Новый `tools/holdout_gate.py`: ищет `*/tests/holdout/*.jsonl`,
+   ловит утечку visible-кейсов в закрытый файл, **падает громко на пустом сейфе**. `eval_gate.sh --holdout`.
+   `tools/tests/holdout/` — README + шаблон (намеренно не `.jsonl`). Правило 20 в `AGENTS.md`.
+
+**Проверено (Verified):** `eval_rag_evalset.py` PASSED (TP-1..TP-7: split-фильтр, невалидный split,
+holdout без `reviewed_by`, легальный holdout); регрессий нет — `eval_rag_evalrunner.py`,
+`eval_rag_retrieval.py` PASSED; гейт на 4 путях (валидный 0, без `reviewed_by` 1, утечка 1, `--min 5` 1);
+`ruff check` чист; `bash -n tools/eval_gate.sh` ок; на реальном репо гейт даёт **exit 1 «сейф пуст»**.
+
+**Честно:** holdout-кейсы не заведены ни для одного агента — их пишет человек по реальным провалам
+приёмки (RSI-005, пилот на `agents/batrak`). Пустой сейф — не «зелёно», а названный провал.
+
+**Состояние машины (00:00):** `SleepDisabled 1`, ассерт ClamDown живой (00:40:23), батарея 80% на
+зарядке, агенты живы (opencode 80083, hermes ~20 PID), load 6.57.
+
 ## 🔍 2026-11-16 (вечер) — шесть внешних дропов разобраны, ClamDown установлен и ждёт теста с закрытой крышкой
 
 **Статус:** все шесть разборов записаны в `ACTIVE_TASKS.md` (строки 819–1171). Из них один
