@@ -1,5 +1,49 @@
 # Context — последней сессии
 
+## 🔍 2026-11-16 (вечер) — шесть внешних дропов разобраны, ClamDown установлен и ждёт теста с закрытой крышкой
+
+**Статус:** все шесть разборов записаны в `ACTIVE_TASKS.md` (строки 819–1171). Из них один
+отклонён (EGM), один отложен (VSIP), один установлен и проверен (CLD), три записаны как
+потенциальные задачи (HMK, HOME, UIS). Код проектов не менялся — кроме одного нового
+диагностического скрипта.
+
+1. **HMK (Hallmark)** — уже стоял v2.0.0 (совпадает с `main`), ставить нечего. Прогнал
+   sloplint на `ai-bureau-site/concept/index.html`: **108 floor FAIL, 47 reflex** — реальные
+   (`pure #fff`, 2× `<svg>` без `aria-label`, нет focus), плюс шум (гейт 20 требует Hallmark-stamp,
+   гейт 19 — запрет тире). 5 задач: порт в Hermes, baseline по 3 фронтам, sloplint как гейт
+   в `/code-review`, связка с DESIGN.md, темы → brand tokens.
+2. **EGM (Elephant-Goldfish)** — **отклонено Игорем**. Причина не вкусовая: наш порт
+   `egm-review` имеет **0 вызовов** (`skills_audit`), а в порте отрезаны `egm-draft`/
+   `egm-brainstorm` — осталась «рыбка без слона». Плюс `full` = 150-220k токенов.
+3. **VSIP (OpenAI Voice SIP)** — отложено: три блокера не решаются кодом — Mango должен уметь
+   пиринг на внешний SIP URI по TLS+SRTP (не проверено), OpenAI API недоступен в РФ (SIP не
+   проксируется), 152-ФЗ. Забрать бесплатно: паттерн sideband + accept/reject-вебхук.
+4. **HOME (Home Repo Pattern)** — диагноз: home repo у нас есть (`freelance-2026`), но
+   **скиллы вне git**: 7.4 МБ + 8.1 МБ + 844 КБ в трёх местах, 18 симлинков между не-репо,
+   а `hermes-skills-sync/skills` **пуст**, хотя README называет его источником истины.
+5. **UIS (Vercel UI SDK)** — библиотеку не брать (beta, 3 недели, дубль Radix). Забрать:
+   `ui-sdk-unslop` как чеклист в `/code-review` и «twin»-паттерн из `ui-sdk-write-code`.
+6. **CLD (ClamDown)** — **установлен и проверен**: DMG нотаризован (`Notarized Developer ID`,
+   Team `RFYMF7Q4UK`, hardened runtime), хелпер `app.clamdown.helper` fail-closed (пиннит
+   bundle ID + Team ID), `pmset` только через закрытый enum с `Bool`, вентиляторы ограничены
+   min/max по построению, e2e-тест на отказ неавторизованному клиенту. Режим взведён
+   23:30 → `SleepDisabled 1` + ассерт «ClamDown is keeping the Mac awake».
+
+**Сделано (Fixed):** 6 секций в `ACTIVE_TASKS.md`; `~/.config/opencode/tools/ops/clamdown_probe.sh`
+(read-only снимок: приложение, хелпер, `SleepDisabled`, батарея, thermal, крышка, ассерты,
+PID агентов); cron-напоминание `ce12da675387` на 17.11 09:00 MSK в Telegram.
+
+**Проверено (Verified):** нотаризация и подпись ClamDown (`spctl`, `codesign`), регистрация
+хелпера (`launchctl print` → `active count = 2`), взведённый режим (`SleepDisabled 1`),
+поведение sloplint на нашем файле (108 floor FAIL).
+
+**Не проверено (честно):** функциональный тест ClamDown с закрытой крышкой — **завтра**;
+render-режим sloplint (`--render`/`--url`); бэкап скиллов в Timeweb S3.
+
+**Моя ошибка за сессию:** объявил «режим ClamDown не взведён», грепнув `pmset -g custom` —
+этого поля там нет, правильное `pmset -g | grep SleepDisabled`. Игорь поправил. Исправлено
+и в скрипте, и в тексте задачи; запись в `self_improve_log.md`.
+
 ## 🏆 2026-11-10 (AI-Traffic PRO) — дистрибуция в Telegram: черновик с кнопкой, публикация не подтверждена
 
 **Статус:** канал `@aitrafficpro`, бот `@ai_bureau_new_bot` назначен админом, права проверены
