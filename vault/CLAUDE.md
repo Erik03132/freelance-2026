@@ -6,6 +6,12 @@
 - Ночной читатель (`tools/ops/night_reader.sh`) разгребает `vault/00-Inbox/`:
   сырьё → 06-Library. СЫРЬЁ не попадает в ACTIVE_TASKS напрямую.
 
+## Порядок чтения для агента
+
+- Сначала `vault/wiki/INDEX.md` → нужная страница в `vault/wiki/entities/`; сырьё
+  (`06-Library/**/digest.md`) — только если в вики нет ответа или нужна дословная цитата.
+- Где источники расходятся — `vault/wiki/contradictions.md`; карта «страница → файлы» — `vault/wiki/sources.md`.
+
 ## Frontmatter (минимум 4 поля в создаваемых заметках)
 
 Все новые/редактируемые заметки в vault несут YAML frontmatter:
