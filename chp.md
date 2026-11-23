@@ -1,5 +1,28 @@
 # Context — последней сессии
 
+## 🚚 2026-11-24 (ночь) — ai-traffic-pro.ru переехал с GitHub Pages на Timeweb Cloud
+
+**Статус:** прод живой на новом хостинге (Verified замерами), коммит `400e002` в `ai-marketing`.
+
+1. **Переезд** — статика на Timeweb Cloud App Platform (приложение `294905`, Москва `ru-3`,
+   IP `178.209.127.53`, 1 ₽/мес + 4,95 ₽ / 10 000 запросов). DNS в Cloudflare: apex и `www`
+   → A на этот IP, DNS only. TLS — Let's Encrypt (до 21.02.2027), `server: Caddy`.
+   Замеры: 6/6 запросов `curl --compressed` → 123 129 байт с `</html>` (HTTP/2 не рвёт, в
+   отличие от Cloudflare Pages 23.11).
+2. **Заголовки и редиректы** — из `_headers`/`_redirects` перенесены в панель «Настройки
+   веб-сервера»: HSTS, CSP, `X-Frame-Options: DENY`, `nosniff`, Referrer/Permissions-Policy;
+   `www` → apex 301, `/services/marketplace/` → `/services/ecommerce/` 301, gzip включён.
+3. **Почему** — на GitHub Pages коммерческое использование запрещено ToS, `_headers` не
+   применяются, юрисдикция США (152-ФЗ).
+4. **Хвосты** — (а) `api.ai-traffic-pro.ru` отдаёт 522 (Cloudflare не проксирует
+   `*.workers.dev` под своим доменом), форма его не использует; (б) автодеплоя нет —
+   репозиторий подключён по URL, деплой вручную из панели/API; (в) `Cache-Control: immutable`
+   для `/_astro/` не воспроизводится (заголовок глобальный).
+5. **Бэкап** — сбой `finish-day`: пуш в `antigravity-brain` отклонён, локальный rebase оставил
+   detached HEAD. Исправлено: снапшот 2026-11-24 восстановлен из коммита `17956bb`, ветка
+   `main` переставлена, пуш `d8b8bf0..22cbbc9`. `test_restore.sh` — 9/9. Архивов 4 вместо 5
+   (ротация удалила два старых, оба есть в истории git).
+
 ## 📰 2026-11-17 (вечер) — ai-marketing: Дзен запущен, пакет из 10 статей и обложек
 
 **Статус:** канал живой, пакет готов, публикация — руками раз в три дня.
