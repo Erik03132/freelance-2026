@@ -1,0 +1,38 @@
+{
+  "project": "freelance-2026 / AI-Traffic PRO (ai-marketing) → projectId: ai-bureau",
+  "date": "2026-11-24",
+  "task": "GEO-аудит запущен, замер видимости сделан, статья о замере готова к выходу на Хабр 25.11",
+  "context": "Сессия 24.11.2026. (1) C3 закрыт: страницы /geo-audit/ и /geo-audit/methodology/ + линковка, sitemap, llms.txt, og-карточки — Verified на проде (деплой 51d61feb). (2) Цена GEO-аудита по решению владельца 31 000 → 29 000 ₽, правится в одном месте src/data/services/geo.ts; хардкод в FAQ заменён на подстановку rur(auditPrice), мета-описание страницы тоже на переменных — коммит 9ea3219, Verified на проде. (3) Блокер замера в браузере снят: аккаунт владельца ChatGPT знает проект (персонализация) и Free без ответа, поэтому замер идёт через API. Ключ оказался от ProxyAPI, не VseGPT (VseGPT его отверг). Сервис: https://api.proxyapi.ru/openai/v1, поиск только через /v1/responses + tools[web_search], 1 ₽ за поисковый запрос, имя модели БЕЗ префикса вендора (openai/gpt-5-mini → 400 Model not supported), gpt-5-search-api не работает. Инструмент tools/ai_visibility_probe.py (--dry-run, --from-raw). Результат 15/15 прогонов, gpt-5-mini: Citation Rate 0% (0 из 15), Brand Mention 13% (2 из 15), Share of Voice не считаем (2 против 2 — шум). Вместо нас цитируются одноимённые домены aitraffic.pro, aitraffic.cc, aitrafficwhale.com, alltrafficpro.com, trafficpro.agency, trafficprolead.ru — утечка сущности бренда, заведена как C7. Вывод: модель цитирует первоисточники и разборы (schema.org, доки Google/OpenAI, rbc.ru, habr.com), страницы услуг — нет. (4) Кейс №0 на сайте НЕ публикуем (решение владельца): «0 из 15» на своём сайте доказывает отсутствие. Данные идут в статью. (5) Статья /blog/zamer-vidimosti-v-neyrosetyah/ — на проде (200, datePublished 2026-11-25), geo_lint 83/100. Посты: Telegram отправлен на подтверждение (approved, жмёт кнопку в боте), VK и Дзен — готовые версии в docs/distribution/{vk,dzen}/, Хабр — docs/distribution/habr/ (без цен и рекламы, теги, хабы). Порядок выхода решён: Хабр → ждём индексацию → замер → TG → VK → Дзен. Обоснование: habr.com цитировался моделью в 2 запросах из 5. Хабр — контрольный эксперимент только под эту статью, декабрьский план (01.12–29.12) не переставляем, обычные статьи идут старым порядком TG → VK → Дзен. (6) C5 Fixed, коммит 9bc5934.",
+  "files": [
+    "projects/ai-marketing/src/data/geo-audit.ts",
+    "projects/ai-marketing/src/data/services/geo.ts",
+    "projects/ai-marketing/src/pages/geo-audit/index.astro",
+    "projects/ai-marketing/src/pages/geo-audit/methodology.astro",
+    "projects/ai-marketing/src/lib/geo-audit.ts",
+    "projects/ai-marketing/src/lib/geo-audit.test.ts",
+    "projects/ai-marketing/src/data/blog/zamer-vidimosti-v-neyrosetyah.ts",
+    "projects/ai-marketing/tools/ai_visibility_probe.py",
+    "projects/ai-marketing/tools/publish/registry.py",
+    "projects/ai-marketing/tests/posts.test.js",
+    "projects/ai-marketing/docs/seo/ai-visibility-2026-11-22.md",
+    "projects/ai-marketing/docs/seo/proxyapi-2026-11-24.md",
+    "projects/ai-marketing/docs/seo/raw/2026-11-24/",
+    "projects/ai-marketing/docs/distribution/habr/zamer-vidimosti-v-neyrosetyah.md",
+    "projects/ai-marketing/docs/distribution/dzen/zamer-vidimosti-v-neyrosetyah.md",
+    "projects/ai-marketing/docs/distribution/vk/zamer-vidimosti-v-neyrosetyah.md",
+    "projects/ai-marketing/docs/distribution/channels.md",
+    "projects/ai-marketing/docs/distribution/registry.json",
+    "projects/ai-marketing/ACTIVE_TASKS.md"
+  ],
+  "skills": ["action-first", "verification-before-completion"],
+  "next_steps": [
+    "1. Игорь: нажать «Опубликовать в канал» в Telegram (черновик уже пришёл), опубликовать статью на Хабре вручную из docs/distribution/habr/zamer-vidimosti-v-neyrosetyah.md",
+    "2. Игорь: VK — вручную в композере из docs/distribution/vk/, Дзен — в Студии из docs/distribution/dzen/ (слот 25.11, лента отложенных 23/26/28/30.11 не двигаем)",
+    "3. После выхода статьи на Хабре: добавить ссылку в public/llms.txt и docs/distribution/channels.md, в реестре пометить posted (render.py --mark posted --url ...)",
+    "4. Через 24–48 ч после индексации Хабра — перезамер: python3 tools/ai_visibility_probe.py --runs 3 (те же 5 запросов), смотреть Citation Rate и появление habr.com в цитатах; результат в docs/seo/ai-visibility-2026-11-22.md",
+    "5. Игорь: решить, брать ли Хабр в декабрьский план для GEO-постов 15.12 и 22.12 — сейчас это только контрольный эксперимент",
+    "6. C7 (утечка сущности бренда): sameAs на профили, профиль организации в открытой базе знаний, разграничение имён — по замеру 24.11 это первая задача по влиянию"
+  ],
+  "escalation": false,
+  "deadline": "2026-11-25T20:00:00"
+}
