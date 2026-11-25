@@ -11,13 +11,59 @@
 #   4. Чистит мусор сессии
 #   5. Выводит инструкцию: «Нажми Cmd+N для чистого старта»
 #
-# ИСПОЛЬЗОВАНИЕ (вызывается агентом, не вручную):
-#   bash ~/freelance-2026/tools/finish_day.sh
+# ИСПОЛЬЗОВАНИЕ:
+#   bash tools/ops/finish_day.sh --help     только справка, без действий
+#   bash tools/ops/finish_day.sh            сухой прогон (по умолчанию):
+#                                           показывает шаги, ничего не меняет
+#   bash tools/ops/finish_day.sh --apply    настоящий запуск: бэкап, чистка,
+#                                           git, NAS, внешний диск
 #
 # Чекпоинт агент создаёт ПЕРЕД запуском этого скрипта.
 # ============================================================================
 
 set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Использование: finish_day.sh [--help | --dry-run | --apply]
+
+  --help, -h  Показать эту справку и выйти. Действий нет.
+  --dry-run   Показать, что было бы сделано. Действий нет (режим по умолчанию).
+  --apply     Выполнить: бэкап, архив и ротацию, чистку мусора, git commit/push,
+              синхронизацию на NAS и внешний диск, test-restore.
+
+Агент обязан сначала вызвать --help или сухой прогон; --apply — только по
+явной просьбе владельца. Неизвестный флаг = ошибка (код 2).
+
+Примеры:
+  bash tools/ops/finish_day.sh --help
+  bash tools/ops/finish_day.sh
+  bash tools/ops/finish_day.sh --apply
+EOF
+}
+
+APPLY=0
+case "${1:-}" in
+  --help|-h) usage; exit 0 ;;
+  "") ;;
+  --dry-run) ;;
+  --apply) APPLY=1 ;;
+  *) echo "Неизвестный аргумент: $1 (см. --help)" >&2; exit 2 ;;
+esac
+if (( $# > 1 )); then
+  echo "Слишком много аргументов (см. --help)" >&2
+  exit 2
+fi
+
+# ВСЕ меняющие состояние команды идут через эту обёртку. В сухом прогоне
+# команда только печатается и НЕ выполняется.
+do_cmd() {
+  if [[ "$APPLY" -eq 1 ]]; then
+    "$@"
+  else
+    printf '  \033[1;33m[dry-run]\033[0m %s\n' "$*"
+  fi
+}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKSPACE="$HOME/freelance-2026"
@@ -39,31 +85,34 @@ echo ""
 echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${BOLD}${CYAN}  🛰️  ANTIGRAVITY FINISH-DAY — $(date '+%d.%m.%Y %H:%M')${NC}"
 echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+if [[ "$APPLY" -eq 0 ]]; then
+  echo -e "  ${YELLOW}РЕЖИМ ПРОСМОТРА: изменения НЕ вносятся. Настоящий запуск — с --apply${NC}"
+fi
 
 # ========================= ФАЗА 1: БЭКАП ====================================
 
 echo ""
 echo -e "  ${BOLD}📦 ФАЗА 1: Бэкап фундамента...${NC}"
 
-mkdir -p "$BACKUP_DIR"
+do_cmd mkdir -p "$BACKUP_DIR"
 
 # Функция бэкапа
 backup_dir() {
     local src="$1" dest="$2" label="$3"
     if [[ -d "$src" ]]; then
-        mkdir -p "$dest"
-        rsync -a --exclude='node_modules' --exclude='.git' --exclude='venv' \
+        do_cmd mkdir -p "$dest"
+        do_cmd rsync -a --exclude='node_modules' --exclude='.git' --exclude='venv' \
               --exclude='__pycache__' --exclude='.DS_Store' "$src/" "$dest/" 2>/dev/null
-        echo -e "  ${GREEN}✅ $label${NC}"
+        [[ "$APPLY" -eq 1 ]] && echo -e "  ${GREEN}✅ $label${NC}" || echo -e "  ${YELLOW}• $label (dry-run)${NC}"
     fi
 }
 
 backup_file() {
     local src="$1" dest="$2" label="$3"
     if [[ -f "$src" ]]; then
-        mkdir -p "$(dirname "$dest")"
-        cp "$src" "$dest"
-        echo -e "  ${GREEN}✅ $label${NC}"
+        do_cmd mkdir -p "$(dirname "$dest")"
+        do_cmd cp "$src" "$dest"
+        [[ "$APPLY" -eq 1 ]] && echo -e "  ${GREEN}✅ $label${NC}" || echo -e "  ${YELLOW}• $label (dry-run)${NC}"
     fi
 }
 
@@ -99,8 +148,8 @@ for doc in STRATEGY_2026.md ACTIVE_TASKS.md chp.md DOOMSDAY_PROTOCOL.md AGENT_SK
 done
 
 # 7. Чекпоинт и Стенограммы
-mkdir -p "$WORKSPACE/checkpoints" "$WORKSPACE/reports"
-cp "$WORKSPACE/chp.md" "$WORKSPACE/checkpoints/chp_${TIMESTAMP}.md"
+do_cmd mkdir -p "$WORKSPACE/checkpoints" "$WORKSPACE/reports"
+do_cmd cp "$WORKSPACE/chp.md" "$WORKSPACE/checkpoints/chp_${TIMESTAMP}.md"
 backup_file "$WORKSPACE/chp.md" "$BACKUP_DIR/chp.md" "chp.md (свежий)"
 backup_dir "$WORKSPACE/reports" "$BACKUP_DIR/reports" "Technical Reports (Stenograms)"
 
@@ -109,7 +158,7 @@ echo -e "  ${GREEN}✅ Стенограмма сохранена в reports/${NC
 
 # Архив
 ARCHIVE="$BACKUP_ROOT/antigravity_backup_${TIMESTAMP}.tar.gz"
-tar -czf "$ARCHIVE" -C "$BACKUP_ROOT" "$DATE_SHORT" 2>/dev/null
+do_cmd tar -czf "$ARCHIVE" -C "$BACKUP_ROOT" "$DATE_SHORT" 2>/dev/null
 ARCHIVE_SIZE=$(stat -f%z "$ARCHIVE" 2>/dev/null || echo "?")
 echo -e "  ${GREEN}📦 Архив: $(basename "$ARCHIVE") (${ARCHIVE_SIZE} bytes)${NC}"
 
@@ -118,7 +167,7 @@ ARCHIVE_COUNT=$(find "$BACKUP_ROOT" -name "antigravity_backup_*.tar.gz" -type f 
 if (( ARCHIVE_COUNT > 5 )); then
     EXCESS=$((ARCHIVE_COUNT - 5))
     find "$BACKUP_ROOT" -name "antigravity_backup_*.tar.gz" -type f | sort | head -n "$EXCESS" | while read -r old; do
-        rm -f "$old" 2>/dev/null
+        do_cmd rm -f "$old" 2>/dev/null
     done
 fi
 
@@ -129,36 +178,36 @@ echo -e "  ${BOLD}🧹 ФАЗА 2: Чистка мусора...${NC}"
 
 # .DS_Store
 ds=$(find "$WORKSPACE" -name ".DS_Store" -type f 2>/dev/null | wc -l | tr -d ' ')
-find "$WORKSPACE" -name ".DS_Store" -type f -delete 2>/dev/null || true
+do_cmd find "$WORKSPACE" -name ".DS_Store" -type f -delete 2>/dev/null || true
 echo -e "  ${RED}🗑️  .DS_Store: $ds файлов${NC}"
 
 # __pycache__
 pyc=$(find "$WORKSPACE" -name "__pycache__" -type d 2>/dev/null | wc -l | tr -d ' ')
-find "$WORKSPACE" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+do_cmd find "$WORKSPACE" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
 echo -e "  ${RED}🗑️  __pycache__: $pyc директорий${NC}"
 
 # .pyc
 pyc_files=$(find "$WORKSPACE" -name "*.pyc" -type f 2>/dev/null | wc -l | tr -d ' ')
-find "$WORKSPACE" -name "*.pyc" -type f -delete 2>/dev/null || true
+do_cmd find "$WORKSPACE" -name "*.pyc" -type f -delete 2>/dev/null || true
 echo -e "  ${RED}🗑️  .pyc: $pyc_files файлов${NC}"
 
 # Старые browser recordings (>7 дней)
 if [[ -d "$ANTIGRAVITY/browser_recordings" ]]; then
     old_rec=$(find "$ANTIGRAVITY/browser_recordings" -type f -mtime +7 2>/dev/null | wc -l | tr -d ' ')
-    find "$ANTIGRAVITY/browser_recordings" -type f -mtime +7 -delete 2>/dev/null || true
+    do_cmd find "$ANTIGRAVITY/browser_recordings" -type f -mtime +7 -delete 2>/dev/null || true
     echo -e "  ${RED}🗑️  Browser recordings (>7d): $old_rec файлов${NC}"
 fi
 
 # Старые html_artifacts (>7 дней)
 if [[ -d "$ANTIGRAVITY/html_artifacts" ]]; then
     old_html=$(find "$ANTIGRAVITY/html_artifacts" -type f -mtime +7 2>/dev/null | wc -l | tr -d ' ')
-    find "$ANTIGRAVITY/html_artifacts" -type f -mtime +7 -delete 2>/dev/null || true
+    do_cmd find "$ANTIGRAVITY/html_artifacts" -type f -mtime +7 -delete 2>/dev/null || true
     echo -e "  ${RED}🗑️  HTML artifacts (>7d): $old_html файлов${NC}"
 fi
 
 # tmp файлы
 tmp_cleaned=$(find /tmp -maxdepth 1 -user "$(whoami)" -type f -mtime +1 2>/dev/null | wc -l | tr -d ' ')
-find /tmp -maxdepth 1 -user "$(whoami)" -type f -mtime +1 -delete 2>/dev/null || true
+do_cmd find /tmp -maxdepth 1 -user "$(whoami)" -type f -mtime +1 -delete 2>/dev/null || true
 echo -e "  ${RED}🗑️  /tmp (>1d): $tmp_cleaned файлов${NC}"
 
 # Чистка tmp/ в проекте (Document Governance)
@@ -186,18 +235,18 @@ echo ""
 echo -e "  ${BOLD}🚀 ФАЗА 3: Синхронизация с GitHub...${NC}"
 
 if [[ ! -d "$BACKUP_ROOT/.git" ]]; then
-    git -C "$BACKUP_ROOT" init
+    do_cmd git -C "$BACKUP_ROOT" init
     echo -e "  ${YELLOW}⚠️  Git repo инициализирован в $BACKUP_ROOT${NC}"
 fi
 
-git -C "$BACKUP_ROOT" add .
-git -C "$BACKUP_ROOT" commit -m "🧠 Antigravity Brain Sync: $TIMESTAMP" --author="Antigravity AI <ai@antigravity.net>" 2>/dev/null || echo -e "  ${YELLOW}ℹ️  Нет изменений для коммита${NC}"
+do_cmd git -C "$BACKUP_ROOT" add .
+do_cmd git -C "$BACKUP_ROOT" commit -m "🧠 Antigravity Brain Sync: $TIMESTAMP" --author="Antigravity AI <ai@antigravity.net>" 2>/dev/null || echo -e "  ${YELLOW}ℹ️  Нет изменений для коммита${NC}"
 
 # Пытаемся запушить, если есть remote
 GITHUB_OK=false
 if git -C "$BACKUP_ROOT" remote | grep -q "origin"; then
     echo -e "  ${CYAN}📤 Пушим в GitHub...${NC}"
-    if env -u http_proxy -u https_proxy -u all_proxy \
+    if do_cmd env -u http_proxy -u https_proxy -u all_proxy \
            -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
            git -C "$BACKUP_ROOT" push origin main; then
         GITHUB_OK=true
@@ -220,7 +269,7 @@ NAS_OK=false
 
 if [[ -d "$NAS_SHARE" ]]; then
     if [[ -f "$NAS_SYNC_SCRIPT" ]]; then
-        bash "$NAS_SYNC_SCRIPT" --cleanup && NAS_OK=true
+        do_cmd bash "$NAS_SYNC_SCRIPT" --cleanup && NAS_OK=true
     else
         echo -e "  ${YELLOW}⚠️  Скрипт sync_to_nas.sh не найден${NC}"
     fi
@@ -248,7 +297,7 @@ fi
 
 if [[ -d "$EXT_MOUNT" ]]; then
     if [[ -f "$EXTERNAL_SYNC_SCRIPT" ]]; then
-        bash "$EXTERNAL_SYNC_SCRIPT"
+        do_cmd bash "$EXTERNAL_SYNC_SCRIPT"
         echo -e "  ${GREEN}✅ Внешний диск синхронизирован: $EXT_MOUNT${NC}"
     else
         echo -e "  ${YELLOW}⚠️  Скрипт sync_to_external.sh не найден${NC}"
@@ -264,17 +313,27 @@ fi
 # ========================= ИТОГ ==============================================
 
 echo ""
-echo -e "${BOLD}${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${BOLD}${GREEN}  ✅  FINISH-DAY ВЫПОЛНЕН${NC}"
-echo -e "${BOLD}${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+if [[ "$APPLY" -eq 1 ]]; then
+  echo -e "${BOLD}${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${BOLD}${GREEN}  ✅  FINISH-DAY ВЫПОЛНЕН${NC}"
+  echo -e "${BOLD}${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+else
+  echo -e "${BOLD}${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${BOLD}${YELLOW}  СУХОЙ ПРОГОН ЗАВЕРШЁН — НИЧЕГО НЕ ИЗМЕНЕНО${NC}"
+  echo -e "${BOLD}${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+fi
 echo ""
-echo -e "  ${BOLD}📍 Чекпоинт:${NC}   $WORKSPACE/chp.md"
-echo -e "  ${BOLD}📦 Бэкап:${NC}      $ARCHIVE"
+echo -e "  ${BOLD}📍 Чекпоинт:${NC}   $WORKSPACE/chp.md$([[ "$APPLY" -eq 1 ]] || echo ' (dry-run: не менялся)')"
+echo -e "  ${BOLD}📦 Бэкап:${NC}      $ARCHIVE$([[ "$APPLY" -eq 1 ]] || echo ' (dry-run: не создан)')"
 echo ""
-echo -e "  ${BOLD}Уровни резервирования:${NC}"
-echo -e "    🌐 GitHub      → $([[ "$GITHUB_OK" == 'true' ]] && echo '✅ синхронизирован' || echo '⚠️  не синхронизирован')"
-echo -e "    🏠 NAS DS720   → $([[ \"$NAS_OK\" == 'true' ]] && echo '✅ синхронизирован' || echo '⚠️  недоступен')"
-echo -e "    💾 Внешний диск→ $([[ -d \"$EXT_MOUNT\" ]] && echo '✅ синхронизирован' || echo '⚠️  не подключён')"
+if [[ "$APPLY" -eq 0 ]]; then
+  echo -e "  ${YELLOW}Уровни резервирования: не проверялись (dry-run)${NC}"
+else
+  echo -e "  ${BOLD}Уровни резервирования:${NC}"
+  echo -e "    🌐 GitHub      → $([[ "$GITHUB_OK" == 'true' ]] && echo '✅ синхронизирован' || echo '⚠️  не синхронизирован')"
+  echo -e "    🏠 NAS DS720   → $([[ \"$NAS_OK\" == 'true' ]] && echo '✅ синхронизирован' || echo '⚠️  недоступен')"
+  echo -e "    💾 Внешний диск→ $([[ -d \"$EXT_MOUNT\" ]] && echo '✅ синхронизирован' || echo '⚠️  не подключён')"
+fi
 echo ""
 
 # ========================= ФАЗА 6: TEST-RESTORE (метрика успешности) =====
@@ -284,12 +343,16 @@ echo -e "  ${BOLD}✅ ФАЗА 6: Test-restore (пробное восстано�
 
 TEST_RESTORE_SCRIPT="$WORKSPACE/tools/backup/test_restore.sh"
 if [[ -f "$TEST_RESTORE_SCRIPT" ]]; then
-    bash "$TEST_RESTORE_SCRIPT" 2>&1 | tail -3
+    do_cmd bash "$TEST_RESTORE_SCRIPT" 2>&1 | tail -3
 else
     echo -e "  ${YELLOW}⚠️  test_restore.sh не найден — метрика недоступна${NC}"
 fi
 
 echo ""
-echo -e "  ${BOLD}${YELLOW}👉 Для чистого старта: нажми Cmd+N в Antigravity${NC}"
-echo -e "  ${BOLD}${YELLOW}   Затем напиши: \"Прочитай chp.md и продолжим\"${NC}"
+if [[ "$APPLY" -eq 1 ]]; then
+  echo -e "  ${BOLD}${YELLOW}👉 Для чистого старта: нажми Cmd+N в Antigravity${NC}"
+  echo -e "  ${BOLD}${YELLOW}   Затем напиши: \"Прочитай chp.md и продолжим\"${NC}"
+else
+  echo -e "  ${BOLD}${YELLOW}👉 Чтобы выполнить по-настоящему: bash tools/ops/finish_day.sh --apply${NC}"
+fi
 echo ""
