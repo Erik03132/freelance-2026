@@ -100,11 +100,13 @@ HOME_VERIFY = """<meta name="google-site-verification" content="GaN9-C8adDGu08r6
 # Общие стили прода: липкая шапка и единый подвал. Вставляются в каждую страницу
 # последним блоком <style>, поэтому перекрывают постраничные правила.
 SITE_CSS = """<style id="site-shared">
-/* шапка: всегда сверху при скролле */
-header.topbar{position:sticky;top:0;z-index:60;background:rgba(243,239,231,.9);-webkit-backdrop-filter:saturate(160%) blur(14px);backdrop-filter:saturate(160%) blur(14px)}
-header.topbar::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:100vw;transform:translateX(-50%);background:rgba(243,239,231,.9);-webkit-backdrop-filter:saturate(160%) blur(14px);backdrop-filter:saturate(160%) blur(14px);z-index:-1;pointer-events:none}
-[id]{scroll-margin-top:104px}
-html,body{overflow-x:hidden}
+/* шапка: фиксированная, всегда сверху */
+header.topbar{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(243,239,231,.9);-webkit-backdrop-filter:saturate(160%) blur(14px);backdrop-filter:saturate(160%) blur(14px);border-bottom:1px solid var(--line,#DED7CC);padding:14px max(64px,calc((100vw - 1240px)/2))}
+body{padding-top:80px}
+[id]{scroll-margin-top:96px}
+/* CTA: основная кнопка Telegram — бежевая, а не терракотовая */
+.cta .btn--signal{background:var(--line,#DED7CC);color:var(--ink,#1f2937);border-color:var(--line,#DED7CC)}
+.cta .btn--signal:hover{background:var(--paper,#F3EFE7)}
 /* подвал */
 footer{background:var(--surface,#fff);color:var(--ink,#1f2937);border-top:1px solid var(--line,#DED7CC);padding:56px 0 40px}
 footer .f-grid{display:grid;grid-template-columns:5fr 4fr 3fr;gap:56px 40px}

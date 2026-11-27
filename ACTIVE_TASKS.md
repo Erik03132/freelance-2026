@@ -2654,9 +2654,41 @@ Motion; для рекламных блоков — Motion + 9:16 + `Voice: none`
       настоящий «movie-design» — отдельная итерация в 3D-режиме. Fresh-eyes
       subagent-ревью контакт-листа не запускал — смоук принимается как Verified
       по `qa.py` + ручному просмотру.
-- [ ] **VEX-3 (обучение/систематизация):** разобрать 3 движка на одном брифе
-      (Motion vs Illustrated vs 3D), замерить токены/время/качество, зафиксировать
-      «house style» и чек-лист анти-slide в `docs/cases/`, пригодный для рекламы.
-- [ ] **VEX-4 (границы):** без `GEMINI_API_KEY` и платного TTS/Lyria (ADR-007);
-      web-медиа только с атрибуцией, клиентские данные/персданные — обезличены;
-      external-загрузки — по ADR-002 (прокси только при реальной блокировке).
+- [x] **VEX-3/VEX-4 — отложено по решению Игоря (27.11.2026):** оценка
+      «троечка с минусом, потенциал есть». Вся фича перенесена в
+      `docs/IMPROVEMENT_BACKLOG.md` как **SYS-003** с вердиктом, списком
+      «что взять при возврате» и условием пересмотра. В ACTIVE_TASKS больше
+      не держим: возврат только при конкретной задаче анимированной рекламы.
+      Границы на будущее (без Gemini-ключа, обезличенные данные, ADR-002)
+      перенесены в SYS-003.
+
+## 🗂 OBS — Obsidian Connectors: разбор заявления (дроп 27.11.2026)
+
+**Проверка (src):** официальная [Obsidian Help / Connectors](https://obsidian.md/help/connectors)
++ независимый разбор [Sulat 26.11](https://news.sulat.com/2026/11/26/obsidian-connectors-agents/).
+Заявление в целом верное, с тремя уточнениями: (1) это **не сервер и не MCP**, а
+7 open-source навыков (`obsidian-markdown`, `obsidian-bases`, `json-canvas`,
+`obsidian-cli`, `obsidian-headless`, `defuddle`, `knap`) — know-how, а не доступ;
+(2) CLI требует запущенного десктопа Obsidian и включённого CLI, Headless —
+Node 22 + подписки Sync/Publish; (3) «обмен контекстом» = общие файлы, которые
+агент должен прочитать, а не автоматическая передача памяти. Список агентов
+шире заявленного: Claude, ChatGPT/Dots/Codex, Antigravity, Cursor, GitHub
+Copilot, Grok Bot, Hermes, Kiro, Muse, **OpenCode**. Канбан — через Bases/Canvas,
+не отдельный навык. Приватность: Obsidian не имеет доступа к заметкам, но
+прочитанное агентом уходит в модель — 중요 для NDA/клиентских данных.
+
+**Вердикт: принято частично — базовый паттерн у нас уже работает, берём только
+форматные навыки после аудита.** У нас уже есть `vault/` (md-заметки, digest/source,
+`vault/CLAUDE.md`) и агенты, которые читают/пишут файлы напрямую; claude-mem
+остаётся отдельным слоем памяти и коннекторами не заменяется.
+
+- [ ] **OBS-1 (до установки):** ai-defender аудит `obsidianmd/obsidian-skills`
+      (внешние инструкции = surface prompt injection); поставить только
+      форматные навыки `obsidian-markdown`/`obsidian-bases`/`json-canvas`,
+      не `obsidian-cli` (широкий доступ к running app).
+- [ ] **OBS-2 (пилот):** прогнать 1–2 наши vault-заметки через навыки, сверить
+      корректность wikilinks/Bases/Canvas и соблюдение `vault/CLAUDE.md`
+      (frontmatter `type/tags/status/updated`); без клиентских/NDA-заметок.
+- [ ] **OBS-3 (граница):** не смешивать vault и SSoT (`ACTIVE_TASKS.md`,
+      `chp.md`); любые записи агентов в vault — по правилу propose→approve;
+      память `claude-mem` не дублировать в Obsidian без явного решения.
