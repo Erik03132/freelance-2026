@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1590" height="576" viewBox="0 0 1590 576">
+  <defs>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0" result="gray"/>
+      <feComponentTransfer in="gray" result="soft"><feFuncA type="linear" slope="0.06"/></feComponentTransfer>
+      <feComposite in="soft" in2="SourceGraphic" operator="over"/>
+    </filter>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7F3EC"/><stop offset="0.55" stop-color="#F3EFE7"/><stop offset="1" stop-color="#E7DFD3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1590" height="576" fill="url(#paper)"/>
+  <g opacity="0.45" stroke="#D8CEC0" stroke-width="1" fill="none">
+    <path d="M60 470 C 250 420, 380 500, 590 450 S 850 400, 1050 430"/>
+    <path d="M140 120 C 280 160, 390 96, 520 130"/>
+  </g>
+  <rect width="1590" height="576" filter="url(#grain)" fill="#000000" opacity="0.03"/>
+  <rect x="1180" y="0" width="410" height="576" fill="#B95433"/>
+  <text x="90" y="96" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" letter-spacing="5" fill="#23211F">РАЗБОР</text>
+  <text x="84" y="372" font-family="Arial, Helvetica, sans-serif" font-size="236" font-weight="800" letter-spacing="-6" fill="#23211F">ВЫБОР</text>
+  <rect x="90" y="404" width="1060" height="8" fill="#B95433"/>
+  <rect x="1180" y="404" width="410" height="8" fill="#F7F3EC"/>
+  <text x="90" y="470" font-family="Arial, Helvetica, sans-serif" font-size="34" fill="#3D3833">агент или чат-бот: что брать бизнесу</text>
+  <text x="1385" y="310" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="190" font-weight="800" letter-spacing="-4" fill="#FFFFFF">2</text>
+  <text x="1385" y="364" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600" letter-spacing="6" fill="#FFFFFF">РОЛИ</text>
+</svg>
