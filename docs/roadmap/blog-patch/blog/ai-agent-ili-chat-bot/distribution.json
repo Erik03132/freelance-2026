@@ -20,17 +20,19 @@
     {
       "id": "telegram",
       "name": "Telegram",
-      "date": "2026-12-03",
-      "status": "planned",
-      "url": "",
+      "date": "2026-11-27",
+      "status": "published",
+      "url": "https://t.me/aibureau_official",
+      "note": "Опубликовано по просьбе Игоря 27.11.2026, раньше плановой даты 03.12. Текст — social/telegram.md, превью ведёт на канон с UTM.",
       "utm": "?utm_source=telegram&utm_medium=post&utm_campaign=ai-agent-vs-chatbot"
     },
     {
       "id": "vk",
       "name": "VK",
       "date": "2026-12-03",
-      "status": "planned",
+      "status": "draft_ready",
       "manual": true,
+      "note": "Адаптация подготовлена в social/vk.md, content_lint 0 предупреждений. Публикует владелец вручную.",
       "url": "",
       "utm": "?utm_source=vk&utm_medium=post&utm_campaign=ai-agent-vs-chatbot"
     },
@@ -38,8 +40,9 @@
       "id": "dzen",
       "name": "Дзен",
       "date": "2026-12-03",
-      "status": "planned",
+      "status": "deferred",
       "manual": true,
+      "note": "По решению Игоря 27.11.2026 Дзен пока не подключаем: на аккаунте только канал ai-traffic-pro.",
       "url": "",
       "utm": "?utm_source=dzen&utm_medium=post&utm_campaign=ai-agent-vs-chatbot"
     }
