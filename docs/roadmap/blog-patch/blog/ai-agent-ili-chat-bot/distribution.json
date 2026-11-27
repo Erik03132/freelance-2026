@@ -1,0 +1,46 @@
+{
+  "article": {
+    "slug": "ai-agent-ili-chat-bot",
+    "canonical": "https://ai-bureau.online/blog/ai-agent-ili-chat-bot/",
+    "title": "AI-агент или чат-бот: в чём разница и что брать бизнесу",
+    "date": "2026-12-01",
+    "author": "Игорь Васин"
+  },
+  "rule": "Канон — страница на ai-bureau.online. Площадки получают адаптацию со ссылкой на канон, не полную копию.",
+  "platforms": [
+    {
+      "id": "habr",
+      "name": "Хабр",
+      "date": "2026-12-01",
+      "status": "planned",
+      "url": "",
+      "utm": "?utm_source=habr&utm_medium=article&utm_campaign=ai-agent-vs-chatbot"
+    },
+    {
+      "id": "telegram",
+      "name": "Telegram",
+      "date": "2026-12-03",
+      "status": "planned",
+      "url": "",
+      "utm": "?utm_source=telegram&utm_medium=post&utm_campaign=ai-agent-vs-chatbot"
+    },
+    {
+      "id": "vk",
+      "name": "VK",
+      "date": "2026-12-03",
+      "status": "planned",
+      "manual": true,
+      "url": "",
+      "utm": "?utm_source=vk&utm_medium=post&utm_campaign=ai-agent-vs-chatbot"
+    },
+    {
+      "id": "dzen",
+      "name": "Дзен",
+      "date": "2026-12-03",
+      "status": "planned",
+      "manual": true,
+      "url": "",
+      "utm": "?utm_source=dzen&utm_medium=post&utm_campaign=ai-agent-vs-chatbot"
+    }
+  ]
+}
