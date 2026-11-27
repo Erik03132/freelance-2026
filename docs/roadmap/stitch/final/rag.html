@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Поиск по документам (RAG) — отдельная услуга — AI Bureau</title>
+<meta name="description" content="Поиск по документам как отдельная услуга: ответ со ссылкой на фрагмент, инвентаризация источников, eval-набор, работа в вашем контуре. Пилот за 3–6 недель.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3EFE7;--surface:#fff;--ink:#1f2937;--soft:#4A4640;--muted:#6E675F;--line:#DED7CC;--acc:#9e2a2b;--accsoft:#ffffff;--dark:#1f2937;--max:1240px;--r:16px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.55 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--surface);padding:10px 16px;z-index:10}
+.skip:focus{left:12px}
+.wrap{width:min(calc(100% - 128px),var(--max));margin:0 auto}
+.mono{font:500 11px/1.2 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.eyebrow{display:block;margin-bottom:18px}
+h1,h2,h3,h4{margin:0;letter-spacing:-.03em;line-height:1.06}
+h1{font-size:clamp(40px,4.3vw,56px);font-weight:700;max-width:900px}
+h2{font-size:clamp(28px,3.8vw,46px);font-weight:600}
+h3{font-size:20px;font-weight:600;letter-spacing:-.015em;line-height:1.2}
+h4{font-size:16px;font-weight:600;letter-spacing:-.01em}
+p{margin:0}
+section{padding:120px 0;border-top:1px solid var(--line)}
+section.first{border-top:0;padding-top:72px}
+main > .wrap + section{padding-top:56px}
+.lede{color:var(--soft);font-size:18px;max-width:680px;margin-top:22px}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:40px;margin-bottom:32px}
+.section-head p{color:var(--muted);max-width:420px;font-size:15px}
+.intro{color:var(--soft);max-width:820px;margin-bottom:30px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:100px;background:var(--acc);color:#fff;font-weight:600;font-size:15px;border:0}
+.row{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line)}
+.brand{font-weight:700;letter-spacing:.12em;font-size:14px}
+.brand span{display:inline-block;width:9px;height:9px;background:var(--acc);margin-right:10px}
+nav{display:flex;gap:24px;font-size:14px;color:var(--soft)}
+.top-link{font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc)}
+.crumb{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:34px}
+.badge{display:inline-block;background:#fff;border:1px solid var(--line);color:var(--acc);padding:10px 14px;border-radius:100px;font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;margin-bottom:20px}
+.hero-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:48px;align-items:start}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:24px}
+.metric{padding:24px 22px;border-right:1px solid var(--line)}
+.metric:last-child{border-right:0}
+.metric b{display:block;font-size:32px;letter-spacing:-.04em}
+.metric span{color:var(--muted);font-size:13px}
+.brief{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:32px}
+.brief-title{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-top:14px}
+.metric-big{font-size:44px;font-weight:700;letter-spacing:-.04em;line-height:1.1;margin-top:22px}
+.metric-big span{display:block;font:500 11px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.brief-block{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.brief-block p{color:var(--soft);font-size:14px;margin-top:10px}
+.brief ol{margin:18px 0 0;padding:0;list-style:none}
+.brief li{display:flex;gap:14px;padding:12px 0;border-top:1px solid var(--line);font-size:14px}
+.brief li span{font:500 12px/1.5 "JetBrains Mono",ui-monospace,monospace;color:var(--acc)}
+.brief-note{margin-top:18px;font-size:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:36px}
+.card h3{margin:18px 0 10px}
+.card p{color:var(--soft);font-size:14px}
+.num{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--acc)}
+.ico{width:32px;height:32px;border-radius:6px;background:#F3EFE7;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.ico svg{width:16px;height:16px;display:block}
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.art-num{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.cell-ico{display:flex;align-items:center;gap:12px}
+.aeo{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:24px 26px;margin-top:28px;color:var(--soft);font-size:16px;max-width:900px}
+.problem .line{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.problem .line span{display:block;font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc);margin-bottom:5px}
+.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.detail{border-top:2px solid var(--acc);padding-top:18px}
+.detail b{display:block;font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--acc);margin-bottom:6px}
+.detail .term{font:500 11px/1.4 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.detail h3{font-size:18px}
+.detail dl{margin:16px 0 0}
+.detail dt{font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc)}
+.detail dd{margin:3px 0 12px;color:var(--soft);font-size:13px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);background:var(--surface);border-radius:var(--r)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:16px 20px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
+td b{font-size:15px}
+tr:last-child td{border-bottom:0}
+.tint{background:#fff;border-top:1px solid var(--line)}
+.artifact{display:grid;grid-template-columns:52px 1fr;gap:18px;padding:18px 0;border-top:1px solid var(--line)}
+.artifact:last-child{border-bottom:1px solid var(--line)}
+.artifact b{font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--acc);padding-top:4px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:32px}
+.panel h3{margin-bottom:14px}
+.panel .mono{display:block;margin-bottom:12px}
+.panel ul{margin:0;padding-left:18px;color:var(--soft);font-size:14px}
+.panel li{margin-bottom:10px}
+.dark{background:var(--dark);color:#ffffff;border-top:1px solid var(--line)}
+.dark .mono,.dark .num{color:#cbd5e1}
+.dark b{color:#ffffff}
+.dark h2{max-width:760px}
+.dark p{color:#cbd5e1}
+.dark .detail p,.dark .detail dd{color:#cbd5e1}
+.dark .detail b{color:#ffffff}
+.dark .detail dt{color:#cbd5e1}
+.dark .detail{border-top-color:var(--line)}
+.dark .detail .term{color:#cbd5e1}
+.dark .intro{color:#cbd5e1}
+.dark .table-wrap{background:var(--dark);border-color:var(--line)}
+.dark th{background:var(--dark);color:#cbd5e1}
+.dark td{border-bottom-color:var(--line)}
+.dark td b{color:#ffffff}
+.dark .note{color:#cbd5e1}
+.dark .card,.dark .panel{background:var(--dark);border-color:var(--line)}
+.dark .card h3,.dark .panel h3{color:#ffffff}
+.dark .card p,.dark .panel p,.dark .panel li{color:#cbd5e1}
+.dark .card .num,.dark .card-head .num{color:#cbd5e1}
+.dark .card .ico{background:var(--acc);color:#ffffff}
+.hero-notes{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.hero-notes span{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:100px;padding:8px 12px;font-size:12px;color:var(--soft)}
+.hero-notes svg{width:14px;height:14px;stroke:var(--acc)}
+.dark .artifact{border-top-color:var(--line)}
+.dark .artifact:last-child{border-bottom-color:var(--line)}
+.dark .artifact b{color:#ffffff}
+.dark .artifact .ico{background:var(--acc);color:#ffffff}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:100px;padding:12px 20px;font-size:14px}
+.note{color:var(--muted);font-size:14px;margin-top:20px;max-width:840px}
+details{border-top:1px solid var(--line)}
+details:last-child{border-bottom:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;padding:20px 0;font-weight:600;display:flex;justify-content:space-between;gap:20px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--acc);font:500 20px/1 "JetBrains Mono",ui-monospace,monospace}
+details[open] summary::after{content:"–"}
+details p{color:var(--soft);padding-bottom:20px;max-width:860px}
+.btn--beige{background:var(--line);color:var(--ink)}
+.cta{background:var(--dark);color:#ffffff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cta .mono{color:#cbd5e1}
+.cta p{color:#cbd5e1;margin-top:18px;max-width:560px}
+.cta .btn{background:var(--acc);color:#ffffff}
+footer{background:var(--dark);border-top:1px solid var(--line);padding:30px 0;color:var(--paper)}
+.footer-row{display:flex;justify-content:space-between;gap:24px;font-size:13px;color:#cbd5e1;flex-wrap:wrap}
+.footer-row a{color:var(--line);text-decoration:underline}
+@media(max-width:900px){nav{display:none}.grid,.grid-4,.detail-grid,.metrics{grid-template-columns:1fr 1fr}.hero-grid{grid-template-columns:1fr}.section-head{display:block}.section-head p{margin-top:16px}section{padding:60px 0}}
+@media(max-width:640px){.wrap{width:min(calc(100% - 32px),var(--max))}.grid,.grid-2,.grid-4,.detail-grid,.metrics{grid-template-columns:1fr}.metric{border-right:0;border-bottom:1px solid var(--line)}.metric:last-child{border-bottom:0}.row .btn{width:100%}.footer-row{flex-direction:column}h1{font-size:38px}}
+</style>
+<style>.detail-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-bottom:8px}.detail-meta b,.detail-meta .term{margin-bottom:0}</style></head>
+<body>
+<a class="skip" href="#main">К содержимому</a>
+<div class="wrap">
+<header class="topbar">
+<a class="brand" href="home.html"><span></span>AI BUREAU</a>
+<nav aria-label="Навигация"><a href="home.html#services">Услуги</a><a href="home.html#cases">Кейсы</a><a href="blog.html">Блог</a><a href="home.html#contact">Контакты</a></nav>
+<a class="top-link" href="#request">Обсудить задачу</a>
+</header>
+<main id="main">
+
+<section class="first">
+<div class="crumb">Главная / Услуги / Поиск по документам</div>
+<div class="hero-grid">
+<div>
+<span class="badge">ЗНАНИЯ + AI</span>
+<h1>Поиск по документам на базе RAG: <br>ответы со ссылкой на источник</h1>
+<p class="lede">Ваши регламенты и инструкции отвечают на вопросы сотрудников без перебора папок. Каждый ответ ведёт к фрагменту, который можно открыть и проверить. Пилот показывает, насколько это работает на ваших данных, а не на демонстрационном наборе.</p>
+<div class="row"><a class="btn" href="#request">Обсудить задачу</a></div>
+<div class="hero-notes">
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14 2H6v20h12V8z"/><polyline points="14 2 14 8 20 8"/></svg>Ответ со ссылкой на файл</span>
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>Честный отказ без факта</span>
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Данные в вашем контуре</span>
+</div>
+</div>
+<aside class="brief" aria-label="Параметры услуги">
+<span class="mono">[ ПЕРВЫЙ ШАГ ]</span>
+<div class="brief-title">Что будет после разбора</div>
+<div class="metric-big">3–6 нед.<span>до первого теста</span></div>
+<div class="brief-block"><span class="mono">КОМУ ПОДХОДИТ</span><p>Командам, чьи знания лежат в PDF, Word и Confluence, а ответы ищут вручную.</p></div>
+<ol>
+<li><span>01</span><div>Реестр источников с владельцами и статусом.</div></li>
+<li><span>02</span><div>Ответы со ссылками на контрольной выборке.</div></li>
+<li><span>03</span><div>Регламент обновлений и передача команде.</div></li>
+</ol>
+<p class="brief-note">Стоимость — по запросу после разбора источников и прав доступа.</p>
+</aside>
+</div>
+</section>
+
+<div class="wrap">
+<div class="metrics" aria-label="Параметры работы AI Bureau">
+<div class="metric"><b>6</b><span>направлений внедрения</span></div>
+<div class="metric"><b>4</b><span>этапа от аудита до масштаба</span></div>
+<div class="metric"><b>2–4</b><span>недели на пилот</span></div>
+<div class="metric"><b>3–6</b><span>месяцев на внедрение</span></div>
+</div>
+</div>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[01 / ПРОБЛЕМЫ]</span><h2>Как работает RAG</h2></div><p>Три сбоя, из-за которых знания есть, а ответа нет.</p></div>
+<p class="aeo">RAG (retrieval-augmented generation — генерация по найденным фрагментам) работает так: система ищет нужные места в ваших файлах и собирает ответ со ссылкой на источник. Сотрудник задаёт вопрос обычным языком и видит, откуда взята каждая часть. Первый контур — 3–6 недель. Точность проверяем на вашей выборке, а без факта система отвечает честным отказом.</p>
+<div class="grid" style="margin-top:28px">
+<article class="card problem"><span class="num">01</span><h3>Знания есть, доступа к ним нет</h3><div class="line"><span>Симптом</span><p>Регламент лежит в Confluence, инструкция — в PDF, выписка — в почте. Сотрудник открывает пять вкладок и всё равно уточняет у коллеги.</p></div><div class="line"><span>Цена ошибки</span><p>Каждое уточнение отвлекает двух людей: спросившего и того, кто знает предмет. За смену набираются десятки таких пауз, а учитывают их только в разговорах.</p></div><div class="line"><span>Последствие</span><p>Новый сотрудник учится по устным объяснениям, а не по актуальным текстам. Найденная им версия может отличаться от рабочей.</p></div></article>
+<article class="card problem"><span class="num">02</span><h3>Поиск по словам не находит смысл</h3><div class="line"><span>Симптом</span><p>В вопросе человек пишет «как оформить отпуск», а в документе стоит «порядок предоставления отпуска». Ключевое совпадение есть не всегда, и выдача пуста.</p></div><div class="line"><span>Цена ошибки</span><p>Сотрудник переформулирует запрос несколько раз, затем сдаётся и идёт в чат к специалисту. Время уходит на перебор формулировок, а не на работу.</p></div><div class="line"><span>Последствие</span><p>База знаний кажется бесполезной, хотя тексты в ней правильные. Её перестают обновлять, и разрыв между файлами и реальностью растёт.</p></div></article>
+<article class="card problem"><span class="num">03</span><h3>Ответ без источника нельзя проверить</h3><div class="line"><span>Симптом</span><p>Скопированный абзац приходит без названия файла, раздела и даты. Установить, актуальна ли формулировка, невозможно.</p></div><div class="line"><span>Цена ошибки</span><p>Ошибка живёт до первой проверки и может попасть в клиентское письмо или внутренний регламент. Исправляют её позже, когда последствия уже наступили.</p></div><div class="line"><span>Последствие</span><p>Доверие к автоматическим ответам падает даже там, где они верны. Команда возвращается к ручному поиску и перестаёт пользоваться решением.</p></div></article>
+</div>
+</section>
+
+<section class="dark">
+<div class="wrap">
+<span class="mono eyebrow">[02 / КАК ЭТО РАБОТАЕТ]</span>
+<h2>Путь до рабочего поиска</h2>
+<p class="intro">Четыре этапа. У каждого — входные данные, артефакт, участники и критерий готовности. Сроки даны как ориентир до разбора ваших материалов.</p>
+<div class="detail-grid">
+<div class="detail"><div class="detail-meta"><b>01</b><div class="term">1 неделя</div></div><h3>Инвентаризация источников</h3><dl><dt>Входные данные</dt><dd>Список хранилищ, права доступа, 10–15 типовых вопросов от команды.</dd><dt>Артефакт</dt><dd>Реестр источников с владельцами, форматами и статусом актуальности.</dd><dt>Кто участвует</dt><dd>Аналитик, владелец базы знаний, администратор доступа.</dd><dt>Критерий готовности</dt><dd>По каждому источнику ясно, можно ли его индексировать и кто обновляет текст.</dd></dl></div>
+<div class="detail"><div class="detail-meta"><b>02</b><div class="term">1–2 недели</div></div><h3>Очистка и разметка</h3><dl><dt>Входные данные</dt><dd>Файлы из реестра, дубли, сканы, таблицы с несколькими листами.</dd><dt>Артефакт</dt><dd>Нормализованный текст с разметкой разделов и метаданными, короткое демо на реальных вопросах.</dd><dt>Кто участвует</dt><dd>Аналитик, редактор со стороны заказчика, владелец раздела.</dd><dt>Критерий готовности</dt><dd>Демо показывает фрагменты с верными границами и ссылкой, без обрывов таблиц.</dd></dl></div>
+<div class="detail"><div class="detail-meta"><b>03</b><div class="term">2–3 недели</div></div><h3>Проверка на выборке</h3><dl><dt>Входные данные</dt><dd>Eval-набор из реальных вопросов и эталонных ответов со ссылками.</dd><dt>Артефакт</dt><dd>Таблица метрик, журнал ошибок, список правок с приоритетом.</dd><dt>Кто участвует</dt><dd>Инженер, эксперт предметной области, владелец базы знаний.</dd><dt>Критерий готовности</dt><dd>Ответы содержат ссылку на фрагмент, а промахи разнесены по причинам.</dd></dl></div>
+<div class="detail"><div class="detail-meta"><b>04</b><div class="term">По плану</div></div><h3>Остальные базы</h3><dl><dt>Входные данные</dt><dd>Реестр, результаты пилота, согласованный регламент обновлений.</dd><dt>Артефакт</dt><dd>Расширенный индекс, пайплайн обновлений, инструкция для команды.</dd><dt>Кто участвует</dt><dd>Инженер, администратор, ответственный за базу знаний.</dd><dt>Критерий готовности</dt><dd>Новый источник подключается по регламенту без привлечения разработчика.</dd></dl></div>
+</div>
+</div>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03 / КАК РЕШАЕМ]</span><h2>Как это работает</h2></div><p>Четыре решения, из которых состоит рабочий поиск по вашим файлам.</p></div>
+<div class="grid-2">
+<article class="card"><span class="num">01</span><h3>Семантический поиск по смыслу</h3><p>Текст нарезается на фрагменты с сохранением границ разделов, затем для каждого фрагмента строится векторное представление. Запрос попадает в то же пространство, поэтому находится текст с другой формулировкой, но тем же смыслом. Кандидаты переранжируются, и только лучшие уходят в ответ. Так переформулировка вопроса перестаёт быть причиной пустой выдачи.</p></article>
+<article class="card"><span class="num">02</span><h3>Ответ с цитатой и адресом</h3><p>Каждое утверждение опирается на конкретный участок исходного текста. В карточке указаны файл, раздел, страница или номер строки. Пользователь открывает источник и сверяет формулировку за минуту. Если два фрагмента противоречат друг другу, показываются оба с датами версий.</p></article>
+<article class="card"><span class="num">03</span><h3>Свежесть и версии документов</h3><p>Индекс хранит дату файла и признак устаревшей версии. После изменения исходника переиндексируется только затронутая часть, а не весь массив. В ответе видно, когда источник последний раз менялся. Старые редакции не вытесняют актуальную формулировку в выдаче.</p></article>
+<article class="card"><span class="num">04</span><h3>Аудит запросов и правки базы</h3><p>Журнал фиксирует вопрос, выданные фрагменты и оценку пользователя. По нему видно, какие темы повторяются и где текст не закрывает потребность. Раз в месяц отчёт превращается в список правок и новых документов. База знаний живёт по регламенту, а не по принципу «кто-нибудь потом поправит».</p></article>
+</div>
+</section>
+
+<section class="dark">
+<div class="wrap">
+<span class="mono eyebrow">[03.5 / ИСТОЧНИКИ]</span>
+<h2>Источники и требования</h2>
+<p class="intro">Подключаем только те хранилища, где у команды есть права. Требования ниже проверяются на этапе инвентаризации — до начала индексации.</p>
+<div class="grid" style="margin-bottom:18px">
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span class="num">01 / PDF</span></div><h3>Договоры и регламенты</h3><p>Нужен текстовый слой или качественное распознавание. Сохраняем нумерацию страниц и указываем дату версии. Файлы без даты не попадают в пилот.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.7" y2="16.7"></line></svg></div><span class="num">02 / WORD</span></div><h3>Инструкции и политики</h3><p>Требуются единые стили заголовков. Убираем комментарии и скрытые правки до загрузки. У каждого файла должен быть ответственный владелец.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div><span class="num">03 / EXCEL</span></div><h3>Справочники и таблицы</h3><p>Именуем листы и диапазоны, сохраняем единицы измерения. Проверяем, что конвертация не разрывает таблицу на отдельные ячейки. Скрытые листы исключаем.</p></article>
+</div>
+<div class="grid">
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div><span class="num">04 / CONFLUENCE</span></div><h3>База знаний команды</h3><p>Используем актуальные страницы с единым шаблоном раздела. Указываем владельца и дату проверки. Черновики и устаревшие страницы исключаем из индексации.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="20" x2="4" y2="10"></line><line x1="10" y1="20" x2="10" y2="4"></line><line x1="16" y1="20" x2="16" y2="14"></line><line x1="22" y1="20" x2="22" y2="8"></line></svg></div><span class="num">05 / СКАНЫ С OCR</span></div><h3>Бумажные архивы</h3><p>Требуется разрешение, достаточное для распознавания. Цифры и названия вычитывает человек. В метаданных помечаем, что текст прошёл распознавание.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="num">06 / ТИКЕТЫ И ПИСЬМА</span></div><h3>Переписка и обращения</h3><p>Подключаем только по согласованному списку. Удаляем персональные данные и склеиваем ветку сообщений. Проверяем, что ответ не содержит лишнюю переписку.</p></article>
+</div>
+</div>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.6 / КАЧЕСТВО ОТВЕТА]</span><h2>Как проверяем ответ</h2></div><p>Шесть механизмов и таблица метрик, которые фиксируются в отчёте.</p></div>
+<div class="grid">
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span class="num">01</span></div><h3>Ссылка на фрагмент</h3><p>В ответе указаны файл, раздел и страница. Проверка занимает минуту. Ссылка считается валидной, только если открывает тот текст, на который опирается ответ.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.7" y2="16.7"></line></svg></div><span class="num">02</span></div><h3>Порог уверенности</h3><p>Порог задаётся до пилота и фиксируется в отчёте. При слабом совпадении формулировка не выдаётся как факт. Порог можно поднять, если команда требует более строгой проверки.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div><span class="num">03</span></div><h3>Отказ при отсутствии факта</h3><p>Если нужного текста в базе нет, пользователь видит честное сообщение об этом. Вместо догадки выдаётся список ближайших источников. Отказ считается корректным исходом, а не ошибкой.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div><span class="num">04</span></div><h3>Свежесть данных</h3><p>У каждого фрагмента хранится дата документа и признак версии. Устаревшие редакции помечаются при разметке. В карточке ответа видна дата последнего изменения источника.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="20" x2="4" y2="10"></line><line x1="10" y1="20" x2="10" y2="4"></line><line x1="16" y1="20" x2="16" y2="14"></line><line x1="22" y1="20" x2="22" y2="8"></line></svg></div><span class="num">05</span></div><h3>Eval-набор примеров</h3><p>До пилота собирается набор реальных вопросов с эталонными ответами. По нему сравниваются варианты настроек и фиксируются промахи. Набор остаётся у вас и используется при каждом обновлении.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span class="num">06</span></div><h3>Журнал и разбор ошибок</h3><p>Каждый промах разносится по причине: разметка, источник, формулировка вопроса. По итогам делается список правок с владельцем и сроком. Повторный прогон идёт на той же выборке.</p></article>
+</div>
+<div class="table-wrap" style="margin-top:28px">
+<table>
+<thead><tr><th>Метрика качества</th><th>Как считаем</th><th>Что записываем в отчёт</th></tr></thead>
+<tbody>
+<tr><td><b>Доля ответов со ссылкой</b></td><td>Число ответов с валидным фрагментом, делённое на все ответы выборки.</td><td>Значение по каждому прогону и список ответов без ссылки.</td></tr>
+<tr><td><b>Точность на eval-наборе</b></td><td>Совпадение ответа с эталоном по вопросу из набора.</td><td>Доля совпадений и разбор расхождений по причинам.</td></tr>
+<tr><td><b>Доля честных отказов</b></td><td>Случаи, где факта в базе нет и система не выдумала текст.</td><td>Число корректных отказов и проверка, что источник действительно отсутствует.</td></tr>
+<tr><td><b>Доля устаревших источников</b></td><td>Проверка дат документов, попавших в выдачу.</td><td>Список устаревших файлов и ответственный за обновление.</td></tr>
+<tr><td><b>Время ответа</b></td><td>Замер на одинаковой выборке вопросов до и после внедрения.</td><td>Медиана и максимальное значение, результат в отчёте.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="note">Пороги и целевые значения согласуем до старта. Публиковать цифры без замера на ваших данных не будем — в отчёте указываем выборку, даты и способ подсчёта.</p>
+</div>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.7 / БЕЗОПАСНОСТЬ]</span><h2>Контур, права и журналы</h2></div><p>Пять проверок, которые проходятся до подключения документов.</p></div>
+<div class="grid">
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span class="num">01 / КОНТУР</span></div><h3>Где живут данные</h3><p>Индекс и модель разворачиваем внутри вашей сети или в согласованном контуре. Внешние сервисы не получают документы без отдельного решения владельца. Схема размещения фиксируется в проектной документации до загрузки файлов.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.7" y2="16.7"></line></svg></div><span class="num">02 / ДОСТУПЫ</span></div><h3>Кто видит файл</h3><p>Поиск учитывает права пользователя: закрытый документ не попадёт в его выдачу. Права сверяются с вашим каталогом до подключения источника. Изменение прав подхватывается при следующем обновлении индекса.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div><span class="num">03 / ЛОГИ</span></div><h3>Кто и что спросил</h3><p>Журнал хранит запрос, выданные фрагменты, время и инициатора. Доступ к журналу есть у администратора. Срок хранения согласуется заранее и записывается в регламент.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div><span class="num">04 / 152-ФЗ</span></div><h3>Персональные данные</h3><p>До индексации определяем состав данных, цель обработки и правовое основание. Формулировки и документы согласуем с владельцем. Юридическую часть отдаём на проверку специалисту до публикации любых обещаний.</p></article>
+<article class="card"><div class="card-head"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="20" x2="4" y2="10"></line><line x1="10" y1="20" x2="10" y2="4"></line><line x1="16" y1="20" x2="16" y2="14"></line><line x1="22" y1="20" x2="22" y2="8"></line></svg></div><span class="num">05 / УДЕРЖАНИЕ</span></div><h3>Что остаётся после работ</h3><p>Промежуточные копии и векторные индексы удаляются по регламенту. В договоре фиксируем, что остаётся у вас, а что удаляется после приёмки. Акт удаления подписывается вместе с актом приёмки.</p></article>
+</div>
+</section>
+
+<section class="dark">
+<div class="wrap">
+<span class="mono eyebrow">[03.8 / ЧТО В ПОСТАВКЕ]</span>
+<h2>Что в поставке</h2>
+<p class="intro">Всё, что переходит под ваш контроль: компоненты, документация и обученная команда. Каждый пункт принимается отдельно.</p>
+<div>
+<div class="artifact"><div class="art-num"><b>01</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div></div><div><h4>Индекс</h4><p>Векторный индекс с метаданными источника, даты, раздела и прав доступа. Поставляется вместе со схемой полей, чтобы его можно было перенести в вашу инфраструктуру.</p></div></div>
+<div class="artifact"><div class="art-num"><b>02</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.7" y2="16.7"></line></svg></div></div><div><h4>Пайплайн</h4><p>Скрипты загрузки, очистки, разметки и переиндексации с логами каждого запуска. Поддерживает повторный прогон на той же выборке и откат к предыдущей версии индекса.</p></div></div>
+<div class="artifact"><div class="art-num"><b>03</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div></div><div><h4>API</h4><p>Метод поиска и метод получения ответа со ссылками на фрагменты. Описание запросов, форматов и кодов ошибок входит в документацию для ваших разработчиков.</p></div></div>
+<div class="artifact"><div class="art-num"><b>04</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div></div><div><h4>Админка</h4><p>Экран управления источниками, статусами обработки и правами. Видно, когда файл обновлён, кто владелец раздела и на каком этапе находится индексация.</p></div></div>
+<div class="artifact"><div class="art-num"><b>05</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="20" x2="4" y2="10"></line><line x1="10" y1="20" x2="10" y2="4"></line><line x1="16" y1="20" x2="16" y2="14"></line><line x1="22" y1="20" x2="22" y2="8"></line></svg></div></div><div><h4>Регламент</h4><p>Документ о том, кто и как обновляет источники, что делать с устаревшими версиями и как часто проводится прогон на eval-наборе. Согласуется с владельцем базы знаний.</p></div></div>
+<div class="artifact"><div class="art-num"><b>06</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg></div></div><div><h4>Обучение</h4><p>Короткая инструкция по формулировке вопросов и сессия для команды. Отдельно разбирается, как читать ответ со ссылкой и что делать при честном отказе.</p></div></div>
+<div class="artifact"><div class="art-num"><b>07</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div></div><div><h4>Передача команде</h4><p>Исходники, доступы, схема компонентов и акт приёмки. После передачи решение работает без постоянного участия подрядчика — изменения вносятся по регламенту.</p></div></div>
+<div class="artifact"><div class="art-num"><b>08</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.7" y2="16.7"></line></svg></div></div><div><h4>Промпты</h4><p>Шаблоны запросов к модели с версиями и правилами вывода ссылок. Хранятся в репозитории вместе с eval-набором, чтобы изменение можно было откатить.</p></div></div>
+<div class="artifact"><div class="art-num"><b>09</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div></div><div><h4>Мониторинг</h4><p>Дашборд по запросам, отказам, времени ответа и качеству фрагментов. Показывает, когда пора переиндексировать источник или поднять порог.</p></div></div>
+<div class="artifact"><div class="art-num"><b>10</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div></div><div><h4>Резервный сценарий</h4><p>Что делать, если поиск недоступен или уверенность ниже порога: ключевой поиск по файлам и уведомление владельцу раздела. Прописывается в регламенте и проверяется на прогоне.</p></div></div>
+</div>
+</div>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.9 / КАК СЧИТАЕМ ЭФФЕКТ]</span><h2>Как считаем эффект</h2></div><p>Сравнение делается на одной и той же выборке вопросов до и после внедрения.</p></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Метрика</th><th>Как замеряем</th><th>Что фиксируем</th></tr></thead>
+<tbody>
+<tr><td><div class="cell-ico"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><b>Время поиска</b></div></td><td>Замер на 10–15 типовых вопросах до и после пилота.</td><td>Медианное время до найденного фрагмента, результат в отчёте.</td></tr>
+<tr><td><div class="cell-ico"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.7" y2="16.7"></line></svg></div><b>Точность</b></div></td><td>Совпадение ответа с эталоном на eval-наборе.</td><td>Доля совпадений и список промахов с причиной.</td></tr>
+<tr><td><div class="cell-ico"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div><b>Доля ответов с источником</b></div></td><td>Счётчик валидных ссылок в журнале за период.</td><td>Процент ответов со ссылкой, результат в отчёте.</td></tr>
+<tr><td><div class="cell-ico"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div><b>Число повторных вопросов</b></div></td><td>Повторные обращения по той же теме за период.</td><td>Динамика по неделям и темы, которые закрыты плохо.</td></tr>
+<tr><td><div class="cell-ico"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="20" x2="4" y2="10"></line><line x1="10" y1="20" x2="10" y2="4"></line><line x1="16" y1="20" x2="16" y2="14"></line><line x1="22" y1="20" x2="22" y2="8"></line></svg></div><b>Удовлетворённость</b></div></td><td>Короткая оценка после ответа и комментарий при желании.</td><td>Доля положительных оценок и типичные замечания.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="note">Цифры не публикуем до замера на ваших данных. В отчёте указываем исходные выборки, даты и способ подсчёта, чтобы результат можно было проверить независимо.</p>
+</section>
+
+<section class="dark">
+<div class="wrap">
+<span class="mono eyebrow">[03.10 / ГДЕ НЕ РАБОТАЕТ]</span>
+<h2>Честные ограничения</h2>
+<p class="intro">Есть условия, при которых поиск по документам не даёт результата. Называем их до старта, а не после провала пилота.</p>
+<div class="grid">
+<article class="card"><span class="num">01</span><h3>Хаотичные данные</h3><p>Если файлы дублируются, противоречат друг другу и не имеют владельца, выдача будет разбросанной. Сначала наводим реестр и убираем устаревшие копии. Индексировать беспорядок бессмысленно.</p></article>
+<article class="card"><span class="num">02</span><h3>Редкие документы</h3><p>По одному уникальному файлу нельзя судить о качестве ответов. Добавляем репрезентативную выборку или честно ограничиваем обещания. Иначе метрика будет случайной.</p></article>
+<article class="card"><span class="num">03</span><h3>Юридические формулировки</h3><p>Точный смысл нормы требует проверки юристом. Сервис помогает найти текст и ссылку, но не заменяет экспертизу. Ответы по правовым темам идут с оговоркой.</p></article>
+<article class="card"><span class="num">04</span><h3>Нет владельца базы знаний</h3><p>Без человека, который отвечает за актуальность, индекс устареет за несколько обновлений. Назначаем владельца на этапе инвентаризации. Без этого пилот в приёмку не идёт.</p></article>
+</div>
+</div>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.11 / СРАВНЕНИЕ ПОДХОДОВ]</span><h2>Способы и границы</h2></div><p>Выбор зависит от задачи. Подходы можно сочетать, но подменять один другим не стоит.</p></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Подход</th><th>Что даёт</th><th>Где слаб</th><th>Когда выбираем</th></tr></thead>
+<tbody>
+<tr><td><b>Ключевой поиск</b></td><td>Быстрый перебор файлов по словам и названиям.</td><td>Не понимает переформулировки и не даёт готового ответа со ссылкой.</td><td>Небольшой архив с понятными именами файлов.</td></tr>
+<tr><td><b>RAG</b></td><td>Ответ со ссылкой на фрагмент из ваших документов.</td><td>Зависит от разметки, актуальности источников и eval-набора.</td><td>Нужны ответы по регламентам, инструкциям и паспортам.</td></tr>
+<tr><td><b>Дообучение модели</b></td><td>Меняет стиль и формат ответов под ваши требования.</td><td>Не хранит свежие факты, требует данных и регулярных затрат.</td><td>Стабильный тон и шаблон важнее доступа к новым файлам.</td></tr>
+<tr><td><b>Простой чат-бот</b></td><td>Быстро отвечает на заранее прописанные вопросы.</td><td>Не находит факт в новом документе и не показывает источник.</td><td>Узкий FAQ, который почти меняется.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="note">Ключевой поиск часто остаётся как запасной инструмент, а поиск с ответом работает поверх него. Решение выбирается по задаче, а не по моде.</p>
+</section>
+
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.12 / ТИПОВОЙ СЦЕНАРИЙ]</span>
+<h2>Было и стало</h2>
+<p class="intro">Сценарий описан без выдуманных цифр. Показываем характер изменений, а результат фиксируем замером на ваших вопросах.</p>
+<div class="grid-2">
+<div class="panel"><span class="mono">БЫЛО</span><h3>Поиск по памяти и папкам</h3><ul><li>Мастер ищет паспорт оборудования в общей папке и уточняет параметр у старшего смены.</li><li>Инструкции есть, но в нескольких версиях и без даты последнего изменения.</li><li>Ответ передаётся устно и может дойти до следующей смены в другой формулировке.</li><li>Новый сотрудник учится на практике, а не по актуальному регламенту.</li></ul></div>
+<div class="panel"><span class="mono">СТАЛО</span><h3>Вопрос и фрагмент в одном ответе</h3><ul><li>Запрос формулируется обычным языком, без знания точного названия файла.</li><li>Ответ показывает текст из паспорта и дату версии источника.</li><li>Спорный случай помечается и уходит владельцу раздела на проверку.</li><li>Регламент обновляется по графику, а индекс подхватывает изменение.</li></ul></div>
+</div>
+<p class="note">Что проверяем: время поиска, долю ответов со ссылкой, число уточнений у коллег и число повторных вопросов. Результат в отчёте — с датами замера и исходной выборкой.</p>
+</div>
+</section>
+
+<section class="dark">
+<div class="wrap">
+<div class="section-head"><div><span class="mono eyebrow">[03.13 / СТЕК]</span><h2>Из чего собран поиск</h2></div><p>Инструменты, которые звучат в проекте. Конкретный выбор фиксируется после аудита.</p></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Слой</th><th>Инструменты</th><th>Роль в решении</th></tr></thead>
+<tbody>
+<tr><td><div class="cell-ico"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><b>Источники</b></div></td><td>PDF, Word, Excel, Confluence</td><td>Файлы и страницы, из которых берём текст для индекса.</td></tr>
+<tr><td><div class="cell-ico"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16.7" y2="16.7"></line></svg></div><b>Векторный поиск</b></div></td><td>pgvector или Qdrant</td><td>Хранение векторных представлений и поиск близких фрагментов по смыслу.</td></tr>
+<tr><td><div class="cell-ico"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div><b>Модели</b></div></td><td>OpenAI-совместимые модели</td><td>Составление ответа по найденным фрагментам со ссылками на источник.</td></tr>
+<tr><td><div class="cell-ico"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div><b>Выдача</b></div></td><td>REST API</td><td>Подключение ответов к внутреннему порталу, CRM или боту.</td></tr>
+<tr><td><div class="cell-ico"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="20" x2="4" y2="10"></line><line x1="10" y1="20" x2="10" y2="4"></line><line x1="16" y1="20" x2="16" y2="14"></line><line x1="22" y1="20" x2="22" y2="8"></line></svg></div><b>Интеграции</b></div></td><td>1С, Bitrix24</td><td>Связь поиска с процессами и данными компании.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="note">Конкретный выбор фиксируется после аудита источников, объёма данных и требований к контуру. Если у вас уже есть векторное хранилище, рассматриваем его вместе с предложенными вариантами.</p>
+</div>
+</section>
+
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.14 / ЧТО ПОДГОТОВИТЬ]</span>
+<h2>Что подготовить</h2>
+<p class="intro">Шесть пунктов, которые нужны нам от вашей команды. Идеальный архив заранее собирать не обязательно — наведём порядок вместе на этапе инвентаризации.</p>
+<div class="grid">
+<article class="card"><span class="num">01</span><h3>Примеры документов</h3><p>5–10 типичных файлов и вопросы к ним. По ним сразу видно, как устроены ваши данные.</p></article>
+<article class="card"><span class="num">02</span><h3>Владелец базы знаний</h3><p>Человек, который подтверждает актуальность разделов и знает, где лежит нужный текст.</p></article>
+<article class="card"><span class="num">03</span><h3>Критерий хорошего ответа</h3><p>Что считать правильным: ссылка на фрагмент, полнота, честный отказ при отсутствии факта.</p></article>
+<article class="card"><span class="num">04</span><h3>Права на данные</h3><p>Подтверждение, что переданные файлы можно индексировать и показывать внутри компании.</p></article>
+<article class="card"><span class="num">05</span><h3>Доступы к системам</h3><p>Confluence, общие папки, 1С и Bitrix24 — только те, которые нужны для выбранного контура.</p></article>
+<article class="card"><span class="num">06</span><h3>Ответственный за обновление</h3><p>Кто и с какой периодичностью правит документы и запускает переиндексацию по регламенту.</p></article>
+</div>
+</div>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.15 / СТОИМОСТЬ]</span><h2>Состав стоимости</h2></div><p>Состав работ по строкам. Суммы называем после разбора задачи.</p></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Статья работ</th><th>Что входит</th><th>Что влияет на объём</th></tr></thead>
+<tbody>
+<tr><td><b>Аудит источников</b></td><td>Реестр хранилищ, форматов, прав и владельцев; оценка пригодности файлов.</td><td>Число систем и разрозненность архива.</td></tr>
+<tr><td><b>Подготовка данных</b></td><td>Очистка, разметка разделов, удаление дублей и устаревших версий.</td><td>Состояние текстов и наличие сканов.</td></tr>
+<tr><td><b>Индекс и пайплайн</b></td><td>Векторный индекс, скрипты загрузки и переиндексации, логи запусков.</td><td>Объём файлов и частота обновлений.</td></tr>
+<tr><td><b>Интеграции</b></td><td>REST API, подключение к 1С и Bitrix24 по согласованному списку.</td><td>Число систем и требования к доступам.</td></tr>
+<tr><td><b>Обучение команды</b></td><td>Инструкция, короткая сессия, разбор честного отказа и спорных вопросов.</td><td>Число пользователей и сценариев.</td></tr>
+<tr><td><b>Поддержка</b></td><td>Обновления источников, настройка порогов, разбор ошибок по регламенту.</td><td>Темп изменений в документах.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="note">Ориентир до аудита, не оферта. Итоговая стоимость считается после разбора источников, прав доступа и выбранного контура; состав работ фиксируется в договоре.</p>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[04 / ВОПРОСЫ И ОТВЕТЫ]</span><h2>Вопросы и ответы</h2></div><p>Полные ответы по существу. Если вашего вопроса нет — напишите в Telegram.</p></div>
+<div style="margin-top:26px">
+<details><summary>Что такое RAG простыми словами?</summary><p>RAG расшифровывается как поиск с дополнением ответа найденными фрагментами. Сначала сервис ищет подходящие места в ваших файлах, затем составляет текст и показывает, откуда он взят. Это не генерация «из головы»: каждое утверждение опирается на исходный документ. Проверить ответ можно по ссылке на страницу или раздел.</p></details>
+<details><summary>Чем отличается от обычного поиска по файлам?</summary><p>Обычный поиск ищет совпадение слов и отдаёт список файлов. Здесь учитывается смысл вопроса, поэтому формулировка из документа может отличаться от вашей. На выходе вы получаете не папку с файлами, а текст со ссылкой на конкретный фрагмент. При отсутствии факта выдаётся честный отказ, а не догадка.</p></details>
+<details><summary>Какие форматы документов поддерживаются?</summary><p>Работаем с PDF, Word, Excel, страницами Confluence, сканами после распознавания и отдельно согласованной перепиской. Требования к подготовке каждого формата фиксируются на этапе инвентаризации. Итоговый список источников определяется вашими правами доступа, а не нашим желанием подключить всё подряд. Файлы без даты и владельца в пилот не берём.</p></details>
+<details><summary>Как измеряется точность ответов?</summary><p>Точность считаем на eval-наборе, который собираем из реальных вопросов вашей команды. Для каждого вопроса есть эталонный ответ и ссылка на источник. Сравнение делается до и после настроек, а расхождения разносятся по причинам: разметка, источник или формулировка запроса. Все значения и даты замеров попадают в отчёт.</p></details>
+<details><summary>Сколько стоит услуга?</summary><p>Стоимость зависит от числа источников, состояния документов, требований к контуру и интеграций. Мы не публикуем цифру «от», потому что разброс между проектами слишком большой, а усреднённое число вводит в заблуждение. Расчёт присылаем после короткого разбора задачи с описанием состава работ. В него входят этапы, артефакты и то, что остаётся под вашим контролем.</p></details>
+<details><summary>Какие сроки до первого результата?</summary><p>Ориентир — 3–6 недель до первого рабочего теста. Инвентаризация занимает около недели, подготовка текста — 1–2 недели, проверка на выборке — 2–3 недели. Точный график называется после того, как видно объём материалов и число источников. Подключение остальных баз идёт отдельным планом.</p></details>
+<details><summary>Где находятся данные и можно ли работать без облака?</summary><p>Индекс и модель можно развернуть внутри вашей сети. Внешние сервисы не получают документы без отдельного решения владельца. Схема размещения и перечень доступов фиксируются в проектной документации до начала загрузки файлов. По завершении работ составляется акт с перечнем переданных компонентов.</p></details>
+<details><summary>Как обновляются документы после запуска?</summary><p>На этапе инвентаризации назначается владелец каждого раздела и частота проверки актуальности. Изменённый файл проходит переиндексацию, а устаревшая версия помечается в метаданных. Регламент описывает, кто инициирует обновление и как часто проводится повторный прогон на eval-наборе. Без владельца базы знаний мы не рекомендуем запускать пилот.</p></details>
+<details><summary>С какими системами вы интегрируетесь?</summary><p>Из хранилищ — Confluence, общие папки, таблицы и системы тикетов по согласованному списку. Для выдачи ответов предлагается API, который можно подключить к внутреннему порталу, CRM или Telegram. Конкретный способ зависит от доступов и вашей сети. Интеграции обсуждаются отдельно от базового пилота, чтобы не смешивать сроки.</p></details>
+<details><summary>Какие гарантии вы даёте?</summary><p>Гарантируем проверяемый результат: ответ со ссылкой на фрагмент и отчёт по тестовой выборке. Точность и пороги фиксируются цифрами до расширения базы документов. Мы не обещаем стопроцентное попадание без замера на ваших данных. Если условие не выполняется, показываем причину и список правок.</p></details>
+<details><summary>Что будет, если ответа нет в документах?</summary><p>Пользователь видит сообщение, что подходящего факта в базе нет. Вместо выдуманной формулировки показываются ближайшие источники и дата их последнего обновления. Такой отказ считается правильным поведением. Он помогает увидеть, какую информацию пора добавить в базу знаний.</p></details>
+<details><summary>Нужно ли обучать команду?</summary><p>Да. В поставку входит короткая инструкция по формулировке вопросов и сессия с объяснением, как читать ответ со ссылкой. Отдельно разбирается поведение при отказе и порядок передачи спорного вопроса владельцу раздела. Обучение входит в передачу решения и не требует привлечения подрядчика после приёмки.</p></details>
+<details><summary>Что показывает первый прогон?</summary><p>Первый прогон показывает набор реальных вопросов, выданные ответы со ссылками и список промахов. По нему видно, где разметка мешает поиску, а где сам документ устарел. Результат сравнивается с эталоном из eval-набора. После этого принимается решение: расширять базу или править подготовку текстов.</p></details>
+<details><summary>Как исправляются ошибки в ответах?</summary><p>Ошибка связывается с конкретным фрагментом и причиной: разметка, источник или формулировка вопроса. После правки повторяется прогон на той же выборке, чтобы сравнение было честным. Изменения в индекс вносятся через пайплайн, который входит в поставку. История правок остаётся в журнале.</p></details>
+<details><summary>Есть ли поддержка после запуска?</summary><p>Поддержка нужна для обновлений документов, новых источников и корректировки порогов. Объём, срок реагирования и состав работ фиксируются отдельно в договоре. Регламент передаётся вместе с решением, поэтому текущие обновления команда делает сама. Мы подключаемся, когда меняется схема или требуется разбор сложных ошибок.</p></details>
+</div>
+</section>
+
+<section id="request" class="cta">
+<div class="wrap">
+<span class="mono eyebrow">[05 / ЗАЯВКА]</span>
+<h2>Пришлите вопрос к документу</h2>
+<p>Покажем, как выглядит ответ со ссылкой, какие источники понадобятся для пилота и где проходят границы применимости.</p>
+<div class="row"><a class="btn" href="https://t.me/erik03132">Написать в Telegram</a><a class="btn btn--beige" href="mailto:info@ai-traffic-pro.ru">info@ai-traffic-pro.ru</a></div>
+</div>
+</section>
+
+</main>
+<footer>
+<div class="footer-row">
+<span>AI BUREAU · Telegram @erik03132 · info@ai-traffic-pro.ru · +7 (495) 923-46-44</span>
+<span>ИП Марченко Дмитрий Николаевич · ИНН 770304789944 · © 2026</span>
+</div>
+<div class="footer-row" style="margin-top:10px"><span>Контакты и реквизиты из ai-marketing. Для ai-bureau.online требуют подтверждения владельца.</span></div>
+</footer>
+</div>
+</body>
+</html>

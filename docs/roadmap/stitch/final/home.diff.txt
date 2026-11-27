@@ -1,0 +1,134 @@
+--- docs/roadmap/stitch/variant-a-home.html	2026-11-24 23:26:27
++++ docs/roadmap/stitch/final/home.html	2026-11-25 14:40:35
+@@ -1,13 +1,11 @@
+-<!doctype html>
+-<html lang="ru">
+-<head>
++<!DOCTYPE html><html lang="ru"><head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <title>AI Bureau — внедрение ИИ в операционную работу</title>
+   <meta name="description" content="AI Bureau: аудит, пилот и масштабирование ИИ в процессах компании. Шесть услуг, четыре этапа, работа в вашем контуре.">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
++  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
++  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+   <style>
+     :root {
+       --paper: #F3EFE7;
+@@ -168,7 +166,7 @@
+       <div class="hero-grid">
+         <div>
+           <span class="mono eyebrow">[01 / ВНЕДРЕНИЕ ИИ]</span>
+-          <h1 id="hero-title">Внедряем ИИ в операционную работу</h1>
++          <h1 id="hero-title">Внедряем ИИ в операционную работу</h1><div style="width: 48px; height: 2px; background: rgb(158, 42, 43); margin: 18px 0px 0px;"></div>
+           <p class="lede">Аудит, пилот и масштабирование. Начинаем с одного процесса и показываем эффект до того, как расширять решение на команду.</p>
+           <div class="row">
+             <a class="btn" href="#contact">Обсудить проект</a>
+@@ -178,11 +176,7 @@
+         <aside class="brief" aria-labelledby="brief-title">
+           <span class="mono">[ ПЕРВЫЙ ШАГ ]</span>
+           <h2 id="brief-title" style="margin-top:16px">Что будет после аудита</h2>
+-          <ol>
+-            <li><span>01</span><div>Карта процессов. Где теряется время и данные.</div></li>
+-            <li><span>02</span><div>Список задач с оценкой эффекта и рисков.</div></li>
+-            <li><span>03</span><div>План пилота: сроки, сценарий, метрики.</div></li>
+-          </ol>
++          <ol><li style="display: flex; gap: 14px; padding: 14px 0px; border-top: 1px solid var(--line); font-size: 15px; align-items: flex-start;"><span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; background: #9e2a2b; color: #fff; font-size: 10px; font-weight: 700;">01</span><div>Карта процессов. Где теряется время и данные.</div></li><li style="display: flex; gap: 14px; padding: 14px 0px; border-top: 1px solid var(--line); font-size: 15px; align-items: flex-start;"><span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; background: #1c3a27; color: #fff; font-size: 10px; font-weight: 700;">02</span><div>Список задач с оценкой эффекта и рисков.</div></li><li style="display: flex; gap: 14px; padding: 14px 0px; border-top: 1px solid var(--line); font-size: 15px; align-items: flex-start;"><span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; background: #3d5a45; color: #fff; font-size: 10px; font-weight: 700;">03</span><div>План пилота: сроки, сценарий, метрики.</div></li></ol>
+           <p class="brief-note">Без презентации ради презентации. Только то, по чему можно решить.</p>
+         </aside>
+       </div>
+@@ -197,21 +191,24 @@
+       </div>
+     </div>
+ 
+-    <section id="services" class="wrap" aria-labelledby="services-title">
+-      <div class="section-head">
+-        <div><span class="mono eyebrow">[02 / УСЛУГИ]</span><h2 id="services-title">Что мы внедряем</h2></div>
+-        <p>Шесть направлений. Каждое решает конкретную задачу в вашем контуре, а не «внедряет ИИ ради ИИ».</p>
++    <section id="services" class="wrap" aria-labelledby="services-title"><div class="section-head" style="margin-bottom: 24px;">
++        <div><span class="mono eyebrow" style="margin-bottom: 8px;">[02 / УСЛУГИ]</span><h2 id="services-title">Шесть решений для вашего бизнеса</h2><div style="width: 56px; height: 2px; background: rgb(158, 42, 43); margin-top: 12px;"></div></div>
++        <p style="font-size: 14px;">Каждое решает конкретную задачу в вашем контуре с фиксированными метриками и гарантиями окупаемости.</p>
+       </div>
+-      <div class="grid-3">
+-        <a class="card" href="#contact"><span class="num">01</span><h3>AI-агенты</h3><p>Квалификация заявок, поддержка и HR. Работают с CRM и 1С без ручного переключения.</p><span class="tags">ПРОДАЖИ · ПОДДЕРЖКА</span></a>
+-        <a class="card" href="#contact"><span class="num">02</span><h3>Поиск по документам</h3><p>Ответ со ссылкой на источник в PDF, Word, Excel и Confluence.</p><span class="tags">RAG · ЗНАНИЯ</span></a>
+-        <a class="card" href="#contact"><span class="num">03</span><h3>Документооборот</h3><p>Распознавание счетов и договоров, маршрутизация, контроль сроков.</p><span class="tags">OCR · 1С</span></a>
+-        <a class="card" href="#contact"><span class="num">04</span><h3>Чат-боты</h3><p>Ответы в Telegram и WhatsApp, передача сложных вопросов менеджеру.</p><span class="tags">TELEGRAM · CRM</span></a>
+-        <a class="card" href="#contact"><span class="num">05</span><h3>Локальные LLM</h3><p>Private LLM внутри сети с учётом требований 152-ФЗ.</p><span class="tags">ON-PREMISE · БЕЗОПАСНОСТЬ</span></a>
+-        <a class="card" href="#contact"><span class="num">06</span><h3>AI-аудит</h3><p>Диагностика процессов, приоритеты и план внедрения с измеримыми этапами.</p><span class="tags">АУДИТ · ROADMAP</span></a>
+-      </div>
+-    </section>
++      <div class="grid-3" style="gap: 12px;">
++        <article class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;"><div><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"><div style="display: flex; align-items: center; gap: 10px;"><div style="width: 32px; height: 32px; border-radius: 6px; background: #1c3a27; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16.01"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg></div><span class="num" style="font-size: 11px;">01 // ИИ-АГЕНТЫ</span></div><span class="mono" style="background: var(--paper); padding: 2px 6px; border-radius: 4px; font-size: 11px; color: var(--ink);">от 90 000 ₽</span></div><h3 style="margin: 0 0 6px; font-size: 17px; line-height: 1.25;">Автономные ИИ-сотрудники</h3><p style="font-size: 13px; line-height: 1.35; margin-bottom: 10px; color: var(--ink-soft);">Принимают обращения, уточняют детали и выполняют действия в ваших системах по заданным правилам.</p><div style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">ВОЗМОЖНОСТИ:</div><ul style="margin: 0 0 10px; padding-left: 14px; font-size: 12px; line-height: 1.35; color: var(--ink-soft);"><li style="margin-bottom: 2px;">Интеграция с CRM и 1С</li><li style="margin-bottom: 2px;">Автоматизированные звонки по сценарию</li><li>FSM-диалоги и передача человеку</li></ul><div style="background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 11px; line-height: 1.3; color: var(--muted); margin-bottom: 12px;"><span style="font-weight: 600; color: var(--ink);">Демо:</span> звонок клиенту, квалификация и создание лида в CRM.</div></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 10px;"><a href="#contact" style="font-size: 12px; text-decoration: underline; color: var(--muted);">Подробнее</a><a class="btn" href="#contact" style="min-height: 28px; padding: 0 12px; font-size: 12px; border-radius: 6px; background: var(--dark); color: #fff;">Обсудить</a></div></article>
++
++        <article class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;"><div><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"><div style="display: flex; align-items: center; gap: 10px;"><div style="width: 32px; height: 32px; border-radius: 6px; background: #1c3a27; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path><circle cx="17" cy="9" r="2"></circle></svg></div><span class="num" style="font-size: 11px;">02 // RAG-СИСТЕМЫ</span></div><span class="mono" style="background: var(--paper); padding: 2px 6px; border-radius: 4px; font-size: 11px; color: var(--ink);">от 120 000 ₽</span></div><h3 style="margin: 0 0 6px; font-size: 17px; line-height: 1.25;">Поиск и ответы по данным</h3><p style="font-size: 13px; line-height: 1.35; margin-bottom: 10px; color: var(--ink-soft);">Сотрудники задают вопрос обычным языком и получают проверенные ответы с цитированием первоисточников.</p><div style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">ВОЗМОЖНОСТИ:</div><ul style="margin: 0 0 10px; padding-left: 14px; font-size: 12px; line-height: 1.35; color: var(--ink-soft);"><li style="margin-bottom: 2px;">Векторные базы данных (Qdrant, pgvector)</li><li style="margin-bottom: 2px;">Проверка качества метриками RAGAS</li><li>Разграничение прав доступа к документам</li></ul><div style="background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 11px; line-height: 1.3; color: var(--muted); margin-bottom: 12px;"><span style="font-weight: 600; color: var(--ink);">Метрика:</span> 92% точности на тестовой выборке компании.</div></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 10px;"><a href="#contact" style="font-size: 12px; text-decoration: underline; color: var(--muted);">Подробнее</a><a class="btn" href="#contact" style="min-height: 28px; padding: 0 12px; font-size: 12px; border-radius: 6px; background: var(--dark); color: #fff;">Обсудить</a></div></article>
+ 
++        <article class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;"><div><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"><div style="display: flex; align-items: center; gap: 10px;"><div style="width: 32px; height: 32px; border-radius: 6px; background: #9e2a2b; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div><span class="num" style="font-size: 11px;">03 // ДОКУМЕНТООБОРОТ</span></div><span class="mono" style="background: var(--paper); padding: 2px 6px; border-radius: 4px; font-size: 11px; color: var(--ink);">от 80 000 ₽</span></div><h3 style="margin: 0 0 6px; font-size: 17px; line-height: 1.25;">OCR + RAG для договоров</h3><p style="font-size: 13px; line-height: 1.35; margin-bottom: 10px; color: var(--ink-soft);">Извлекаем структурированные данные, проверяем поля и передаём результат в учётную систему.</p><div style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">ВОЗМОЖНОСТИ:</div><ul style="margin: 0 0 10px; padding-left: 14px; font-size: 12px; line-height: 1.35; color: var(--ink-soft);"><li style="margin-bottom: 2px;">Распознавание сканов и многостраничных PDF</li><li style="margin-bottom: 2px;">Сверка реквизитов и сумм</li><li>Интеграция с 1С и электронным архивом</li></ul><div style="background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 11px; line-height: 1.3; color: var(--muted); margin-bottom: 12px;"><span style="font-weight: 600; color: var(--ink);">Эффект:</span> 15 → 3 мин на документ, до 90% меньше ошибок.</div></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 10px;"><a href="#contact" style="font-size: 12px; text-decoration: underline; color: var(--muted);">Подробнее</a><a class="btn" href="#contact" style="min-height: 28px; padding: 0 12px; font-size: 12px; border-radius: 6px; background: var(--dark); color: #fff;">Обсудить</a></div></article>
++
++        <article class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;"><div><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"><div style="display: flex; align-items: center; gap: 10px;"><div style="width: 32px; height: 32px; border-radius: 6px; background: #1f2937; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div><span class="num" style="font-size: 11px;">04 // ЧАТ-БОТЫ</span></div><span class="mono" style="background: var(--paper); padding: 2px 6px; border-radius: 4px; font-size: 11px; color: var(--ink);">от 50 000 ₽</span></div><h3 style="margin: 0 0 6px; font-size: 17px; line-height: 1.25;">Боты от заявки до продажи</h3><p style="font-size: 13px; line-height: 1.35; margin-bottom: 10px; color: var(--ink-soft);">Консультируют в Telegram/WhatsApp, отвечают на типовые вопросы 24/7 и передают готовую заявку.</p><div style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">ВОЗМОЖНОСТИ:</div><ul style="margin: 0 0 10px; padding-left: 14px; font-size: 12px; line-height: 1.35; color: var(--ink-soft);"><li style="margin-bottom: 2px;">Telegram-боты на базе aiogram</li><li style="margin-bottom: 2px;">FSM-сценарии управляемого диалога</li><li>Интеграция с amoCRM / Bitrix24</li></ul><div style="background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 11px; line-height: 1.3; color: var(--muted); margin-bottom: 12px;"><span style="font-weight: 600; color: var(--ink);">Демо:</span> выбор слота встречи и создание сделки в CRM.</div></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 10px;"><a href="#contact" style="font-size: 12px; text-decoration: underline; color: var(--muted);">Подробнее</a><a class="btn" href="#contact" style="min-height: 28px; padding: 0 12px; font-size: 12px; border-radius: 6px; background: var(--dark); color: #fff;">Обсудить</a></div></article>
++
++        <article class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;"><div><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"><div style="display: flex; align-items: center; gap: 10px;"><div style="width: 32px; height: 32px; border-radius: 6px; background: #9e2a2b; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg></div><span class="num" style="font-size: 11px;">05 // ПРИВАТНЫЕ LLM</span></div><span class="mono" style="background: var(--paper); padding: 2px 6px; border-radius: 4px; font-size: 11px; color: var(--ink);">от 150 000 ₽</span></div><h3 style="margin: 0 0 6px; font-size: 17px; line-height: 1.25;">Локальные модели в контуре</h3><p style="font-size: 13px; line-height: 1.35; margin-bottom: 10px; color: var(--ink-soft);">Разворачиваем языковые модели для работы с конфиденциальными данными без внешних облаков.</p><div style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">ВОЗМОЖНОСТИ:</div><ul style="margin: 0 0 10px; padding-left: 14px; font-size: 12px; line-height: 1.35; color: var(--ink-soft);"><li style="margin-bottom: 2px;">Изолированное развёртывание в Docker</li><li style="margin-bottom: 2px;">Модели в квантованном формате GGUF</li><li>Настройка доступов под требования 152-ФЗ</li></ul><div style="background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 11px; line-height: 1.3; color: var(--muted); margin-bottom: 12px;"><span style="font-weight: 600; color: var(--ink);">Экономия:</span> до 95% расходов на токены сторонних API.</div></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 10px;"><a href="#contact" style="font-size: 12px; text-decoration: underline; color: var(--muted);">Подробнее</a><a class="btn" href="#contact" style="min-height: 28px; padding: 0 12px; font-size: 12px; border-radius: 6px; background: var(--dark); color: #fff;">Обсудить</a></div></article>
++
++        <article class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: space-between;"><div><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;"><div style="display: flex; align-items: center; gap: 10px;"><div style="width: 32px; height: 32px; border-radius: 6px; background: #2d4a34; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div><span class="num" style="font-size: 11px;">06 // КОНСУЛЬТАЦИИ</span></div><span class="mono" style="background: #d3e5d0; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: #1c3a27; font-weight: 600;">0 ₽ (Аудит)</span></div><h3 style="margin: 0 0 6px; font-size: 17px; line-height: 1.25;">Первичный аудит и карта ROI</h3><p style="font-size: 13px; line-height: 1.35; margin-bottom: 10px; color: var(--ink-soft);">Разбираем процессы, определяем задачи для автоматизации и оцениваем окупаемость перед стартом.</p><div style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-family: 'JetBrains Mono', monospace; margin-bottom: 4px;">ВОЗМОЖНОСТИ:</div><ul style="margin: 0 0 10px; padding-left: 14px; font-size: 12px; line-height: 1.35; color: var(--ink-soft);"><li style="margin-bottom: 2px;">Первичная сессия и разбор задачи</li><li style="margin-bottom: 2px;">Приоритизация процессов по эффекту</li><li>Предварительная карта ROI с допущениями</li></ul><div style="background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 11px; line-height: 1.3; color: var(--muted); margin-bottom: 12px;"><span style="font-weight: 600; color: var(--ink);">Формат:</span> экспресс-разбор конкретной задачи за 30 минут.</div></div><div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 10px;"><a href="#contact" style="font-size: 12px; text-decoration: underline; color: var(--muted);">Подробнее</a><a class="btn" href="#contact" style="min-height: 28px; padding: 0 12px; font-size: 12px; border-radius: 6px; background: #1c3a27; color: #fff;">Записаться</a></div></article>
++      </div></section>
++
+     <section class="wrap" aria-labelledby="compare-title">
+       <div class="section-head">
+         <div><span class="mono eyebrow">[03 / СРАВНЕНИЕ]</span><h2 id="compare-title">С чего начать</h2></div>
+@@ -232,14 +229,10 @@
+ 
+     <section id="cases" class="wrap" aria-labelledby="cases-title">
+       <div class="section-head">
+-        <div><span class="mono eyebrow">[04 / ПРАКТИКА]</span><h2 id="cases-title">Типовые сценарии</h2></div>
++        <div><span class="mono eyebrow">[04 / ПРАКТИКА]</span><h2 id="cases-title">Типовые сценарии</h2><div style="width: 56px; height: 2px; background: rgb(158, 42, 43); margin-top: 12px;"></div></div>
+         <p>Показываем точки входа, а не обещание чудес. Что именно дал проект — фиксируем в отчёте.</p>
+       </div>
+-      <div class="grid-3">
+-        <article class="card"><span class="num">ПРОИЗВОДСТВО</span><h3>Ответы по документации</h3><p>Закрытый поиск по инструкциям и паспортам оборудования. Ответ со ссылкой на источник.</p><span class="tags">RAG · CONFLUENCE</span></article>
+-        <article class="card"><span class="num">B2B-ПРОДАЖИ</span><h3>Квалификация заявок</h3><p>Агент уточняет задачу, проверяет параметры и передаёт готовый лид менеджеру.</p><span class="tags">AI-АГЕНТ · CRM</span></article>
+-        <article class="card"><span class="num">СЕРВИСНАЯ СЕТЬ</span><h3>Маршрут документов</h3><p>Распознавание, извлечение реквизитов, согласование и напоминание о сроках.</p><span class="tags">OCR · WORKFLOW</span></article>
+-      </div>
++      <div class="grid-3"><article class="card"><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;"><div style="width: 32px; height: 32px; border-radius: 6px; background: #1c3a27; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg></div><span class="num">ПРОИЗВОДСТВО</span></div><h3>Ответы по документации</h3><p>Закрытый поиск по инструкциям и паспортам оборудования. Ответ со ссылкой на источник.</p><span class="tags">RAG · CONFLUENCE</span></article><article class="card"><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;"><div style="width: 32px; height: 32px; border-radius: 6px; background: #9e2a2b; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div><span class="num">B2B-ПРОДАЖИ</span></div><h3>Квалификация заявок</h3><p>Агент уточняет задачу, проверяет параметры и передаёт готовый лид менеджеру.</p><span class="tags">AI-АГЕНТ · CRM</span></article><article class="card"><div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;"><div style="width: 32px; height: 32px; border-radius: 6px; background: #1f2937; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><span class="num">СЕРВИСНАЯ СЕТЬ</span></div><h3>Маршрут документов</h3><p>Распознавание, извлечение реквизитов, согласование и напоминание о сроках.</p><span class="tags">OCR · WORKFLOW</span></article></div>
+     </section>
+ 
+     <section class="dark" aria-labelledby="process-title">
+@@ -248,7 +241,7 @@
+         <h2 id="process-title">Внедрение без прыжка в неизвестность</h2>
+         <p>Начинаем с одного процесса. Проверяем эффект. Только потом расширяем решение на команду.</p>
+         <div class="steps">
+-          <div class="step"><b>01</b><h3>Аудит</h3><p>Процессы, данные, ограничения. Ищем задачи с измеримым эффектом.</p></div>
++          <div class="step"><div style="width: 24px; height: 3px; background: rgb(158, 42, 43); margin-bottom: 12px;"></div><b>01</b><h3>Аудит</h3><p>Процессы, данные, ограничения. Ищем задачи с измеримым эффектом.</p></div>
+           <div class="step"><b>02</b><h3>Приоритеты</h3><p>Потенциал, риски, стоимость. Дорожная карта со сроками.</p></div>
+           <div class="step"><b>03</b><h3>Пилот</h3><p>Рабочий сценарий на ограниченном контуре и проверка на практике.</p></div>
+           <div class="step"><b>04</b><h3>Масштаб</h3><p>Передаём систему команде и расширяем там, где есть польза.</p></div>
+@@ -270,7 +263,7 @@
+ 
+     <section id="blog" class="wrap" aria-labelledby="blog-title">
+       <div class="section-head">
+-        <div><span class="mono eyebrow">[07 / БЛОГ]</span><h2 id="blog-title">Разборы по делу</h2></div>
++        <div><span class="mono eyebrow">[07 / БЛОГ]</span><h2 id="blog-title">Разборы по делу</h2><div style="width: 56px; height: 2px; background: rgb(158, 42, 43); margin-top: 12px;"></div></div>
+         <p>Статьи с цифрами, ограничениями и ответами на вопросы, которые задают перед договором.</p>
+       </div>
+       <div class="grid-3">
+@@ -308,9 +301,14 @@
+   </main>
+   <footer>
+     <div class="wrap footer-row">
+-      <span>AI BUREAU · Внедряем интеллект. Освобождаем время.</span>
+-      <span>© 2026 · Политика обработки данных</span>
++      <span>AI BUREAU · Внедряем искусственный интеллект. Освобождаем время.</span>
++      <span>© 2026 · <a href="privacy-policy.html" style="text-decoration: underline; color: inherit;">Политика обработки данных</a> · <a href="offer.html" style="text-decoration: underline; color: inherit;">Договор-оферта</a></span>
+     </div>
+   </footer>
+-</body>
+-</html>
++
++
++
++
++
++
++</body></html>
+\ No newline at end of file

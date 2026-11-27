@@ -1,0 +1,34 @@
+{
+  "project": "AI Bureau — мультилендинги услуг",
+  "task": "После приёмки визуала A собрать шесть отдельных страниц услуг по стандарту ai-marketing SPEC-multi-landing.md",
+  "date": "2026-11-25",
+  "status": "Fixed: собраны все одиннадцать страниц в docs/roadmap/stitch/final/ (главная, шесть услуг, блог, автор, политика, оферта) и загружены в Stitch. Verified: все экраны видимы с метками 01–11, content_lint по видимому тексту rc=0. Не Verified: реквизиты, имя и профили автора для ai-bureau.online; юридическая проверка политики и оферты; визуальная приёмка последних восьми страниц.",
+  "context": "Визуал согласован. Основной стиль — вариант A: графит #23211F, песок #F3EFE7, терракота #B95433, моно-рубрики, светлые карточки, радиус 16 px. Газетный макет отложен как SYS-002. Структура заимствована из projects/ai-marketing/docs/design/SPEC-multi-landing.md: крошки, hero с сайдбаром, 3 проблемы, 4 шага со сроками, 4 карточки решения, 2–3 сервисных блока 03.5–03.7, FAQ на 13–15 вопросов, один CTA. Для каждого из шести направлений (AI-агенты, RAG, документооборот, чат-боты, локальные LLM, AI-аудит) в документе расписаны H1 из двух строк, бейдж, метрика, проблемы, шаги, сервисные блоки и темы FAQ. Отдельно описаны страницы блога, статьи, автора, политики конфиденциальности и публичной оферты по аналогу ai-marketing. Оферта требует юридической проверки Фемидой до публикации. Контакты для страницы контактов взяты из ai-marketing и помечены как требующие подтверждения для ai-bureau.online. Рабочий код сайта и прод не трогать без отдельного разрешения. Ни коммита, ни публикации.",
+  "files": [
+    "docs/roadmap/stitch/SERVICE_LANDING_STRUCTURE.md",
+    "docs/roadmap/stitch/final/home.html",
+    "docs/roadmap/stitch/final/home.jpg",
+    "docs/roadmap/stitch/final/rag.html",
+    "docs/roadmap/stitch/final/rag.png",
+    "docs/roadmap/stitch/final/agents.html",
+    "docs/roadmap/stitch/final/agents.png",
+    "docs/roadmap/stitch/final/CAPTURE.md",
+    "projects/ai-marketing/docs/design/SPEC-multi-landing.md",
+    "docs/roadmap/stitch/README.md",
+    "docs/roadmap/stitch/page-services.html",
+    "docs/roadmap/stitch/service-rag.html",
+    "docs/roadmap/stitch/page-contacts.html",
+    "docs/audit/FINDINGS.md",
+    "ACTIVE_TASKS.md"
+  ],
+  "skills": ["action-first", "agents/shakespeare"],
+  "next_steps": [
+    "1. Игорь: визуально принять восемь новых экранов в Stitch: документооборот, чат-боты, локальные LLM, AI-аудит, блог, автор, политика, оферта.",
+    "2. Подтвердить реквизиты, имя и профили автора для ai-bureau.online. Все помечены как гипотеза.",
+    "3. Отдать политику и оферту на проверку Фемиде до любой публикации.",
+    "4. Прогнать eval-гейт перед сдачей. Fixed и Verified фиксировать раздельно.",
+    "5. Закрыть AB-P0-1: форма на проде отдаёт 405. Без этого лендинги ведут в никуда."
+  ],
+  "escalation": false,
+  "deadline": "2026-12-01T18:00:00+03:00"
+}

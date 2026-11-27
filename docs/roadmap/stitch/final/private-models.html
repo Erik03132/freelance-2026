@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Локальные LLM (on-premise LLM) — отдельная услуга — AI Bureau</title>
+<meta name="description" content="Локальные языковые LLM в вашем контуре: варианты развёртывания, подбор LLM под железо, доступы, мониторинг и работа с персональными данными без обещаний без проверки.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>:root{--paper:#F3EFE7;--surface:#ffffff;--ink:#1f2937;--soft:#475569;--muted:#64748b;--line:#ddd6ca;--acc:#9e2a2b;--dark:#1f2937;--dark2:#0f172a;--dark3:#334155;--dark4:#475569;--pale:#cbd5e1;--max:1240px;--radius:16px;--r6:6px}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.55 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}a:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:3px}.skip{position:absolute;left:-9999px;top:8px;background:var(--dark);color:#fff;padding:10px 16px;z-index:10}.skip:focus{left:12px}.wrap{width:min(calc(100% - 128px),var(--max));margin:0 auto}.mono{font:500 11px/1.2 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.eyebrow{display:block;margin-bottom:12px}.accent-line{width:48px;height:2px;background:var(--acc);margin-top:14px}h1,h2,h3,h4{margin:0;letter-spacing:-.03em;line-height:1.06}h1{font-size:clamp(40px,4.6vw,60px);font-weight:700;max-width:880px}h2{font-size:clamp(28px,3.8vw,46px);font-weight:600}h3{font-size:20px;font-weight:600;letter-spacing:-.015em;line-height:1.2}h4{font-size:16px;font-weight:600;letter-spacing:-.01em}p{margin:0}section{padding:120px 0;border-top:1px solid var(--line)}section.first{border-top:0;padding:56px 0 24px}.lede{color:var(--soft);font-size:18px;max-width:680px;margin-top:22px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:40px;margin-bottom:32px}.section-head p{color:var(--muted);max-width:420px;font-size:15px}.intro{color:var(--soft);max-width:840px;margin-bottom:30px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:100px;background:var(--acc);color:#fff;font-weight:600;font-size:15px;border:0}.btn-mini{min-height:28px;padding:0 12px;font-size:12px;border-radius:var(--r6);background:var(--dark);color:#fff;display:inline-flex;align-items:center;justify-content:center}.row{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}.topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line)}.brand{font-weight:700;letter-spacing:.12em;font-size:14px}.brand span{display:inline-block;width:9px;height:9px;background:var(--acc);margin-right:10px}nav{display:flex;gap:24px;font-size:14px;color:var(--soft)}.top-link{font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc)}.crumb{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:34px}.badge{display:inline-block;background:#fff;border:1px solid var(--line);color:var(--acc);padding:10px 14px;border-radius:var(--r6);font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;margin-bottom:20px}.hero-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:48px;align-items:start}.brief{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:30px}.brief-title{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-top:14px}.metric-big{font-size:42px;font-weight:700;letter-spacing:-.04em;line-height:1.1;margin-top:22px}.metric-big span{display:block;font:500 11px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:8px}.brief-block{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}.brief-block p{color:var(--soft);font-size:14px;margin-top:10px}.brief ol{margin:18px 0 0;padding:0;list-style:none}.brief li{display:flex;gap:14px;padding:12px 0;border-top:1px solid var(--line);font-size:14px;align-items:flex-start}.brief li i{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;color:#fff;font:700 10px/1 "JetBrains Mono",ui-monospace,monospace;font-style:normal;flex-shrink:0;background:var(--dark)}.brief li:nth-child(2) i{background:var(--dark3)}.brief li:nth-child(3) i{background:var(--dark4)}.brief-note{margin-top:18px;font-size:13px;color:var(--muted)}.metrics{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:12px}.metric{padding:24px 22px;border-right:1px solid var(--line)}.metric:last-child{border-right:0}.metric b{display:block;font-size:32px;letter-spacing:-.04em}.metric span{color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:36px}.card h3{margin:18px 0 10px}.card p{color:var(--soft);font-size:14px}.num{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--muted)}.aeo{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;margin-top:28px;color:var(--soft);font-size:16px;max-width:900px}.problem .line{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.problem .line span{display:block;font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc);margin-bottom:5px}.icon{width:32px;height:32px;border-radius:var(--r6);background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}.icon--slate{background:var(--dark3);color:#fff}.icon--steel{background:var(--dark4);color:#fff}.dense-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;justify-content:space-between}.dense-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}.dense-id{display:flex;align-items:center;gap:10px}.dense-card .num{font-size:11px}.price-plate{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;background:var(--paper);padding:5px 8px;border-radius:var(--r6);color:var(--ink);border:1px solid var(--line);white-space:nowrap}.dense-card h3{margin:0 0 6px;font-size:17px;line-height:1.25}.dense-card p{font-size:13px;line-height:1.35;margin-bottom:10px}.dense-label{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;color:var(--muted);margin-bottom:6px}.dense-card ul{margin:0 0 10px;padding-left:14px;font-size:12px;line-height:1.35;color:var(--soft)}.dense-card li{margin-bottom:2px}.demo{background:var(--paper);border:1px solid var(--line);border-radius:var(--r6);padding:8px 10px;font-size:11px;line-height:1.3;color:var(--muted);margin-bottom:12px}.demo b{color:var(--ink)}.dense-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:10px;gap:10px}.detail-link{font-size:12px;text-decoration:underline;color:var(--muted)}.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.detail{border-top:2px solid var(--acc);padding-top:18px}.detail b{display:block;font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--acc);margin-bottom:6px}.detail .term{font:500 11px/1.4 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;color:var(--muted);margin-bottom:14px}.detail h3{font-size:18px}.detail dl{margin:16px 0 0}.detail dt{font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc)}.detail dd{margin:3px 0 12px;color:var(--soft);font-size:13px}.table-wrap{overflow-x:auto;border:1px solid var(--line);background:var(--surface);border-radius:var(--radius)}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:16px 20px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}th{font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--paper)}td b{font-size:15px}tr:last-child td{border-bottom:0}.tint{background:var(--surface);border-top:1px solid var(--line)}.artifact{display:grid;grid-template-columns:52px 1fr;gap:18px;padding:18px 0;border-top:1px solid var(--line)}.artifact:last-child{border-bottom:1px solid var(--line)}.artifact b{font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--acc);padding-top:4px}.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px}.panel h3{margin-bottom:14px}.panel .mono{display:block;margin-bottom:12px}.panel ul{margin:0;padding-left:18px;color:var(--soft);font-size:14px}.panel li{margin-bottom:10px}.dark{background:var(--dark);color:var(--paper);border-top:0}.dark--deep{background:var(--dark)}.dark--steel{background:var(--dark)}.dark .mono,.dark .num,.dark .section-head p{color:var(--pale)}.dark b{color:#ffffff}.dark h2{max-width:760px}.dark p,.dark .intro{color:var(--pale)}.dark .card{background:var(--dark3);border-color:var(--pale)}.dark--deep .card,.dark--steel .card{background:var(--dark);border-color:var(--pale)}.dark .card p{color:var(--pale)}.dark .dense-card{background:var(--dark3);border-color:var(--pale)}.dark--deep .dense-card,.dark--steel .dense-card{background:var(--dark);border-color:var(--pale)}.dark .dense-card p,.dark .dense-label,.dark .demo,.dark .detail-link{color:var(--pale)}.dark .demo{background:var(--dark2);border-color:var(--pale)}.dark--deep .demo,.dark--steel .demo{background:var(--dark);border-color:var(--pale)}.dark .demo b{color:#ffffff}.dark .price-plate{background:var(--dark2);border-color:var(--pale);color:#ffffff}.dark--deep .price-plate,.dark--steel .price-plate{background:var(--dark);border-color:var(--pale);color:#ffffff}.dark .btn-mini{background:var(--pale);color:var(--dark2)}.dark .icon,.dark .icon--slate,.dark .icon--steel{background:var(--pale);color:var(--dark2)}.dark .detail{border-top-color:#ffffff}.dark .detail b{color:#ffffff}.dark .detail .term,.dark .detail dt{color:var(--pale)}.dark .detail dd{color:var(--pale)}.dark .accent-line{background:#ffffff}.dark .table-wrap{background:transparent;border-color:var(--pale)}.dark th{background:transparent;color:var(--pale)}.dark td{border-bottom-color:var(--pale)}.dark td b{color:#ffffff}.hero-notes{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.hero-notes span{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:100px;padding:8px 12px;font-size:12px;color:var(--soft)}.hero-notes svg{width:14px;height:14px;stroke:var(--acc)}details{border-top:1px solid var(--line)}details:last-child{border-bottom:1px solid var(--line)}summary{list-style:none;cursor:pointer;padding:20px 0;font-weight:600;display:flex;justify-content:space-between;gap:20px}summary::-webkit-details-marker{display:none}summary::after{content:"+";color:var(--acc);font:500 20px/1 "JetBrains Mono",ui-monospace,monospace}details[open] summary::after{content:"–"}details p{color:var(--soft);padding-bottom:20px;max-width:860px}.cta{background:var(--dark);color:var(--paper);border-top:1px solid var(--line)}.cta .mono{color:var(--line)}.cta p{color:#cbd5e1;margin-top:18px;max-width:560px}.cta .btn{background:var(--acc);border:1px solid var(--line)}footer{border-top:1px solid var(--line);padding:30px 0;background:var(--dark);color:#cbd5e1}.footer-row{display:flex;justify-content:space-between;gap:24px;font-size:13px;color:#cbd5e1;flex-wrap:wrap}.footer-row a{color:var(--line);text-decoration:underline}@media(max-width:900px){nav{display:none}.grid,.grid-4,.detail-grid,.dense-grid,.metrics{grid-template-columns:1fr 1fr}.hero-grid{grid-template-columns:1fr}.section-head{display:block}.section-head p{margin-top:16px}section{padding:60px 0}}@media(max-width:640px){.wrap{width:min(calc(100% - 32px),var(--max))}.grid,.grid-2,.grid-4,.detail-grid,.dense-grid,.metrics{grid-template-columns:1fr}.metric{border-right:0;border-bottom:1px solid var(--line)}.metric:last-child{border-bottom:0}.row .btn{width:100%}.footer-row{flex-direction:column}h1{font-size:38px}}</style>
+<style>.detail-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-bottom:8px}.detail-meta b,.detail-meta .term{margin-bottom:0}</style><style>.art-num{display:flex;align-items:center;gap:10px}.art-num .ico{width:32px;height:32px;border-radius:var(--r6);background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}.art-num .ico svg{width:18px;height:18px}.dark .artifact .ico{background:var(--acc);color:#fff}</style></head>
+<body>
+<a class="skip" href="#main">К содержимому</a>
+<div class="wrap">
+<header class="topbar">
+<a class="brand" href="home.html"><span aria-hidden="true"></span>AI BUREAU</a>
+<nav aria-label="Навигация"><a href="home.html#services">Услуги</a><a href="home.html#cases">Кейсы</a><a href="blog.html">Блог</a><a href="home.html#contact">Контакты</a></nav>
+<a class="top-link" href="#request">Обсудить задачу</a>
+</header>
+<main id="main">
+
+<section class="first">
+<div class="crumb">Главная / Услуги / Локальные LLM</div>
+<div class="hero-grid">
+<div>
+<span class="badge">ON-PREMISE + 152-ФЗ</span>
+<h1>Локальные LLM: <br>данные внутри сети</h1>
+<p class="lede">Языковая модель работает на вашем оборудовании и не отправляет запросы во внешнее облако. Мы подбираем конфигурацию под доступное железо, настраиваем доступы и показываем результат на ваших задачах, а не на демонстрационном примере. Первый тест идёт в ограниченном контуре: без внешних вызовов, с журналом запросов и проверкой прав доступа. По итогам теста видно, где не хватает ресурсов и какие задачи модель закрывает, до решения о расширении.</p>
+<div class="row"><a class="btn" href="#request">Обсудить задачу</a></div>
+<div class="hero-notes">
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Данные внутри сети</span>
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>Подбор под железо</span>
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8m-3 0h3v3"/></svg>Журнал доступов</span>
+</div>
+</div>
+<aside class="brief" aria-label="Параметры услуги">
+<span class="mono">[ ПЕРВЫЙ ШАГ ]</span>
+<div class="brief-title">Что даёт аудит инфраструктуры</div>
+<div class="metric-big">по итогам аудита<span>срок и стоимость фиксируются после разбора</span></div>
+<div class="brief-block"><span class="mono">КОМУ ПОДХОДИТ</span><p>Командам, которым нельзя передавать документы и запросы во внешние сервисы, а также командам с жёсткими требованиями к контуру.</p></div>
+<ol>
+<li><i>01</i><div>Карта железо, сетей и прав доступа с указанием владельцев.</div></li>
+<li><i>02</i><div>Подбор LLM под доступную память и бюджет задержки.</div></li>
+<li><i>03</i><div>Ограниченный контур с журналом запросов и правилами отката.</div></li>
+</ol>
+<p class="brief-note">Стоимость — по запросу. Ориентир до аудита, не оферта.</p>
+</aside>
+</div>
+</section>
+
+<div class="wrap">
+<div class="metrics" aria-label="Параметры процесса">
+<div class="metric"><b>1 нед.</b><span>на аудит инфраструктуры — ориентир до разбора</span></div>
+<div class="metric"><b>3</b><span>варианта развёртывания: сеть, изоляция, гибрид</span></div>
+<div class="metric"><b>4</b><span>этапа от аудита до внедрения</span></div>
+<div class="metric"><b>15</b><span>полных ответов в разделе вопросов</span></div>
+</div>
+<p class="note" style="margin-top:12px">Цифры описывают наш процесс, а не гарантированный эффект. Ориентир до аудита, не оферта.</p>
+</div>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[01 / ПРОБЛЕМЫ]</span><h2>Как работает LLM</h2></div><p>Три сбоя, из-за которых идея своего контура упирается в реальность.</p></div>
+<p class="aeo">Локальная модель — это языковая модель, которую запускают на вашем оборудовании и не отправляют запросы во внешнее облако. Вариант развёртывания выбирают по требованиям к данным: внутри сети, в изолированном контуре или гибридно. Сначала аудит инфраструктуры, затем подбор LLM под железо, потом тест на ваших задачах. Сроки и стоимость называем после разбора.</p>
+<div class="grid" style="margin-top:28px">
+<article class="card problem"><span class="num">01</span><h3>Данные нельзя отдавать в облако</h3><div class="line"><span>Симптом</span><p>Документы попадают под внутренние правила, а публичный API их не принимает. Сотрудники решают задачи вручную: легального способа автоматизации нет.</p></div><div class="line"><span>Цена ошибки</span><p>Каждый перенос текста в сторонний сервис создаёт событие, которое придётся объяснять. Проверка отвлекает инженеров и владельца процесса.</p></div><div class="line"><span>Последствие</span><p>Инициатива замораживается на согласовании. Работающий инструмент есть у других, но повторить его у себя нельзя.</p></div></article>
+<article class="card problem"><span class="num">02</span><h3>Нужен изолированный контур</h3><div class="line"><span>Симптом</span><p>Сеть отрезана от внешних узлов, обновления приносят вручную, а установка LLM ожидает доступ к реестрам. Проверка зависимостей становится отдельным проектом.</p></div><div class="line"><span>Цена ошибки</span><p>Инженер ищет совместимые версии вместо настройки сценария. Ошибка в версии библиотеки проявляется только на тесте.</p></div><div class="line"><span>Последствие</span><p>Контур не воспроизводится: установку нельзя повторить на втором сервере. Масштабирование под вопросом.</p></div></article>
+<article class="card problem"><span class="num">03</span><h3>Модель не вписывается в железо</h3><div class="line"><span>Симптом</span><p>Модель требует больше памяти, чем есть на сервере, а время ответа растёт. Запуск «как в примере» заканчивается ошибкой загрузки.</p></div><div class="line"><span>Цена ошибки</span><p>Закупка идёт по непроверенной оценке. Деньги уходят на железо, которое простаивает.</p></div><div class="line"><span>Последствие</span><p>Руководство решает, что LLM не работают, хотя проблема была в конфигурации.</p></div></article>
+</div>
+</section>
+
+<section class="dark">
+<div class="wrap">
+<span class="mono eyebrow">[02 / КАК ЭТО РАБОТАЕТ]</span>
+<h2>От аудита до внедрения</h2>
+<p class="intro">Четыре этапа. У каждого — входные данные, артефакт, участники и критерий готовности. Сроки даны как ориентир до разбора вашей инфраструктуры.</p>
+<div class="detail-grid">
+<div class="detail"><div class="detail-meta"><b>01</b><div class="term">1 неделя</div></div><h3>Аудит инфраструктуры</h3><dl><dt>Входные данные</dt><dd>Список серверов и GPU, схема сети, действующие ограничения, примеры задач и документов.</dd><dt>Артефакт</dt><dd>Карта инфраструктуры и требований с указанием владельцев систем и допустимых контуров.</dd><dt>Кто участвует</dt><dd>Инженер, администратор сети, владелец процесса и ответственный за информационную безопасность.</dd><dt>Критерий готовности</dt><dd>Понятно, где можно развернуть модель, какие данные туда попадут и кто подтверждает доступы.</dd></dl></div>
+<div class="detail"><div class="detail-meta"><b>02</b><div class="term">1–2 недели</div></div><h3>Подбор LLM</h3><dl><dt>Входные данные</dt><dd>Карта инфраструктуры, бюджет памяти, допустимая задержка и контрольные задачи.</dd><dt>Артефакт</dt><dd>Сравнение кандидатов, рекомендуемая конфигурация и короткое демо на ваших примерах.</dd><dt>Кто участвует</dt><dd>Инженер и эксперт предметной области, который оценивает качество ответов.</dd><dt>Критерий готовности</dt><dd>Модель запускается на доступном железе и проходит контрольные задачи без падений.</dd></dl></div>
+<div class="detail"><div class="detail-meta"><b>03</b><div class="term">3–4 недели</div></div><h3>Ограниченный контур</h3><dl><dt>Входные данные</dt><dd>Выбранная модель, правила доступа, регламент обновлений и перечень контактов с внешним миром.</dd><dt>Артефакт</dt><dd>Рабочий контур с журналом запросов, разграничением прав и инструкцией по откату.</dd><dt>Кто участвует</dt><dd>Инженер, администратор доступа и владелец процесса, принимающий результат.</dd><dt>Критерий готовности</dt><dd>Контур работает без внешних вызовов, а каждый запрос восстанавливается по журналу.</dd></dl></div>
+<div class="detail"><div class="detail-meta"><b>04</b><div class="term">По плану</div></div><h3>Внедрение</h3><dl><dt>Входные данные</dt><dd>Результаты ограниченного контура, согласованный регламент и список пользователей.</dd><dt>Артефакт</dt><dd>Расширенная установка, мониторинг, документация и обученная команда.</dd><dt>Кто участвует</dt><dd>Инженер, администратор и ответственный за эксплуатацию со стороны заказчика.</dd><dt>Критерий готовности</dt><dd>Система работает по регламенту, а обновления не требуют привлечения подрядчика.</dd></dl></div>
+</div>
+</div>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03 / КАК РЕШАЕМ]</span><h2>Четыре механизма</h2></div><p>Каждый узел настраивается и принимается отдельно, с демо на ваших задачах.</p></div>
+<div class="grid-2 dense-grid">
+<article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="8" rx="2"></rect><rect x="2" y="13" width="20" height="8" rx="2"></rect><line x1="6" y1="7" x2="6.01" y2="7"></line><line x1="6" y1="17" x2="6.01" y2="17"></line></svg></div><span class="num">01 // ВНУТРИ СЕТИ</span></div><span class="price-plate">по запросу</span></div><h3>Развернуть внутри сети</h3><p>Модель и API поднимаются на ваших серверах, запросы не покидают сеть.</p><div class="dense-label">Возможности</div><ul><li>Проверка доступных GPU и памяти</li><li>Служба с Единой точкой входа</li><li>Журнал запросов и ответов</li></ul><div class="demo"><b>Демо:</b> ответ на внутренний вопрос с подтверждением, что вызов остался в сети.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article>
+<article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon icon--slate"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div><span class="num">02 // ИЗОЛЯЦИЯ</span></div><span class="price-plate">по запросу</span></div><h3>Закрыть внешние каналы</h3><p>Контур работает без выхода в интернет, зависимости приносят по регламенту.</p><div class="dense-label">Возможности</div><ul><li>Офлайн-установка зависимостей</li><li>Список разрешённых узлов</li><li>Процедура обновления с проверкой</li></ul><div class="demo"><b>Демо:</b> запуск LLM при отключённом внешнем доступе и разбор логов.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article>
+<article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon icon--steel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6" rx="1"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="20" x2="15" y2="23"></line></svg></div><span class="num">03 // ПОД ЖЕЛЕЗО</span></div><span class="price-plate">по запросу</span></div><h3>Подобрать конфигурацию</h3><p>Размер LLM и способ загрузки считаются по памяти, задержке и мощности.</p><div class="dense-label">Возможности</div><ul><li>Сравнение квантованных вариантов</li><li>Замер задержки на вашей выборке</li><li>Запас по памяти под нагрузку</li></ul><div class="demo"><b>Демо:</b> два варианта LLM на одном сервере с таблицей замеров.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article>
+<article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 15l4-5 3 3 5-7"></path></svg></div><span class="num">04 // МОНИТОРИНГ</span></div><span class="price-plate">по запросу</span></div><h3>Видеть состояние контура</h3><p>Дашборд показывает доступность, задержку, ошибки и расход ресурсов.</p><div class="dense-label">Возможности</div><ul><li>Метрики по каждому сервису</li><li>Оповещение при недоступности</li><li>Журнал для разбора инцидента</li></ul><div class="demo"><b>Демо:</b> дашборд с замером до и после нагрузки и разбором одного инцидента.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article>
+</div>
+</section>
+
+<section class="dark dark--deep">
+<div class="wrap">
+<span class="mono eyebrow">[03.5 / ВАРИАНТЫ РАЗВЁРТЫВАНИЯ]</span>
+<h2>Три варианта</h2>
+<p class="intro">Выбор зависит от того, куда можно пускать данные и насколько жёстко ограничена сеть. Окончательная схема фиксируется после аудита.</p>
+<div class="grid dense-grid">
+<article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="8" rx="2"></rect><rect x="2" y="13" width="20" height="8" rx="2"></rect><line x1="6" y1="7" x2="6.01" y2="7"></line><line x1="6" y1="17" x2="6.01" y2="17"></line></svg></div><span class="num">01 // ВНУТРИ СЕТИ</span></div><span class="price-plate">по запросу</span></div><h3>Локальная сеть</h3><p>Модель стоит рядом с вашими системами, внешние сервисы не участвуют.</p><div class="dense-label">Возможности</div><ul><li>Вызовы только во внутренней сети</li><li>Права доступа по вашему каталогу</li><li>Логи остаются на ваших серверах</li></ul><div class="demo"><b>Демо:</b> запрос из внутреннего портала и ответ без выхода наружу.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article>
+<article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon icon--slate"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div><span class="num">02 // AIR-GAPPED</span></div><span class="price-plate">по запросу</span></div><h3>Изолированный контур</h3><p>Сеть полностью отделена, обновления и LLM приносят через проверенный канал.</p><div class="dense-label">Возможности</div><ul><li>Офлайн-реестр и локальные зеркала</li><li>Проверка целостности артефактов</li><li>Регламент переноса обновлений</li></ul><div class="demo"><b>Демо:</b> установка LLM без сетевого доступа и журнал переноса пакетов.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article>
+<article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon icon--steel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M16 3h3a2 2 0 0 1 2 2v3"></path><path d="M21 16v3a2 2 0 0 1-2 2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg></div><span class="num">03 // ГИБРИД</span></div><span class="price-plate">по запросу</span></div><h3>Гибридная схема</h3><p>Часть задач идёт локально, часть — в согласованный внешний контур по отдельному решению.</p><div class="dense-label">Возможности</div><ul><li>Разделение данных по классам</li><li>Явный выбор контура для задачи</li><li>Журнал, где видно местоположение вызова</li></ul><div class="demo"><b>Демо:</b> два сценария с разными контурами и проверка, какие данные куда ушли.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article>
+</div>
+<p class="note">Гибрид обсуждается только при письменном решении владельца данных. Мы не обещаем соответствие без проверки документов и схемы.</p>
+</div>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.6 / МОДЕЛИ И ЖЕЛЕЗО]</span><h2>Подбор под ресурсы</h2></div><p>Размер LLM, память и задержка считаются до закупки оборудования.</p></div>
+<div class="grid">
+<article class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6" rx="1"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="20" x2="15" y2="23"></line></svg></div><span class="num" style="margin-top:14px;display:block">01 / РАЗМЕР</span><h3>Размер и квантование</h3><p>Сравниваем несколько размеров LLM и форматы с пониженной точностью. Смотрим не на обещания в спецификации, а на запуск на вашем сервере и качество на контрольных задачах.</p></article>
+</div>
+<p class="note">Конкретные LLM и версии называем после аудита. Числа в спецификациях считаем ориентиром до проверки на вашем оборудовании.</p>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.7 / СООТВЕТСТВИЕ]</span><h2>Доступы и логи</h2></div><p>Пять проверок до того, как в контур попадут данные.</p></div>
+<div class="grid">
+<article class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg></div><span class="num" style="margin-top:14px;display:block">01 / ДОСТУПЫ</span><h3>Кто может вызвать модель</h3><p>Права сверяются с вашим каталогом пользователей. Закрытые документы не попадают в общий ответ, а вызов фиксируется с указанием инициатора.</p></article>
+<article class="card"><div class="icon icon--slate"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div><span class="num" style="margin-top:14px;display:block">02 / ЛОГИ</span><h3>Что остаётся в журнале</h3><p>Запрос, время, инициатор и результат. Доступ к журналу есть у администратора, срок хранения согласуется до запуска и записывается в регламент.</p></article>
+<article class="card"><div class="icon icon--steel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="9" y1="12" x2="11" y2="14"></line><line x1="11" y1="14" x2="15" y2="10"></line></svg></div><span class="num" style="margin-top:14px;display:block">03 / 152-ФЗ</span><h3>Персональные данные</h3><p>Определяем состав данных, цель обработки и правовое основание вместе с владельцем. Мы не даём юридических гарантий и не заменяем экспертизу: документы уходят на проверку к вашему юристу.</p></article>
+<article class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4l3 2"></path></svg></div><span class="num" style="margin-top:14px;display:block">04 / АУДИТ</span><h3>Проверка контура</h3><p>Перед приёмкой фиксируем, какие каналы открыты, кто имеет доступ и какие события попадают в журнал. Результат — отчёт с перечнем проверок и датами.</p></article>
+<article class="card"><div class="icon icon--slate"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M6 6v14h12V6"></path><path d="M9 10h6"></path><path d="M9 14h6"></path></svg></div><span class="num" style="margin-top:14px;display:block">05 / УДЕРЖАНИЕ</span><h3>Что удаляется после работ</h3><p>Временные копии моделей и тестовые данные удаляются по согласованному акту. В договоре фиксируется, что остаётся под вашим контролем.</p></article>
+</div>
+</section>
+
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.8 / ЧТО В ПОСТАВКЕ]</span>
+<h2>Что в поставке</h2>
+<p class="intro">Всё, что переходит под ваш контроль: конфигурации, документация, журналы и обученная команда. Каждый пункт принимается отдельно.</p>
+<div>
+<div class="artifact"><div class="art-num"><b>01</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/></svg></div></div><div><h4>Карта инфраструктуры</h4><p>Схема серверов, сегментов сети и доступов с указанием владельцев. Используется при каждой смене конфигурации.</p></div></div>
+<div class="artifact"><div class="art-num"><b>02</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div></div><div><h4>Выбор LLM</h4><p>Сравнение кандидатов с результатами замеров на вашей выборке и обоснование выбранного варианта.</p></div></div>
+<div class="artifact"><div class="art-num"><b>03</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6v20h12V8z"/><polyline points="14 2 14 8 20 8"/></svg></div></div><div><h4>Конфигурации</h4><p>Файлы запуска с версиями параметров и правилами отката. Хранятся в репозитории, изменения видны по истории.</p></div></div>
+<div class="artifact"><div class="art-num"><b>04</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></div></div><div><h4>Офлайн-пакеты</h4><p>Проверенные дистрибутивы и зависимости для установки без выхода в сеть, с указанием контрольных сумм.</p></div></div>
+<div class="artifact"><div class="art-num"><b>05</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div></div><div><h4>API</h4><p>Метод запроса к LLM, форматы ответов и коды ошибок. Описание входит в документацию для ваших разработчиков.</p></div></div>
+<div class="artifact"><div class="art-num"><b>06</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8m-3 0h3v3"/></svg></div></div><div><h4>Права доступа</h4><p>Матрица ролей и порядок согласования доступа к контуру. Сверяется с вашим каталогом пользователей.</p></div></div>
+<div class="artifact"><div class="art-num"><b>07</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg></div></div><div><h4>Журнал запросов</h4><p>Записи о вызовах с временем, инициатором и результатом. Срок хранения и порядок доступа фиксируются в регламенте.</p></div></div>
+<div class="artifact"><div class="art-num"><b>08</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div></div><div><h4>Регламент обновлений</h4><p>Кто и как приносит обновления в изолированный контур, как проверяет целостность и что делает при неудачной установке.</p></div></div>
+<div class="artifact"><div class="art-num"><b>09</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16M4 10h12M4 15h16M4 20h8"/></svg></div></div><div><h4>Промпты</h4><p>Шаблоны запросов с версиями и правилами вывода. Изменение проходит через тот же прогон, что и смена LLM.</p></div></div>
+<div class="artifact"><div class="art-num"><b>10</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg></div></div><div><h4>Мониторинг</h4><p>Дашборд по доступности, задержке, ошибкам и расходу ресурсов с оповещением ответственному дежурному.</p></div></div>
+<div class="artifact"><div class="art-num"><b>11</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div></div><div><h4>Резервный сценарий</h4><p>Что делать при недоступности LLM: ключевой поиск по базе знаний и уведомление владельцу процесса.</p></div></div>
+<div class="artifact"><div class="art-num"><b>12</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20a6 6 0 0 1 12 0M15 20a5 5 0 0 1 6-5"/></svg></div></div><div><h4>Передача команде</h4><p>Исходники, доступы, акт приёмки и короткая сессия для команды. Дальнейшие изменения делаются по регламенту.</p></div></div>
+</div>
+</div>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.9 / КАК СЧИТАЕМ ЭФФЕКТ]</span><h2>Как считаем эффект</h2></div><p>Сравнение идёт на одной и той же выборке задач до и после внедрения.</p></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Метрика</th><th>Как замеряем</th><th>Что фиксируем</th></tr></thead>
+<tbody>
+<tr><td><b>Задержка ответа</b></td><td>Замер на одинаковых задачах до и после смены конфигурации.</td><td>Медиана и максимум, дата замера, используемое железо.</td></tr>
+<tr><td><b>Доступность сервиса</b></td><td>Учёт успешных и неуспешных вызовов за период.</td><td>Доля успешных вызовов и перечень причин отказов.</td></tr>
+<tr><td><b>Качество на выборке</b></td><td>Совпадение ответов с эталонами из контрольного набора.</td><td>Доля совпадений и разбор расхождений по причинам.</td></tr>
+<tr><td><b>Расход ресурсов</b></td><td>Потребление памяти и времени вычисления на одной нагрузке.</td><td>Пиковые значения и запас, результат в отчёте.</td></tr>
+<tr><td><b>Доля ручных операций</b></td><td>Счёт действий, которые команда делала до автоматизации.</td><td>Перечень оставшихся ручных шагов и их причина.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="note">Цифры не публикуем до замера. В отчёте — выборка, даты и способ подсчёта. Ориентир до аудита, не оферта.</p>
+</section>
+
+<section class="dark dark--steel">
+<div class="wrap">
+<span class="mono eyebrow">[03.10 / ГДЕ НЕ РАБОТАЕТ]</span>
+<h2>Честные ограничения</h2>
+<p class="intro">Есть условия, при которых локальная модель не даёт результата. Называем их до старта, а не после неудачного пилота.</p>
+<div class="grid">
+<article class="card"><span class="num">01</span><h3>Нет свободной памяти</h3><p>Если доступное железо не потянет выбранную модель, придётся снижать размер или менять формат. Мы показываем замеры и не обещаем качество, которого оборудование не даёт.</p></article>
+<article class="card"><span class="num">02</span><h3>Нет владельца регламента</h3><p>Изолированный контур быстро устареет, если не назначить ответственного за обновления. Без владельца процесса мы не рекомендуем запускать пилот.</p></article>
+<article class="card"><span class="num">03</span><h3>Юридические вопросы без экспертизы</h3><p>Локальное размещение само по себе не решает вопросы 152-ФЗ. Состав данных, основания и документы проверяет ваш юрист. Мы не даём юридических гарантий.</p></article>
+<article class="card"><span class="num">04</span><h3>Редкие и нечёткие задачи</h3><p>По одному примеру нельзя судить о качестве ответов. Нужна репрезентативная выборка, иначе метрика будет случайной и пользы от неё не будет.</p></article>
+</div>
+</div>
+</section>
+
+<section class="dark">
+<div class="wrap">
+<div class="section-head"><div><span class="mono eyebrow">[03.11 / СРАВНЕНИЕ ПОДХОДОВ]</span><h2>Способы и границы</h2></div><p>Подходы можно сочетать, но подменять один другим не стоит.</p></div>
+<div class="grid-2">
+<article class="card"><span class="num">01</span><h3>Публичный API</h3><p>Быстрый старт и минимальные требования к железу. Но данные уходят во внешний сервис, поэтому подход не подходит там, где это запрещено внутренними правилами.</p></article>
+<article class="card"><span class="num">02</span><h3>Локальная модель в сети</h3><p>Запросы остаются внутри компании, а обновления приходят обычным порядком. Требует серверов и администратора, зато проще в эксплуатации, чем полная изоляция.</p></article>
+<article class="card"><span class="num">03</span><h3>Air-gapped контур</h3><p>Максимальная изоляция при минимальном количестве внешних каналов. Дороже в поддержке: каждое обновление приносится по регламенту и проверяется вручную.</p></article>
+<article class="card"><span class="num">04</span><h3>Гибрид</h3><p>Часть задач решается локально, часть — в согласованном внешнем контуре. Требует явных правил, что и куда можно отправлять, и журнала, где это видно.</p></article>
+</div>
+<p class="note">Выбор зависит от требований к контуру, а не от моды на модель. Любая схема фиксируется в проектной документации до переноса данных.</p>
+</div>
+</section>
+
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.12 / ТИПОВОЙ СЦЕНАРИЙ]</span>
+<h2>Было и стало</h2>
+<p class="intro">Сценарий описан без выдуманных цифр. Показываем характер изменений, а результат фиксируем замером на ваших задачах.</p>
+<div class="grid-2">
+<div class="panel"><span class="mono">БЫЛО</span><h3>Ответы ищут вручную</h3><ul><li>Инженер ищет описание неисправности в папке и уточняет детали у старшего смены.</li><li>Часть инструкций есть только в бумажном виде и без даты версии.</li><li>Непонятно, можно ли скопировать текст во внешний сервис, поэтому не делают этого вообще.</li><li>Новый сотрудник учится на практике, а не по актуальному регламенту.</li></ul></div>
+<div class="panel"><span class="mono">СТАЛО</span><h3>Модель отвечает внутри сети</h3><ul><li>Вопрос задаётся обычным языком, без знания точного названия файла.</li><li>Ответ показывает текст из регламента и дату версии источника.</li><li>Спорный случай помечается и уходит владельцу раздела на проверку.</li><li>Журнал показывает, кто и когда получил ответ, без выхода во внешний контур.</li></ul></div>
+</div>
+<p class="note">Что проверяем: задержку, долю ответов с источником, число уточнений у коллег и число ручных шагов. Результат в отчёте — с датами замера и исходной выборкой.</p>
+</div>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.13 / СТЕК]</span><h2>Из чего собран контур</h2></div><p>Инструменты, которые звучат в проекте. Конкретный выбор фиксируется после аудита.</p></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Слой</th><th>Инструменты</th><th>Роль в решении</th></tr></thead>
+<tbody>
+<tr><td><b>LLM</b></td><td>OpenAI-совместимые локальные LLM</td><td>Выполнение запросов внутри вашего контура без внешних вызовов.</td></tr>
+<tr><td><b>Форматы</b></td><td>Квантованные LLM, локальные веса</td><td>Запуск на доступной памяти с сохранением проверенного качества.</td></tr>
+<tr><td><b>Сервис</b></td><td>Контейнеры, внутренний REST API</td><td>Единая точка вызова и подключение к вашим системам.</td></tr>
+<tr><td><b>Доступы</b></td><td>Ваш каталог пользователей, роли</td><td>Разграничение вызовов и контроль того, кто видит ответ.</td></tr>
+<tr><td><b>Наблюдение</b></td><td>Метрики, журналы, оповещения</td><td>Контроль доступности, задержки и расхода ресурсов.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="note">Если у вас есть платформа виртуализации или мониторинг, рассматриваем их вместе с предложенными вариантами. Ориентир до аудита, не оферта.</p>
+</section>
+
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.14 / ЧТО ПОДГОТОВИТЬ]</span>
+<h2>Что подготовить</h2>
+<p class="intro">Шесть пунктов, которые нужны нам от вашей команды. Идеальную инфраструктуру заранее собирать не обязательно — разберёмся на аудите.</p>
+<div class="grid">
+<article class="card"><span class="num">01</span><h3>Параметры серверов</h3><p>Модель процессора, объём памяти, наличие GPU и версия системы. По ним сразу видно, какие LLM реально запустить.</p></article>
+<article class="card"><span class="num">02</span><h3>Схема сети</h3><p>Сегменты, разрешённые узлы и ограничения на внешние вызовы. Это определяет выбор между сетью и изоляцией.</p></article>
+<article class="card"><span class="num">03</span><h3>Примеры задач</h3><p>5–10 вопросов или документов с эталонными ответами. По ним измеряем качество до и после настроек.</p></article>
+<article class="card"><span class="num">04</span><h3>Владелец процесса</h3><p>Человек, который подтверждает, что ответы подходят, и принимает решение о запуске.</p></article>
+<article class="card"><span class="num">05</span><h3>Права на данные</h3><p>Подтверждение, что переданные файлы можно обрабатывать в выбранном контуре. Юридическую часть проверяет ваш специалист.</p></article>
+<article class="card"><span class="num">06</span><h3>Ответственный за обновление</h3><p>Кто приносит обновления LLM и кто следит за журналом и оповещениями после приёмки.</p></article>
+</div>
+</div>
+</section>
+
+<section class="dark">
+<div class="wrap">
+<div class="section-head"><div><span class="mono eyebrow">[03.15 / СТОИМОСТЬ]</span><h2>Состав стоимости</h2></div><p>Состав работ по строкам. Суммы называем после разбора задачи.</p></div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Статья работ</th><th>Что входит</th><th>Что влияет на объём</th></tr></thead>
+<tbody>
+<tr><td><b>Аудит инфраструктуры</b></td><td>Обследование серверов, сети, прав и ограничений; карта требований.</td><td>Число систем и строгость контура.</td></tr>
+<tr><td><b>Подбор LLM</b></td><td>Сравнение кандидатов, замеры на контрольных задачах, рекомендация.</td><td>Число сценариев и доступное оборудование.</td></tr>
+<tr><td><b>Контур и доступы</b></td><td>Установка, настройка ролей, журналы, схема отката.</td><td>Требования к изоляции и числу пользователей.</td></tr>
+<tr><td><b>Офлайн-поставка</b></td><td>Подготовка проверенных пакетов и регламента обновлений.</td><td>Нужна ли работа без выхода в сеть.</td></tr>
+<tr><td><b>Мониторинг</b></td><td>Метрики, оповещения, разбор одного инцидента с командой.</td><td>Число сервисов и требуемая глубина журналирования.</td></tr>
+<tr><td><b>Передача и поддержка</b></td><td>Документация, обучение, регламент, разбор сложных ошибок.</td><td>Темп изменений и число участников.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="note">Ориентир до аудита, не оферта. Итоговая стоимость считается после разбора инфраструктуры и задач; всё фиксируется в договоре.</p>
+</div>
+</section>
+
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[04 / ВОПРОСЫ И ОТВЕТЫ]</span><h2>Вопросы и ответы</h2></div><p>Полные ответы по существу. Если вашего вопроса нет — напишите в Telegram.</p></div>
+<div style="margin-top:26px">
+<details><summary>Что такое on-premise простыми словами?</summary><p>On-premise — развёртывание LLM на вашем оборудовании, в вашей сети. Запросы и документы не уходят в публичное облако, журнал остаётся на ваших серверах. Такой вариант выбирают, когда правила запрещают передачу данных наружу. Мы проверяем, что конфигурация работает без внешних вызовов, и показываем это на демо.</p></details>
+<details><summary>Когда нужен air-gapped контур?</summary><p>Изоляция нужна, когда сеть не должна иметь внешних узлов, а обновления приносят через проверенный канал. Мы готовим офлайн-пакеты, убираем обращения к публичным реестрам и составляем регламент переноса. Если таких требований нет, обычно хватает развёртывания внутри сети: оно проще в поддержке.</p></details>
+<details><summary>Сколько стоит услуга?</summary><p>Стоимость зависит от инфраструктуры, контура, числа сценариев и требований к мониторингу. Мы не публикуем цифру «от»: разброс между проектами слишком велик. Расчёт присылаем после короткого аудита с составом работ. В него входят этапы, артефакты и то, что остаётся под вашим контролем. Ориентир до аудита, не оферта.</p></details>
+<details><summary>Какие сроки до первого результата?</summary><p>Ориентир — одна неделя на аудит инфраструктуры. Подбор LLM занимает 1–2 недели, ограниченный контур — 3–4 недели. Точный график называется после того, как видны оборудование, схема сети и контрольные задачи. Сроки фиксируются по результатам разбора, а не берутся из шаблона.</p></details>
+<details><summary>Какое железо нужно?</summary><p>Мы смотрим на память, процессор и видеокарту. По ним подбираем размер LLM и формат весов с запасом под параллельные запросы. Если GPU нет, рассматриваем варианты под процессор и честно называем ограничения по задержке. Требования формируются после аудита; закупать оборудование без замера мы не советуем.</p></details>
+<details><summary>Какие LLM вы используете?</summary><p>Рассматриваем OpenAI-совместимые локальные LLM и квантованные форматы, которые запускаются внутри контура. Выбор делается по результатам сравнения на ваших задачах и с учётом лицензии. Мы не настаиваем на одной LLM: важнее, чтобы она прошла проверку и помещалась в инфраструктуру.</p></details>
+<details><summary>Какое качество ответов можно ожидать?</summary><p>Точность без замера мы не обещаем. Качество определяется совпадением с эталоном на вашей выборке и задержкой на доступном железе. Оба значения фиксируются в отчёте с датами и описанием выборки. Если результат не устраивает, показываем причину и список правок.</p></details>
+<details><summary>Где находятся данные и логи?</summary><p>Внутри вашего контура. Схема размещения и доступы фиксируются в документации до переноса файлов. Внешние сервисы не получают запросы без отдельного решения владельца. Журнал хранит время, инициатора и результат; доступ к нему есть у администратора. Срок хранения согласуется заранее.</p></details>
+<details><summary>Как вы работаете с 152-ФЗ?</summary><p>Мы помогаем описать состав данных, цель обработки и схему доступа, готовим техническую часть: журналы, роли и размещение. Мы не даём юридических гарантий и не заменяем экспертизу. Документы уходят на проверку к вашему специалисту до публикации любых обещаний. Без этого шага запуск не идёт в приёмку.</p></details>
+<details><summary>Как обновляется модель в изолированном контуре?</summary><p>По регламенту: обновление приносится проверенным каналом, сверяется контрольная сумма, затем делается тестовый прогон. Только после этого новая версия заменяет рабочую. Старая конфигурация остаётся для отката. Все шаги фиксируются в журнале.</p></details>
+<details><summary>Как устроен мониторинг?</summary><p>Мы снимаем доступность сервиса, задержку ответа и расход памяти. При выходе за согласованные границы уходит оповещение ответственному. В журнале видно, какой вызов завершился ошибкой. Разбор одного инцидента входит в демо и помогает команде понять, как действовать после передачи.</p></details>
+<details><summary>Что показывает первый прогон?</summary><p>Первый прогон показывает ответы на ваших контрольных задачах, замеры задержки и расхождения с эталоном. По нему видно, где не хватает памяти, где мешает формулировка запроса, а где задача описана неточно. Дальше решается: менять конфигурацию, править промпты или уточнять выборку.</p></details>
+<details><summary>Как исправляются ошибки?</summary><p>Ошибка связывается с версией конфигурации и причиной: модель, промпт, данные или железо. После правки повторяется прогон на той же выборке. Изменения вносятся через репозиторий конфигураций, поэтому предыдущее состояние можно вернуть. История правок остаётся в журнале.</p></details>
+<details><summary>Есть ли поддержка после внедрения?</summary><p>Поддержка нужна для обновлений LLM, изменений прав и разбора сложных ошибок. Объём и срок реагирования фиксируются в договоре. Регламент и мониторинг передаются вместе с решением, поэтому текущие операции команда делает сама. Мы подключаемся при смене схемы контура.</p></details>
+<details><summary>Что будет, если мы откажемся от запуска?</summary><p>Вы получаете карту инфраструктуры, сравнение моделей, отчёт по замерам и рекомендацию — независимо от решения. Артефакты передаются в полном виде, без скрытых обязательств. Если результат не проходит проверку, мы прямо говорим почему и не предлагаем запуск ради галочки.</p></details>
+</div>
+</section>
+
+<section id="request" class="cta">
+<div class="wrap">
+<span class="mono eyebrow">[05 / ЗАЯВКА]</span>
+<h2>Пришлите задачу и сервер</h2>
+<p>Покажем, какой контур подходит, какие LLM реально запустить на вашем железе и где проходят границы применимости. Стоимость — по запросу после разбора.</p>
+<div class="row"><a class="btn" href="https://t.me/erik03132">Написать в Telegram</a></div>
+</div>
+</section>
+
+</main>
+<footer>
+<div class="footer-row">
+<span>AI BUREAU · Telegram @erik03132 · info@ai-traffic-pro.ru · +7 (495) 923-46-44</span>
+<span>ИП Марченко Дмитрий Николаевич · ИНН 770304789944 · © 2026</span>
+</div>
+<div class="footer-row" style="margin-top:10px"><span>Контакты и реквизиты из ai-marketing. Для ai-bureau.online требуют подтверждения владельца. Материалы страницы не являются публичной офертой.</span></div>
+</footer>
+</div>
+</body>
+</html>

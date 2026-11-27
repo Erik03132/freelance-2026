@@ -1,0 +1,77 @@
+--- /private/var/folders/18/9bft2pp5595d231dd_zfs4240000gn/T/opencode/aib-prod2/index.html	2026-11-26 19:47:17
++++ docs/roadmap/stitch/prod-patch/index.html	2026-11-26 19:48:53
+@@ -1376,16 +1376,6 @@
+         accurateTrackBounce:true,
+         webvisor:true,
+         trackHash:true
+-    });
+-
+-    // Цель: отправка формы
+-    document.addEventListener('DOMContentLoaded', function() {
+-        var form = document.getElementById('contactForm');
+-        if (form) {
+-            form.addEventListener('submit', function() {
+-                ym(113314969, 'reachGoal', 'form_submit');
+-            });
+-        }
+     });
+ 
+     // Цель: клик в Telegram
+@@ -1843,56 +1833,9 @@
+                 Расскажите, где сейчас теряется время. Мы покажем, что можно
+                 автоматизировать и с чего начать.
+               </p>
+-              <form id="contactForm" class="contact-form" action="/api/submit" method="POST" novalidate>
+-                <label>Имя <input type="text" name="name" required placeholder="Ваше имя"></label>
+-                <label>Компания <input type="text" name="company" placeholder="Название компании"></label>
+-                <label>Задача <textarea name="task" required placeholder="Опишите задачу"></textarea></label>
+-                <label>Контакт (телефон или email) <input type="text" name="contact" placeholder="+7 или email"></label>
+-                <label class="honeypot" style="display:none">Не заполняйте <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+-                <label class="consent">
+-                  <input type="checkbox" name="consent" required> Я согласен на обработку персональных данных согласно <a href="/privacy">политики</a>
+-                </label>
+-                <button class="button button-dark" type="submit">Отправить заявку <span class="arrow">↗</span></button>
+-                <div class="msg ok" id="msgOk">Заявка отправлена. Мы скоро ответим.</div>
+-                <div class="msg err" id="msgErr">Ошибка отправки. Попробуйте erik03132@gmail.com.</div>
+-              </form>
+-
+-              <script>
+-              (function() {
+-                const form = document.getElementById('contactForm');
+-                if (!form) return;
+-                form.addEventListener('submit', async function(e) {
+-                  e.preventDefault();
+-                  document.getElementById('msgOk').style.display = 'none';
+-                  document.getElementById('msgErr').style.display = 'none';
+-                  const fd = new FormData(form);
+-                  const data = Object.fromEntries(fd.entries());
+-                  if (data.website && data.website.trim().length > 0) {
+-                    document.getElementById('msgErr').textContent = 'Ошибка защиты. Попробуйте позже.';
+-                    document.getElementById('msgErr').style.display = 'block';
+-                    return;
+-                  }
+-                  data.consent = data.consent === 'on' ? true : false;
+-                  try {
+-                    const r = await fetch(form.action, {
+-                      method: 'POST',
+-                      headers: {'Content-Type': 'application/json'},
+-                      body: JSON.stringify(data)
+-                    });
+-                    if (r.ok) {
+-                      document.getElementById('msgOk').style.display = 'block';
+-                      form.reset();
+-                    } else throw new Error();
+-                  } catch {
+-                    document.getElementById('msgErr').textContent = 'Ошибка отправки. Попробуйте erik03132@gmail.com.';
+-                    document.getElementById('msgErr').style.display = 'block';
+-                  }
+-                });
+-              })();
+-              </script>
+                             <a
+                 class="button telegram-cta"
+-                href="https://t.me/erik03132?text=Здравствуйте%21%20Хочу%20обсудить%20внедрение%20ИИ%20в%20бизнес."
++                href="https://t.me/erik03132?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%95%D1%81%D1%82%D1%8C%20%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B0%20%D0%BF%D0%BE%20%D0%B2%D0%BD%D0%B5%D0%B4%D1%80%D0%B5%D0%BD%D0%B8%D1%8E%20%D0%98%D0%98.%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BE%D0%B1%D1%81%D1%83%D0%B4%D0%B8%D1%82%D1%8C."
+                 target="_blank"
+                 rel="noopener noreferrer"
+               >

@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Чат-боты и поддержка — отдельная услуга — AI Bureau</title>
+<meta name="description" content="Чат-боты и поддержка: ответы на типовые вопросы, квалификация заявок, эскалация человеку и связь с CRM. Пилот в одном канале.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3EFE7;--surface:#fff;--ink:#1f2937;--soft:#4A4640;--muted:#6E675F;--line:#DED7CC;--acc:#9e2a2b;--dark:#1f2937;--dark2:#0f172a;--dark3:#334155;--dark4:#475569;--max:1240px;--radius:16px;--r6:6px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.55 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.skip{position:absolute;left:-9999px;top:8px;background:var(--dark);color:#fff;padding:10px 16px;z-index:10}
+.skip:focus{left:12px}
+.wrap{width:min(calc(100% - 128px),var(--max));margin:0 auto}
+.mono{font:500 11px/1.2 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.eyebrow{display:block;margin-bottom:14px}
+h1,h2,h3,h4{margin:0;letter-spacing:-.03em;line-height:1.06}
+h1{font-size:clamp(40px,4.5vw,58px);font-weight:700;max-width:900px}
+h2{font-size:clamp(28px,3.8vw,46px);font-weight:600}
+h3{font-size:20px;font-weight:600;letter-spacing:-.015em;line-height:1.2}
+h4{font-size:16px;font-weight:600;letter-spacing:-.01em}
+p{margin:0}
+section{padding:120px 0;border-top:1px solid var(--line)}
+section.first{border-top:0;padding:56px 0 24px}
+.lede{color:var(--soft);font-size:18px;max-width:700px;margin-top:22px}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:40px;margin-bottom:32px}
+.section-head p{color:var(--muted);max-width:430px;font-size:15px}
+.intro{color:var(--soft);max-width:850px;margin-bottom:30px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:100px;background:var(--acc);color:#fff;font-weight:600;font-size:15px;border:0}
+.row{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line)}
+.brand{font-weight:700;letter-spacing:.12em;font-size:14px}
+.brand span{display:inline-block;width:9px;height:9px;background:var(--acc);margin-right:10px}
+nav{display:flex;gap:24px;font-size:14px;color:var(--soft)}
+.top-link{font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc)}
+.crumb{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:34px}
+.badge{display:inline-block;background:#fff;border:1px solid var(--line);color:var(--acc);padding:10px 14px;border-radius:var(--r6);font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;margin-bottom:20px}
+.hero-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:48px;align-items:start}
+.brief{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:30px}
+.brief-title{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-top:14px}
+.metric-big{font-size:44px;font-weight:700;letter-spacing:-.04em;line-height:1.1;margin-top:22px}
+.metric-big span{display:block;font:500 11px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.brief-block{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.brief-block p{color:var(--soft);font-size:14px;margin-top:10px}
+.brief ol{margin:18px 0 0;padding:0;list-style:none}
+.brief li{display:flex;gap:14px;padding:12px 0;border-top:1px solid var(--line);font-size:14px;align-items:flex-start}
+.brief li i{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;color:#fff;font:700 10px/1 "JetBrains Mono",ui-monospace,monospace;font-style:normal;flex-shrink:0}
+.brief li:nth-child(1) i{background:var(--acc)}
+.brief li:nth-child(2) i{background:var(--dark)}
+.brief li:nth-child(3) i{background:var(--dark3)}
+.brief-note{margin-top:18px;font-size:13px;color:var(--muted)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:12px}
+.metric{padding:24px 22px;border-right:1px solid var(--line)}
+.metric:last-child{border-right:0}
+.metric b{display:block;font-size:32px;letter-spacing:-.04em}
+.metric span{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:36px}
+.card h3{margin:18px 0 10px}
+.card p{color:var(--soft);font-size:14px}
+.num{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--muted)}
+.aeo{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;margin-top:28px;color:var(--soft);font-size:16px;max-width:900px}
+.problem .line{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.problem .line span{display:block;font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc);margin-bottom:5px}
+.dense-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;justify-content:space-between}
+.dense-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+.dense-id{display:flex;align-items:center;gap:10px;min-width:0}
+.icon{width:32px;height:32px;border-radius:var(--r6);background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon--g2{background:var(--dark3)}
+.icon--g3{background:var(--dark4)}
+.icon--acc{background:var(--acc)}
+.dense-card .num{font-size:11px}
+.price-plate{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;background:var(--paper);padding:5px 8px;border-radius:var(--r6);color:var(--ink);white-space:nowrap}
+.dense-card h3{margin:0 0 6px;font-size:17px;line-height:1.25}
+.dense-card p{font-size:13px;line-height:1.35;margin-bottom:10px}
+.dense-label{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.dense-card ul{margin:0 0 10px;padding-left:14px;font-size:12px;line-height:1.35;color:var(--soft)}
+.dense-card li{margin-bottom:2px}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:var(--r6);padding:8px 10px;font-size:11px;line-height:1.3;color:var(--muted);margin-bottom:12px}
+.demo b{color:var(--ink)}
+.dense-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:10px}
+.detail-link{font-size:12px;text-decoration:underline;color:var(--muted)}
+.btn-mini{min-height:28px;padding:0 12px;font-size:12px;border-radius:var(--r6);background:var(--dark);color:#fff;display:inline-flex;align-items:center;justify-content:center}
+.icon-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.icon-card .icon{margin-bottom:16px}
+.icon-card h3{font-size:18px;margin-bottom:8px}
+.icon-card p{color:var(--soft);font-size:13px}
+.icon-card .num{display:block;margin-bottom:10px}
+.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.detail{border-top:2px solid var(--acc);padding-top:18px}
+.detail b{display:block;font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--acc);margin-bottom:6px}
+.detail .term{font:500 11px/1.4 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.detail h3{font-size:18px}
+.detail dl{margin:16px 0 0}
+.detail dt{font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc)}
+.detail dd{margin:3px 0 12px;color:var(--soft);font-size:13px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);background:var(--surface);border-radius:var(--radius)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:16px 20px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
+td b{font-size:15px}
+tr:last-child td{border-bottom:0}
+.tint{background:var(--surface);border-top:1px solid var(--line)}
+.artifact{display:grid;grid-template-columns:52px 1fr;gap:18px;padding:18px 0;border-top:1px solid var(--line)}
+.artifact:last-child{border-bottom:1px solid var(--line)}
+.artifact b{font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--acc);padding-top:4px}
+.artifact p{color:var(--soft);font-size:14px;margin-top:6px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px}
+.panel h3{margin-bottom:14px}
+.panel .mono{display:block;margin-bottom:12px}
+.panel ul{margin:0;padding-left:18px;color:var(--soft);font-size:14px}
+.panel li{margin-bottom:10px}
+.dsec{background:var(--dark);color:#F3EFE7;border-top:0}
+.dsec.bg2{background:var(--dark)}
+.dsec.bg3{background:var(--dark)}
+.dsec .mono,.dsec .num{color:#cbd5e1}
+.dsec h2{max-width:800px;color:#fff}
+.dsec h3{color:#fff}
+.dsec p,.dsec .intro,.dsec .icon-card p{color:#cbd5e1}
+.dsec .detail{border-top-color:#cbd5e1}
+.dsec .detail b,.dsec .detail dt{color:#fff}
+.dsec .detail dd,.dsec .detail .term{color:#cbd5e1}
+.dsec .icon-card{background:transparent;border-color:#cbd5e1}
+.dsec .icon-card .num{color:#cbd5e1}
+.dsec .icon{background:var(--dark3);color:#fff}
+.dsec.bg2 .icon{background:var(--dark4);color:#fff}
+.dsec.bg3 .icon{background:var(--dark);color:#fff}
+.dsec .lede,.dsec .note{color:#cbd5e1}
+.dsec .table-wrap{background:transparent;border-color:#cbd5e1}
+.dsec th{background:transparent;color:#cbd5e1}
+.dsec td{border-bottom-color:#cbd5e1}
+.dsec td b{color:#fff}
+.note{color:var(--muted);font-size:14px;margin-top:20px;max-width:860px}
+.hero-notes{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.hero-notes span{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:100px;padding:8px 12px;font-size:12px;color:var(--soft)}
+.hero-notes svg{width:14px;height:14px;stroke:var(--acc)}
+details{border-top:1px solid var(--line)}
+details:last-child{border-bottom:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;padding:20px 0;font-weight:600;display:flex;justify-content:space-between;gap:20px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--acc);font:500 20px/1 "JetBrains Mono",ui-monospace,monospace}
+details[open] summary::after{content:"–"}
+details p{color:var(--soft);padding-bottom:20px;max-width:880px}
+.cta{background:var(--dark);color:var(--paper);border-top:1px solid var(--line)}
+.cta .mono{color:var(--line)}
+.cta p{color:#cbd5e1;margin-top:18px;max-width:600px}
+.cta .btn{background:var(--acc);border:1px solid var(--line)}
+footer{border-top:1px solid var(--line);padding:30px 0;background:var(--dark);color:#cbd5e1}
+.footer-row{display:flex;justify-content:space-between;gap:24px;font-size:13px;color:#cbd5e1;flex-wrap:wrap}
+.footer-row a{color:var(--line);text-decoration:underline}
+@media(max-width:900px){nav{display:none}.grid,.grid-4,.detail-grid,.metrics,.icon-grid{grid-template-columns:1fr 1fr}.hero-grid{grid-template-columns:1fr}.section-head{display:block}.section-head p{margin-top:16px}section{padding:60px 0}}
+@media(max-width:640px){.wrap{width:min(calc(100% - 32px),var(--max))}.grid,.grid-2,.grid-4,.detail-grid,.metrics,.icon-grid{grid-template-columns:1fr}.metric{border-right:0;border-bottom:1px solid var(--line)}.metric:last-child{border-bottom:0}.row .btn{width:100%}.footer-row{flex-direction:column}h1{font-size:38px}}
+</style>
+<style>.detail-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-bottom:8px}.detail-meta b,.detail-meta .term{margin-bottom:0}</style><style>.art-num{display:flex;align-items:center;gap:10px}.art-num .ico{width:32px;height:32px;border-radius:var(--r6);background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}.art-num .ico svg{width:18px;height:18px}.dsec .artifact .ico{background:var(--acc);color:#fff}</style></head>
+<body>
+<a class="skip" href="#main">К содержимому</a>
+<div class="wrap">
+<header class="topbar">
+<a class="brand" href="home.html"><span></span>AI BUREAU</a>
+<nav aria-label="Навигация"><a href="home.html#services">Услуги</a><a href="home.html#cases">Кейсы</a><a href="blog.html">Блог</a><a href="home.html#contact">Контакты</a></nav>
+<a class="top-link" href="#request">Обсудить задачу</a>
+</header>
+<main id="main">
+
+<section class="first">
+<div class="crumb">Главная / Услуги / Чат-боты и поддержка</div>
+<div class="hero-grid">
+<div>
+<span class="badge">TELEGRAM + CRM</span>
+<h1>Чат-боты и поддержка:<br>ответы без задержки</h1>
+<p class="lede">Бот отвечает на типовые вопросы, уточняет задачу и передаёт диалог человеку, когда нужен контекст. Работает в канале, где клиенты уже пишут, и оставляет заявку в CRM. Если подходящего ответа нет или вопрос спорный, диалог уходит оператору с резюме и историей переписки. Первый тест проходит в одном канале на ваших обращениях и показывает, какие темы бот закрывает сам.</p>
+<div class="row"><a class="btn" href="#request">Обсудить задачу</a></div>
+<div class="hero-notes">
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>Ответ 24/7</span>
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c0-2.8 2.5-4.8 5.5-4.8 1 0 2 .2 2.8.7"/><path d="M14 15h6m0 0-3-3m3 3-3 3"/></svg>Передача человеку</span>
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="7" ry="3"/><path d="M5 5.5v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/><path d="M5 11.5v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg>Связь с CRM</span>
+</div>
+</div>
+<aside class="brief" aria-label="Параметры услуги">
+<span class="mono">[ ПЕРВЫЙ ШАГ ]</span>
+<div class="brief-title">Что будет после разбора</div>
+<div class="metric-big">2–4 нед.<span>до первого теста, ориентир</span></div>
+<div class="brief-block"><span class="mono">КОМУ ПОДХОДИТ</span><p>Командам поддержки и продаж, где повторяются одни и те же вопросы, а ночные обращения остаются без ответа.</p></div>
+<ol>
+<li><i>01</i><div>Карта повторяющихся вопросов и сценариев диалога.</div></li><li><i>02</i><div>Рабочий бот в одном канале с записью обращения в CRM.</div></li><li><i>03</i><div>Правила эскалации и база ответов под вашим контролем.</div></li>
+</ol>
+<p class="brief-note">Стоимость — по запросу после разбора диалогов и доступов. Сроки ориентировочные.</p>
+</aside>
+</div>
+</section>
+
+<div class="wrap">
+<div class="metrics" aria-label="Параметры работы AI Bureau">
+<div class="metric"><b>3</b><span>канала в базовом пилоте</span></div><div class="metric"><b>4</b><span>этапа до первого теста</span></div><div class="metric"><b>2–4</b><span>недели ориентировочно</span></div><div class="metric"><b>по запросу</b><span>стоимость после разбора</span></div>
+</div>
+</div>
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[01 / ПРОБЛЕМЫ]</span><h2>Как работает бот</h2></div><p>Три сбоя, из-за которых обращение не становится решённой задачей.</p></div>
+<p class="aeo">Чат-бот для поддержки закрывает повторяющиеся вопросы по согласованной базе знаний и оставляет след в CRM. Когда ответа нет или нужен контекст, диалог уходит человеку с кратким резюме. Пилот запускается в одном канале и показывает, какие темы реально закрываются без оператора. Результат проверяется на ваших диалогах, а не на демонстрационных примерах.</p>
+<div class="grid" style="margin-top:28px">
+<article class="card problem"><span class="num">01</span><h3>Типовые вопросы отнимают смену</h3>
+<div class="line"><span>Симптом</span><p>Оператор отвечает на один и тот же вопрос по несколько раз в день и теряет нить сложных обращений.</p></div>
+<div class="line"><span>Цена ошибки</span><p>Время уходит на повтор, а не на случаи, где нужна экспертиза.</p></div>
+<div class="line"><span>Последствие</span><p>Ответы разных сотрудников расходятся, и клиент получает разные условия.</p></div></article><article class="card problem"><span class="num">02</span><h3>Ночью никто не отвечает</h3>
+<div class="line"><span>Симптом</span><p>Сообщение приходит после окончания рабочего дня и ждёт утра.</p></div>
+<div class="line"><span>Цена ошибки</span><p>Клиент уходит к конкуренту, а обращение теряется без следа.</p></div>
+<div class="line"><span>Последствие</span><p>Утром оператор не видит контекст и начинает разговор заново.</p></div></article><article class="card problem"><span class="num">03</span><h3>Лиды не попадают в CRM</h3>
+<div class="line"><span>Симптом</span><p>Контакт остаётся в переписке и не превращается в сделку или тикет.</p></div>
+<div class="line"><span>Цена ошибки</span><p>Менеджер не знает о обращении, пока клиент не напишет повторно.</p></div>
+<div class="line"><span>Последствие</span><p>История канала пустая, и оценить эффективность невозможно.</p></div></article>
+</div>
+</section>
+<section class="dsec">
+<div class="wrap">
+<span class="mono eyebrow">[02 / КАК ЭТО РАБОТАЕТ]</span>
+<h2>От диалогов до канала</h2>
+<p class="intro">Четыре этапа. У каждого — входные данные, артефакт, участники и критерий готовности. Сроки даны как ориентир до разбора ваших сценариев.</p>
+<div class="detail-grid">
+<div class="detail"><div class="detail-meta"><b>01</b><div class="term">3–5 дней</div></div><h3>Разбор диалогов</h3><dl>
+<dt>Входные данные</dt><dd>50–100 последних диалогов, список типовых вопросов и текущая CRM.</dd>
+<dt>Артефакт</dt><dd>Карта повторов и критерий готового ответа.</dd>
+<dt>Кто участвует</dt><dd>Владелец поддержки и аналитик.</dd>
+<dt>Критерий готовности</dt><dd>Видно, какие темы забирают больше всего времени у команды.</dd></dl></div><div class="detail"><div class="detail-meta"><b>02</b><div class="term">1 неделя</div></div><h3>Сценарий и тональность</h3><dl>
+<dt>Входные данные</dt><dd>Карта вопросов, правила бренда и список запрещённых обещаний.</dd>
+<dt>Артефакт</dt><dd>Сценарий диалога и демо на реальных вопросах.</dd>
+<dt>Кто участвует</dt><dd>Аналитик, редактор, владелец поддержки.</dd>
+<dt>Критерий готовности</dt><dd>Демо показывает приветствие, уточнение, ответ и эскалацию.</dd></dl></div><div class="detail"><div class="detail-meta"><b>03</b><div class="term">2 недели</div></div><h3>Запуск в одном канале</h3><dl>
+<dt>Входные данные</dt><dd>Сценарий, доступы к каналу и CRM, база ответов.</dd>
+<dt>Артефакт</dt><dd>Рабочий бот, журнал диалогов и созданные сделки.</dd>
+<dt>Кто участвует</dt><dd>Инженер и администратор CRM.</dd>
+<dt>Критерий готовности</dt><dd>Диалог доходит до записи в CRM, а спорный случай передаётся человеку.</dd></dl></div><div class="detail"><div class="detail-meta"><b>04</b><div class="term">По плану</div></div><h3>Остальные каналы</h3><dl>
+<dt>Входные данные</dt><dd>Результаты пилота и регламент базы ответов.</dd>
+<dt>Артефакт</dt><dd>Подключённые каналы, обновлённая база, обучение команды.</dd>
+<dt>Кто участвует</dt><dd>Инженер и владелец поддержки.</dd>
+<dt>Критерий готовности</dt><dd>Новый канал подключается по регламенту без переделки сценария.</dd></dl></div>
+</div>
+</div>
+</section>
+<section class="tint">
+<div class="wrap">
+<div class="section-head"><div><span class="mono eyebrow">[03 / КАК РЕШАЕМ]</span><h2>Четыре действия</h2></div><p>Каждое действие описано сценарием и оставляет след в журнале.</p></div>
+<div class="grid-2">
+<article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon icon--acc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="8" y1="10" x2="16" y2="10"></line></svg></div><span class="num">01 // ОТВЕТЫ ПО FAQ</span></div><span class="price-plate">по запросу</span></div>
+<h3>Ответить по базе знаний</h3><p>Бот берёт формулировку из согласованных текстов и показывает источник внутри компании.</p><div class="dense-label">Возможности</div><ul><li>Ответы из актуальных материалов</li><li>Ссылка на источник для сотрудника</li><li>Честный отказ при отсутствии факта</li></ul>
+<div class="demo"><b>Пример:</b> вопрос о сроках и ссылка на актуальный регламент.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article><article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18l-7 8v7l-4 2v-9z"></path></svg></div><span class="num">02 // КВАЛИФИКАЦИЯ</span></div><span class="price-plate">по запросу</span></div>
+<h3>Собрать задачу и контакты</h3><p>Диалог уточняет недостающее по одному вопросу за шаг и заполняет поля заявки.</p><div class="dense-label">Возможности</div><ul><li>Одно уточнение на каждом шаге</li><li>Структурированные поля заявки</li><li>Проверка повторных обращений</li></ul>
+<div class="demo"><b>Пример:</b> диалог с уточнением и созданием лида в CRM.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article><article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h9"></path><path d="M10 8l4 4-4 4"></path><circle cx="19" cy="12" r="2"></circle><path d="M19 14v3a3 3 0 0 1-3 3H8"></path></svg></div><span class="num">03 // ЭСКАЛАЦИЯ</span></div><span class="price-plate">по запросу</span></div>
+<h3>Передать сложный случай</h3><p>При признаках спорного вопроса бот зовёт специалиста и сохраняет контекст разговора.</p><div class="dense-label">Возможности</div><ul><li>Признаки спорного вопроса</li><li>Резюме для оператора</li><li>Возврат в диалог без потери истории</li></ul>
+<div class="demo"><b>Пример:</b> передача диалога оператору с кратким резюме и причиной.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article><article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon icon--g3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path></svg></div><span class="num">04 // CRM</span></div><span class="price-plate">по запросу</span></div>
+<h3>Зафиксировать обращение</h3><p>Каждое обращение превращается в сделку или тикет по согласованному правилу.</p><div class="dense-label">Возможности</div><ul><li>Сделка или тикет по правилу</li><li>Теги канала и темы</li><li>Журнал всех обращений</li></ul>
+<div class="demo"><b>Пример:</b> обращение из Telegram превращается в сделку с тегом темы.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article>
+</div>
+</div>
+</section>
+<section class="dsec bg2">
+<div class="wrap">
+<span class="mono eyebrow">[03.5 / КАНАЛЫ]</span><h2>Три канала</h2><p class="intro">Базовый пилот идёт в одном канале. Остальные подключаются по регламенту после проверки сценария.</p>
+<div class="icon-grid" style="display:grid;gap:16px;grid-template-columns:repeat(3,1fr)">
+<article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4z"></path></svg></div><span class="num">01 / TELEGRAM</span><h3>Telegram</h3><p>Основной канал пилота. Поддерживает(кнопки, кнопки и передачу диалога оператору без потери контекста.</p></article><article class="icon-card"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16v3a2 2 0 0 1-2 2A18 18 0 0 1 3 5a2 2 0 0 1 2-2h3l2 4-2 2a14 14 0 0 0 5 5l2-2z"></path></svg></div><span class="num">02 / WHATSAPP</span><h3>WhatsApp</h3><p>Подключается по согласованному номеру и правилам обработки персональных данных. Сценарий остаётся общим.</p></article><article class="icon-card"><div class="icon icon--g3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="2"></rect><line x1="2" y1="9" x2="22" y2="9"></line><path d="M7 13h6l3 3-3 3H7z"></path></svg></div><span class="num">03 / ЧАТ НА САЙТЕ</span><h3>Чат на сайте</h3><p>Работает на страницах, где клиент уже изучает условия. История диалога попадает в общий журнал.</p></article>
+</div>
+</div>
+</section>
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.6 / СЦЕНАРИИ ДИАЛОГА]</span><h2>Сценарий диалога</h2><p class="intro">Сценарий описывается до запуска. Каждая ветка имеет условие выхода и владельца.</p>
+<div class="icon-grid" style="display:grid;gap:16px;grid-template-columns:repeat(4,1fr)">
+<article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="8" y1="10" x2="16" y2="10"></line></svg></div><span class="num">01 / ПРИВЕТСТВИЕ</span><h3>Первое сообщение</h3><p>Бот называет себя и цель обращения. Тон и длина текста задаются в сценарии.</p></article><article class="icon-card"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1 .7-1.5 1.2-1.5 2.5"></path><line x1="12" y1="17" x2="12" y2="17.01"></line></svg></div><span class="num">02 / УТОЧНЕНИЕ</span><h3>Уточнение задачи</h3><p>Один вопрос за шаг и сразу по делу. Ответы пользователя заполняют поля заявки.</p></article><article class="icon-card"><div class="icon icon--g3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"></path><path d="M8 10l2 2 4-4"></path></svg></div><span class="num">03 / ОТВЕТ</span><h3>Проверенный ответ</h3><p>Формулировка берётся из базы знаний. При отсутствии факта показывается честный отказ.</p></article><article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h9"></path><path d="M10 8l4 4-4 4"></path><circle cx="19" cy="12" r="2"></circle><path d="M19 14v3a3 3 0 0 1-3 3H8"></path></svg></div><span class="num">04 / ЭСКАЛАЦИЯ</span><h3>Передача человеку</h3><p>Специалист получает резюме и историю. Бот возвращается в диалог после решения.</p></article>
+</div>
+
+</div>
+</section>
+<section class="dsec bg3">
+<div class="wrap">
+<span class="mono eyebrow">[03.7 / ТОН И ОГРАНИЧЕНИЯ]</span><h2>Что бот не обещает</h2><p class="intro">Границы зафиксированы до запуска. Это снижает число неверных обещаний в диалоге.</p>
+<div class="icon-grid" style="display:grid;gap:16px;grid-template-columns:repeat(4,1fr)">
+<article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"></path><path d="M9 12l2 2 4-4"></path></svg></div><span class="num">01 / ОБЕЩАНИЯ</span><h3>Запрещённые формулировки</h3><p>Бот не называет цену, сроки и условия без подтверждённого источника. Список запретов согласуется заранее.</p></article><article class="icon-card"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h9"></path><path d="M10 8l4 4-4 4"></path><circle cx="19" cy="12" r="2"></circle><path d="M19 14v3a3 3 0 0 1-3 3H8"></path></svg></div><span class="num">02 / СПЕЦИАЛИСТ</span><h3>Момент эскалации</h3><p>Спорный вопрос, юридическая формулировка или недовольный клиент передаются человеку с резюме.</p></article><article class="icon-card"><div class="icon icon--g3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H4z"></path><path d="M20 4h-6v13h6z"></path></svg></div><span class="num">03 / БАЗА ОТВЕТОВ</span><h3>Правка формулировок</h3><p>База ответов лежит в доступном владельцу документе. Правка проходит проверку и получает дату версии.</p></article><article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h9a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H4z"></path><path d="M20 4h-4v13h4z"></path></svg></div><span class="num">04 / ПРОВЕРКА</span><h3>Журнал и тон</h3><p>Выборка диалогов разбирается по тону и точности. Замечания превращаются в правки сценария.</p></article>
+</div>
+</div>
+</section>
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.8 / ЧТО В ПОСТАВКЕ]</span>
+<h2>Что в поставке</h2><p class="intro">Всё, что переходит под ваш контроль. Каждый пункт принимается отдельно.</p>
+<div>
+<div class="artifact"><div class="art-num"><b>01</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/></svg></div></div><div><h4>Сценарий диалога</h4><p>Карта веток с условиями перехода, приветствием и правилами выхода из диалога.</p></div></div><div class="artifact"><div class="art-num"><b>02</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6v20h12V8z"/><polyline points="14 2 14 8 20 8"/></svg></div></div><div><h4>База ответов</h4><p>Согласованные формулировки с источниками, датами версий и владельцем раздела.</p></div></div><div class="artifact"><div class="art-num"><b>03</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg></div></div><div><h4>Интеграция с CRM</h4><p>Создание сделки или тикета с полями из диалога и проверка дублей.</p></div></div><div class="artifact"><div class="art-num"><b>04</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 0 1-8 8H5l-2 2 1-5a8 8 0 1 1 16-5z"/></svg></div></div><div><h4>Подключение канала</h4><p>Настройка выбранного канала, команды и передачи диалога оператору.</p></div></div><div class="artifact"><div class="art-num"><b>05</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 18c.2-2.6 2.2-4.5 5-4.5M15 18h6m0 0-3-3m3 3-3 3"/></svg></div></div><div><h4>Правила эскалации</h4><p>Признаки спорного вопроса, кому он уходит и вид резюме для специалиста.</p></div></div><div class="artifact"><div class="art-num"><b>06</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg></div></div><div><h4>Журнал диалогов</h4><p>История сообщений, веток и решений с привязкой к обращению в CRM.</p></div></div><div class="artifact"><div class="art-num"><b>07</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div></div><div><h4>Дашборд</h4><p>Сводка по темам, закрытым обращениям и передачам человеку за период.</p></div></div><div class="artifact"><div class="art-num"><b>08</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div></div><div><h4>Регламент базы</h4><p>Порядок обновления ответов, проверки формулировок и повторного прогона.</p></div></div><div class="artifact"><div class="art-num"><b>09</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20a6 6 0 0 1 12 0M15 20a5 5 0 0 1 6-5"/></svg></div></div><div><h4>Обучение</h4><p>Инструкция для операторов и сессия по работе с эскалацией и резюме.</p></div></div><div class="artifact"><div class="art-num"><b>10</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div></div><div><h4>Резервный сценарий</h4><p>Действия при недоступности бота: переключение на живого оператора и уведомление владельца.</p></div></div>
+</div>
+</div>
+</section>
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.9 / КАК СЧИТАЕМ ЭФФЕКТ]</span><h2>Как считаем эффект</h2></div><p>Сравнение идёт на одной и той же выборке диалогов до и после запуска.</p></div>
+<div class="table-wrap"><table><thead><tr><th>Метрика</th><th>Как замеряем</th><th>Что фиксируем</th></tr></thead><tbody><tr><td><b>Время до первого ответа</b></td><td>Замер на 20–30 типовых обращениях до и после запуска.</td><td>Медиана и максимальное значение, даты замера.</td></tr><tr><td><b>Доля закрытых без оператора</b></td><td>Число диалогов, завершённых ответом из базы.</td><td>Список тем, где ответ не помог, с причиной.</td></tr><tr><td><b>Число уточнений</b></td><td>Среднее число сообщений в диалоге по одной теме.</td><td>Список вопросов, которые требуют переформулировки.</td></tr><tr><td><b>Доля записей в CRM</b></td><td>Число обращений со сделкой или тикетом, делённое на все обращения.</td><td>Пропущенные обращения и причины.</td></tr><tr><td><b>Оценка клиента</b></td><td>Короткая оценка после ответа и комментарий при желании.</td><td>Доля положительных оценок и типичные замечания.</td></tr></tbody></table></div>
+<p class="note">Целевые значения согласуем до старта. Цифры без замера на ваших диалогах не публикуем — в отчёте указываем выборку и способ подсчёта.</p>
+</section>
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.10 / ГДЕ НЕ РАБОТАЕТ]</span><h2>Честные ограничения</h2></div><p>Условия, при которых бот не даёт результата. Называем их до старта.</p></div>
+<div class="grid">
+<article class="card"><span class="num">01</span><h3>Нет базы ответов</h3><p>Без согласованных текстов бот начинает догадываться. Сначала собираем базу и назначаем владельца.</p></article><article class="card"><span class="num">02</span><h3>Сложные вопросы</h3><p>Юридические и финансовые формулировки требуют специалиста. Бот передаёт их человеку с резюме.</p></article><article class="card"><span class="num">03</span><h3>Конфликтующие условия</h3><p>Если в материалах есть разные условия, ответ без проверки ухудшит ответ. Показываем оба источника.</p></article><article class="card"><span class="num">04</span><h3>Нет владельца сценария</h3><p>Без человека, который обновляет базу, ответы устареют за несколько недель. Назначаем владельца до пилота.</p></article>
+</div>
+</section>
+<section class="dsec">
+<div class="wrap">
+<div class="section-head"><div><span class="mono eyebrow">[03.11 / СРАВНЕНИЕ ПОДХОДОВ]</span><h2>Способы и границы</h2></div><p>Подходы можно сочетать, но подменять один другим не стоит.</p></div>
+<div class="table-wrap"><table><thead><tr><th>Подход</th><th>Что даёт</th><th>Где слаб</th><th>Когда выбираем</th></tr></thead><tbody><tr><td><b>Статический FAQ</b></td><td>Быстрые ответы на фиксированные вопросы.</td><td>Не понимает формулировки и не пишет в CRM.</td><td>Узкий список вопросов без уточнений.</td></tr><tr><td><b>Скриптовый бот</b></td><td>Управляемый диалог по кнопкам и веткам.</td><td>Требует обновления сценария при каждом новом вопросе.</td><td>Заявки с фиксированными полями.</td></tr><tr><td><b>Бот с базой знаний</b></td><td>Ответы по актуальным текстам и честный отказ.</td><td>Зависит от качества базы и правил эскалации.</td><td>Поддержка с повторяющимися темами.</td></tr><tr><td><b>Живой оператор</b></td><td>Контекст и ответственность за условие.</td><td>Не работает ночью и дорог при массовых повторах.</td><td>Сложные и спорные обращения.</td></tr></tbody></table></div>
+<p class="note">Часто рабочая схема сочетает скрипт, базу знаний и живого оператора. Выбор зависит от доли повторяющихся вопросов.</p>
+</div>
+</section>
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.12 / ТИПОВОЙ СЦЕНАРИЙ]</span><h2>Было и стало</h2><p class="intro">Сценарий описан без выдуманных цифр. Результат фиксируем замером на ваших диалогах.</p>
+<div class="grid-2">
+<div class="panel"><span class="mono">БЫЛО</span><h3>Ручной поток и память</h3><ul><li>Оператор отвечает на одинаковые вопросы вручную и теряет контекст сложных обращений.</li><li>Ночные сообщения ждут утра, а часть клиентов уходит без ответа.</li><li>Контакт остаётся в чате и не попадает в сделку или тикет.</li><li>Тон ответов зависит от смены и настроения сотрудника.</li></ul></div>
+<div class="panel"><span class="mono">СТАЛО</span><h3>Правила и видимый результат</h3><ul><li>Бот закрывает повторяющиеся темы по согласованной базе знаний.</li><li>Ночное обращение получает ответ изапись в журнале.</li><li>Заявка превращается в сделку в CRM с тегом темы и канала.</li><li>Спорный вопрос уходит оператору с резюме и историей диалога.</li></ul></div>
+</div>
+<p class="note">Что проверяем: время до ответа, долю закрытых обращений, число уточнений и записи в CRM. Отчёт содержит даты замера.</p>
+</div>
+</section>
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.13 / СТЕК]</span><h2>Из чего собран диалог</h2><p class="intro">Инструменты, которые звучат в проекте. Конкретный выбор фиксируется после разбора.</p>
+<div class="icon-grid" style="display:grid;gap:16px;grid-template-columns:repeat(3,1fr)">
+<article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div><span class="num">01</span><h3>Каналы</h3><p>Telegram, WhatsApp, чат на сайте. Точки входа и история сообщений.</p></article><article class="icon-card"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3"></path><path d="M16 3h3a2 2 0 0 1 2 2v3"></path><path d="M21 16v3a2 2 0 0 1-2 2h-3"></path><path d="M8 21H5a2 2 0 0 1-2-2v-3"></path><line x1="7" y1="12" x2="17" y2="12"></line></svg></div><span class="num">02</span><h3>Сценарии</h3><p>Конечный автомат диалога. Ветки, условия перехода и эскалация.</p></article><article class="icon-card"><div class="icon icon--g3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3v5"></path><path d="M15 3v5"></path><path d="M6 8h12v3a6 6 0 0 1-12 0z"></path><path d="M12 17v4"></path></svg></div><span class="num">03</span><h3>База знаний</h3><p>Поиск по согласованным ответам. Выбор формулировки и честный отказ без факта.</p></article><article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path></svg></div><span class="num">04</span><h3>CRM</h3><p>Bitrix24, amoCRM. Сделка или тикет с полями из диалога.</p></article><article class="icon-card"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"></path></svg></div><span class="num">05</span><h3>Мониторинг</h3><p>Журнал и дашборд. Просмотр диалогов, передач человеку и оценок.</p></article>
+</div>
+<p class="note">Если у вас уже есть CRM или система тикетов, рассматриваем их вместе с предложенными вариантами. Решение фиксируется после аудита каналов.</p>
+</div>
+</section>
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.14 / ЧТО ПОДГОТОВИТЬ]</span><h2>Что подготовить</h2></div><p>Шесть пунктов, которые нужны от вашей команды. Идеальный сценарий заранеесобирать не обязательно.</p></div>
+<div class="grid">
+<article class="card"><span class="num">01</span><h3>Диалоги для разбора</h3><p>50–100 последних обращений и список повторяющихся тем.</p></article><article class="card"><span class="num">02</span><h3>Владелец поддержки</h3><p>Человек, который утверждает ответы и правила эскалации.</p></article><article class="card"><span class="num">03</span><h3>Критерий хорошего ответа</h3><p>Что считать закрытой темой и когда звать специалиста.</p></article><article class="card"><span class="num">04</span><h3>Запрещённые обещания</h3><p>Список формулировок о цене, сроках и условиях.</p></article><article class="card"><span class="num">05</span><h3>Доступы</h3><p>Канал, CRM и база знаний — только нужные для пилота.</p></article><article class="card"><span class="num">06</span><h3>Ответственный за базу</h3><p>Кто обновляет ответы и проверяет выборку диалогов.</p></article>
+</div>
+</section>
+<section class="dsec">
+<div class="wrap">
+<div class="section-head"><div><span class="mono eyebrow">[03.15 / СТОИМОСТЬ]</span><h2>Состав стоимости</h2></div><p>Состав работ по строкам. Суммы называем после разбора задачи.</p></div>
+<div class="table-wrap"><table><thead><tr><th>Статья работ</th><th>Что входит</th><th>Что влияет на объём</th></tr></thead><tbody><tr><td><b>Разбор диалогов</b></td><td>Карта повторов и критерий закрытой темы.</td><td>Число каналов и объём истории.</td></tr><tr><td><b>Сценарий и тональность</b></td><td>Ветки диалога, приветствие, правила эскалации.</td><td>Число сценариев и вариантов ответа.</td></tr><tr><td><b>База ответов</b></td><td>Сбор формулировок, источники, версии и проверка.</td><td>Состояние материалов и число тем.</td></tr><tr><td><b>Подключение канала</b></td><td>Настройка бота, команд и истории диалогов.</td><td>Требования канала и доступы.</td></tr><tr><td><b>Интеграция с CRM</b></td><td>Сделки и тикеты, теги, проверка дублей.</td><td>Число систем и полей.</td></tr><tr><td><b>Обучение и поддержка</b></td><td>Инструкция, сессия, разбор ошибок по регламенту.</td><td>Число операторов и темп изменений.</td></tr></tbody></table></div>
+<p class="note">Ориентир до аудита, не оферта. Итоговая стоимость считается после разбора диалогов, каналов и выбранного контура; состав работ фиксируется в договоре.</p>
+</div>
+</section>
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[04 / ВОПРОСЫ И ОТВЕТЫ]</span><h2>Вопросы и ответы</h2></div><p>Полные ответы по существу. Если вашего вопроса нет — напишите в Telegram.</p></div>
+<div style="margin-top:26px">
+<details><summary>Какие каналы поддерживаются?</summary><p>Базовый пилот работает в Telegram, WhatsApp или чате на сайте — выбираем один канал. Остальные подключаются по регламенту после проверки сценария. Для каждого канала отдельно проверяются доступы, команды и способ передачи диалога оператору.</p></details><details><summary>Сколько стоит услуга?</summary><p>Стоимость зависит от числа сценариев, состояния базы ответов, интеграции с CRM и количества каналов. Мы не публикуем цифру «от», потому что разброс между проектами большой. Расчёт присылаем после разбора диалогов с описанием состава работ и артефактов.</p></details><details><summary>Какие сроки до первого результата?</summary><p>Ориентир — 2–4 недели до первого теста в одном канале. Разбор диалогов занимает 3–5 дней, сценарий и тональность — около недели, запуск — около двух недель. Точный график называется после того, как видно число тем и доступы.</p></details><details><summary>Насколько точны ответы?</summary><p>Точность зависит от базы знаний и формулировок вопросов. Мы не называем число без замера на ваших диалогах. В отчёте есть выборка, доля закрытых тем, список промахов и причины. По ним видно, что править: базу, сценарий или правило эскалации.</p></details><details><summary>Когда бот передаёт диалог человеку?</summary><p>Передача происходит при спорной формулировке, юридическом или финансовом вопросе, а также при недовольстве клиента. Признаки эскалации описываются в сценарии до запуска. Оператор получает резюме и историю, чтобы не начинать разговор заново.</p></details><details><summary>Работает ли бот с CRM?</summary><p>Да. Обращение превращается в сделку или тикет с тегами канала и темы. Поля заполняются из диалога, а дубли проверяются по правилу. Способ обмена и права доступа фиксируются до начала работ. Другую систему разбираем отдельно.</p></details><details><summary>Откуда берутся ответы?</summary><p>Из согласованной базы знаний с указанием источника и даты версии. Формулировки утверждает владелец поддержки. Если подходящего текста нет, бот сообщает об этом и предлагает передать вопрос специалисту, а не придумывает объяснение.</p></details><details><summary>Как задаётся тональность?</summary><p>Тон описывается в сценарии: длина сообщений, обращение к клиенту, список запрещённых обещаний и манера уточнять. Выборка диалогов разбирается после запуска, а замечания превращаются в правки сценария с датой версии.</p></details><details><summary>Что происходит ночью?</summary><p>Бот отвечает на закрытые базой темы и фиксирует обращение в журнале. Если вопрос требует человека, создаётся запись с резюме, которая попадает к оператору в начале смены. Мы не обещаем скорость реакции живого специалиста вне графика.</p></details><details><summary>Где находятся данные и как соблюдается 152-ФЗ?</summary><p>Диалоги и база ответов размещаются в согласованном контуре. Состав персональных данных, цель обработки и правовое основание определяются до запуска. Сроки хранения и доступы фиксируются в регламенте, юридическую часть отдаём на проверку специалисту.</p></details><details><summary>Нужно ли обучать команду?</summary><p>Да. В поставку входит инструкция по работе с эскалацией и короткая сессия для операторов. Разбираем, как читать резюме, где править базу ответов и что делать при спорной формулировке. Обучение передаётся вместе с регламентом.</p></details><details><summary>Что показывает первый прогон?</summary><p>Первый прогон показывает реальные вопросы, выданные ответы, передачи человеку и обращения без записи в CRM. По нему видно, какие темы закрыты базой, а какие требуют сценария. Решение о расширении каналов принимается после разбора этой выборки.</p></details><details><summary>Как исправляются ошибки в ответах?</summary><p>Ошибка связывается с формулировкой в базе или веткой сценария и причиной. Правка получает версию и дату, затем прогон повторяется на той же выборке диалогов. История изменений остаётся в журнале, что позволяет откатить неудачную формулировку.</p></details><details><summary>Есть ли поддержка после запуска?</summary><p>Поддержка нужна для обновления базы ответов, новых тем и корректировки правил эскалации. Объём, срок реакции и состав работ фиксируются отдельно в договоре. Текущие правки команда делает по регламенту, мы подключаемся при смене сценария.</p></details><details><summary>Что будет, если мы откажемся от внедрения?</summary><p>Вы получаете сценарий, базу ответов, правила эскалации и отчёт по прогону. Доступы и промежуточные копии удаляются по согласованному акту. Решение не оставляет скрытых зависимостей от подрядчика.</p></details>
+</div>
+</section>
+<section id="request" class="cta">
+<div class="wrap">
+<span class="mono eyebrow">[05 / ЗАЯВКА]</span>
+<h2>Пришлите три диалога</h2>
+<p>Покажем, какие темы закрываются базой ответов, где нужна эскалация и как обращение попадает в CRM.</p>
+<div class="row"><a class="btn" href="https://t.me/erik03132">Написать в Telegram</a></div>
+</div>
+</section>
+
+</main>
+<footer>
+<div class="footer-row">
+<span>AI BUREAU · Telegram @erik03132 · info@ai-traffic-pro.ru · +7 (495) 923-46-44</span>
+<span>ИП Марченко Дмитрий Николаевич · ИНН 770304789944 · © 2026</span>
+</div>
+<div class="footer-row" style="margin-top:10px"><span>Контакты и реквизиты из ai-marketing. Для ai-bureau.online требуют подтверждения владельца.</span></div>
+</footer>
+</div>
+</body>
+</html>

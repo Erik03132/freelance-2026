@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Автоматизация документооборота — отдельная услуга — AI Bureau</title>
+<meta name="description" content="Автоматизация документооборота: распознавание сканов, извлечение реквизитов, маршрутизация согласований и контроль сроков. Пилот на одном типе документов.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3EFE7;--surface:#fff;--ink:#1f2937;--soft:#4A4640;--muted:#6E675F;--line:#DED7CC;--acc:#9e2a2b;--dark:#1f2937;--dark2:#0f172a;--dark3:#334155;--dark4:#475569;--max:1240px;--radius:16px;--r6:6px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.55 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.skip{position:absolute;left:-9999px;top:8px;background:var(--dark);color:#fff;padding:10px 16px;z-index:10}
+.skip:focus{left:12px}
+.wrap{width:min(calc(100% - 128px),var(--max));margin:0 auto}
+.mono{font:500 11px/1.2 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.eyebrow{display:block;margin-bottom:14px}
+h1,h2,h3,h4{margin:0;letter-spacing:-.03em;line-height:1.06}
+h1{font-size:clamp(40px,4.5vw,58px);font-weight:700;max-width:900px}
+h2{font-size:clamp(28px,3.8vw,46px);font-weight:600}
+h3{font-size:20px;font-weight:600;letter-spacing:-.015em;line-height:1.2}
+h4{font-size:16px;font-weight:600;letter-spacing:-.01em}
+p{margin:0}
+section{padding:120px 0;border-top:1px solid var(--line)}
+section.first{border-top:0;padding:56px 0 24px}
+.lede{color:var(--soft);font-size:18px;max-width:700px;margin-top:22px}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:40px;margin-bottom:32px}
+.section-head p{color:var(--muted);max-width:430px;font-size:15px}
+.intro{color:var(--soft);max-width:850px;margin-bottom:30px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:100px;background:var(--acc);color:#fff;font-weight:600;font-size:15px;border:0}
+.row{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--line)}
+.brand{font-weight:700;letter-spacing:.12em;font-size:14px}
+.brand span{display:inline-block;width:9px;height:9px;background:var(--acc);margin-right:10px}
+nav{display:flex;gap:24px;font-size:14px;color:var(--soft)}
+.top-link{font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc)}
+.crumb{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:34px}
+.badge{display:inline-block;background:#fff;border:1px solid var(--line);color:var(--acc);padding:10px 14px;border-radius:var(--r6);font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;margin-bottom:20px}
+.hero-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:48px;align-items:start}
+.brief{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:30px}
+.brief-title{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-top:14px}
+.metric-big{font-size:44px;font-weight:700;letter-spacing:-.04em;line-height:1.1;margin-top:22px}
+.metric-big span{display:block;font:500 11px/1.4 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.brief-block{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.brief-block p{color:var(--soft);font-size:14px;margin-top:10px}
+.brief ol{margin:18px 0 0;padding:0;list-style:none}
+.brief li{display:flex;gap:14px;padding:12px 0;border-top:1px solid var(--line);font-size:14px;align-items:flex-start}
+.brief li i{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;color:#fff;font:700 10px/1 "JetBrains Mono",ui-monospace,monospace;font-style:normal;flex-shrink:0}
+.brief li:nth-child(1) i{background:var(--acc)}
+.brief li:nth-child(2) i{background:var(--dark)}
+.brief li:nth-child(3) i{background:var(--dark3)}
+.brief-note{margin-top:18px;font-size:13px;color:var(--muted)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:12px}
+.metric{padding:24px 22px;border-right:1px solid var(--line)}
+.metric:last-child{border-right:0}
+.metric b{display:block;font-size:32px;letter-spacing:-.04em}
+.metric span{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:36px}
+.card h3{margin:18px 0 10px}
+.card p{color:var(--soft);font-size:14px}
+.num{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--muted)}
+.aeo{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;margin-top:28px;color:var(--soft);font-size:16px;max-width:900px}
+.problem .line{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.problem .line span{display:block;font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc);margin-bottom:5px}
+.dense-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;justify-content:space-between}
+.dense-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+.dense-id{display:flex;align-items:center;gap:10px;min-width:0}
+.icon{width:32px;height:32px;border-radius:var(--r6);background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon--g2{background:var(--dark3)}
+.icon--g3{background:var(--dark4)}
+.icon--acc{background:var(--acc)}
+.dense-card .num{font-size:11px}
+.price-plate{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;background:var(--paper);padding:5px 8px;border-radius:var(--r6);color:var(--ink);white-space:nowrap}
+.dense-card h3{margin:0 0 6px;font-size:17px;line-height:1.25}
+.dense-card p{font-size:13px;line-height:1.35;margin-bottom:10px}
+.dense-label{font:500 11px/1 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.dense-card ul{margin:0 0 10px;padding-left:14px;font-size:12px;line-height:1.35;color:var(--soft)}
+.dense-card li{margin-bottom:2px}
+.demo{background:var(--paper);border:1px solid var(--line);border-radius:var(--r6);padding:8px 10px;font-size:11px;line-height:1.3;color:var(--muted);margin-bottom:12px}
+.demo b{color:var(--ink)}
+.dense-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:10px}
+.detail-link{font-size:12px;text-decoration:underline;color:var(--muted)}
+.btn-mini{min-height:28px;padding:0 12px;font-size:12px;border-radius:var(--r6);background:var(--dark);color:#fff;display:inline-flex;align-items:center;justify-content:center}
+.icon-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.icon-card .icon{margin-bottom:16px}
+.icon-card h3{font-size:18px;margin-bottom:8px}
+.icon-card p{color:var(--soft);font-size:13px}
+.icon-card .num{display:block;margin-bottom:10px}
+.detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.detail{border-top:2px solid var(--acc);padding-top:18px}
+.detail b{display:block;font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--acc);margin-bottom:6px}
+.detail .term{font:500 11px/1.4 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.detail h3{font-size:18px}
+.detail dl{margin:16px 0 0}
+.detail dt{font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--acc)}
+.detail dd{margin:3px 0 12px;color:var(--soft);font-size:13px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);background:var(--surface);border-radius:var(--radius)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:16px 20px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 10px/1.3 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
+td b{font-size:15px}
+tr:last-child td{border-bottom:0}
+.tint{background:var(--surface);border-top:1px solid var(--line)}
+.artifact{display:grid;grid-template-columns:52px 1fr;gap:18px;padding:18px 0;border-top:1px solid var(--line)}
+.artifact:last-child{border-bottom:1px solid var(--line)}
+.artifact b{font:500 12px/1 "JetBrains Mono",ui-monospace,monospace;color:var(--acc);padding-top:4px}
+.artifact p{color:var(--soft);font-size:14px;margin-top:6px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px}
+.panel h3{margin-bottom:14px}
+.panel .mono{display:block;margin-bottom:12px}
+.panel ul{margin:0;padding-left:18px;color:var(--soft);font-size:14px}
+.panel li{margin-bottom:10px}
+.dsec{background:var(--dark);color:#F3EFE7;border-top:0}
+.dsec.bg2{background:var(--dark)}
+.dsec.bg3{background:var(--dark)}
+.dsec .mono,.dsec .num{color:#cbd5e1}
+.dsec h2{max-width:800px;color:#fff}
+.dsec h3{color:#fff}
+.dsec p,.dsec .intro,.dsec .icon-card p{color:#cbd5e1}
+.dsec .detail{border-top-color:#cbd5e1}
+.dsec .detail b,.dsec .detail dt{color:#fff}
+.dsec .detail dd,.dsec .detail .term{color:#cbd5e1}
+.dsec .icon-card{background:transparent;border-color:#cbd5e1}
+.dsec .icon-card .num{color:#cbd5e1}
+.dsec .icon{background:var(--dark3);color:#fff}
+.dsec.bg2 .icon{background:var(--dark4);color:#fff}
+.dsec.bg3 .icon{background:var(--dark);color:#fff}
+.dsec .lede,.dsec .note{color:#cbd5e1}
+.dsec .table-wrap{background:transparent;border-color:#cbd5e1}
+.dsec th{background:transparent;color:#cbd5e1}
+.dsec td{border-bottom-color:#cbd5e1}
+.dsec td b{color:#fff}
+.note{color:var(--muted);font-size:14px;margin-top:20px;max-width:860px}
+.hero-notes{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.hero-notes span{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:100px;padding:8px 12px;font-size:12px;color:var(--soft)}
+.hero-notes svg{width:14px;height:14px;stroke:var(--acc)}
+details{border-top:1px solid var(--line)}
+details:last-child{border-bottom:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;padding:20px 0;font-weight:600;display:flex;justify-content:space-between;gap:20px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--acc);font:500 20px/1 "JetBrains Mono",ui-monospace,monospace}
+details[open] summary::after{content:"–"}
+details p{color:var(--soft);padding-bottom:20px;max-width:880px}
+.cta{background:var(--dark);color:var(--paper);border-top:1px solid var(--line)}
+.cta .mono{color:var(--line)}
+.cta p{color:#cbd5e1;margin-top:18px;max-width:600px}
+.cta .btn{background:var(--acc);border:1px solid var(--line)}
+footer{border-top:1px solid var(--line);padding:30px 0;background:var(--dark);color:#cbd5e1}
+.footer-row{display:flex;justify-content:space-between;gap:24px;font-size:13px;color:#cbd5e1;flex-wrap:wrap}
+.footer-row a{color:var(--line);text-decoration:underline}
+@media(max-width:900px){nav{display:none}.grid,.grid-4,.detail-grid,.metrics,.icon-grid{grid-template-columns:1fr 1fr}.hero-grid{grid-template-columns:1fr}.section-head{display:block}.section-head p{margin-top:16px}section{padding:60px 0}}
+@media(max-width:640px){.wrap{width:min(calc(100% - 32px),var(--max))}.grid,.grid-2,.grid-4,.detail-grid,.metrics,.icon-grid{grid-template-columns:1fr}.metric{border-right:0;border-bottom:1px solid var(--line)}.metric:last-child{border-bottom:0}.row .btn{width:100%}.footer-row{flex-direction:column}h1{font-size:38px}}
+</style>
+<style>.detail-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-bottom:8px}.detail-meta b,.detail-meta .term{margin-bottom:0}</style><style>.art-num{display:flex;align-items:center;gap:10px}.art-num .ico{width:32px;height:32px;border-radius:var(--r6);background:var(--acc);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}.art-num .ico svg{width:18px;height:18px}.dsec .artifact .ico{background:var(--acc);color:#fff}</style></head>
+<body>
+<a class="skip" href="#main">К содержимому</a>
+<div class="wrap">
+<header class="topbar">
+<a class="brand" href="home.html"><span></span>AI BUREAU</a>
+<nav aria-label="Навигация"><a href="home.html#services">Услуги</a><a href="home.html#cases">Кейсы</a><a href="blog.html">Блог</a><a href="home.html#contact">Контакты</a></nav>
+<a class="top-link" href="#request">Обсудить задачу</a>
+</header>
+<main id="main">
+
+<section class="first">
+<div class="crumb">Главная / Услуги / Автоматизация документооборота</div>
+<div class="hero-grid">
+<div>
+<span class="badge">OCR + 1С</span>
+<h1>Документооборот:<br>скорость без ошибок</h1>
+<p class="lede">Счета, акты и договоры перестают ждать ручного ввода. Сервис распознаёт файл, проверяет реквизиты, отправляет его по маршруту и показывает, где задержалось согласование. Спорные суммы и неполные поля уходят в очередь проверки, а не в общий поток. Первый прогон идёт на одном типе документов из вашего потока.</p>
+<div class="row"><a class="btn" href="#request">Обсудить задачу</a></div>
+<div class="hero-notes">
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><path d="M8 11h8M8 15h5"/></svg>OCR сканов</span>
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="12" height="15" rx="2"/><path d="M6.5 8.5h5M6.5 12h5"/><circle cx="17" cy="17" r="4"/><polyline points="15 17 16.5 18.5 19 15.5"/></svg>Сверка реквизитов</span>
+<span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 6h5a3 3 0 0 1 0 6h-1a3 3 0 0 0 0 6h6"/></svg>Маршрут в 1С</span>
+</div>
+</div>
+<aside class="brief" aria-label="Параметры услуги">
+<span class="mono">[ ПЕРВЫЙ ШАГ ]</span>
+<div class="brief-title">Что будет после разбора</div>
+<div class="metric-big">2–4 нед.<span>до первого теста, ориентир</span></div>
+<div class="brief-block"><span class="mono">КОМУ ПОДХОДИТ</span><p>Командам, где документы вручную переносят в 1С и согласуют в переписке.</p></div>
+<ol>
+<li><i>01</i><div>Реестр полей и правил по одному типу документа.</div></li><li><i>02</i><div>Прогон с проверкой реквизитов и журналом исключений.</div></li><li><i>03</i><div>Регламент маршрутов и передача ответственным сотрудникам.</div></li>
+</ol>
+<p class="brief-note">Стоимость — по запросу после разбора потока и доступов. Сроки ориентировочные.</p>
+</aside>
+</div>
+</section>
+
+<div class="wrap">
+<div class="metrics" aria-label="Параметры работы AI Bureau">
+<div class="metric"><b>1</b><span>тип документа в пилоте</span></div><div class="metric"><b>4</b><span>этапа до первого теста</span></div><div class="metric"><b>2–4</b><span>недели ориентировочно</span></div><div class="metric"><b>по запросу</b><span>стоимость после разбора</span></div>
+</div>
+</div>
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[01 / ПРОБЛЕМЫ]</span><h2>Как работает поток</h2></div><p>Три сбоя, из-за которых документ есть, а результата нет.</p></div>
+<p class="aeo">Автоматизация документооборота — это распознавание файла, извлечение реквизитов и передача документа по заданному маршруту без ручного ввода. Сканы и PDF проходят проверку полей, затем карточка уходит ответственному, а сроки видны в одном журнале. Пилот охватывает один тип документов и показывает, где поток стоит. Результат фиксируется замером до и после, а не обещанием.</p>
+<div class="grid" style="margin-top:28px">
+<article class="card problem"><span class="num">01</span><h3>Реквизиты вбивают вручную</h3>
+<div class="line"><span>Симптом</span><p>Бухгалтер открывает счёт и переписывает ИНН, дату и сумму в 1С. Опечатка в одном поле уходит дальше по цепочке.</p></div>
+<div class="line"><span>Цена ошибки</span><p>Проверка и исправление отвлекают сотрудника от закрытия периода. Ошибку замечают не сразу.</p></div>
+<div class="line"><span>Последствие</span><p>Неверные реквизиты всплывают при оплате или в отчётности, когда исправлять дороже.</p></div></article><article class="card problem"><span class="num">02</span><h3>Документ застревает на согласовании</h3>
+<div class="line"><span>Симптом</span><p>Файл лежит в почте, ответственный в отпуске, а следующий участник не знает, что его очередь.</p></div>
+<div class="line"><span>Цена ошибки</span><p>Срок срывается, а виновника ищут по переписке и личным напоминаниям.</p></div>
+<div class="line"><span>Последствие</span><p>Акт или накладная подписаны позже, чем закрыт учётный период.</p></div></article><article class="card problem"><span class="num">03</span><h3>Сроки не видны до дедлайна</h3>
+<div class="line"><span>Симптом</span><p>Нет единого списка, где по каждому документу видно владельца и крайнюю дату.</p></div>
+<div class="line"><span>Цена ошибки</span><p>Руководитель узнаёт о просрочке от контрагента, а не из внутреннего журнала.</p></div>
+<div class="line"><span>Последствие</span><p>Контроль держится на памяти сотрудника и рассыпан по чатам.</p></div></article>
+</div>
+</section>
+<section class="dsec">
+<div class="wrap">
+<span class="mono eyebrow">[02 / КАК ЭТО РАБОТАЕТ]</span>
+<h2>От потока до прогона</h2>
+<p class="intro">Четыре этапа. У каждого — входные данные, артефакт, участники и критерий готовности. Сроки даны как ориентир до разбора ваших документов.</p>
+<div class="detail-grid">
+<div class="detail"><div class="detail-meta"><b>01</b><div class="term">3–5 дней</div></div><h3>Разбор потока</h3><dl>
+<dt>Входные данные</dt><dd>10–20 типичных файлов, текущая схема согласований и список полей.</dd>
+<dt>Артефакт</dt><dd>Карта потока и реестр полей с правилами заполнения.</dd>
+<dt>Кто участвует</dt><dd>Владелец процесса, бухгалтер, аналитик.</dd>
+<dt>Критерий готовности</dt><dd>По каждому полю видно, откуда берётся значение и кто его проверяет.</dd></dl></div><div class="detail"><div class="detail-meta"><b>02</b><div class="term">1 неделя</div></div><h3>Правила маршрутизации</h3><dl>
+<dt>Входные данные</dt><dd>Суммы, типы контрагентов и список ответственных сотрудников.</dd>
+<dt>Артефакт</dt><dd>Таблица маршрутов и короткое демо на реальных файлах.</dd>
+<dt>Кто участвует</dt><dd>Аналитик и руководитель участка.</dd>
+<dt>Критерий готовности</dt><dd>Демо показывает, кому уходит документ и что происходит при отсутствии ответа.</dd></dl></div><div class="detail"><div class="detail-meta"><b>03</b><div class="term">2–3 недели</div></div><h3>Пилот на одном типе документов</h3><dl>
+<dt>Входные данные</dt><dd>Согласованные правила, доступы к почте и 1С, выборка из 20 документов.</dd>
+<dt>Артефакт</dt><dd>Рабочий пайплайн, очередь исключений и журнал сроков.</dd>
+<dt>Кто участвует</dt><dd>Инженер, бухгалтер и владелец процесса.</dd>
+<dt>Критерий готовности</dt><dd>Карточка доходит до учётной системы с заполненными полями и меткой источника.</dd>
+<dt>Демо</dt><dd>Прогон на спорном документе с показом причины исключения.</dd></dl></div><div class="detail"><div class="detail-meta"><b>04</b><div class="term">По плану</div></div><h3>Расширение на поток</h3><dl>
+<dt>Входные данные</dt><dd>Результаты пилота, новые типы документов и обновлённые регламенты.</dd>
+<dt>Артефакт</dt><dd>Расширенная карта маршрутов и обученная команда.</dd>
+<dt>Кто участвует</dt><dd>Инженер, владелец процесса и руководитель участка.</dd>
+<dt>Критерий готовности</dt><dd>Новый тип документа подключается по регламенту без переписывания ядра.</dd>
+<dt>Демо</dt><dd>Запуск второго типа документов на том же контуре.</dd></dl></div>
+</div>
+</div>
+</section>
+<section class="tint">
+<div class="wrap">
+<div class="section-head"><div><span class="mono eyebrow">[03 / КАК РЕШАЕМ]</span><h2>Четыре узла</h2></div><p>Каждый узел работает по заданным условиям и оставляет след в журнале.</p></div>
+<div class="grid-2">
+<article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon icon--acc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div><span class="num">01 // РАСПОЗНАВАНИЕ</span></div><span class="price-plate">по запросу</span></div>
+<h3>Прочитать скан и PDF</h3><p>Сервис определяет тип документа и читает текст, включая многостраничные файлы.</p><div class="dense-label">Возможности</div><ul><li>Распознавание сканов и печатных форм</li><li>Разделение многостраничных PDF</li><li>Отметка низкого качества изображения</li></ul>
+<div class="demo"><b>Пример:</b> счёт на трёх страницах с распознанными полями и указанием источника.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article><article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3"></path><path d="M16 3h3a2 2 0 0 1 2 2v3"></path><path d="M21 16v3a2 2 0 0 1-2 2h-3"></path><path d="M8 21H5a2 2 0 0 1-2-2v-3"></path><line x1="7" y1="12" x2="17" y2="12"></line></svg></div><span class="num">02 // РЕКВИЗИТЫ</span></div><span class="price-plate">по запросу</span></div>
+<h3>Извлечь и сверить поля</h3><p>Значения попадают в карточку документа, а сомнительные поля получают отметку.</p><div class="dense-label">Возможности</div><ul><li>ИНН, номер, дата и сумма</li><li>Сверка итога по позициям</li><li>Флажок на спорное значение</li></ul>
+<div class="demo"><b>Пример:</b> счёт с расхождением суммы и передачей в очередь проверки.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article><article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="6" r="2"></circle><circle cx="19" cy="18" r="2"></circle><path d="M7 6h6a4 4 0 0 1 4 4v6"></path><path d="M13 14l4 4 4-4"></path></svg></div><span class="num">03 // МАРШРУТ</span></div><span class="price-plate">по запросу</span></div>
+<h3>Отправить на согласование</h3><p>Документ уходит ответственным по правилам, которые утвердил владелец процесса.</p><div class="dense-label">Возможности</div><ul><li>Правила по типу и сумме</li><li>Напоминание ответственному</li><li>Фиксация времени каждого шага</li></ul>
+<div class="demo"><b>Пример:</b> договор уходит двум согласующим и ждёт подписи.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article><article class="dense-card"><div><div class="dense-top"><div class="dense-id"><div class="icon icon--g3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></div><span class="num">04 // СРОКИ</span></div><span class="price-plate">по запросу</span></div>
+<h3>Показать, где стоит документ</h3><p>Единый журнал отвечает на вопрос, кто держит документ и когда истекает срок.</p><div class="dense-label">Возможности</div><ul><li>Журнал статусов и владельцев</li><li>Эскалация при просрочке</li><li>Отчёт по задержанным документам</li></ul>
+<div class="demo"><b>Пример:</b> список документов с владельцами, статусами и крайними датами.</div></div><div class="dense-foot"><a class="detail-link" href="#request">Подробнее</a><a class="btn-mini" href="#request">Обсудить</a></div></article>
+</div>
+</div>
+</section>
+<section class="dsec bg2">
+<div class="wrap">
+<span class="mono eyebrow">[03.5 / ТИПЫ ДОКУМЕНТОВ]</span><h2>Четыре типа</h2><p class="intro">Пилот начинается с одного типа. Требования ниже проверяются на этапе разбора потока.</p>
+<div class="icon-grid" style="display:grid;gap:16px;grid-template-columns:repeat(4,1fr)">
+<article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div><span class="num">01 / СЧЕТА</span><h3>Входящие счета</h3><p>Нужен читаемый текст и ясная сумма. Итог сверяется с позициями, а расхождение уходит в очередь.</p></article><article class="icon-card"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"></path><polyline points="15 2 15 7 20 7"></polyline><path d="M9 12l2 2 4-4"></path></svg></div><span class="num">02 / ДОГОВОРЫ</span><h3>Договоры и приложения</h3><p>Проверяются стороны, даты и предмет. Для многостраничных файлов сохраняется нумерация разделов.</p></article><article class="icon-card"><div class="icon icon--g3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg></div><span class="num">03 / АКТЫ</span><h3>Акты и сверки</h3><p>Сверяются период, номер и подписи. Тип задан в разметке, чтобы не путать с накладными.</p></article><article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5z"></path><path d="M3 8v8l9 5 9-5V8"></path><line x1="12" y1="13" x2="12" y2="21"></line></svg></div><span class="num">04 / НАКЛАДНЫЕ</span><h3>Накладные и поставки</h3><p>Проверяются позиции и количество. Расхождение с заказом показывает до передачи в учёт.</p></article>
+</div>
+</div>
+</section>
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.6 / МАРШРУТИЗАЦИЯ]</span><h2>Маршрутизация</h2><p class="intro">Маршрут описывается до запуска. Каждый шаг имеет владельца и предельную дату.</p>
+<div class="icon-grid" style="display:grid;gap:16px;grid-template-columns:repeat(4,1fr)">
+<article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="6" r="2"></circle><circle cx="19" cy="18" r="2"></circle><path d="M7 6h6a4 4 0 0 1 4 4v6"></path><path d="M13 14l4 4 4-4"></path></svg></div><span class="num">01 / ПРАВИЛА</span><h3>Карта маршрутов</h3><p>Тип документа и сумма определяют список согласующих. Правило меняется по регламенту, а не в переписке.</p></article><article class="icon-card"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3"></circle><path d="M5 20a7 7 0 0 1 14 0"></path></svg></div><span class="num">02 / ОТВЕТСТВЕННЫЙ</span><h3>Владелец шага</h3><p>В журнале видно, кто должен ответить сейчас. Замена сотрудника не обнуляет историю шага.</p></article><article class="icon-card"><div class="icon icon--g3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></div><span class="num">03 / НАПОМИНАНИЯ</span><h3>Сигнал о сроке</h3><p>Напоминание уходит заранее, а просрочка поднимается руководителю участка по заданному правилу.</p></article><article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="14" y2="18"></line></svg></div><span class="num">04 / ИСКЛЮЧЕНИЯ</span><h3>Очередь спорных случаев</h3><p>Непонятное поле не уходит в учёт молча. Оно попадает в очередь с причиной и владельцем проверки.</p></article>
+</div>
+
+</div>
+</section>
+<section class="dsec bg3">
+<div class="wrap">
+<span class="mono eyebrow">[03.7 / КОНТРОЛЬ КАЧЕСТВА]</span><h2>Проверка перед учётом</h2><p class="intro">Четыре механизма, которые не дают сомнительному полю пройти незамеченным.</p>
+<div class="icon-grid" style="display:grid;gap:16px;grid-template-columns:repeat(4,1fr)">
+<article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="20" y1="20" x2="16" y2="16"></line></svg></div><span class="num">01 / СВЕРКА</span><h3>Проверка реквизитов</h3><p>Поля сравниваются между собой и с эталоном из вашего справочника. Расхождение получает причину.</p></article><article class="icon-card"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h9"></path><path d="M10 8l4 4-4 4"></path><circle cx="19" cy="12" r="2"></circle><path d="M19 14v3a3 3 0 0 1-3 3H8"></path></svg></div><span class="num">02 / РУЧНАЯ ПРОВЕРКА</span><h3>Контроль человека</h3><p>Сомнительные значения уходят сотруднику до создания проводки. Решение фиксируется в журнале.</p></article><article class="icon-card"><div class="icon icon--g3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h9a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H4z"></path><path d="M20 4h-4v13h4z"></path></svg></div><span class="num">03 / ЖУРНАЛ</span><h3>Аудит ошибок</h3><p>Каждая правка хранит исходное значение, новое значение и инициатора. История доступна разбору.</p></article><article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 7H5V3"></path><path d="M5 7a8 8 0 1 1-1 8"></path></svg></div><span class="num">04 / ОТКАТ</span><h3>Откат правила</h3><p>Ошибочное условие возвращается к предыдущей версии, а прогон повторяется на той же выборке.</p></article>
+</div>
+</div>
+</section>
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.8 / ЧТО В ПОСТАВКЕ]</span>
+<h2>Что в поставке</h2><p class="intro">Всё, что переходит под ваш контроль. Каждый пункт принимается отдельно.</p>
+<div>
+<div class="artifact"><div class="art-num"><b>01</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/></svg></div></div><div><h4>Карта потока</h4><p>Схема прохождения документа с шагами, владельцами и предельными сроками.</p></div></div><div class="artifact"><div class="art-num"><b>02</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6v20h12V8z"/><polyline points="14 2 14 8 20 8"/></svg></div></div><div><h4>Правила извлечения</h4><p>Описание полей, форматов и условий, при которых значение считается найденным.</p></div></div><div class="artifact"><div class="art-num"><b>03</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="2"/></svg></div></div><div><h4>Маршруты</h4><p>Таблица правил согласования по типу документа и сумме, с историей изменений.</p></div></div><div class="artifact"><div class="art-num"><b>04</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div></div><div><h4>Интеграция с 1С</h4><p>Передача карточки и черновика в учётную систему по согласованному набору полей.</p></div></div><div class="artifact"><div class="art-num"><b>05</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div></div><div><h4>Очередь исключений</h4><p>Экран спорных значений с причиной, владельцем и сроком решения.</p></div></div><div class="artifact"><div class="art-num"><b>06</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div></div><div><h4>Журнал и дашборд</h4><p>История шагов, просрочек и правок, плюс сводка по потоку за период.</p></div></div><div class="artifact"><div class="art-num"><b>07</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div></div><div><h4>Регламент</h4><p>Документ о том, кто обновляет правила и как часто проводится повторный прогон.</p></div></div><div class="artifact"><div class="art-num"><b>08</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 18c.2-2.6 2.2-4.5 5-4.5M15 18h6m0 0-3-3m3 3-3 3"/></svg></div></div><div><h4>Обучение</h4><p>Короткая инструкция для бухгалтерии и владельцев маршрутов, с разбором исключений.</p></div></div><div class="artifact"><div class="art-num"><b>09</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div></div><div><h4>Шаблоны и промпты</h4><p>Версии инструкций для модели, хранящиеся вместе с правилами и откатываемые.</p></div></div><div class="artifact"><div class="art-num"><b>10</b><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="5"/></svg></div></div><div><h4>Резервный сценарий</h4><p>Действия при недоступности распознавания: ручной ввод по тем же полям и уведомление владельцу.</p></div></div>
+</div>
+</div>
+</section>
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.9 / КАК СЧИТАЕМ ЭФФЕКТ]</span><h2>Как считаем эффект</h2></div><p>Сравнение идёт на одной и той же выборке документов до и после пилота.</p></div>
+<div class="table-wrap"><table><thead><tr><th>Метрика</th><th>Как замеряем</th><th>Что фиксируем</th></tr></thead><tbody><tr><td><b>Время обработки</b></td><td>Замер на 10–20 документах одного типа до и после пилота.</td><td>Медиана и максимальное значение, даты замера.</td></tr><tr><td><b>Доля заполненных полей</b></td><td>Число верно извлечённых полей, делённое на все поля выборки.</td><td>Список полей с расхождениями и причины.</td></tr><tr><td><b>Ошибки в реквизитах</b></td><td>Число исправлений до проводки за согласованный период.</td><td>Типы ошибок и ответственный за правило.</td></tr><tr><td><b>Доля документов в срок</b></td><td>Доля карточек, прошедших маршрут до крайней даты.</td><td>Список просрочек с владельцами и причинами.</td></tr><tr><td><b>Число ручных проверок</b></td><td>Счётчик решений в очереди исключений за период.</td><td>Динамика по неделям и спорные поля.</td></tr></tbody></table></div>
+<p class="note">Публиковать цифровые обещания без замера не будем. В отчёте указываем выборку, даты и способ подсчёта.</p>
+</section>
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.10 / ГДЕ НЕ РАБОТАЕТ]</span><h2>Честные ограничения</h2></div><p>Условия, при которых автоматизация не даёт результата. Называем их до старта.</p></div>
+<div class="grid">
+<article class="card"><span class="num">01</span><h3>Плохие сканы</h3><p>Размытые или скошенные изображения не дают надёжного текста. Сначала меняем качество съёмки или получаем электронный оригинал.</p></article><article class="card"><span class="num">02</span><h3>Уникальные документы</h3><p>По одному файлу нельзя судить о правилах извлечения. Берём репрезентативную выборку или ограничиваем обещание.</p></article><article class="card"><span class="num">03</span><h3>Юридические формулировки</h3><p>Смысл условия проверяет юрист. Сервис помогает найти текст и поле, но не заменяет экспертизу.</p></article><article class="card"><span class="num">04</span><h3>Нет владельца процесса</h3><p>Без человека, который утверждает условия обработки, маршрут быстро устареет. Назначаем владельца до пилота.</p></article>
+</div>
+</section>
+<section class="dsec">
+<div class="wrap">
+<div class="section-head"><div><span class="mono eyebrow">[03.11 / СРАВНЕНИЕ ПОДХОДОВ]</span><h2>Способы и границы</h2></div><p>Подходы можно сочетать, но подменять один другим не стоит.</p></div>
+<div class="table-wrap"><table><thead><tr><th>Подход</th><th>Что даёт</th><th>Где слаб</th><th>Когда выбираем</th></tr></thead><tbody><tr><td><b>Ручной ввод</b></td><td>Полный контроль каждого поля сотрудником.</td><td>Медленно и зависит от внимания.</td><td>Небольшой поток уникальных документов.</td></tr><tr><td><b>Шаблоны и правила</b></td><td>Быстро заполняют однотипные поля.</td><td>Не читают сканы и не видят расхождений.</td><td>Электронные формы с фиксированной структурой.</td></tr><tr><td><b>OCR и извлечение</b></td><td>Читает файл и возвращает структурированные поля.</td><td>Требует проверки качества и правил сверки.</td><td>Входящие счета, акты и накладные.</td></tr><tr><td><b>OCR с контролем человека</b></td><td>Сомнительные поля уходят на проверку до учёта.</td><td>Нужна очередь исключений и владелец правил.</td><td>Финансовый поток с ошибкой цены.</td></tr></tbody></table></div>
+<p class="note">Выбор зависит от типа документа и цены ошибки. Распознавание часто работает вместе с ручной проверкой, а не вместо неё.</p>
+</div>
+</section>
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.12 / ТИПОВОЙ СЦЕНАРИЙ]</span><h2>Было и стало</h2><p class="intro">Сценарий описан без выдуманных цифр. Результат фиксируем замером на ваших документах.</p>
+<div class="grid-2">
+<div class="panel"><span class="mono">БЫЛО</span><h3>Ручной поток и память</h3><ul><li>Бухгалтер открывает входящий счёт и переносит реквизиты в 1С вручную.</li><li>Договор уходит на согласование в чате, а текущий владелец известен только по переписке.</li><li>Ошибка в сумме обнаруживается при оплате, когда исправлять сложнее.</li><li>Крайние даты живут в личных напоминаниях ответственных.</li></ul></div>
+<div class="panel"><span class="mono">СТАЛО</span><h3>Правила и видимый результат</h3><ul><li>Файл попадает в очередь, тип документа определяется автоматически.</li><li>Поля извлекаются, а сомничные значения получают отметку до проводки.</li><li>Маршрут назначает владельца шага и показывает срок в журнале.</li><li>Просрочка поднимается руководителю, а условия правятся по регламенту.</li></ul></div>
+</div>
+<p class="note">Что проверяем: время обработки, долю верных полей, ошибки в реквизитах и документы без просрочки. Отчёт содержит даты замера.</p>
+</div>
+</section>
+<section class="tint">
+<div class="wrap">
+<span class="mono eyebrow">[03.13 / СТЕК]</span><h2>Из чего собран поток</h2><p class="intro">Инструменты, которые звучат в проекте. Конкретный выбор фиксируется после разбора.</p>
+<div class="icon-grid" style="display:grid;gap:16px;grid-template-columns:repeat(3,1fr)">
+<article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div><span class="num">01</span><h3>Источники</h3><p>PDF, сканы, 1С, общая папка. Файлы, из которых берём текст и реквизиты.</p></article><article class="icon-card"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3"></path><path d="M16 3h3a2 2 0 0 1 2 2v3"></path><path d="M21 16v3a2 2 0 0 1-2 2h-3"></path><path d="M8 21H5a2 2 0 0 1-2-2v-3"></path><line x1="7" y1="12" x2="17" y2="12"></line></svg></div><span class="num">02</span><h3>Распознавание</h3><p>OCR-движок. Преобразование изображения в текст с указанием качества.</p></article><article class="icon-card"><div class="icon icon--g3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3v5"></path><path d="M15 3v5"></path><path d="M6 8h12v3a6 6 0 0 1-12 0z"></path><path d="M12 17v4"></path></svg></div><span class="num">03</span><h3>Извлечение</h3><p>Правила и модель. Поиск полей и сверка значений между собой.</p></article><article class="icon-card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"></path></svg></div><span class="num">04</span><h3>Маршрутизация</h3><p>Сценарии согласований. Назначение ответственных, сроков и напоминаний.</p></article><article class="icon-card"><div class="icon icon--g2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"></path></svg></div><span class="num">05</span><h3>Учёт и выдача</h3><p>1С:Предприятие, REST API. Передача карточки в учёт и отображение журнала.</p></article>
+</div>
+<p class="note">Если у вас уже есть OCR или систему маршрутизации, рассматриваем их вместе с предложенными вариантами. Решение фиксируется после аудита.</p>
+</div>
+</section>
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[03.14 / ЧТО ПОДГОТОВИТЬ]</span><h2>Что подготовить</h2></div><p>Шесть пунктов, которые нужны от вашей команды. Идеальный архив заранее собирать не обязательно.</p></div>
+<div class="grid">
+<article class="card"><span class="num">01</span><h3>Примеры документов</h3><p>10–20 типичных файлов и поля, которые из них нужны.</p></article><article class="card"><span class="num">02</span><h3>Владелец процесса</h3><p>Человек, который утверждает правила и маршруты.</p></article><article class="card"><span class="num">03</span><h3>Критерий верного поля</h3><p>Что считать правильным значением и как проверять расхождения.</p></article><article class="card"><span class="num">04</span><h3>Права на данные</h3><p>Подтверждение, что файлы можно обрабатывать и передавать в 1С.</p></article><article class="card"><span class="num">05</span><h3>Доступы к системам</h3><p>1С, папка и почта — только то, что нужно для выбранного потока.</p></article><article class="card"><span class="num">06</span><h3>Ответственный за правила</h3><p>Кто обновляет разметку и запускает повторный прогон.</p></article>
+</div>
+</section>
+<section class="dsec">
+<div class="wrap">
+<div class="section-head"><div><span class="mono eyebrow">[03.15 / СТОИМОСТЬ]</span><h2>Состав стоимости</h2></div><p>Состав работ по строкам. Суммы называем после разбора задачи.</p></div>
+<div class="table-wrap"><table><thead><tr><th>Статья работ</th><th>Что входит</th><th>Что влияет на объём</th></tr></thead><tbody><tr><td><b>Разбор потока</b></td><td>Карта шагов, реестр полей, список участников.</td><td>Число типов документов и разрозненность маршрутов.</td></tr><tr><td><b>Подготовка данных</b></td><td>Разметка полей, удаление дублей, проверка сканов.</td><td>Качество файлов и число форматов.</td></tr><tr><td><b>Распознавание и правила</b></td><td>Настройка извлечения, сверка и обработка исключений.</td><td>Сложность форм и число полей.</td></tr><tr><td><b>Маршрутизация</b></td><td>Правила согласований, сроки и напоминания.</td><td>Число участников и ветвлений.</td></tr><tr><td><b>Интеграция с 1С</b></td><td>Передача карточек и черновиков, журнал обмена.</td><td>Требования к доступам и версия системы.</td></tr><tr><td><b>Обучение и поддержка</b></td><td>Инструкции, сессия, разбор ошибок по регламенту.</td><td>Число пользователей и темп изменений.</td></tr></tbody></table></div>
+<p class="note">Ориентир до аудита, не оферта. Итоговая стоимость считается после разбора потока, доступов и выбранного контура; состав работ фиксируется в договоре.</p>
+</div>
+</section>
+<section>
+<div class="section-head"><div><span class="mono eyebrow">[04 / ВОПРОСЫ И ОТВЕТЫ]</span><h2>Вопросы и ответы</h2></div><p>Полные ответы по существу. Если вашего вопроса нет — напишите в Telegram.</p></div>
+<div style="margin-top:26px">
+<details><summary>Что такое OCR простыми словами?</summary><p>OCR расшифровывается как оптическое распознавание символов. Программа смотрит на изображение и превращает видимый текст в машиночитаемые символы. Дальше правила находят в этом текстеномер, дату и сумму. Распознанное значение сверяется с другими полями, а спорное уходит человеку. Проверить результат можно по исходному файлу.</p></details><details><summary>Какие документы можно обработать?</summary><p>В пилот берём один тип: входящие счета, договоры, акты или накладные. Для каждого типа заранее описаны поля и правила сверки. Дополнительные форматы подключаются отдельным этапом после того, как первый поток проходит проверку на вашей выборке.</p></details><details><summary>Насколько точное распознавание?</summary><p>Точность зависит от качества файла и сложности формы. Мы не называем число без замера на ваших документах. В отчёте указаны выборка, доля верных полей, типы расхождений и даты прогона. По результату видно, что править: разметку, качество сканов или само правило.</p></details><details><summary>Работает ли решение с 1С?</summary><p>Да, передача карточки и черновика идёт в 1С по согласованному набору полей. Способ обмена и права доступа фиксируются до начала работ. Если у вас другая учётная система, сначала разбираем её API и только потом называем сроки интеграции.</p></details><details><summary>Сколько стоит услуга?</summary><p>Стоимость зависит от числа типов документов, качества файлов, правил маршрутизации и интеграций. Мы не публикуем цифру «от», потому что разброс между потоками слишком большой. Расчёт присылаем после короткого разбора с описанием состава работ и артефактов.</p></details><details><summary>Какие сроки до первого результата?</summary><p>Ориентир — 2–4 недели до первого теста на одном типе документов. Разбор потока занимает 3–5 дней, правила маршрутизации — около недели, проверка на выборке — 2–3 недели. Точный график называется после того, как видно объём файлов и число участников.</p></details><details><summary>Где находятся данные?</summary><p>Обработка идёт в согласованном контуре. Внешние сервисы не получают документы без отдельного решения владельца. Схема размещения, перечень доступов и сроки хранения фиксируются в документации до загрузки файлов. По завершении работ составляется акт с перечнем переданных компонентов.</p></details><details><summary>Что происходит с ошибками?</summary><p>Ошибка связывается с конкретным полем и причиной: качество скана, разметка или правило сверки. Сомничное значение не уходит в учёт молча, а попадает в очередь с владельцем. После правки прогон повторяется на той же выборке, чтобы сравнение было честным.</p></details><details><summary>Нужна ли ручная проверка?</summary><p>На пилоте да. Финансовые поля и спорные значения проверяет сотрудник до проводки. По итогам прогона часть правил уточняется, а доля ручных решений снижается. Полностью убирать проверку без замера на ваших документах мы не рекомендуем.</p></details><details><summary>С какими системами вы интегрируетесь?</summary><p>С 1С:Предприятие, общими папками, почтой и внутренними сервисами по согласованному списку. Для выдачи статусов предлагается REST API, который подключается к порталу или чату. Конкретный способ зависит от доступов и требований вашей сети.</p></details><details><summary>Какие гарантии вы даёте?</summary><p>Гарантируем проверяемый результат: реестр полей, журнал прогона и отчёт по выборке. Правила и пороги фиксируются до расширения потока. Мы не обещаем стопроцентное попадание без замера на ваших данных. Если условие не выполняется, показываем причину и список правок.</p></details><details><summary>Что показывает первый прогон?</summary><p>Первый прогон показывает извлечённые поля, расхождения и очередь исключений. По нему видно, где мешает качество файла, а где правило описано неверно. Результат сравнивается с эталоном по той же выборке. После этого принимается решение: расширять число типов или править разметку.</p></details><details><summary>Нужно ли обучать команду?</summary><p>Да. В поставку входит инструкция по работе с очередью исключений и короткая сессия для бухгалтерии и владельцев маршрутов. Отдельно разбирается порядок действий при просрочке и смене ответственного. Обучение передаётся вместе с регламентом.</p></details><details><summary>Как исправляются настройки после запуска?</summary><p>Правка вносится в версионированное правило, а затем повторяется прогон на контрольной выборке. Старая версия остаётся доступной для отката. История изменений хранится в журнале, поэтому можно понять, когда и почему поведение потока изменилось.</p></details><details><summary>Что будет, если мы откажемся от внедрения?</summary><p>Вы получаете артефакты, подготовленные до решения: карту потока, реестр полей, правила и отчёт по прогону. Доступы и промежуточные копии удаляются по согласованному акту. Никаких скрытых зависимостей от подрядчика не остаётся.</p></details>
+</div>
+</section>
+<section id="request" class="cta">
+<div class="wrap">
+<span class="mono eyebrow">[05 / ЗАЯВКА]</span>
+<h2>Пришлите три документа</h2>
+<p>Покажем, какие поля удаётся извлечь, где проходят границы распознавания и как выглядит маршрут согласования на вашем потоке.</p>
+<div class="row"><a class="btn" href="https://t.me/erik03132">Написать в Telegram</a></div>
+</div>
+</section>
+
+</main>
+<footer>
+<div class="footer-row">
+<span>AI BUREAU · Telegram @erik03132 · info@ai-traffic-pro.ru · +7 (495) 923-46-44</span>
+<span>ИП Марченко Дмитрий Николаевич · ИНН 770304789944 · © 2026</span>
+</div>
+<div class="footer-row" style="margin-top:10px"><span>Контакты и реквизиты из ai-marketing. Для ai-bureau.online требуют подтверждения владельца.</span></div>
+</footer>
+</div>
+</body>
+</html>
