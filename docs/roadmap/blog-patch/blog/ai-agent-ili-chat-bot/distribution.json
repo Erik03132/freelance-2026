@@ -12,7 +12,8 @@
       "id": "habr",
       "name": "Хабр",
       "date": "2026-12-01",
-      "status": "planned",
+      "status": "draft_filled_not_submitted",
+      "note": "27.11.2026: форма заполнена в браузере; отложенная публикация для статьи недоступна, отправка на модерацию не выполнялась",
       "url": "",
       "utm": "?utm_source=habr&utm_medium=article&utm_campaign=ai-agent-vs-chatbot"
     },
