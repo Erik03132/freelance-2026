@@ -30,9 +30,9 @@
       "id": "vk",
       "name": "VK",
       "date": "2026-12-03",
-      "status": "draft_ready",
+      "status": "scheduled",
       "manual": true,
-      "note": "Адаптация подготовлена в social/vk.md, content_lint 0 предупреждений. Публикует владелец вручную.",
+      "note": "Пост запланирован в сообществе vk.com/ai_bureau на 3 декабря 2026 в 10:00 МСК. Текст и обложка из social/vk.md. Ранее планировалось публикация вручную.",
       "url": "",
       "utm": "?utm_source=vk&utm_medium=post&utm_campaign=ai-agent-vs-chatbot"
     },
