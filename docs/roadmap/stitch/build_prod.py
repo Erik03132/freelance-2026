@@ -105,8 +105,8 @@ header.topbar{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(243
 body{padding-top:80px}
 [id]{scroll-margin-top:96px}
 /* CTA: основная кнопка Telegram — бежевая, а не терракотовая */
-.cta .btn--signal{background:var(--line,#DED7CC);color:var(--ink,#1f2937);border-color:var(--line,#DED7CC)}
-.cta .btn--signal:hover{background:var(--paper,#F3EFE7)}
+.cta .btn--signal{background:var(--signal,#9e2a2b);color:var(--line,#DED7CC);border-color:var(--line,#DED7CC)}
+.cta .btn--signal:hover{background:#fff;color:var(--ink,#1f2937)}
 /* подвал */
 footer{background:var(--surface,#fff);color:var(--ink,#1f2937);border-top:1px solid var(--line,#DED7CC);padding:56px 0 40px}
 footer .f-grid{display:grid;grid-template-columns:5fr 4fr 3fr;gap:56px 40px}
