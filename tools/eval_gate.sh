@@ -20,6 +20,7 @@ SKIP_PATTERNS='(voice_exam|eval_levitan)'  # требуют внешние се�
 
 KNOWN_EVALS=(
   "$ROOT/tests/eval_trajectory.py"
+  "$ROOT/tests/eval_financier.py"
   "$ROOT/freelance-agent/.agent/agents/ai_defender/tests/eval_ai_defender.py"
   "$ROOT/projects/ai-eggs/tests/eval_angela.py"
   "$ROOT/projects/hh-ai-agent/tests/eval_batrak.py"
@@ -31,6 +32,7 @@ KNOWN_EVALS=(
   "$ROOT/tools/tests/eval_model_profiles.py"
   "$ROOT/tools/tests/eval_context_layers.py"
   "$ROOT/tools/tests/eval_llms_txt.py"
+  "$ROOT/tools/tests/eval_seo_myths.py"
   "$ROOT/tools/tests/eval_rag_retrieval.py"
   "$ROOT/tools/tests/eval_chunking.py"
   "$ROOT/tools/tests/eval_vision_local.py"

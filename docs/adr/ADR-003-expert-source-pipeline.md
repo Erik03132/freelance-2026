@@ -53,6 +53,7 @@
 | OR  | Orca ADE (stablyai/orca, worktree IDE) |
 | RD  | RustDesk (self-hosted remote desktop) — граница |
 | PM  | PartMode (browser CAD) — граница |
+| FCA | FCA AI Spotlight Observatory (регулятор, 19.11.2026) |
 
 ## Альтернативы
 - Полагаться на саммари статьи без верификации — отвергнуто (анти-авторитет, AGENTS §13).

@@ -2504,3 +2504,79 @@ LLM-ключ для экстракции, `opencode` и `opencode2` делят �
       Сломанный launchd `ru.freelance.geo-monitor` (ссылается на несуществующий
       `tools/geo_monitor.py`) выгружен: `launchctl list` показывает только
       `com.user.site-watchdog`. plist удалён не был.
+
+## 🏦 FCA — AI Spotlight Observatory: разбор для агента «Финансист» (27.11.2026)
+
+**Источник:** `ai-spotlight.fcainnovation.co.uk`. **Проверено (src)**: пресс-релиз
+FCA от 19.11.2026 (`fca.org.uk/news/press-releases/fca-launches-world-first-platform…`) —
+платформа FCA + CFTE + NayaOne, >200 организаций, 150 областей, ~65 публичных
+кейсов с таксономией «use case ≠ implementation». Детали (целевые клиенты, демо)
+доступны только после регистрации.
+
+**Вердикт: принято частично — как источник eval-сценариев и границ, НЕ как фича.**
+Каталог регулятора не добавляет агенту новой функции, но даёт готовую таксономию
+и темы (bias/fairness, explainability/governance, data quality, compliance),
+которые усиливают промпт и eval Финансиста. Прямого отношения к нашим Kwork/IZ
+финансам нет — как готовое решение не берём.
+
+- [x] **FCA-1 (eval).** ✅ **Fixed + Verified (27.11.2026).** Создан
+      `tests/eval_financier.py`: 6 сценариев по кейсам FCA (FUC043/023/011/059/
+      019/044) + 2 гардрейла (длинный payback бьёт высокий ratio, пол маржи
+      60/40, zero-churn → горизонт 36 мес) + контракт формул в `SKILL.md`.
+      Добавлен в `KNOWN_EVALS` (`tools/eval_gate.sh`). Прогон: соло — PASSED,
+      `bash tools/eval_gate.sh --quick` — **20/20 PASSED**. Holdout (RSI-002)
+      не трогался — только на приёмке человеком.
+- [x] **FCA-2 (граница).** ✅ **Fixed + Verified (27.11.2026).** Добавлена секция
+      «Правовая граница (FCA-2)» в OC-мастер
+      `skills/financier-unit-economics/SKILL.md` (внутренние расчёты ≠ инвестиционная
+      консультация; human-gate; обезличенные входные данные) и отдельная строка
+      в живом промпте `~/.hermes/profiles/financier/SOUL.md` (вне git-репозитория).
+      Проверка фрагментов добавлена в `tests/eval_financier.py`: PASSED,
+      `eval_gate.sh --quick` — 20/20. **Gateway перезапущен 27.11 в 12:16**
+      (`launchctl kickstart -k gui/501/ai.hermes.gateway-financier`): PID 14513,
+      `launchctl print` → state=running, SOUL.md от 12:14 вошёл в новый процесс.
+      **Отказ по имени (HT-3):** Telegram не подключается через локальный прокси
+      `127.0.0.1:64468` (attempt 6/8, ConnectError); тот же отказ у `sherlock`
+      в 12:12 — системная проблема сети/прокси, не правка промпта.
+      **Диагноз 27.11:** `lsof` — слушателя нет на 64468/64469; launchd
+      `com.antigravity.usproxy-tunnel.plist.disabled` (форвард на старый VPS
+      172.120.21.141, серверов нет с 25.11); в `~/.hermes/profiles/financier/.env`
+      строки 494–499 хардкодят мёртвый локальный прокси, `NO_PROXY` — только
+      localhost. Прямой доступ к Telegram работает (`curl --noproxy '*'` → 302).
+      Тот же прокси прописан в 18 профилях — чинить надо централизованно,
+      по ADR-002 (прокси только для заблокированных ресурсов).
+      **Исправлено 27.11 (Fixed + Verified):** в 18 `.env` добавлены
+      `api.telegram.org,telegram.org` в `NO_PROXY`/`no_proxy` (внутрь кавычек,
+      mode `-rw-------` сохранён), 9 активных gateway перезапущены. Прокси-ошибка
+      ушла: adaptive дошёл до сервера Telegram.
+
+## 🤖 TG-TOKEN — токены ботов отклонены Telegram (27.11.2026)
+
+- [x] **TG-1a (финансист).** ✅ **Fixed + Verified (27.11 12:33).** Игорь дал
+      новый `TELEGRAM_BOT_TOKEN`; заменён в `.env` профиля (права `-rw-------`
+      сохранены), gateway перезапущен: `✓ telegram connected`, polling healthy,
+      `Channel directory built: 1 target(s)`, 60 команд зарегистрировано, PID 22716.
+      Токен в чате не воспроизводился.
+- [x] **TG-1b — закрыто по решению Игоря (27.11):** остальные 6 профилей
+      (batrak, builder, english-tutor, femida, marketer, sherlock) пока не нужны,
+      токены не обновляем, gateway не трогаем. При возобновлении — начать с
+      новых токенов через @BotFather.
+- [ ] **TG-2 (не трогать до TG-1):** `ai.hermes.gateway-default` вышел с кодом 1
+      и пишет STANDALONE / `hermes gateway migrate --multiplex` — отдельная
+      проблема оркестрации, не следствие правки NO_PROXY.
+- [x] **FCA-3 (источник).** ✅ **Fixed + Verified (27.11.2026).** Снято 10 карточек
+      (FUC043/023/011/059/019/044/016/008/041/037) в
+      `docs/cases/2026-11-27_fca-ai-spotlight.md`: `curl --noproxy '*'` + regex
+      `h1`/`p`/`vendor_listing`, без LLM и без выдуманных метрик. Отказ по имени:
+     register на платформе НЕ делался (детальные данные — только после регистрации,
+      клиентские персданные не нужны). Индекс обновлён; smoke — 10 строк таблицы,
+      1 запись в `docs/cases/INDEX.md`, eval_financier PASSED.
+- [x] **FCA-4 — переписано под реальность (27.11.2026, Fixed).** Прежняя
+      формулировка «внешние ресурсы только через прокси» была неверной и
+      противоречила ADR-002: мёртвый туннель `127.0.0.1:64468` маскировал
+      доступность и вызвал ConnectError у 9 gateway. Рабочая политика:
+      внешние ресурсы (FCA, Brave и др.) — **напрямую, если доступны**; прокси
+      только при реальной блокировке и только при живом слушателе
+      (`lsof -nP -iTCP:<port> -sTCP:LISTEN`). Для Telegram домены добавлены
+      в `NO_PROXY` 18 профилей. ADR-002 не менялся — он уже требовал прокси
+      только для заблокированных ресурсов; ошибка была в этой задаче.
