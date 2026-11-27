@@ -2394,8 +2394,14 @@ GitHub = страховка/бэкап (finish-day уже пушит), НЕ тр
 - [x] **AB-P0-1-DEPLOY (Verified):** по разрешению владельца патч применён к прод-репо `Erik03132/ai-bureau-web-finish`, коммит `82e7ad8`, запушен в main. Verified на https://ai-bureau.online/: HTTP 200, `last-modified` 26.11.2026 16:57 GMT, `api/submit`/`contactForm`/`form_submit` = 0, рабочая Telegram-ссылка на месте. Dirty-файлов в клоне нет.
 - [x] **AB-TW-1 (Fixed, Verified частично):** создано приложение Timeweb App Platform ID `296823` (`ai-bureau`, HTML/CSS/JS, Москва, репозиторий `Erik03132/ai-bureau-web-finish` подключён по URL, автодеплой недоступен). Verified: сборка `82e7ad8` успешна, по IP приложения `/`, `/privacy.html`, `/services/`, `/robots.txt`, `/sitemap.xml`, `/og-image.png` — 200, заголовок наш. OAuth GitHub не понадобился: репозиторий публичный.
 - [x] **AB-TW-2 (Fixed + Verified):** DNS `ai-bureau.online` переведён с GitHub Pages на Timeweb App `296823`. Первая попытка 26.11 упиралась в лимит Let's Encrypt (серия неудачных проверок, пока apex ещё смотрел на GitHub). Одноразовая задача `aut_2197b1f67001KfXuORTQsRl1O6` (27.11 00:04 MSK, скрипт `docs/roadmap/timeweb/apex-switch.sh`) привязала apex к приложению и дождалась сертификата: `Exit code: 0`, «сертификат выпущен, https://ai-bureau.online/ отдаёт 200». Verified 27.11.2026: `CN=ai-bureau.online`, Let's Encrypt, до 24.02.2027; apex и `www` → `178.209.127.53`; `/`, `/privacy.html`, `/services/`, `/robots.txt`, `/sitemap.xml` — 200; canonical и og:url на apex; деплой `82e7ad8` success.
-- [ ] **AB-LANDINGS-8 (финальные блокеры до прода):** отдать три юридические страницы человеку-юристу; подтвердить реквизиты и имя автора; создать Timeweb-приложение и после отдельного разрешения сменить DNS ai-bureau.online с GitHub Pages на Timeweb. Отдельно подтвердить реквизиты, имя и профили автора; отдать политику и оферту Фемиде. Перенос в прод только после AB-P0-1 и отдельного разрешения. собрать документооборот и чат-боты, приватные LLM и AI-аудит, а также блог, автора, политику и оферту. Все — в графитово-синем стиле, с белыми линиями на тёмном, без розового и лайма. Добавлены правила владельца: монохромные SVG-иконки в технических блоках и ритм белая → тёмная → белая → тёмная, 2–3 тёмных секции на лендинг. RAG тоже обновляется по этим правилам.
-- [ ] **AB-LANDINGS-4 (блокер воронки):** AB-P0-1 — форма на проде отдаёт 405. Должен быть решён до переноса лендингов в прод.
+- [x] **AB-TW-3 (Fixed + Verified):** снят дубль с GitHub Pages: из прод-репозитория удалён `CNAME` (коммит `18ddf0a`), Pages выключен (`GET /repos/.../pages` → 404), `erik03132.github.io/ai-bureau-web-finish/` отдаёт 404. Деплой на Timeweb автоматизирован: `docs/roadmap/timeweb/deploy.sh` (флаги `--repo/--app/--commit/--wait/--dry-run/--help`, токен из `projects/ai-marketing/.env`, проверяет сборку и HTTP 200). Verified 27.11.2026 12:05: `success`, `https://ai-bureau.online/` → 200.
+- [ ] **AB-TW-4 (частично Fixed, нужен Timeweb):** добавлена страница `404.html` (коммит `694ec3f`, деплой success, `https://ai-bureau.online/404.html` → 200 с нашим заголовком). Но статический пресет App Platform (`framework: static-nobuild`, Caddy) отдаёт `index.html` со статусом 200 на любой несуществующий путь — проверил `/foo.txt`, `/missing.css`, `/deep/nested/page`, `/CNAME`: везде 200 и заголовок главной. Своими файлами это не переопределяется, тумблера в API нет (`index_dir`, `build_cmd`, `run_cmd` — единственные поля). Пока риск снят canonical на главной. Решение владельца 27.11.2026: тикет отправлен — №13191315 «Настройка обработки ошибок 404 для приложения», сервис `ai-bureau`, статус «На рассмотрении». `404.html` уже в репозитории и заработает без правок. Резервный вариант (если поддержка откажет): перевести приложение на свой Node-сервер статики (`run_cmd: node server.js`).
+- [x] **AB-LANDINGS-8 (Fixed + Verified):** новые 12 страниц из `docs/roadmap/stitch/final/` собраны и задеплоены на прод. Структура: `/` (home), `/services/ai-agents/`, `/services/rag/`, `/services/document-automation/`, `/services/chatbots/`, `/services/private-models/`, `/services/ai-audit/`, `/blog/`, `/author/`, `/privacy.html`, `/offer.html`, `/consent.html`. Добавлены canonical, OG, favicon, theme-color; ссылки на «Подробнее» ведут на свои услуги. Sitemap 12 URL. Link-check: 14 страниц, 307 ссылок, 0 проблем. Деплой `379d557` success, `https://ai-bureau.online/` → 200. Скриншоты live: новый дизайн (бежевый фон, красный акцент), старый лайм (`c8ef67`) отсутствует.
+- [x] **AB-LANDINGS-9 (Fixed + Verified):** перекрёстные ссылки и навигация работают. Главная → 6 услуг + блог + автор. С каждой страницы услуги → 5 других услуг + блог. Блог/автор/юрстраницы → Услуги `/#services`, Блог, Автор, Конфиденциальность, Оферта, Согласие. Подвал и CTA выровнены: CTA обёрнут в `.wrap`, строки подвала в `.wrap`, ссылки в подвале — `flex-start` с отступами. Убраны служебные пометки в футере услуг; дисклеймер «не является публичной офертой» сохранён. Проверено: 13 страниц live, 232 ссылки, 0 проблем. Деплой `b8f64ae` success.
+- [ ] **AB-LANDINGS-10 (Fixed):** единый подвал по образцу ai-traffic-pro на всех 13 страницах. Правка в `docs/roadmap/stitch/build_prod.py`: структура с брендом, услугами, правовыми ссылками, контактами, реквизитами и автором. Собрано в /tmp/aib-prod3, link-check: 15 страниц, 334 ссылки, 0 проблем; ждёт деплоя.
+- [ ] **AB-LANDINGS-11 (Fixed):** sticky-шапка на всех страницах при скролле. Добавлен общий `<style id="site-shared">` через сборщик. Проверено в Chrome: шапка видна на главной и на лендинге услуги при скролле; ждёт деплоя.
+- [ ] **AB-LANDINGS-12 (резерв):** юридические страницы на аппруве у человека-юриста; реквизиты и имя автора не подтверждены владельцем. Ждём ответа Timeweb по тикету №13191315 для 404.
+- [x] **AB-LANDINGS-4 (Resolved):** форма на проде исправлена в AB-P0-1 (Telegram-ссылка). Блокер снят.
 
 ## 🎓 LL — SEO-гейткипинг и отравление LLM-консенсуса (ролик 26.11.2026)
 
@@ -2580,3 +2586,73 @@ FCA от 19.11.2026 (`fca.org.uk/news/press-releases/fca-launches-world-first-pl
       (`lsof -nP -iTCP:<port> -sTCP:LISTEN`). Для Telegram домены добавлены
       в `NO_PROXY` 18 профилей. ADR-002 не менялся — он уже требовал прокси
       только для заблокированных ресурсов; ошибка была в этой задаче.
+
+## 🚫 CGL — colab-g4-glm53: оценка для стека (дроп 27.11.2026)
+
+**Источник и проверка (src):** `github.com/alesha-pro/tools/tree/main/colab-g4-glm53` —
+GitHub API: **★819, MIT, push 26.11.2026, не архивирован**; README.ru.md прочитан
+полностью. Независимая сверка — [Sulat 27.11.2026](https://news.sulat.com/2026/11/27/colab-glm-uncensored):
+замеры 102.3 tok/s — **авторские**, а не независимый бенчмарк.
+
+**Вердикт: НЕ ПРИМЕНЯЕМ — граница HTC (abliterated/uncensored модель).**
+Дополнительные причины: DFlash2-драфтер, от которого зависит 102 tok/s, имеет
+лицензию **CC BY-NC-ND 4.0 (только некоммерческое использование)**; без него 71.5 tok/s.
+Маркетинговое «refusal-free» опровергается модель-кардой: отказы снижены с 0.891
+до 0.094 и измерены на FP8, а не на кванте 2.51 bpw. Цена ~$1/ч ≈ $2.72 за 1M
+output-token — дороже хостинга в 1.7–4.9 раза. G4 подтверждён только для Ultra,
+Colab ToS запрещает расшаривать туннель и требует `colab stop`.
+
+- [ ] **CGL-1 (если тема вернётся):** рассмотреть ту же схему (Colab G4 + Project
+      Maya + SSH-туннель) с **обычной, не abliterated моделью** и без драфтера
+      CC BY-NC-ND — как отдельную гипотезу с eval по latency/цене, не как эту фичу.
+- [ ] **CGL-2 (граница):** не клонировать репо и не запускать `start.sh` без
+      явного решения владельца; никаких ключей/токенов Colab в общие конфиги.
+
+## 🎬 VEX — video-explainer: анимированные постеры/рекламные блоки (дроп 27.11.2026)
+
+**Источник и проверка (src):** `github.com/petergyang/video-explainer` — GitHub API:
+**★556, MIT, создан 15.11.2026, push 25.11, не архивирован**; README/SKILL.md/eval.md
+прочитаны. Независимо подтверждено [ReelStack 25.11](https://thereelstack.com/lab/video-explainer-peter-yang-open-source-agent-skill-motion-illustrated-3d-explainers-hyperframes)
+и [hotskills.dev](https://hotskills.dev/skill/petergyang-video-explainer/) (Grade A PARTIAL):
+у проекта **observed network/broad shell**, 6 файлов не просканированы → перед установкой
+обязателен `ai-defender` аудит исходников, ставить global не сразу.
+
+**Вердикт: принято в пилот с ограничениями.** Это не генератор картинок, а агентный
+пайплайн: `script.md` → локальный рендер через HyperFrames (Apache 2.0) → MP4 1080p
+16:9/9:16/1:1, 30 fps; 3 движка (Motion 2D, Illustrated, 3D Three.js + bloom),
+кадры детерминированы, есть 10 QA-проверок + second-agent frame review + браузерный
+review с комментариями к кадрам. Для «movie-design» — режим 3D, но он ~7× токенов
+Motion; для рекламных блоков — Motion + 9:16 + `Voice: none` + synth-музыка.
+Постеры ≈ стоп-кадры из рендера (`work/preview/frame-*.png`) или отдельный seek-кадр.
+
+- [x] **VEX-1 (безопасность).** ✅ **Fixed + Verified (27.11.2026).** Клон
+      `--depth 1` в изолированный temp, прогон `ai-defender.sh audit`:
+      **CRITICAL=0 / HIGH=0 / MEDIUM=3 / LOW=0**; отчёты в клоне
+      `security/SECURITY.md` и `security/audit-report.json`. Ручная сверка:
+      3× `innerHTML` в `review_page.py` — 2 безопасные (числа/пустая строка),
+      1 с `short(scene)` из своего `script.md`; комментарии идут через
+      `textContent`. Review-сервер слушает **только 127.0.0.1**. Секретов
+      в исходниках нет; `GEMINI_API_KEY` читается из env/`.env` — мы его не используем.
+      Доп. MEDIUM (ручной разбор): `media.py` тянет произвольный URL без
+      allowlist и без лимита размера ответа; `setup.sh` при первом запуске
+      ставит `npx hyperframes@0.9.79` + Chrome (~390 MB), `--voice` ставит
+      kokoro/parakeet. Митигация: только доверенные хосты/медиа, без `--voice`
+      и без Gemini-ключа, установка в отдельный worktree, не global.
+- [x] **VEX-2 (пилот).** ✅ **Fixed + Verified (27.11.2026).** Скилл поставлен
+      в isolated worktree `~/.local/share/opencode/worktree/619c7d/vex-video-pilot`
+      (`setup.sh` без `--voice`, HyperFrames Chrome готов); проект
+      `projects/vex-pilot-ai-bureau` — вертикальный 9:16 ролик 24 с без голоса
+      (Motion, `Voice: none`, `Music: synth:minimal`, 5 сцен). Итог:
+      `renders/vex-pilot-ai-bureau-v4.mp4`, 1080×1920 / 30 fps, `qa.py` **10/10**
+      (loudness -14.4 LUFS, motion 87%, hyperframes errors=0). 2 layout-warning
+      про safe area TikTok/Reels — визуально кадры в границах, но это долг VEX-3.
+      Это смоук пайплайна, **не финальный креатив**: hero пока статичный,
+      настоящий «movie-design» — отдельная итерация в 3D-режиме. Fresh-eyes
+      subagent-ревью контакт-листа не запускал — смоук принимается как Verified
+      по `qa.py` + ручному просмотру.
+- [ ] **VEX-3 (обучение/систематизация):** разобрать 3 движка на одном брифе
+      (Motion vs Illustrated vs 3D), замерить токены/время/качество, зафиксировать
+      «house style» и чек-лист анти-slide в `docs/cases/`, пригодный для рекламы.
+- [ ] **VEX-4 (границы):** без `GEMINI_API_KEY` и платного TTS/Lyria (ADR-007);
+      web-медиа только с атрибуцией, клиентские данные/персданные — обезличены;
+      external-загрузки — по ADR-002 (прокси только при реальной блокировке).
