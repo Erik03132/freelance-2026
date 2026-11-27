@@ -40,6 +40,9 @@
   `docs/superpowers/plans/2026-11-27-izolda-agent.md`; eval 3/3 PASS, валидатор PASS,
   негативный черновик отклонён. RED до создания файлов не был — файлы ушли в параллельные
   субагенты раньше валидатора.
+- [x] IZ-14 — ✅ Fixed + Verified (27.11): Telegram-инфраструктура — бот, run.sh, README,
+  закреп канала, eval 4/4 PASS. Ревью нашло и исправило sendPhoto → multipart/form-data.
+  Ждём токен BotFather, chat_id, канал и чат обсуждений для живого теста.
 - [ ] IZ-8 — ждём от мастера: доступы (телефон/Telegram, Яндекс Бизнес, 2ГИС), номер дома,
   подтверждение «Мария Депиляция», согласие на фото и видео. Текущий спорный отзыв больше
   не разбираем: Авито отказало в возражении, повторных попыток не делаем — только протокол
@@ -2402,9 +2405,9 @@ GitHub = страховка/бэкап (finish-day уже пушит), НЕ тр
 - [ ] **AB-TW-4 (частично Fixed, нужен Timeweb):** добавлена страница `404.html` (коммит `694ec3f`, деплой success, `https://ai-bureau.online/404.html` → 200 с нашим заголовком). Но статический пресет App Platform (`framework: static-nobuild`, Caddy) отдаёт `index.html` со статусом 200 на любой несуществующий путь — проверил `/foo.txt`, `/missing.css`, `/deep/nested/page`, `/CNAME`: везде 200 и заголовок главной. Своими файлами это не переопределяется, тумблера в API нет (`index_dir`, `build_cmd`, `run_cmd` — единственные поля). Пока риск снят canonical на главной. Решение владельца 27.11.2026: тикет отправлен — №13191315 «Настройка обработки ошибок 404 для приложения», сервис `ai-bureau`, статус «На рассмотрении». `404.html` уже в репозитории и заработает без правок. Резервный вариант (если поддержка откажет): перевести приложение на свой Node-сервер статики (`run_cmd: node server.js`).
 - [x] **AB-LANDINGS-8 (Fixed + Verified):** новые 12 страниц из `docs/roadmap/stitch/final/` собраны и задеплоены на прод. Структура: `/` (home), `/services/ai-agents/`, `/services/rag/`, `/services/document-automation/`, `/services/chatbots/`, `/services/private-models/`, `/services/ai-audit/`, `/blog/`, `/author/`, `/privacy.html`, `/offer.html`, `/consent.html`. Добавлены canonical, OG, favicon, theme-color; ссылки на «Подробнее» ведут на свои услуги. Sitemap 12 URL. Link-check: 14 страниц, 307 ссылок, 0 проблем. Деплой `379d557` success, `https://ai-bureau.online/` → 200. Скриншоты live: новый дизайн (бежевый фон, красный акцент), старый лайм (`c8ef67`) отсутствует.
 - [x] **AB-LANDINGS-9 (Fixed + Verified):** перекрёстные ссылки и навигация работают. Главная → 6 услуг + блог + автор. С каждой страницы услуги → 5 других услуг + блог. Блог/автор/юрстраницы → Услуги `/#services`, Блог, Автор, Конфиденциальность, Оферта, Согласие. Подвал и CTA выровнены: CTA обёрнут в `.wrap`, строки подвала в `.wrap`, ссылки в подвале — `flex-start` с отступами. Убраны служебные пометки в футере услуг; дисклеймер «не является публичной офертой» сохранён. Проверено: 13 страниц live, 232 ссылки, 0 проблем. Деплой `b8f64ae` success.
-- [x] **AB-LANDINGS-10 (Fixed + Verified 27.11.2026):** единый подвал по образцу ai-traffic-pro на всех 13 страницах. Правка в `docs/roadmap/stitch/build_prod.py`: структура с брендом, услугами, правовыми ссылками, контактами, реквизитами и автором. Link-check: 15 страниц, 334 ссылки, 0 проблем. Деплой `91990da` success, `https://ai-bureau.online/` → 200.
-- [x] **AB-LANDINGS-11 (Fixed + Verified 27.11.2026):** шапка зафиксирована (`position: fixed`) на всех страницах при скролле. Первый вариант на `position: sticky` не работал из-за `overflow-x: hidden` на body; переделано на fixed с `body{padding-top:80px}`. Деплой `91990da` success, `https://ai-bureau.online/` → 200.
-- [ ] **AB-LANDINGS-12 (резерв):** юридические страницы на аппруве у человека-юриста; реквизиты и имя автора не подтверждены владельцем. Ждём ответа Timeweb по тикету №13191315 для 404.
+- [x] **AB-LANDINGS-10 (Fixed + Verified 27.11.2026):** единый подвал по образцу ai-traffic-pro на всех 13 страницах. Правка в `docs/roadmap/stitch/build_prod.py`: структура с брендом, услугами, правовыми ссылками, контактами, реквизитами и автором. Link-check: 15 страниц, 334 ссылки, 0 проблем. Последний деплой с унификацией цвета кнопок: `6322129` success.
+- [x] **AB-LANDINGS-11 (Fixed + Verified 27.11.2026):** шапка зафиксирована (`position: fixed`) на всех страницах при скролле. Первый вариант на `position: sticky` не работал из-за `overflow-x: hidden` на body; переделано на fixed с `body{padding-top:80px}`. Последний деплой с унификацией цвета кнопок: `6322129` success.
+- [ ] **AB-LANDINGS-12 (частично Fixed):** юрист одобрил тексты юридических страниц 27.11.2026. Реквизиты и имя автора всё ещё ждут подтверждения владельцем. Ждём ответа Timeweb по тикету №13191315 для 404.
 - [x] **AB-LANDINGS-4 (Resolved):** форма на проде исправлена в AB-P0-1 (Telegram-ссылка). Блокер снят.
 
 ## 🎓 LL — SEO-гейткипинг и отравление LLM-консенсуса (ролик 26.11.2026)
@@ -2682,13 +2685,30 @@ Copilot, Grok Bot, Hermes, Kiro, Muse, **OpenCode**. Канбан — через
 `vault/CLAUDE.md`) и агенты, которые читают/пишут файлы напрямую; claude-mem
 остаётся отдельным слоем памяти и коннекторами не заменяется.
 
-- [ ] **OBS-1 (до установки):** ai-defender аудит `obsidianmd/obsidian-skills`
-      (внешние инструкции = surface prompt injection); поставить только
-      форматные навыки `obsidian-markdown`/`obsidian-bases`/`json-canvas`,
-      не `obsidian-cli` (широкий доступ к running app).
-- [ ] **OBS-2 (пилот):** прогнать 1–2 наши vault-заметки через навыки, сверить
-      корректность wikilinks/Bases/Canvas и соблюдение `vault/CLAUDE.md`
-      (frontmatter `type/tags/status/updated`); без клиентских/NDA-заметок.
-- [ ] **OBS-3 (граница):** не смешивать vault и SSoT (`ACTIVE_TASKS.md`,
-      `chp.md`); любые записи агентов в vault — по правилу propose→approve;
-      память `claude-mem` не дублировать в Obsidian без явного решения.
+- [x] **OBS-1.** ✅ **Fixed + Verified (27.11.2026).** Клон `--depth 1`
+      `obsidianmd/obsidian-skills` в изолированный temp; `ai-defender.sh audit` —
+      **CRITICAL/HIGH/MEDIUM/LOW = 0/0/0/0** (report в temp-клоне). Ручная сверка
+      трёх форматных навыков: только ссылки на help.obsidian.md / jsoncanvas.org,
+      никаких shell/сетевых вызовов, ключей и инструкций «ignore previous».
+      Установлены **только** `obsidian-markdown`, `obsidian-bases`, `json-canvas`
+      в `~/.config/opencode/skills-lib/` (архив, lazy-load, не L0);
+      `skills_index.py --apply` → L1-индекс обновлён (активных 50, в архиве 154).
+      `obsidian-cli`, `obsidian-headless`, `defuddle`, `knap` НЕ ставились.
+- [x] **OBS-2 (пилот).** ✅ **Fixed + Verified (27.11.2026).** В
+      `qa/obsidian-pilot/` — копии двух digest-заметок (`kb-prep`, `honcho`),
+      демо-заметка с wikilinks + callout `> [!warning]` + `.canvas`
+      (3 nodes / 2 edges). Детерминированная проверка: все 4 поля frontmatter
+      на месте, wikilink/embed разрешаются, callout распознан, JSON Canvas
+      парсится; `python3 tools/wiki_check.py --root vault` — 18 файлов,
+      15 ссылок, 79 источников, **0 проблем**. Найден конфликт: навык допускает
+      произвольные `properties`, а `vault/CLAUDE.md` задаёт свои enum'ы —
+      у существующих digests `type: tool-digest`, `status: proposed/rejected`
+      вне этого списка. Ничего в vault не переписывал: наши правила сильнее,
+      `wiki_check.py` остаётся обязательным гейтом. Bases отдельно не пилотировали.
+- [x] **OBS-3 (граница).** ✅ **Fixed + Verified (27.11.2026).** В
+      `vault/CLAUDE.md` добавлен раздел «Запись агентов в vault (OBS-3)»:
+      propose→approve перед правкой, исключение для ночного читателя, запрет
+      дублировать `ACTIVE_TASKS.md`/`chp.md` и память claude-mem, обязательный
+      `wiki_check.py`, граница LL-3 для клиентских данных. Проверка: раздел
+      на месте, `python3 tools/wiki_check.py --root vault` — 18 файлов / 15
+      ссылок / 79 источников / 0 проблем. Ветка Obsidian закрыта полностью.
